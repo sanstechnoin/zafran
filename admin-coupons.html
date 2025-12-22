@@ -10,12 +10,12 @@
             background-color: #f4f4f4; 
             color: #333; 
             padding: 20px; 
-            padding-bottom: 80px; /* Space for footer */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             margin: 0;
+            box-sizing: border-box;
         }
         
         .admin-container { 
@@ -29,94 +29,95 @@
             box-sizing: border-box;
         }
 
-        /* Logo & Header */
+        /* Header Logo */
         .header-logo {
             display: block;
-            height: 70px;
-            margin: 0 auto 15px auto;
+            height: 60px; /* Slightly smaller */
+            margin: 0 auto 10px auto;
         }
         
         h2 { 
             border-bottom: 2px solid #D4AF37; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
             color: #333; 
             text-align: center;
             text-transform: uppercase;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
         
         /* Grid Layout */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .form-group { margin-bottom: 15px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 10px; }
         .full-width { grid-column: span 2; }
         
-        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; }
         input[type="text"], input[type="number"], input[type="date"] { 
-            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem;
         }
         
         /* Radio Group */
-        .radio-group { display: flex; gap: 20px; padding: 10px 0; }
-        .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 1rem; }
-        .radio-item input { transform: scale(1.2); cursor: pointer; }
+        .radio-group { display: flex; gap: 20px; padding: 5px 0; }
+        .radio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.9rem; }
+        .radio-item input { transform: scale(1.1); cursor: pointer; }
 
         /* Checkbox Group */
-        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 5px; background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #eee; }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
-        .checkbox-item input { transform: scale(1.1); }
+        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 5px; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
+        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; }
+        .checkbox-item input { transform: scale(1.05); }
 
         /* Save Button */
         button#submitBtn { 
             background-color: #28a745; 
-            color: white; border: none; padding: 15px; width: 100%; 
-            font-size: 1.1rem; cursor: pointer; border-radius: 4px; 
-            font-weight: bold; margin-top: 20px; transition: background 0.2s; 
+            color: white; border: none; padding: 12px; width: 100%; 
+            font-size: 1rem; cursor: pointer; border-radius: 4px; 
+            font-weight: bold; margin-top: 15px; transition: background 0.2s; 
         }
         button#submitBtn:hover { background-color: #218838; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
         /* Messages */
-        #message { margin-top: 15px; padding: 15px; text-align: center; border-radius: 4px; display: none; font-weight: bold; }
+        #message { margin-top: 15px; padding: 10px; text-align: center; border-radius: 4px; display: none; font-weight: bold; font-size: 0.9rem; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .required-star { color: red; }
 
         /* Table */
-        .coupon-list-section { margin-top: 50px; border-top: 3px solid #f1f1f1; padding-top: 30px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem; background: white; }
-        th { background-color: #343a40; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        .coupon-list-section { margin-top: 40px; border-top: 2px solid #f1f1f1; padding-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; background: white; }
+        th { background-color: #343a40; color: white; padding: 10px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; vertical-align: middle; }
         tr:hover { background-color: #f1f1f1; }
         
         /* Badges */
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        .badge { padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
         .badge-percent { background: #e3f2fd; color: #0d47a1; }
         .badge-fixed { background: #e8f5e9; color: #1b5e20; }
-        .badge-category { background: #eee; color: #555; padding: 2px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; margin-bottom: 2px; font-size: 0.75rem;}
+        .badge-category { background: #eee; color: #555; padding: 2px 5px; border-radius: 3px; margin-right: 3px; display: inline-block; margin-bottom: 2px; font-size: 0.7rem;}
 
         /* Status & Action Buttons */
-        .status-active { color: #155724; font-weight: bold; background: #d4edda; padding: 5px 10px; border-radius: 4px; }
-        .status-inactive { color: #721c24; font-weight: bold; background: #f8d7da; padding: 5px 10px; border-radius: 4px; }
+        .status-active { color: #155724; font-weight: bold; background: #d4edda; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; }
+        .status-inactive { color: #721c24; font-weight: bold; background: #f8d7da; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; }
         
         .btn-action-x {
             background-color: #dc3545; color: white; border: none; 
-            width: 30px; height: 30px; border-radius: 50%; 
+            width: 24px; height: 24px; border-radius: 50%; 
             cursor: pointer; font-weight: bold; font-family: sans-serif;
-            margin-left: 10px; line-height: 30px; text-align: center; padding: 0;
+            margin-left: 5px; line-height: 24px; text-align: center; padding: 0; font-size: 0.8rem;
         }
         .btn-action-x:hover { background-color: #a71d2a; transform: scale(1.1); }
 
-        /* Footer */
+        /* Compact Footer */
         .admin-footer {
             margin-top: auto;
             text-align: center;
-            padding: 20px;
-            font-size: 0.8rem;
-            color: #666;
+            padding: 10px 20px;
+            font-size: 0.75rem; /* Smaller font */
+            color: #888;
             border-top: 1px solid #ddd;
             width: 100%;
             background: #f4f4f4;
+            box-sizing: border-box;
         }
 
         /* CUSTOM MODAL */
@@ -215,13 +216,13 @@
 </div>
 
 <footer class="admin-footer">
-    <p>&copy; 2025 Zafran Delight. Created & Developed by Shri Avinash Narendhran S V +49 162 3757839</p>
+    <p>&copy; 2025 Zafran Delight. Created by Shri Avinash Narendhran S V</p>
 </footer>
 
 <div id="actionModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-title" id="modalTitle">Optionen für CODE</div>
-        <p>Was möchten Sie tun?</p>
+        <p style="margin-bottom: 20px; color: #666;">Was möchten Sie tun?</p>
         <div class="modal-actions">
             <button class="btn-modal btn-reactivate" id="btnReactivate">Bearbeiten / Reaktivieren</button>
             <button class="btn-modal btn-confirm-delete" id="btnConfirmDelete">Endgültig löschen</button>
@@ -291,7 +292,7 @@
                 // Append Row
                 const row = `
                     <tr>
-                        <td style="font-weight:bold; color: #D4AF37; font-size:1.1rem;">${data.code}</td>
+                        <td style="font-weight:bold; color: #D4AF37; font-size:1rem;">${data.code}</td>
                         <td><span class="badge ${badgeClass}">${discountDisplay}</span></td>
                         <td>${data.minOrder}€</td>
                         <td>${data.expiryDate}</td>

@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateCart();
     }
 
-    // --- COUPON LOGIC (Updated with Min Order) ---
+    // --- COUPON LOGIC (Updated for Fixed/Percent) ---
     async function handleApplyCoupon() {
         const codeInput = document.getElementById('coupon-input');
         const msgEl = document.getElementById('coupon-message');
@@ -190,32 +190,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         let couponStatusColor = "";
 
         if (currentCoupon) {
-            const minOrder = currentCoupon.minOrder || 0; // Default to 0 if not set
+            const minOrder = currentCoupon.minOrder || 0; 
+            const isPercent = currentCoupon.discountType === 'percent';
+            const value = currentCoupon.discountValue || 0;
 
             // CHECK MINIMUM ORDER
             if (cartSubtotal < minOrder) {
                 couponStatusMsg = `Gutschein "${currentCoupon.code}": Mindestbestellwert ${minOrder}€ nicht erreicht.`;
                 couponStatusColor = "orange";
-                discountAmount = 0; // No discount yet
+                discountAmount = 0; 
             } else {
                 // Determine Category Validity
                 const isAll = currentCoupon.validCategories === 'all' || 
                               (Array.isArray(currentCoupon.validCategories) && currentCoupon.validCategories.includes('all'));
 
+                let eligibleAmount = 0;
+
                 if (isAll) {
-                    discountAmount = (cartSubtotal * currentCoupon.discountPercent) / 100;
+                    eligibleAmount = cartSubtotal;
                 } else {
-                    let eligibleTotal = 0;
                     cart.forEach(item => {
                         if (item.category && currentCoupon.validCategories.includes(item.category)) {
-                            eligibleTotal += (item.price * item.quantity);
+                            eligibleAmount += (item.price * item.quantity);
                         }
                     });
-                    discountAmount = (eligibleTotal * currentCoupon.discountPercent) / 100;
                 }
-                
-                couponStatusMsg = `Gutschein "${currentCoupon.code}" (${currentCoupon.discountPercent}%) aktiviert: -${discountAmount.toFixed(2)} €`;
-                couponStatusColor = "green";
+
+                // CALCULATE BASED ON TYPE
+                if (eligibleAmount > 0) {
+                    if (isPercent) {
+                        discountAmount = (eligibleAmount * value) / 100;
+                        couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}%) aktiviert: -${discountAmount.toFixed(2)} €`;
+                    } else {
+                        // Fixed Amount (capped at eligible amount so it doesn't go negative)
+                        discountAmount = Math.min(value, eligibleAmount);
+                        couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}€) aktiviert: -${discountAmount.toFixed(2)} €`;
+                    }
+                    couponStatusColor = "green";
+                } else {
+                    couponStatusMsg = `Gutschein "${currentCoupon.code}" nicht anwendbar auf diese Artikel.`;
+                    couponStatusColor = "orange";
+                }
             }
         }
 
@@ -229,7 +244,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         let subtotal = 0;
         let itemCount = 0;
 
-        // Sync Menu Quantities
         document.querySelectorAll('.item-qty').forEach(qtyEl => {
             const item = cart.find(i => i.id === qtyEl.dataset.id);
             const controlsDiv = qtyEl.closest('.quantity-controls');
@@ -242,7 +256,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
 
-        // Build Cart Items
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = "<p>Ihre Bestellung ist leer.</p>";
         } else {
@@ -265,17 +278,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
 
-        // Global Subtotal Update
         cartSubtotal = subtotal; 
         if(subtotalAmountEl) subtotalAmountEl.innerText = `${subtotal.toFixed(2)} €`;
 
-        // Calculate Final
         const { discountAmount, finalTotal, couponStatusMsg, couponStatusColor } = calculateFinalTotals();
 
-        // Update Total
         totalAmountEl.innerText = `${finalTotal.toFixed(2)} €`;
         
-        // Update Message
         const msgEl = document.getElementById('coupon-message');
         if(currentCoupon && msgEl) {
              msgEl.textContent = couponStatusMsg;
@@ -298,7 +307,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
     
-    // --- Helper: Generate Summary Data ---
     function generateOrderSummary() {
         let summaryText = "";
         let itemsOnly = [];
@@ -316,24 +324,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const { discountAmount, finalTotal } = calculateFinalTotals();
 
+        let couponDisplay = null;
+        if (currentCoupon && discountAmount > 0) {
+            const typeSymbol = currentCoupon.discountType === 'percent' ? '%' : '€';
+            couponDisplay = `${currentCoupon.code} (${currentCoupon.discountValue}${typeSymbol})`;
+        }
+
         return { 
             summaryText, 
             itemsOnly, 
             originalTotal: cartSubtotal,
             discount: discountAmount,
             finalTotal: finalTotal,
-            couponCode: (currentCoupon && discountAmount > 0) ? currentCoupon.code : null, // Only send code if applied
-            couponPercent: currentCoupon ? currentCoupon.discountPercent : 0
+            couponInfo: couponDisplay
         };
     }
 
-    // --- Confirmation Screen ---
     function showConfirmationScreen(summary) {
         let finalSummaryText = `Kunde: ${summary.customerName}\nTelefon: ${summary.customerPhone}\n\n${summary.summaryText}`;
         
         if (summary.discount > 0) {
             finalSummaryText += `\nZwischensumme: ${summary.originalTotal.toFixed(2)} €`;
-            finalSummaryText += `\nGutschein (${summary.couponCode}): -${summary.discount.toFixed(2)} €`;
+            finalSummaryText += `\nGutschein (${summary.couponInfo}): -${summary.discount.toFixed(2)} €`;
         }
         
         finalSummaryText += `\nTotal: ${summary.finalTotal.toFixed(2)} €`;
@@ -382,7 +394,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
-                coupon: summaryData.couponCode || "None",
+                coupon: summaryData.couponInfo || "None",
                 total: summaryData.finalTotal,
                 
                 status: "new",
@@ -433,7 +445,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
-                coupon: summaryData.couponCode || "None",
+                coupon: summaryData.couponInfo || "None",
                 total: summaryData.finalTotal,
                 
                 status: "new", orderType: "pickup", createdAt: new Date()
@@ -447,7 +459,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             if (summaryData.discount > 0) {
                 whatsappMessage += `\nZwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
-                whatsappMessage += `\nGutschein (${summaryData.couponCode}): -${summaryData.discount.toFixed(2)} €`;
+                whatsappMessage += `\nGutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €`;
             }
             
             whatsappMessage += `\n*Gesamtbetrag: ${summaryData.finalTotal.toFixed(2)} €*`;

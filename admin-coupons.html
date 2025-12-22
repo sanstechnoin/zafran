@@ -4,11 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zafran Admin - Coupons Manager</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="favlogo.png">
     <style>
-        body { background-color: #f4f4f4; color: #333; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .admin-container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { border-bottom: 2px solid #D4AF37; padding-bottom: 10px; margin-bottom: 20px; color: #333; }
+        body { 
+            background-color: #f4f4f4; 
+            color: #333; 
+            padding: 20px; 
+            padding-bottom: 80px; /* Space for footer */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .admin-container { 
+            max-width: 900px; 
+            width: 100%;
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            box-sizing: border-box;
+        }
+
+        /* Logo & Header */
+        .header-logo {
+            display: block;
+            height: 70px;
+            margin: 0 auto 15px auto;
+        }
+        
+        h2 { 
+            border-bottom: 2px solid #D4AF37; 
+            padding-bottom: 15px; 
+            margin-bottom: 25px; 
+            color: #333; 
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+        }
         
         /* Grid Layout */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -32,7 +68,7 @@
 
         /* Save Button */
         button#submitBtn { 
-            background-color: #28a745; /* Green for save */
+            background-color: #28a745; 
             color: white; border: none; padding: 15px; width: 100%; 
             font-size: 1.1rem; cursor: pointer; border-radius: 4px; 
             font-weight: bold; margin-top: 20px; transition: background 0.2s; 
@@ -59,17 +95,53 @@
         .badge-fixed { background: #e8f5e9; color: #1b5e20; }
         .badge-category { background: #eee; color: #555; padding: 2px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; margin-bottom: 2px; font-size: 0.75rem;}
 
-        /* Delete Button */
-        .btn-delete { 
+        /* Status & Action Buttons */
+        .status-active { color: #155724; font-weight: bold; background: #d4edda; padding: 5px 10px; border-radius: 4px; }
+        .status-inactive { color: #721c24; font-weight: bold; background: #f8d7da; padding: 5px 10px; border-radius: 4px; }
+        
+        .btn-action-x {
             background-color: #dc3545; color: white; border: none; 
-            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; 
+            width: 30px; height: 30px; border-radius: 50%; 
+            cursor: pointer; font-weight: bold; font-family: sans-serif;
+            margin-left: 10px; line-height: 30px; text-align: center; padding: 0;
         }
-        .btn-delete:hover { background-color: #c82333; }
+        .btn-action-x:hover { background-color: #a71d2a; transform: scale(1.1); }
+
+        /* Footer */
+        .admin-footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #ddd;
+            width: 100%;
+            background: #f4f4f4;
+        }
+
+        /* CUSTOM MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-modal { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem; color: white; }
+        
+        .btn-reactivate { background-color: #007bff; }
+        .btn-reactivate:hover { background-color: #0056b3; }
+        
+        .btn-confirm-delete { background-color: #dc3545; }
+        .btn-confirm-delete:hover { background-color: #a71d2a; }
+        
+        .btn-cancel { background-color: #6c757d; }
+        .btn-cancel:hover { background-color: #545b62; }
+
     </style>
 </head>
 <body>
 
 <div class="admin-container">
+    <img src="logo.png" alt="Zafran Logo" class="header-logo">
+    
     <h2>Coupon Manager</h2>
     <form id="coupon-form">
         <div class="form-grid">
@@ -130,9 +202,9 @@
                     <th>Code</th>
                     <th>Rabatt</th>
                     <th>Min. Wert</th>
-                    <th>Gültig bis</th>
-                    <th>Kategorien</th>
-                    <th style="text-align: center;">Aktion</th>
+                    <th>Ablaufdatum</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Aktion</th>
                 </tr>
             </thead>
             <tbody id="coupons-body">
@@ -142,11 +214,27 @@
     </div>
 </div>
 
+<footer class="admin-footer">
+    <p>&copy; 2025 Zafran Delight. Created & Developed by Shri Avinash Narendhran S V +49 162 3757839</p>
+</footer>
+
+<div id="actionModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-title" id="modalTitle">Optionen für CODE</div>
+        <p>Was möchten Sie tun?</p>
+        <div class="modal-actions">
+            <button class="btn-modal btn-reactivate" id="btnReactivate">Bearbeiten / Reaktivieren</button>
+            <button class="btn-modal btn-confirm-delete" id="btnConfirmDelete">Endgültig löschen</button>
+            <button class="btn-modal btn-cancel" onclick="closeModal()">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
 <script>
-    // 1. Initialize Firebase directly here to avoid conflict with script.js
+    // 1. Initialize Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
       authDomain: "zaffran-delight.firebaseapp.com",
@@ -156,16 +244,18 @@
       appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
     };
     
-    // Check if firebase is already initialized to prevent errors
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
 
-    // 2. Elements
+    // 2. Elements & Variables
     const form = document.getElementById('coupon-form');
     const msgDiv = document.getElementById('message');
     const tableBody = document.getElementById('coupons-body');
+    const modal = document.getElementById('actionModal');
+    let couponsList = []; 
+    let selectedCouponId = null;
 
     // 3. Load Data Immediately
     loadCoupons();
@@ -175,6 +265,7 @@
         db.collection("coupons").orderBy("createdAt", "desc").get()
         .then((querySnapshot) => {
             tableBody.innerHTML = "";
+            couponsList = []; // Reset list
             
             if (querySnapshot.empty) {
                 tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center; color: #666;'>Keine Coupons in der Datenbank gefunden.</td></tr>";
@@ -183,19 +274,19 @@
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                
+                couponsList.push(data); // Add to local array
+
                 // Format Discount
                 const isPercent = data.discountType === 'percent';
                 const discountDisplay = isPercent ? `${data.discountValue}%` : `${data.discountValue}€`;
                 const badgeClass = isPercent ? 'badge-percent' : 'badge-fixed';
 
-                // Format Categories
-                let catHtml = '<span class="badge badge-category" style="background:#333; color:white;">Alle</span>';
-                if (Array.isArray(data.validCategories) && data.validCategories[0] !== 'all') {
-                    catHtml = data.validCategories.map(cat => 
-                        `<span class="badge badge-category">${cat}</span>`
-                    ).join(" ");
-                }
+                // Check Active Status
+                const today = new Date().toISOString().split('T')[0];
+                const isExpired = data.expiryDate < today;
+                const statusHtml = isExpired 
+                    ? '<span class="status-inactive">Abgelaufen</span>' 
+                    : '<span class="status-active">Aktiv</span>';
 
                 // Append Row
                 const row = `
@@ -204,9 +295,9 @@
                         <td><span class="badge ${badgeClass}">${discountDisplay}</span></td>
                         <td>${data.minOrder}€</td>
                         <td>${data.expiryDate}</td>
-                        <td style="max-width: 250px;">${catHtml}</td>
-                        <td style="text-align: center;">
-                            <button class="btn-delete" onclick="deleteCoupon('${data.code}')">Löschen</button>
+                        <td>${statusHtml}</td>
+                        <td style="text-align: right;">
+                            <button class="btn-action-x" onclick="openActionModal('${data.code}')">X</button>
                         </td>
                     </tr>
                 `;
@@ -219,7 +310,79 @@
         });
     }
 
-    // 4. Save Function
+    // 4. Modal Logic
+    window.openActionModal = function(code) {
+        selectedCouponId = code;
+        document.getElementById('modalTitle').innerText = `Optionen für "${code}"`;
+        modal.style.display = 'flex';
+        
+        // Setup buttons
+        document.getElementById('btnReactivate').onclick = function() { reactivateCoupon(code); };
+        document.getElementById('btnConfirmDelete').onclick = function() { deleteCoupon(code); };
+    };
+
+    window.closeModal = function() {
+        modal.style.display = 'none';
+        selectedCouponId = null;
+    };
+
+    // 5. Delete Logic
+    function deleteCoupon(code) {
+        if(confirm(`Endgültig löschen: ${code}?`)) {
+            db.collection("coupons").doc(code).delete()
+            .then(() => {
+                closeModal();
+                loadCoupons(); // Refresh table
+            })
+            .catch((error) => {
+                alert("Löschen fehlgeschlagen: " + error.message);
+            });
+        }
+    }
+
+    // 6. Reactivate Logic (Fill Form)
+    function reactivateCoupon(code) {
+        // Find data in local array
+        const coupon = couponsList.find(c => c.code === code);
+        if (!coupon) return;
+
+        // Fill Form
+        document.getElementById('code').value = coupon.code;
+        document.getElementById('expiry').value = ""; // Clear date to force update
+        document.getElementById('discountValue').value = coupon.discountValue;
+        document.getElementById('minOrder').value = coupon.minOrder;
+        
+        // Set Radio
+        const radios = document.getElementsByName('discountType');
+        for(let r of radios) {
+            if(r.value === coupon.discountType) r.checked = true;
+        }
+
+        // Set Checkboxes
+        const checkboxes = document.querySelectorAll('input[name="cat"]');
+        // If saved as 'all', clear checkboxes
+        if (coupon.validCategories === 'all') {
+            checkboxes.forEach(cb => cb.checked = false);
+        } else {
+            checkboxes.forEach(cb => {
+                cb.checked = coupon.validCategories.includes(cb.value);
+            });
+        }
+
+        closeModal();
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to form
+        document.getElementById('expiry').focus(); // Focus date field
+        
+        // Update Message
+        msgDiv.style.display = 'block';
+        msgDiv.className = 'success';
+        msgDiv.style.background = '#e2e3e5';
+        msgDiv.style.color = '#383d41';
+        msgDiv.style.borderColor = '#d6d8db';
+        msgDiv.textContent = `Daten für "${code}" geladen. Bitte neues Datum eingeben und speichern.`;
+    }
+
+    // 7. Save Function
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         msgDiv.style.display = 'none';
@@ -256,9 +419,11 @@
             });
 
             // Success UI
-            msgDiv.textContent = `Coupon "${code}" wurde gespeichert!`;
+            msgDiv.textContent = `Coupon "${code}" wurde erfolgreich gespeichert!`;
             msgDiv.className = 'success';
             msgDiv.style.display = 'block';
+            msgDiv.style.background = '#d4edda';
+            msgDiv.style.color = '#155724';
             
             form.reset();
             document.querySelector('input[value="percent"]').checked = true;
@@ -275,19 +440,6 @@
             btn.innerText = "Coupon Speichern";
         }
     });
-
-    // 5. Delete Function
-    window.deleteCoupon = function(code) {
-        if(confirm(`Möchten Sie den Coupon "${code}" wirklich löschen?`)) {
-            db.collection("coupons").doc(code).delete()
-            .then(() => {
-                loadCoupons();
-            })
-            .catch((error) => {
-                alert("Löschen fehlgeschlagen: " + error.message);
-            });
-        }
-    };
 </script>
 
 </body>

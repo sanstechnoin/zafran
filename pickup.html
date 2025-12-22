@@ -1,3 +1,13 @@
+Here is the updated `pickup.html`. I have replaced the header and footer with the ones from `index.html`, adapting the links to work correctly from this page (pointing back to `index.html` where necessary).
+
+I have also:
+
+1. **Removed the "Menu Card" (Speisekarte)** link from the header as requested.
+2. **Preserved the Category Navigation** (Suppen, Vorspeisen, etc.) from the old pickup page, placing it immediately below the new fixed header so users can still navigate the menu easily.
+3. **Included the necessary CSS** for the dark-theme header and footer directly in the file to ensure they look exactly like the index page.
+4. **Added the Translation Scripts** so the language toggle (DE/EN) in the header works.
+
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -7,21 +17,132 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="icon" type="image/png" href="favlogo.png"> 
     <link rel="stylesheet" href="style.css?v=32">
+    
+    <style>
+        :root {
+            --bg-dark: #1a1a1a;       
+            --card-bg: #2a2a2a;      
+            --gold: #D4AF37;
+            --text-main: #f0f0f0;
+            --text-subtle: #aaa;
+            --border-color: #444;
+            --spice-red: #8B0000;     
+        }
+
+        /* Ensure header fonts match index */
+        header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+        /* --- HEADER (KDS Style) --- */
+        /* Renamed class to main-header to avoid conflict with existing pickup css if any */
+        .main-header { 
+            position: fixed; width: 100%; top: 0; left: 0; z-index: 1000; 
+            background: rgba(42, 42, 42, 0.95); 
+            border-bottom: 1px solid var(--gold); 
+            padding: 10px 0; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+        }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; }
+        
+        .main-header .logo img { height: 50px; display: block; }
+        
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links a { 
+            color: var(--gold); 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            text-transform: uppercase; 
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover { color: #fff; }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        
+        .lang-switch { display: flex; border: 1px solid var(--gold); border-radius: 4px; overflow: hidden; }
+        .lang-btn { background: transparent; border: none; color: var(--gold); padding: 5px 10px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .lang-btn.active { background: var(--gold); color: #000; }
+
+        .hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; }
+        .bar { width: 30px; height: 3px; background: var(--gold); }
+
+        /* Buttons needed for header */
+        .btn { 
+            padding: 12px 30px; border-radius: 4px; font-weight: bold; 
+            text-transform: uppercase; font-size: 0.9rem; cursor: pointer; 
+            border: none; transition: all 0.2s; display: inline-block; 
+        }
+        .btn-outline { 
+            background: transparent; color: var(--gold); border: 2px solid var(--gold); 
+        }
+        .btn-outline:hover { background: var(--gold); color: #000; }
+
+        /* --- FOOTER --- */
+        .site-footer { background: #000; padding: 60px 0 30px 0; border-top: 1px solid var(--border-color); color: #666; font-size: 0.9rem; text-align: center; }
+        .footer-logo { height: 40px; margin-bottom: 20px; opacity: 0.6; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .nav-links { position: absolute; top: 70px; left: 0; width: 100%; background: #2a2a2a; flex-direction: column; padding: 30px; display: none; border-bottom: 1px solid var(--gold); }
+            .nav-links.active { display: flex; } 
+            .hamburger { display: flex; }
+        }
+
+        /* Adjustment for Pickup Page Category Nav */
+        .category-nav-wrapper {
+            margin-top: 90px; /* Push down below fixed header */
+            background: #fff; /* Ensure visibility */
+            position: sticky;
+            top: 71px; /* Height of main header */
+            z-index: 900;
+            border-bottom: 1px solid #ddd;
+        }
+        /* Style adjustments for the existing pickup nav to fit nicely */
+        #nav-links-container {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px 0;
+            justify-content: center;
+        }
+        #nav-links-container a {
+            padding: 5px 15px;
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        #nav-links-container a:hover { color: #d4af37; }
+        
+        /* Ensure Main content is not hidden */
+        #main { margin-top: 20px; }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="header-content-wrapper">
-            <div class="header-content">
-               <a href="https://sanstechnoin.github.io/zaffran-menu/"><img src="logo.png" alt="Zaffran Logo" class="logo"></a>
-                <div class="contact-info">
-                    <strong>Zafran Delight</strong>
-                    <p>Kessenicher Straße 9<br>53879 Euskirchen</p>
-                    <a href="tel:+4922511290950" class="phone-link">
-                    <i class="fa fa-phone"></i> +49 2251 1290950
-                    </a>
+
+    <header class="main-header">
+        <div class="container navbar">
+            <a href="index.html" class="logo"><img src="logo.png" alt="Zafran Delight"></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" data-i18n="nav_home">Startseite</a>
+                <a href="index.html#about" data-i18n="nav_story">Über Uns</a>
+                <a href="index.html#offers" data-i18n="nav_offers">Angebote</a>
+                <a href="index.html#visit" data-i18n="nav_contact">Kontakt</a>
+                <div class="header-actions">
+                    <div class="lang-switch">
+                        <button class="lang-btn active" onclick="setLang('de')">DE</button>
+                        <button class="lang-btn" onclick="setLang('en')">EN</button>
+                    </div>
+                    <a href="pickup.html" class="btn btn-outline" style="padding: 5px 15px; font-size: 0.8rem;" data-i18n="btn_order">Bestellen</a>
                 </div>
+            </nav>
+            <div class="hamburger" onclick="toggleMenu()">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
             </div>
         </div>
+    </header>
+
+    <div class="category-nav-wrapper">
         <div id="marquee-container" class="hidden">
             <p id="marquee-text"></p>
         </div>
@@ -47,7 +168,7 @@
                 </div>
             </div>
         </nav>
-    </header>
+    </div>
 
     <main id="main">
         
@@ -1473,22 +1594,27 @@
         
     </main>
     
-    <footer>
-        <p><strong>Zusatzstoffe:</strong> 1) mit Farbstoffen 2) Schwärzungsmittel 3) mit Konservierungsstoffen 4) Schwefeloxid 5) mit Phosphat 6) mit Antioxidationsmittel 7) mit Geschmacksverstärkern 8) gewachst 9) mit Süßungsmittel 10) mit Zuckerart(en) 11) enthält eine Phenylalaninquelle 12) kann bei übermäßigem Verzehr abführend wirken 13) chininhaltig 14) koffeinhaltig 15) Stärke 16) Eiklar 17) Sojaeiweiß 18) mit Milcheweiß</p>
-        <p><strong>Allergene:</strong> A) enthält Weizen B) enthält Krebstiere C) enthält Eier D) enthält Fisch E) enthält Erdnüsse F) enthält Soja G) enthält Milch/Laktose H) enthält Pistazien I) enthält Sellerie J) enthält Senf K) enthält Sesamsamen I) enthält Schwefeldioxid und Sulfite M) enthält Lupine N) enthält Weichtiere und Weichtiererzeugnisse</p>
-        <p class="disclaimer">Alle Preise inkl. MwSt.. Änderungen, Irrtümer, Druckfehler vorbehalten. Es kann keine Garantie für eine 100% Vollständigkeit der Angaben übernommen werden.</p>
+    <footer class="site-footer">
+        <div class="container text-center">
+            <img src="logo.png" class="footer-logo" alt="Zafran">
+            <div style="margin-bottom: 30px;">
+                <h5 style="color: var(--gold);">Impressum</h5>
+                <p style="font-size: 0.9rem; color: #666;">Inhaber: Syed Hussain Haider Zaidi | Kessenicher Str. 9, 53879 Euskirchen | USt-IdNr gemäß § 27 a UStG</p>
+                <p style="font-size: 0.8rem; margin-top: 10px;">
+                    <a href="imprint.html" target="_blank" style="color: #666;">Impressum</a> | 
+                    <a href="privacy.html" target="_blank" style="color: #666;">Datenschutz</a>
+                </p>
+            </div>
+            <div style="border-top: 1px solid #333; padding-top: 20px;">
+                <p style="font-size: 0.8rem; color: #444;">© 2025 Zafran Delight. Created & Developed by Shri Avinash Narendhran S V +49 162 3757839</p>
+            </div>
+        </div>
+        <div class="container" style="margin-top: 20px; font-size: 0.7rem; text-align: left; color: #444;">
+            <p><strong>Zusatzstoffe:</strong> 1) mit Farbstoffen 2) Schwärzungsmittel 3) mit Konservierungsstoffen 4) Schwefeloxid 5) mit Phosphat 6) mit Antioxidationsmittel 7) mit Geschmacksverstärkern 8) gewachst 9) mit Süßungsmittel 10) mit Zuckerart(en) 11) enthält eine Phenylalaninquelle 12) kann bei übermäßigem Verzehr abführend wirken 13) chininhaltig 14) koffeinhaltig 15) Stärke 16) Eiklar 17) Sojaeiweiß 18) mit Milcheweiß</p>
+            <p><strong>Allergene:</strong> A) enthält Weizen B) enthält Krebstiere C) enthält Eier D) enthält Fisch E) enthält Erdnüsse F) enthält Soja G) enthält Milch/Laktose H) enthält Pistazien I) enthält Sellerie J) enthält Senf K) enthält Sesamsamen I) enthält Schwefeldioxid und Sulfite M) enthält Lupine N) enthält Weichtiere und Weichtiererzeugnisse</p>
+        </div>
     </footer>
 
-    <div class="site-credit-footer">
-        <p>
-            <a href="imprint.html" target="_blank">Impressum (Imprint)</a> | 
-            <a href="privacy.html" target="_blank">Datenschutzerklärung (Privacy)</a>
-        </p>
-        <p>&copy; Zafran Delight, Euskirchen 2025</p>
-        <p>Created & Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a> +49 162 3757839</p>
-    </div>
-
-    <!-- ADDED ALL THE CART HTML HERE -->
     <button id="cart-toggle-btn" class="hidden">
         <span class="cart-icon">🛒</span>
         <span id="cart-item-count">0</span>
@@ -1503,8 +1629,7 @@
                 <p>Zahlung im Restaurant (Bar oder Karte).</p>
                 
                 <div id="cart-items-container">
-                    <!-- Cart items here -->
-                </div>
+                    </div>
                 
                 <div id="cart-summary">
                     <div class="summary-line" id="summary-total">
@@ -1535,7 +1660,6 @@
                         </label>
                     </div>
 
-                    <!-- NEW BUTTON LAYOUT - FORMBOLD IS REMOVED -->
                     <div class="checkout-buttons">
                         <button type="button" id="firebase-btn" class="checkout-kitchen">
                             An Küche senden (Live)
@@ -1553,18 +1677,42 @@
                 <p>Danke, Ihre Bestellung ist eingegangen.</p>
                 <h3>Ihre Bestellübersicht:</h3>
                 <div id="confirmation-summary">
-                    <!-- Summary here -->
-                </div>
+                    </div>
                 <button type="button" id="confirmation-close-btn" class="checkout-email">Close</button>
             </div>
 
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
-    <script src="script.js?v=1"></script> <!-- New script file -->
+    <script src="script.js?v=1"></script>
+
+    <script>
+        function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
+
+        const translations = {
+            de: {
+                nav_home: "Startseite", nav_story: "Über Uns", nav_menu: "Speisekarte", nav_offers: "Angebote", nav_contact: "Kontakt",
+                btn_order: "Bestellen"
+            },
+            en: {
+                nav_home: "Home", nav_story: "Our Story", nav_menu: "Menu", nav_offers: "Offers", nav_contact: "Contact",
+                btn_order: "Order Now"
+            }
+        };
+
+        function setLang(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+        }
+    </script>
 </body>
 </html>

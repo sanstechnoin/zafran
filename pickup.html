@@ -81,50 +81,9 @@
         main { padding-top: 20px; }
 
      
-        /* --- CART & COUPON STYLES --- */
+        /* COUPON STYLES --- */
 
-        #order-confirmation {
-
-            text-align: center;
-
-            color: #333; /* Ensure text is visible on white background */
-
-        }
-
-        
-
-        #confirmation-summary {
-
-            white-space: pre-wrap; /* CRITICAL: This preserves the \n line breaks */
-
-            text-align: left;
-
-            background: #f9f9f9;
-
-            padding: 15px;
-
-            border: 1px solid #ddd;
-
-            border-radius: 4px;
-
-            margin: 15px 0;
-
-            font-family: monospace;
-
-            font-size: 0.9rem;
-
-            line-height: 1.5;
-
-            color: #000; /* Force black text */
-
-            max-height: 300px;
-
-            overflow-y: auto;
-
-        }
-
-
-
+     
         .coupon-section {
 
             background: #f9f9f9;
@@ -188,7 +147,73 @@
             min-height: 1.2em;
 
         }
-     
+             
+
+        /* Flex display class to toggle visibility */
+
+        #success-modal.flex { display: flex !important; }
+
+
+
+        .success-box {
+
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 8px;
+
+            width: 90%;
+
+            max-width: 500px;
+
+            text-align: center;
+
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+
+            position: relative;
+
+        }
+
+
+
+        .success-icon {
+
+            font-size: 50px;
+
+            color: #28a745;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        #success-summary-content {
+
+            text-align: left;
+
+            background: #f8f9fa;
+
+            padding: 15px;
+
+            margin: 20px 0;
+
+            border: 1px solid #e9ecef;
+
+            border-radius: 4px;
+
+            max-height: 300px;
+
+            overflow-y: auto;
+
+            font-size: 0.95rem;
+
+            line-height: 1.5;
+
+            color: #333;
+
+        }
     </style>
 </head>
 <body>
@@ -1764,29 +1789,45 @@
                     </div>
                 </form>
             </div>
+           </div>
+
+
+
+    <div id="success-modal">
+
+        <div class="success-box">
+
+            <div class="success-icon">✓</div>
+
+            <h2 style="color:#28a745; margin:0;">Bestellung Erfolgreich!</h2>
+
+            <p style="color:#666; margin-top:5px;">Vielen Dank für Ihre Bestellung.</p>
+
+
+            <div id="success-summary-content">
+
+                </div>
+
             
-            <div id="order-confirmation" class="hidden">
-                <h2>Bestellung gesendet!</h2>
-                <p>Danke, Ihre Bestellung ist eingegangen.</p>
-                <h3>Ihre Bestellübersicht:</h3>
-                <div id="confirmation-summary">
-                    </div>
-                <button type="button" id="confirmation-close-btn" class="checkout-email">Close</button>
-            </div>
+
+            <button onclick="closeSuccessModal()" style="background:#333; color:white; border:none; padding:12px 30px; font-size:1rem; cursor:pointer; border-radius:4px; margin-top:10px;">Schließen</button>
 
         </div>
+
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
-    <script src="script.js?v=1"></script>
-    
-    <script>
-        function toggleMenu() { document.querySelector('.nav-links-clean').classList.toggle('active'); }
-    </script>
-</body>
-</html>
 
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    
+
+    <script src="script.js?v=102"></script>
+
+</body>
+
+</html>
 
 

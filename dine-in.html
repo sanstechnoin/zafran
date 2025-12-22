@@ -8,23 +8,53 @@
     <link rel="stylesheet" href="style.css?v=33">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
-        /* Local overrides to match KDS header/footer exactly if needed */
+        /* --- Styles matched to index.html layout --- */
         header { 
+            position: fixed; 
+            width: 100%; 
+            top: 0; 
+            z-index: 1000; 
+            background: rgba(42, 42, 42, 0.95);
+            border-bottom: 1px solid var(--gold); 
+            padding: 10px 0; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+        }
+
+        /* Container to constrain width - Keeps logo/link from being too far apart */
+        .container { 
+            width: 100%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+            box-sizing: border-box;
+        }
+
+        .navbar { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            padding: 10px 20px;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--gold);
         }
+
+        .logo img { 
+            height: 50px; 
+            display: block; 
+            width: auto;
+        }
+
         .header-link {
             color: var(--gold);
-            font-weight: bold;
+            font-weight: 600;
             text-transform: uppercase;
             text-decoration: none;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
         }
         .header-link:hover { color: #fff; }
+
+        /* Adjust main content top margin because header is fixed */
+        .table-selection-main {
+            margin-top: 80px; 
+        }
         
         footer {
             background-color: #000;
@@ -42,8 +72,12 @@
 <body>
     
     <header>
-        <a href="index.html"><img src="logo.png" alt="Zaffran Logo" class="logo" style="height: 50px; width: auto;"></a>
-        <a href="index.html" class="header-link">Startseite</a>
+        <div class="container navbar">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="Zaffran Logo">
+            </a>
+            <a href="index.html" class="header-link">Startseite</a>
+        </div>
     </header>
 
     <main class="table-selection-main">

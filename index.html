@@ -226,22 +226,25 @@
                 left: 0; 
                 width: 100%; 
                 
-                /* Limit height to allow space for mobile browser bars */
+                /* DRASTICALLY REDUCED HEIGHT TO ENSURE FIT */
                 height: auto; 
-                max-height: 80vh; 
-                overflow-y: auto; /* Enable scrolling */
+                max-height: 65vh; /* Only take up 65% of viewport height */
+                overflow-y: auto; /* Enable scrolling if needed */
                 
-                background: var(--card-bg); 
+                /* SOLID BLACK BACKGROUND FOR DISTINCT BOX */
+                background: #000; 
+                
                 flex-direction: column; 
                 
-                /* BIG PADDING BOTTOM TO ENSURE BUTTON IS VISIBLE */
-                padding: 30px 20px 100px 20px; 
+                /* PADDING adjusted for compactness and bottom space */
+                padding: 20px 20px 80px 20px; 
                 
                 display: none; 
-                border-bottom: 1px solid var(--gold); 
-                box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+                /* THICKER BOTTOM BORDER */
+                border-bottom: 3px solid var(--gold); 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.8);
                 align-items: center;
-                gap: 20px; 
+                gap: 15px; /* Reduced gap */
             }
             
             .nav-links.active { display: flex; } 
@@ -250,9 +253,10 @@
                 display: block;
                 width: 100%;
                 text-align: center;
-                padding: 12px 0;
+                /* COMPACT PADDING */
+                padding: 10px 0;
                 font-size: 1.1rem;
-                border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
+                border-bottom: 1px solid rgba(212, 175, 55, 0.2); 
             }
             .nav-links a:last-of-type { border-bottom: none; }
 
@@ -262,7 +266,6 @@
                 gap: 15px; 
                 margin-top: 15px;
                 align-items: center;
-                /* Ensure actions don't get cut off */
                 flex-shrink: 0; 
             }
             
@@ -609,7 +612,7 @@
                     <h3 data-i18n="contact_info">Kontakt</h3>
                     <ul class="contact-list">
                         <li>
-                            <div class="contact-icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+                            <div class="contact-icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5-2.5 2.5z"/></svg></div>
                             <div class="contact-details"><span data-i18n="address">Adresse</span><p>Kessenicher Straße 9<br>53879 Euskirchen</p></div>
                         </li>
                         <li>

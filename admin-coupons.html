@@ -138,7 +138,23 @@
             selectedCats.push(checkbox.value);
         });
 
-        // 3. Save to Firebase
+        // 3. Confirmation Dialog
+        const typeSymbol = discountType === 'percent' ? '%' : '€';
+        const catsText = selectedCats.length > 0 ? selectedCats.join(', ') : 'Alle Kategorien';
+        
+        const confirmMsg = `Bitte bestätigen Sie die Angaben:\n\n` +
+                           `Code: ${code}\n` +
+                           `Rabatt: ${discountValue}${typeSymbol}\n` +
+                           `Mindestbestellwert: ${minOrder}€\n` +
+                           `Gültig bis: ${expiry}\n` +
+                           `Kategorien: ${catsText}\n\n` +
+                           `Klicken Sie OK zum Speichern.`;
+
+        if (!confirm(confirmMsg)) {
+            return; // Stop execution if user clicks Cancel
+        }
+
+        // 4. Save to Firebase
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerText = "Speichern...";
@@ -154,12 +170,15 @@
                 createdAt: new Date()
             });
 
-            msgDiv.textContent = `Coupon ${code} gespeichert! (${discountValue}${discountType === 'percent' ? '%' : '€'}, Min: ${minOrder}€)`;
+            msgDiv.textContent = `Coupon ${code} erfolgreich erstellt!`;
             msgDiv.className = 'success';
+            
+            // 5. Reset Form (Only on success)
             form.reset();
             // Restore defaults
             document.querySelector('input[value="percent"]').checked = true;
             document.getElementById('minOrder').value = "20";
+            
         } catch (error) {
             console.error(error);
             showError("Fehler beim Speichern in die Datenbank.");

@@ -285,12 +285,58 @@
         .footer-logo { height: 40px; margin-bottom: 20px; opacity: 0.6; }
 
         /* --- RESPONSIVE --- */
-        @media (max-width: 992px) { .features-wrapper { grid-template-columns: repeat(2, 1fr); } .contact-grid-3 { grid-template-columns: 1fr 1fr; } .map-col { grid-column: span 2; } }
+        @media (max-width: 992px) { 
+            .features-wrapper { grid-template-columns: repeat(2, 1fr); } 
+            .contact-grid-3 { grid-template-columns: 1fr 1fr; } 
+            .map-col { grid-column: span 2; } 
+        }
+        
         @media (max-width: 768px) {
             .hero-content h1 { font-size: 3rem; }
-            .nav-links { position: absolute; top: 70px; left: 0; width: 100%; background: var(--card-bg); flex-direction: column; padding: 30px; display: none; border-bottom: 1px solid var(--gold); }
-            .nav-links.active { display: flex; } .hamburger { display: flex; }
-            .features-wrapper { grid-template-columns: 1fr; } .contact-grid-3 { grid-template-columns: 1fr; } .map-col { grid-column: span 1; }
+            
+            /* Enhanced Mobile Menu Layout */
+            .hamburger { display: flex; }
+            
+            .nav-links { 
+                position: fixed; 
+                top: 70px; 
+                left: 0; 
+                width: 100%; 
+                background: var(--card-bg); 
+                flex-direction: column; 
+                padding: 40px 20px; 
+                display: none; 
+                border-bottom: 1px solid var(--gold); 
+                box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+                align-items: center;
+                gap: 25px; /* "One by one" spacing */
+            }
+            
+            .nav-links.active { display: flex; } 
+            
+            .nav-links a {
+                display: block;
+                width: 100%;
+                text-align: center;
+                padding: 10px 0;
+                font-size: 1.1rem;
+                border-bottom: 1px dashed rgba(212, 175, 55, 0.2); /* Subtle separator */
+            }
+            .nav-links a:last-of-type { border-bottom: none; }
+
+            .header-actions { 
+                flex-direction: column; 
+                width: 100%; 
+                gap: 20px; 
+                margin-top: 10px;
+                align-items: center;
+            }
+            .header-actions .btn { width: 100%; text-align: center; }
+
+            /* Content Adjustments */
+            .features-wrapper { grid-template-columns: 1fr; } 
+            .contact-grid-3 { grid-template-columns: 1fr; } 
+            .map-col { grid-column: span 1; }
             .menu-book { flex-direction: column; min-height: auto; }
             .book-page { width: 100%; padding: 20px; border-right: none; }
             .offers-grid { grid-template-columns: 1fr; }

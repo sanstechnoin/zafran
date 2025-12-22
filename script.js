@@ -55,43 +55,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     const totalAmountEl = document.getElementById('total-amount');
     
     const cartContentEl = document.getElementById('cart-content');
-    const orderConfirmationEl = document.getElementById('order-confirmation');
-    const confirmationSummaryEl = document.getElementById('confirmation-summary');
-    const confirmationCloseBtn = document.getElementById('confirmation-close-btn');
     const orderForm = document.getElementById('order-form');
     const whatsappBtn = document.getElementById('whatsapp-btn');
     const firebaseBtn = document.getElementById('firebase-btn');
     const consentCheckbox = document.getElementById('privacy-consent');
     const applyCouponBtn = document.getElementById('apply-coupon-btn');
 
+    // New Success Modal Elements
+    const successModal = document.getElementById('success-modal');
+    const successContent = document.getElementById('success-summary-content');
+
     // --- Event Listeners ---
     if (cartToggleBtn) cartToggleBtn.addEventListener('click', openCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', closeCart);
-    if (confirmationCloseBtn) confirmationCloseBtn.addEventListener('click', closeCart);
     
     if (applyCouponBtn) {
         applyCouponBtn.addEventListener('click', handleApplyCoupon);
     }
 
-    // --- Cart Open/Close Logic ---
+    // --- Modal Logic ---
     function openCart() {
         cartContentEl.style.display = 'block'; 
-        // Ensure confirmation is hidden and reset
-        orderConfirmationEl.style.display = 'none'; 
-        orderConfirmationEl.classList.add('hidden'); 
-        
         cartOverlay.classList.remove('hidden');
         updateCart(); 
         toggleCheckoutButtons();
     }
+    
     function closeCart() { 
         cartOverlay.classList.add('hidden'); 
-        setTimeout(() => {
-            cartContentEl.style.display = 'block';
-            orderConfirmationEl.style.display = 'none';
-            orderConfirmationEl.classList.add('hidden');
-        }, 300);
     }
+
+    // Global function to close Success Modal (called by button in HTML)
+    window.closeSuccessModal = function() {
+        if(successModal) successModal.classList.remove('flex');
+    };
 
     function toggleCheckoutButtons() {
         if (consentCheckbox) {
@@ -237,7 +234,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         return { discountAmount, finalTotal, couponStatusMsg, couponStatusColor };
     }
 
-    // --- Update Cart Display ---
     function updateCart() {
         cartItemsContainer.innerHTML = "";
         let subtotal = 0;
@@ -339,77 +335,67 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
     }
 
-    // --- FIX: Show Confirmation Screen Logic ---
+    // --- DISPLAY SUCCESS MODAL (The Fix) ---
     function showConfirmationScreen(summary) {
-        // Use <br> for HTML line breaks to ensure they render
-        let htmlSummary = `<strong>Kunde:</strong> ${summary.customerName}<br><strong>Telefon:</strong> ${summary.customerPhone}<br><br><strong>Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
+        // Use <br> for breaks
+        let html = `<strong>Kunde:</strong> ${summary.customerName}<br>
+                    <strong>Telefon:</strong> ${summary.customerPhone}<br><br>
+                    <strong>Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
         
         if (summary.discount > 0) {
-            htmlSummary += `<br>Zwischensumme: ${summary.originalTotal.toFixed(2)} €`;
-            htmlSummary += `<br><span style="color:green">Gutschein (${summary.couponInfo}): -${summary.discount.toFixed(2)} €</span>`;
+            html += `<br>Zwischensumme: ${summary.originalTotal.toFixed(2)} €`;
+            html += `<br><span style="color:green">Gutschein (${summary.couponInfo}): -${summary.discount.toFixed(2)} €</span>`;
         }
         
-        htmlSummary += `<br><br><strong style="font-size:1.1rem">Total: ${summary.finalTotal.toFixed(2)} €</strong>`;
+        html += `<br><br><strong style="font-size:1.1rem">Total: ${summary.finalTotal.toFixed(2)} €</strong>`;
 
         if (summary.customerNotes) {
-            htmlSummary += `<br><br><strong>Anmerkungen:</strong><br>${summary.customerNotes.replace(/\n/g, '<br>')}`;
+            html += `<br><br><strong>Anmerkungen:</strong><br>${summary.customerNotes.replace(/\n/g, '<br>')}`;
         }
         
-        // Inject HTML
-        confirmationSummaryEl.innerHTML = htmlSummary;
+        // 1. Close Cart
+        closeCart();
+
+        // 2. Inject Content
+        successContent.innerHTML = html;
+
+        // 3. Open Success Modal
+        successModal.classList.add('flex'); // Uses flex class to display
         
-        // Hide Form, Show Confirmation
-        cartContentEl.style.display = 'none'; 
-        
-        // FIX: Ensure 'hidden' class is removed so it actually shows up
-        orderConfirmationEl.classList.remove('hidden'); 
-        orderConfirmationEl.style.display = 'block'; 
-        
-        // Cleanup variables
+        // 4. Reset Logic
         cart = [];
         currentCoupon = null; 
         if(document.getElementById('coupon-input')) document.getElementById('coupon-input').value = "";
         if(document.getElementById('coupon-message')) document.getElementById('coupon-message').textContent = "";
         orderForm.reset();
         if (consentCheckbox) consentCheckbox.checked = false;
-        updateCart();
+        updateCart(); // Updates UI to show empty cart
     }
 
     // --- SEND TO FIREBASE ---
     if(firebaseBtn) {
         firebaseBtn.addEventListener('click', async () => {
-            if (cart.length === 0) {
-                alert("Ihr Warenkorb ist leer.");
-                return;
-            }
+            if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
 
             const customerName = document.getElementById('customer-name').value;
             const customerPhone = document.getElementById('customer-phone').value;
             const customerNotes = document.getElementById('customer-notes').value;
             
-            if (!customerName || !customerPhone) {
-                alert("Bitte geben Sie Namen und Telefonnummer ein.");
-                return; 
-            }
+            if (!customerName || !customerPhone) return alert("Bitte geben Sie Namen und Telefonnummer ein.");
 
             const summaryData = generateOrderSummary();
 
             const orderId = `pickup-${new Date().getTime()}`;
-            const billingIdentifier = `${customerName} (${customerPhone})`; 
             
             const orderData = {
                 id: orderId,
-                table: billingIdentifier,
-                customerName: customerName,
-                customerPhone: customerPhone, 
-                notes: customerNotes || null, 
+                table: `${customerName} (${customerPhone})`,
+                customerName, customerPhone, notes: customerNotes,
                 items: summaryData.itemsOnly,
-                
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
                 coupon: summaryData.couponInfo || "None",
                 total: summaryData.finalTotal,
-                
                 status: "new",
                 orderType: "pickup", 
                 createdAt: new Date()
@@ -427,7 +413,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             try {
                 await db.collection("orders").doc(orderId).set(orderData);
-                showConfirmationScreen(screenSummary);
+                showConfirmationScreen(screenSummary); // CALL THE NEW FUNCTION
             } catch (error) {
                 console.error("Error sending order: ", error);
                 alert("Fehler beim Senden. Bitte erneut versuchen.");
@@ -442,16 +428,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- SEND TO WHATSAPP ---
     if(whatsappBtn) {
         whatsappBtn.addEventListener('click', () => {
-            if (cart.length === 0) {
-                alert("Ihr Warenkorb ist leer.");
-                return;
-            }
+            if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
 
             const customerName = document.getElementById('customer-name').value;
             const customerPhone = document.getElementById('customer-phone').value;
             const customerNotes = document.getElementById('customer-notes').value;
             
-            if (!customerName || !customerPhone) { alert("Bitte geben Sie Namen und Telefonnummer ein."); return; }
+            if (!customerName || !customerPhone) return alert("Bitte geben Sie Namen und Telefonnummer ein.");
 
             const summaryData = generateOrderSummary();
 
@@ -461,18 +444,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 table: `${customerName} (${customerPhone})`,
                 customerName, customerPhone, notes: customerNotes,
                 items: summaryData.itemsOnly, 
-                
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
                 coupon: summaryData.couponInfo || "None",
                 total: summaryData.finalTotal,
-                
                 status: "new", orderType: "pickup", createdAt: new Date()
             };
             db.collection("orders").doc(orderId).set(orderData).catch(e => console.error("Firebase err", e));
             
             const WHATSAPP_NUMBER = config.whatsappNumber;
-            if (!WHATSAPP_NUMBER) { alert("WhatsApp-Nummer fehlt."); return; }
+            if (!WHATSAPP_NUMBER) return alert("WhatsApp-Nummer fehlt.");
 
             let whatsappMessage = `*Neue Abholbestellung*\n\n*Kunde:* ${customerName}\n*Telefon:* ${customerPhone}\n\n*Bestellung:*\n${summaryData.summaryText}`;
             

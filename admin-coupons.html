@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zafran Admin - Coupons</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background-color: #f4f4f4; color: #333; padding: 20px; font-family: sans-serif; }
+        .admin-container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { border-bottom: 2px solid #D4AF37; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
+        .checkbox-item input { width: auto; }
+
+        button { background-color: #D4AF37; color: white; border: none; padding: 12px; width: 100%; font-size: 1rem; cursor: pointer; border-radius: 4px; margin-top: 10px; }
+        button:hover { background-color: #b39028; }
+        
+        #message { margin-top: 15px; padding: 10px; text-align: center; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h2>Coupon Erstellen</h2>
+    <form id="coupon-form">
+        <div class="form-group">
+            <label>Coupon Code (z.B. SUMMER2025)</label>
+            <input type="text" id="code" required style="text-transform: uppercase;">
+        </div>
+
+        <div class="form-group">
+            <label>Rabatt (%)</label>
+            <input type="number" id="discount" min="1" max="100" placeholder="z.B. 10 für 10%" required>
+        </div>
+
+        <div class="form-group">
+            <label>Gültig bis</label>
+            <input type="date" id="expiry" required>
+        </div>
+
+        <div class="form-group">
+            <label>Gültig für Kategorien (Leer lassen für alle)</label>
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="vorspeisen"> Vorspeisen</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="veganes"> Veganes</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Vegetarisches</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="chicken"> Chicken</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="lamm"> Lamm</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="fisch-garnelen"> Fisch</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="tandoori"> Tandoori</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="biryani"> Biryani</label>
+                <label class="checkbox-item"><input type="checkbox" name="cat" value="brot"> Brot</label>
+            </div>
+        </div>
+
+        <button type="submit">Coupon Speichern</button>
+        <div id="message"></div>
+    </form>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script src="script.js"></script> <script>
+    const db = firebase.firestore();
+
+    document.getElementById('coupon-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const code = document.getElementById('code').value.toUpperCase().trim();
+        const discount = Number(document.getElementById('discount').value);
+        const expiry = document.getElementById('expiry').value;
+        
+        // Get selected categories
+        const selectedCats = [];
+        document.querySelectorAll('input[name="cat"]:checked').forEach((checkbox) => {
+            selectedCats.push(checkbox.value);
+        });
+
+        const msgDiv = document.getElementById('message');
+
+        try {
+            await db.collection('coupons').doc(code).set({
+                code: code,
+                discountPercent: discount,
+                expiryDate: expiry,
+                validCategories: selectedCats.length > 0 ? selectedCats : 'all',
+                createdAt: new Date()
+            });
+
+            msgDiv.textContent = `Coupon ${code} erfolgreich erstellt!`;
+            msgDiv.className = 'success';
+            document.getElementById('coupon-form').reset();
+        } catch (error) {
+            console.error(error);
+            msgDiv.textContent = "Fehler beim Erstellen.";
+            msgDiv.className = 'error';
+        }
+    });
+</script>
+
+</body>
+</html>

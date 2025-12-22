@@ -79,6 +79,116 @@
         
         /* Ensure Main content is not hidden behind header */
         main { padding-top: 20px; }
+
+     
+        /* --- CART & COUPON STYLES --- */
+
+        #order-confirmation {
+
+            text-align: center;
+
+            color: #333; /* Ensure text is visible on white background */
+
+        }
+
+        
+
+        #confirmation-summary {
+
+            white-space: pre-wrap; /* CRITICAL: This preserves the \n line breaks */
+
+            text-align: left;
+
+            background: #f9f9f9;
+
+            padding: 15px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 4px;
+
+            margin: 15px 0;
+
+            font-family: monospace;
+
+            font-size: 0.9rem;
+
+            line-height: 1.5;
+
+            color: #000; /* Force black text */
+
+            max-height: 300px;
+
+            overflow-y: auto;
+
+        }
+
+
+
+        .coupon-section {
+
+            background: #f9f9f9;
+
+            padding: 10px;
+
+            border-radius: 5px;
+
+            margin: 15px 0;
+
+            border: 1px dashed #ccc;
+
+        }
+
+        .coupon-row {
+
+            display: flex;
+
+            gap: 5px;
+
+        }
+
+        #coupon-input {
+
+            flex: 1;
+
+            padding: 8px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 4px;
+
+            font-size: 0.9rem;
+
+        }
+
+        #apply-coupon-btn {
+
+            background: var(--gold);
+
+            color: black;
+
+            border: none;
+
+            padding: 0 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            border-radius: 4px;
+
+        }
+
+        #coupon-message {
+
+            font-size: 0.8rem;
+
+            margin-top: 5px;
+
+            min-height: 1.2em;
+
+        }
+     
     </style>
 </head>
 <body>
@@ -1677,5 +1787,6 @@
     </script>
 </body>
 </html>
+
 
 

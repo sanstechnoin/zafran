@@ -12,18 +12,27 @@
         
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        input[type="text"], input[type="number"], input[type="date"] { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; 
+        }
         
+        /* Radio Button Group */
+        .radio-group { display: flex; gap: 20px; margin-bottom: 10px; }
+        .radio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .radio-item input { width: auto; cursor: pointer; }
+
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
         .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
         .checkbox-item input { width: auto; }
 
         button { background-color: #D4AF37; color: white; border: none; padding: 12px; width: 100%; font-size: 1rem; cursor: pointer; border-radius: 4px; margin-top: 10px; }
         button:hover { background-color: #b39028; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
         
-        #message { margin-top: 15px; padding: 10px; text-align: center; border-radius: 4px; }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
+        #message { margin-top: 15px; padding: 10px; text-align: center; border-radius: 4px; display: none; }
+        .success { background-color: #d4edda; color: #155724; display: block !important; }
+        .error { background-color: #f8d7da; color: #721c24; display: block !important; }
+        .required-star { color: red; }
     </style>
 </head>
 <body>
@@ -32,22 +41,34 @@
     <h2>Coupon Erstellen</h2>
     <form id="coupon-form">
         <div class="form-group">
-            <label>Coupon Code (z.B. SUMMER2025)</label>
-            <input type="text" id="code" required style="text-transform: uppercase;">
+            <label>Coupon Code <span class="required-star">*</span></label>
+            <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SAVE5">
         </div>
 
         <div class="form-group">
-            <label>Rabatt (%)</label>
-            <input type="number" id="discount" min="1" max="100" placeholder="z.B. 10" required>
+            <label>Rabatt Typ <span class="required-star">*</span></label>
+            <div class="radio-group">
+                <label class="radio-item">
+                    <input type="radio" name="discountType" value="percent" checked> Prozent (%)
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="discountType" value="fixed"> Festbetrag (€)
+                </label>
+            </div>
         </div>
 
         <div class="form-group">
-            <label>Mindestbestellwert (€)</label>
-            <input type="number" id="minOrder" value="20" min="0" placeholder="Standard: 20">
+            <label>Rabatt Wert <span class="required-star">*</span></label>
+            <input type="number" id="discountValue" min="0.1" step="0.1" placeholder="z.B. 10 (für 10%) oder 5 (für 5€)" required>
         </div>
 
         <div class="form-group">
-            <label>Gültig bis</label>
+            <label>Mindestbestellwert (€) <span class="required-star">*</span></label>
+            <input type="number" id="minOrder" value="20" min="0" required placeholder="Standard: 20">
+        </div>
+
+        <div class="form-group">
+            <label>Gültig bis <span class="required-star">*</span></label>
             <input type="date" id="expiry" required>
         </div>
 
@@ -67,7 +88,7 @@
             </div>
         </div>
 
-        <button type="submit">Coupon Speichern</button>
+        <button type="submit" id="submitBtn">Coupon Speichern</button>
         <div id="message"></div>
     </form>
 </div>
@@ -78,42 +99,80 @@
 
 <script>
     const db = firebase.firestore();
+    const form = document.getElementById('coupon-form');
+    const msgDiv = document.getElementById('message');
 
-    document.getElementById('coupon-form').addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+        msgDiv.style.display = 'none';
+        msgDiv.className = '';
+
+        // 1. Get Values
         const code = document.getElementById('code').value.toUpperCase().trim();
-        const discount = Number(document.getElementById('discount').value);
-        const minOrder = Number(document.getElementById('minOrder').value) || 20; // Default 20
+        const discountType = document.querySelector('input[name="discountType"]:checked').value;
+        const discountValue = parseFloat(document.getElementById('discountValue').value);
+        const minOrder = parseFloat(document.getElementById('minOrder').value);
         const expiry = document.getElementById('expiry').value;
         
+        // 2. Strict Validation
+        if (!code || code.length < 2) {
+            showError("Bitte geben Sie einen gültigen Code ein (min. 2 Zeichen).");
+            return;
+        }
+        if (isNaN(discountValue) || discountValue <= 0) {
+            showError("Bitte einen gültigen Rabatt-Wert eingeben.");
+            return;
+        }
+        if (isNaN(minOrder) || minOrder < 0) {
+            showError("Bitte einen gültigen Mindestbestellwert eingeben.");
+            return;
+        }
+        if (!expiry) {
+            showError("Bitte ein Ablaufdatum wählen.");
+            return;
+        }
+
+        // Get selected categories
         const selectedCats = [];
         document.querySelectorAll('input[name="cat"]:checked').forEach((checkbox) => {
             selectedCats.push(checkbox.value);
         });
 
-        const msgDiv = document.getElementById('message');
+        // 3. Save to Firebase
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "Speichern...";
 
         try {
             await db.collection('coupons').doc(code).set({
                 code: code,
-                discountPercent: discount,
+                discountType: discountType, // 'percent' or 'fixed'
+                discountValue: discountValue,
                 minOrder: minOrder,
                 expiryDate: expiry,
                 validCategories: selectedCats.length > 0 ? selectedCats : 'all',
                 createdAt: new Date()
             });
 
-            msgDiv.textContent = `Coupon ${code} erfolgreich erstellt (Min. ${minOrder}€)!`;
+            msgDiv.textContent = `Coupon ${code} gespeichert! (${discountValue}${discountType === 'percent' ? '%' : '€'}, Min: ${minOrder}€)`;
             msgDiv.className = 'success';
-            document.getElementById('coupon-form').reset();
-            document.getElementById('minOrder').value = "20"; // Reset default
+            form.reset();
+            // Restore defaults
+            document.querySelector('input[value="percent"]').checked = true;
+            document.getElementById('minOrder').value = "20";
         } catch (error) {
             console.error(error);
-            msgDiv.textContent = "Fehler beim Erstellen.";
-            msgDiv.className = 'error';
+            showError("Fehler beim Speichern in die Datenbank.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Coupon Speichern";
         }
     });
+
+    function showError(text) {
+        msgDiv.textContent = text;
+        msgDiv.className = 'error';
+    }
 </script>
 
 </body>

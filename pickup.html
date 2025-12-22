@@ -9,125 +9,130 @@
     <link rel="stylesheet" href="style.css?v=32">
     
     <style>
+        /* --- Overrides to match Index Header Style --- */
         :root {
             --bg-dark: #1a1a1a;       
             --card-bg: #2a2a2a;      
             --gold: #D4AF37;
-            --text-main: #f0f0f0;
-            --text-subtle: #aaa;
-            --border-color: #444;
-            --spice-red: #8B0000;     
         }
 
-        /* Ensure header fonts match index */
-        header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-
-        /* --- HEADER (KDS Style) --- */
-        /* Renamed class to main-header to avoid conflict with existing pickup css if any */
-        .main-header { 
-            position: fixed; width: 100%; top: 0; left: 0; z-index: 1000; 
+        /* Force fixed positioning for the main header to match index.html */
+        .main-header-fixed { 
+            position: fixed; 
+            width: 100%; 
+            top: 0; 
+            left: 0;
+            z-index: 2000; 
             background: rgba(42, 42, 42, 0.95); 
             border-bottom: 1px solid var(--gold); 
             padding: 10px 0; 
             box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+            height: 70px; /* Explicit height to calculate offsets */
+            display: flex;
+            align-items: center;
         }
-        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; }
+
+        .container { 
+            width: 100%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+        }
+
+        .navbar-clean { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%;
+        }
         
-        .main-header .logo img { height: 50px; display: block; }
+        .logo img { height: 50px; display: block; }
         
-        .nav-links { display: flex; gap: 20px; align-items: center; }
-        .nav-links a { 
+        /* Clean Nav Links */
+        .nav-links-clean { 
+            display: flex; 
+            gap: 30px; 
+            align-items: center; 
+        }
+        .nav-links-clean a { 
             color: var(--gold); 
             font-weight: 600; 
-            font-size: 0.95rem; 
+            font-size: 1rem; 
             text-transform: uppercase; 
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: color 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        .nav-links a:hover { color: #fff; }
-        
-        .header-actions { display: flex; align-items: center; gap: 15px; }
-        
-        .lang-switch { display: flex; border: 1px solid var(--gold); border-radius: 4px; overflow: hidden; }
-        .lang-btn { background: transparent; border: none; color: var(--gold); padding: 5px 10px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .lang-btn.active { background: var(--gold); color: #000; }
+        .nav-links-clean a:hover { color: #fff; }
 
+        /* Mobile Menu styles */
         .hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; }
         .bar { width: 30px; height: 3px; background: var(--gold); }
 
-        /* Buttons needed for header */
-        .btn { 
-            padding: 12px 30px; border-radius: 4px; font-weight: bold; 
-            text-transform: uppercase; font-size: 0.9rem; cursor: pointer; 
-            border: none; transition: all 0.2s; display: inline-block; 
-        }
-        .btn-outline { 
-            background: transparent; color: var(--gold); border: 2px solid var(--gold); 
-        }
-        .btn-outline:hover { background: var(--gold); color: #000; }
-
-        /* --- FOOTER --- */
-        .site-footer { background: #000; padding: 60px 0 30px 0; border-top: 1px solid var(--border-color); color: #666; font-size: 0.9rem; text-align: center; }
-        .footer-logo { height: 40px; margin-bottom: 20px; opacity: 0.6; }
-
-        /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
-            .nav-links { position: absolute; top: 70px; left: 0; width: 100%; background: #2a2a2a; flex-direction: column; padding: 30px; display: none; border-bottom: 1px solid var(--gold); }
-            .nav-links.active { display: flex; } 
+            .nav-links-clean { 
+                position: absolute; 
+                top: 70px; 
+                left: 0; 
+                width: 100%; 
+                background: #2a2a2a; 
+                flex-direction: column; 
+                padding: 20px; 
+                display: none; 
+                border-bottom: 1px solid var(--gold); 
+                text-align: center;
+            }
+            .nav-links-clean.active { display: flex; }
             .hamburger { display: flex; }
         }
 
-        /* Adjustment for Pickup Page Category Nav */
+        /* --- Adjustments for the Category Navigation below --- */
         .category-nav-wrapper {
-            margin-top: 90px; /* Push down below fixed header */
-            background: #fff; /* Ensure visibility */
+            margin-top: 70px; /* Pushes content down by header height */
+            background: var(--bg-dark); 
             position: sticky;
-            top: 71px; /* Height of main header */
-            z-index: 900;
-            border-bottom: 1px solid #ddd;
+            top: 70px; /* Sticks right below the fixed header */
+            z-index: 1000;
+            border-bottom: 1px solid #444;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        /* Style adjustments for the existing pickup nav to fit nicely */
+        
+        /* Ensure the category links look good on dark bg */
         #nav-links-container {
-            display: flex;
-            overflow-x: auto;
-            white-space: nowrap;
-            padding: 10px 0;
-            justify-content: center;
+            padding: 15px 0;
+            background-color: var(--bg-dark);
         }
         #nav-links-container a {
-            padding: 5px 15px;
-            color: #333;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
+            background-color: var(--card-bg);
+            color: var(--gold);
+            border: 1px solid #444;
         }
-        #nav-links-container a:hover { color: #d4af37; }
-        
-        /* Ensure Main content is not hidden */
-        #main { margin-top: 20px; }
+        #nav-links-container a:hover {
+            background-color: var(--gold);
+            color: #000;
+        }
+
+        /* Fix main content spacing */
+        #main { 
+            padding-top: 20px; 
+        }
     </style>
 </head>
 <body>
 
-    <header class="main-header">
-        <div class="container navbar">
-            <a href="index.html" class="logo"><img src="logo.png" alt="Zafran Delight"></a>
-            <nav class="nav-links" id="navLinks">
-                <a href="index.html" data-i18n="nav_home">Startseite</a>
-                <a href="index.html#about" data-i18n="nav_story">Über Uns</a>
-                <a href="index.html#offers" data-i18n="nav_offers">Angebote</a>
-                <a href="index.html#visit" data-i18n="nav_contact">Kontakt</a>
-                <div class="header-actions">
-                    <div class="lang-switch">
-                        <button class="lang-btn active" onclick="setLang('de')">DE</button>
-                        <button class="lang-btn" onclick="setLang('en')">EN</button>
-                    </div>
-                    <a href="pickup.html" class="btn btn-outline" style="padding: 5px 15px; font-size: 0.8rem;" data-i18n="btn_order">Bestellen</a>
+    <header class="main-header-fixed">
+        <div class="container">
+            <div class="navbar-clean">
+                <a href="index.html" class="logo"><img src="logo.png" alt="Zafran Delight"></a>
+                
+                <nav class="nav-links-clean" id="navLinks">
+                    <a href="index.html">Startseite</a>
+                    <a href="index.html#offers">Angebote</a>
+                </nav>
+
+                <div class="hamburger" onclick="toggleMenu()">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
                 </div>
-            </nav>
-            <div class="hamburger" onclick="toggleMenu()">
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
             </div>
         </div>
     </header>
@@ -1678,31 +1683,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
     <script src="script.js?v=1"></script>
-
+    
     <script>
-        function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
-
-        const translations = {
-            de: {
-                nav_home: "Startseite", nav_story: "Über Uns", nav_menu: "Speisekarte", nav_offers: "Angebote", nav_contact: "Kontakt",
-                btn_order: "Bestellen"
-            },
-            en: {
-                nav_home: "Home", nav_story: "Our Story", nav_menu: "Menu", nav_offers: "Offers", nav_contact: "Contact",
-                btn_order: "Order Now"
-            }
-        };
-
-        function setLang(lang) {
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if(translations[lang] && translations[lang][key]) {
-                    el.textContent = translations[lang][key];
-                }
-            });
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
-        }
+        function toggleMenu() { document.querySelector('.nav-links-clean').classList.toggle('active'); }
     </script>
 </body>
 </html>

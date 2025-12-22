@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Start the main listener
         db.collection("orders")
-          .where("status", "in", ["new", "seen", "ready"]) // Added 'ready'
+          .where("status", "in", ["new", "seen", "ready", "cooked"])
           .onSnapshot(
             (snapshot) => {
                 connectionIconEl.textContent = '✅'; 
@@ -317,11 +317,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (ordersForThisTable.length === 0) {
             orderList.style.display = 'none';
-            emptyMsg.textContent = "Waiting for order..."; 
             emptyMsg.style.display = 'block';
             clearBtn.disabled = false;
             clearBtn.textContent = `Clear Table ${tableId}`;
-            // Remove highlighting if it was empty
+            clearBtn.style.backgroundColor = "#8B0000"; // Reset color
             tableBox.classList.remove('new-order-flash'); 
         } else {
             orderList.style.display = 'block';
@@ -329,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             ordersForThisTable.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
             
-            let hasReadyOrder = false;
+            let allServed = true; // Track if everything is served
 
             ordersForThisTable.forEach(order => {
                 const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', {
@@ -337,13 +336,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     minute: '2-digit'
                 });
                 
+                // Determine Status
                 const isReady = order.status === 'ready';
-                if (isReady) hasReadyOrder = true;
+                const isCooked = order.status === 'cooked';
+                
+                if (!isCooked) allServed = false; // Found an active order
 
                 let itemsHtml = order.items.map((item, index) => `
                     <li class="waiter-item">
                         <span>${item.quantity}x ${item.name}</span>
-                        <button class="delete-item-btn" data-order-id="${order.id}" data-item-index="${index}">×</button>
+                        ${!isCooked ? `<button class="delete-item-btn" data-order-id="${order.id}" data-item-index="${index}">×</button>` : ''}
                     </li>
                 `).join('');
                 
@@ -352,25 +354,47 @@ document.addEventListener("DOMContentLoaded", () => {
                     notesHtml = `<p class="order-notes">⚠️ Notes: ${order.notes}</p>`;
                 }
 
-                // Add special class if ready
-                const readyClass = isReady ? 'ready-order' : '';
-                const statusBadge = isReady ? '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>' : '';
-                
-                // Add specific Serve button for ready orders
-                const serveBtnHtml = isReady ? `<button class="btn-serve" onclick="handleSingleServe('${order.id}')">Serve / Clear</button>` : '';
+                // Dynamic Styling & Buttons
+                let orderClass = '';
+                let statusBadge = '';
+                let actionBtnHtml = '';
+
+                if (isCooked) {
+                    orderClass = 'order-served'; // You can add css or use inline style below
+                    statusBadge = '<span style="color:#aaa;font-weight:bold;float:right;">🔵 SERVED</span>';
+                    // No action button for served items
+                } else if (isReady) {
+                    orderClass = 'ready-order';
+                    statusBadge = '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>';
+                    actionBtnHtml = `<button class="btn-serve" onclick="handleSingleServe('${order.id}')">Serve / Clear</button>`;
+                }
+
+                // Inline style for served items to look "dimmed"
+                const bgStyle = isCooked ? 'background-color: #222; opacity: 0.8; border: 1px solid #444;' : '';
 
                 const orderGroupHtml = `
-                    <div class="order-group ${readyClass}" id="${order.id}">
+                    <div class="order-group ${orderClass}" id="${order.id}" style="${bgStyle}">
                         <h4>Order @ ${orderTimestamp} ${statusBadge}</h4>
                         <ul>
                             ${itemsHtml}
                         </ul>
                         ${notesHtml} 
-                        ${serveBtnHtml}
+                        ${actionBtnHtml}
                     </div>
                 `;
                 orderList.innerHTML += orderGroupHtml;
             });
+
+            // Update the main "Clear Table" button based on status
+            if (allServed) {
+                clearBtn.textContent = "Waiting for Payment...";
+                clearBtn.style.backgroundColor = "#444";
+                clearBtn.disabled = true; // Disable clear button if everything is already served
+            } else {
+                clearBtn.textContent = `Clear Table ${tableId}`;
+                clearBtn.style.backgroundColor = "#8B0000";
+                clearBtn.disabled = false;
+            }
         }
     }
 

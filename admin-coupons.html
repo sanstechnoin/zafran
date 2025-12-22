@@ -6,9 +6,21 @@
     <title>Zafran Admin - Dashboard</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
+        /* --- KDS THEME VARIABLES --- */
+        :root {
+            --bg-dark: #1a1a1a;       
+            --card-bg: #2a2a2a;      
+            --gold: #D4AF37;
+            --text-main: #f0f0f0;
+            --text-subtle: #aaa;
+            --border-color: #444;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+        }
+
         body { 
-            background-color: #f4f4f4; 
-            color: #333; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
             padding: 20px; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             display: flex;
@@ -21,13 +33,13 @@
         .admin-container { 
             max-width: 900px; 
             width: 100%;
-            margin: 0 auto; 
-            background: white; 
+            margin: 0 auto 30px auto; 
+            background: var(--card-bg); 
             padding: 30px; 
             border-radius: 8px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            border: 1px solid var(--border-color);
             box-sizing: border-box;
-            margin-bottom: 30px;
         }
 
         /* Header Logo */
@@ -38,100 +50,118 @@
         }
         
         h2 { 
-            border-bottom: 2px solid #D4AF37; 
+            border-bottom: 2px solid var(--gold); 
             padding-bottom: 10px; 
             margin-bottom: 20px; 
-            color: #333; 
+            color: var(--gold); 
             text-align: center;
             text-transform: uppercase;
             font-size: 1.4rem;
+            letter-spacing: 1px;
         }
 
-        h3 { margin-top: 0; color: #555; font-size: 1.1rem; border-left: 4px solid #D4AF37; padding-left: 10px; }
-        
         /* Grid Layout */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { margin-bottom: 15px; }
         .full-width { grid-column: span 2; }
         
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; }
-        input[type="text"], input[type="number"], input[type="date"] { 
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem;
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; color: var(--gold); }
+        
+        input[type="text"], input[type="number"], input[type="date"], input[type="password"] { 
+            width: 100%; padding: 12px; 
+            border: 1px solid var(--border-color); 
+            background-color: #111;
+            color: white;
+            border-radius: 4px; box-sizing: border-box; font-size: 1rem;
         }
+        input:focus { border-color: var(--gold); outline: none; }
         
         /* Radio Group */
-        .radio-group { display: flex; gap: 20px; padding: 5px 0; }
-        .radio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.9rem; }
-        .radio-item input { transform: scale(1.1); cursor: pointer; }
+        .radio-group { display: flex; gap: 20px; padding: 10px 0; }
+        .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 1rem; }
+        .radio-item input { accent-color: var(--gold); transform: scale(1.2); cursor: pointer; }
 
         /* Checkbox Group */
-        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 5px; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
-        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; }
-        .checkbox-item input { transform: scale(1.05); }
+        .checkbox-group { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+            gap: 10px; margin-top: 5px; 
+            background: #111; 
+            padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); 
+        }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+        .checkbox-item input { accent-color: var(--gold); transform: scale(1.1); }
 
         /* Buttons */
         button { 
-            background-color: #28a745; 
-            color: white; border: none; padding: 12px; width: 100%; 
+            background-color: var(--gold); 
+            color: #000; border: none; padding: 12px; width: 100%; 
             font-size: 1rem; cursor: pointer; border-radius: 4px; 
             font-weight: bold; margin-top: 10px; transition: background 0.2s; 
+            text-transform: uppercase;
         }
-        button:hover { background-color: #218838; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        button:hover { background-color: #fff; }
+        button:disabled { background-color: #555; color: #888; cursor: not-allowed; }
         
-        button.btn-blue { background-color: #007bff; }
+        button.btn-blue { background-color: #007bff; color: white; }
         button.btn-blue:hover { background-color: #0056b3; }
 
         /* Messages */
-        .message-box { margin-top: 10px; padding: 10px; text-align: center; border-radius: 4px; display: none; font-weight: bold; font-size: 0.9rem; }
-        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
-        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
-        .required-star { color: red; }
+        .message-box { margin-top: 15px; padding: 12px; text-align: center; border-radius: 4px; display: none; font-weight: bold; font-size: 0.9rem; }
+        .success { background-color: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid #2ecc71; display: block; }
+        .error { background-color: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid #ff6b6b; display: block; }
+        .required-star { color: var(--danger-red); }
 
         /* Table */
-        .coupon-list-section { margin-top: 40px; border-top: 2px solid #f1f1f1; padding-top: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; background: white; }
-        th { background-color: #343a40; color: white; padding: 10px; text-align: left; font-size: 0.85rem; }
-        td { padding: 10px; border-bottom: 1px solid #ddd; vertical-align: middle; }
-        tr:hover { background-color: #f1f1f1; }
+        .coupon-list-section { margin-top: 40px; border-top: 2px solid var(--border-color); padding-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem; background: #222; border-radius: 4px; overflow: hidden; }
+        th { background-color: #111; color: var(--gold); padding: 12px; text-align: left; font-size: 0.9rem; border-bottom: 2px solid var(--border-color); }
+        td { padding: 12px; border-bottom: 1px solid #333; vertical-align: middle; color: #ddd; }
+        tr:hover { background-color: #2f2f2f; }
         
         /* Badges */
-        .badge { padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-        .badge-percent { background: #e3f2fd; color: #0d47a1; }
-        .badge-fixed { background: #e8f5e9; color: #1b5e20; }
-        .badge-category { background: #eee; color: #555; padding: 2px 5px; border-radius: 3px; margin-right: 3px; display: inline-block; margin-bottom: 2px; font-size: 0.7rem;}
-
-        /* Status & Action Buttons */
-        .status-active { color: #155724; font-weight: bold; background: #d4edda; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; }
-        .status-inactive { color: #721c24; font-weight: bold; background: #f8d7da; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: black; }
+        .badge-percent { background: #90caf9; }
+        .badge-fixed { background: #a5d6a7; }
+        
+        /* Status */
+        .status-active { color: #2ecc71; font-weight: bold; background: rgba(46, 204, 113, 0.1); padding: 4px 8px; border-radius: 4px; }
+        .status-inactive { color: #e74c3c; font-weight: bold; background: rgba(231, 76, 60, 0.1); padding: 4px 8px; border-radius: 4px; }
         
         .btn-action-x {
-            background-color: #dc3545; color: white; border: none; 
-            width: 24px; height: 24px; border-radius: 50%; 
+            background-color: var(--danger-red); color: white; border: none; 
+            width: 28px; height: 28px; border-radius: 50%; 
             cursor: pointer; font-weight: bold; font-family: sans-serif;
-            margin-left: 5px; line-height: 24px; text-align: center; padding: 0; font-size: 0.8rem;
+            margin-left: 5px; line-height: 28px; text-align: center; padding: 0; font-size: 0.9rem;
         }
-        .btn-action-x:hover { background-color: #a71d2a; transform: scale(1.1); }
+        .btn-action-x:hover { background-color: #ff6b6b; transform: scale(1.1); }
 
-        /* Compact Footer */
+        /* Footer */
         .admin-footer {
-            margin-top: auto;
-            text-align: center;
-            padding: 10px 20px;
-            font-size: 0.75rem;
-            color: #888;
-            border-top: 1px solid #ddd;
-            width: 100%;
-            background: #f4f4f4;
-            box-sizing: border-box;
+            margin-top: auto; text-align: center; padding: 15px;
+            font-size: 0.8rem; color: #666; border-top: 1px solid var(--border-color);
+            background: var(--bg-dark);
         }
 
+        /* --- LOGIN OVERLAY --- */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark); z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+        }
+        .login-box {
+            background: var(--card-bg); padding: 40px; border-radius: 8px;
+            border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 400px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        .login-box img { height: 80px; margin-bottom: 20px; }
+        
         /* CUSTOM MODAL */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 5000; justify-content: center; align-items: center; }
+        .modal-box { background: var(--card-bg); padding: 30px; border-radius: 8px; width: 90%; max-width: 400px; text-align: center; border: 2px solid var(--gold); color: white; }
+        .modal-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; color: var(--gold); }
         .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-modal { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem; color: white; }
+        .btn-modal { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem; color: white; width: 100%; }
         .btn-reactivate { background-color: #007bff; }
         .btn-confirm-delete { background-color: #dc3545; }
         .btn-cancel { background-color: #6c757d; }
@@ -140,108 +170,124 @@
 </head>
 <body>
 
-<div class="admin-container">
-    <img src="logo.png" alt="Zafran Logo" class="header-logo">
-    <h2>Webseiten Einstellungen</h2>
-    
-    <form id="settings-form">
-        <div class="form-group">
-            <label>Laufschrift (Marquee) Text</label>
-            <input type="text" id="marqueeText" placeholder="z.B. Willkommen! 10% Rabatt bei Abholung...">
-            <small style="color:#666;">Leer lassen, um die Laufschrift auszuschalten.</small>
-        </div>
-
-        <div class="form-group">
-            <label>WhatsApp Nummer (Internationales Format)</label>
-            <input type="text" id="whatsappNumber" placeholder="4915123456789">
-        </div>
-
-        <button type="submit" id="settingsBtn" class="btn-blue">Einstellungen Speichern</button>
-        <div id="settings-message" class="message-box"></div>
-    </form>
-</div>
-
-<div class="admin-container">
-    <h2>Coupon Manager</h2>
-    <form id="coupon-form">
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Gutschein-Code <span class="required-star">*</span></label>
-                <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SOMMER25">
-            </div>
-
-            <div class="form-group">
-                <label>Gültig bis <span class="required-star">*</span></label>
-                <input type="date" id="expiry" required>
-            </div>
-
-            <div class="form-group">
-                <label>Rabatt Typ <span class="required-star">*</span></label>
-                <div class="radio-group">
-                    <label class="radio-item"><input type="radio" name="discountType" value="percent" checked> Prozent (%)</label>
-                    <label class="radio-item"><input type="radio" name="discountType" value="fixed"> Euro (€)</label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Rabatt Wert <span class="required-star">*</span></label>
-                <input type="number" id="discountValue" min="0.1" step="0.1" placeholder="z.B. 10" required>
-            </div>
-
-            <div class="form-group full-width">
-                <label>Mindestbestellwert (€) <span class="required-star">*</span></label>
-                <input type="number" id="minOrder" value="20" min="0" required>
-            </div>
-
-            <div class="form-group full-width">
-                <label>Gültig für Kategorien (Keine Auswahl = Alle Kategorien)</label>
-                <div class="checkbox-group">
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="vorspeisen"> Vorspeisen</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="veganes"> Veganes</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Vegetarisch</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="chicken"> Chicken</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="lamm"> Lamm</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="fisch-garnelen"> Fisch</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="tandoori"> Tandoori</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="biryani"> Biryani</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="brot"> Brot</label>
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" id="submitBtn">Coupon Speichern</button>
-        <div id="message" class="message-box"></div>
-    </form>
-
-    <div class="coupon-list-section">
-        <h3>Gespeicherte Coupons (Live)</h3>
-        <table id="coupons-table">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Rabatt</th>
-                    <th>Min.</th>
-                    <th>Bis</th>
-                    <th>Status</th>
-                    <th style="text-align: right;">Aktion</th>
-                </tr>
-            </thead>
-            <tbody id="coupons-body">
-                <tr><td colspan="6" style="text-align:center; padding: 20px;">Lade Daten...</td></tr>
-            </tbody>
-        </table>
+<div id="login-overlay">
+    <div class="login-box">
+        <img src="logo.png" alt="Zafran">
+        <h3 style="color:var(--gold); margin-bottom:20px;">ADMIN LOGIN</h3>
+        <form id="login-form">
+            <input type="password" id="admin-password" placeholder="Passwort eingeben" required style="text-align:center; margin-bottom:15px;">
+            <button type="submit">Einloggen</button>
+            <p id="login-error" style="color:red; margin-top:10px; font-size:0.9rem;"></p>
+        </form>
     </div>
 </div>
 
-<footer class="admin-footer">
-    <p>&copy; 2025 Zafran Delight. Created by Shri Avinash Narendhran S V</p>
-</footer>
+<div id="admin-content" style="display:none;">
+
+    <div class="admin-container">
+        <img src="logo.png" alt="Zafran Logo" class="header-logo">
+        <h2>Webseiten Einstellungen</h2>
+        
+        <form id="settings-form">
+            <div class="form-group">
+                <label>Laufschrift (Marquee) Text</label>
+                <input type="text" id="marqueeText" placeholder="z.B. Willkommen! 10% Rabatt bei Abholung...">
+                <small style="color:#888;">Leer lassen, um die Laufschrift auszuschalten.</small>
+            </div>
+
+            <div class="form-group">
+                <label>WhatsApp Nummer (Internationales Format)</label>
+                <input type="text" id="whatsappNumber" placeholder="4915123456789">
+            </div>
+
+            <button type="submit" id="settingsBtn" class="btn-blue">Einstellungen Speichern</button>
+            <div id="settings-message" class="message-box"></div>
+        </form>
+    </div>
+
+    <div class="admin-container">
+        <h2>Coupon Manager</h2>
+        <form id="coupon-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Gutschein-Code <span class="required-star">*</span></label>
+                    <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SOMMER25">
+                </div>
+
+                <div class="form-group">
+                    <label>Gültig bis <span class="required-star">*</span></label>
+                    <input type="date" id="expiry" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Rabatt Typ <span class="required-star">*</span></label>
+                    <div class="radio-group">
+                        <label class="radio-item"><input type="radio" name="discountType" value="percent" checked> Prozent (%)</label>
+                        <label class="radio-item"><input type="radio" name="discountType" value="fixed"> Euro (€)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Rabatt Wert <span class="required-star">*</span></label>
+                    <input type="number" id="discountValue" min="0.1" step="0.1" placeholder="z.B. 10" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Mindestbestellwert (€) <span class="required-star">*</span></label>
+                    <input type="number" id="minOrder" value="20" min="0" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Gültig für Kategorien (Keine Auswahl = Alle Kategorien)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="vorspeisen"> Vorspeisen</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="veganes"> Veganes</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Vegetarisch</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="chicken"> Chicken</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="lamm"> Lamm</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="fisch-garnelen"> Fisch</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="tandoori"> Tandoori</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="biryani"> Biryani</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="brot"> Brot</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">Coupon Speichern</button>
+            <div id="message" class="message-box"></div>
+        </form>
+
+        <div class="coupon-list-section">
+            <h3>Gespeicherte Coupons (Live)</h3>
+            <table id="coupons-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Rabatt</th>
+                        <th>Min.</th>
+                        <th>Bis</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="coupons-body">
+                    <tr><td colspan="6" style="text-align:center; padding: 20px;">Lade Daten...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="admin-footer">
+        <p>&copy; 2025 Zafran Delight. Created by Shri Avinash Narendhran S V</p>
+    </footer>
+
+</div>
 
 <div id="actionModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-title" id="modalTitle">Optionen für CODE</div>
-        <p style="margin-bottom: 20px; color: #666;">Was möchten Sie tun?</p>
+        <p style="margin-bottom: 20px; color: #ccc;">Was möchten Sie tun?</p>
         <div class="modal-actions">
             <button class="btn-modal btn-reactivate" id="btnReactivate">Bearbeiten / Reaktivieren</button>
             <button class="btn-modal btn-confirm-delete" id="btnConfirmDelete">Endgültig löschen</button>
@@ -254,7 +300,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
 <script>
-    // 1. Initialize Firebase
+    // --- 1. ADMIN CONFIGURATION ---
+    const ADMIN_PASSWORD = "zafran2025"; // CHANGE THIS PASSWORD HERE
+
+    // --- 2. Initialize Firebase ---
     const firebaseConfig = {
       apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
       authDomain: "zaffran-delight.firebaseapp.com",
@@ -269,11 +318,33 @@
     }
     const db = firebase.firestore();
 
-    // 2. Load Data on Start
-    loadCoupons();
-    loadSettings();
+    // --- 3. LOGIN LOGIC ---
+    document.addEventListener("DOMContentLoaded", () => {
+        // Check if already logged in
+        if(sessionStorage.getItem('zafran_admin_logged_in') === 'true') {
+            showAdminContent();
+        }
 
-    // --- SETTINGS LOGIC (NEW) ---
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('admin-password').value;
+            if(input === ADMIN_PASSWORD) {
+                sessionStorage.setItem('zafran_admin_logged_in', 'true');
+                showAdminContent();
+            } else {
+                document.getElementById('login-error').textContent = "Falsches Passwort!";
+            }
+        });
+    });
+
+    function showAdminContent() {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'block';
+        loadCoupons();
+        loadSettings();
+    }
+
+    // --- 4. SETTINGS LOGIC ---
     const settingsForm = document.getElementById('settings-form');
     const settingsMsg = document.getElementById('settings-message');
 
@@ -315,7 +386,7 @@
         }
     });
 
-    // --- COUPON LOGIC (EXISTING) ---
+    // --- 5. COUPON LOGIC ---
     const form = document.getElementById('coupon-form');
     const msgDiv = document.getElementById('message');
     const tableBody = document.getElementById('coupons-body');
@@ -346,7 +417,7 @@
 
                 const row = `
                     <tr>
-                        <td style="font-weight:bold; color: #D4AF37;">${data.code}</td>
+                        <td style="font-weight:bold; color: var(--gold);">${data.code}</td>
                         <td><span class="badge ${badgeClass}">${discountDisplay}</span></td>
                         <td>${data.minOrder}€</td>
                         <td>${data.expiryDate}</td>
@@ -362,7 +433,6 @@
         .catch((error) => console.error("Error loading:", error));
     }
 
-    // Modal Logic
     window.openActionModal = function(code) {
         selectedCouponId = code;
         document.getElementById('modalTitle').innerText = `Optionen für "${code}"`;

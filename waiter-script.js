@@ -9,7 +9,7 @@ const firebaseConfig = {
 };
 // --- END OF FIREBASE CONFIG ---
 
-// --- NEW: MASTER MENU LIST FOR WAITER ORDERS ---
+// --- WAITER MENU LIST ---
 const MENU_ITEMS = [
     { name: "Tomatensuppe", price: 5.00 },
     { name: "Daal Linsensuppe", price: 5.00 },
@@ -132,7 +132,6 @@ const MENU_ITEMS = [
     { name: "Mint-Margarita", price: 5.50 },
     { name: "Ipanema", price: 5.50 }
 ];
-// --- END MASTER MENU LIST ---
 
 // --- 2. Initialize Firebase ---
 firebase.initializeApp(firebaseConfig);
@@ -169,16 +168,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeReadyPopupBtn = document.getElementById('close-ready-popup-btn');
     let notificationAudio = new Audio('notification.mp3');
 
-    let allOrders = {}; // Holds all active orders, keyed by order.id
-    
-    // State for the new order being created
+    let allOrders = {}; 
     let activeTableId = null; 
     let currentDraftOrder = []; 
 
-    const KITCHEN_PASSWORD = "zafran"; // <-- NEW PASSWORD
+    const KITCHEN_PASSWORD = "zafran"; // Waiter Password
     const TOTAL_DINE_IN_TABLES = 12;
 
-    // --- 4. KDS Login Logic ---
+    // --- 4. Login Logic ---
     loginButton.addEventListener('click', () => {
         if (passwordInput.value === KITCHEN_PASSWORD) {
             loginOverlay.classList.add('hidden');
@@ -190,22 +187,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 
-
     // --- 5. Main Waiter Station Functions ---
 
     function createDineInTables() {
-        dineInGrid.innerHTML = ''; // Clear grid
+        dineInGrid.innerHTML = '';
         for (let i = 1; i <= TOTAL_DINE_IN_TABLES; i++) {
             const tableBox = document.createElement('div');
             tableBox.className = 'table-box';
-            tableBox.id = `table-${i}`; // e.g., table-1
+            tableBox.id = `table-${i}`; 
             tableBox.innerHTML = `
                 <div class="table-header">
                     <h2>Table ${i}</h2>
                     <button class="add-order-btn" data-table-id="${i}">➕ Order</button>
                 </div>
-                <ul class="order-list" data-table-id="${i}">
-                    </ul>
+                <ul class="order-list" data-table-id="${i}"></ul>
                 <p class="order-list-empty" data-table-id="${i}">Waiting for order...</p>
                 <button class="clear-table-btn" data-table-id="${i}">Clear Table ${i}</button>
             `;
@@ -216,57 +211,46 @@ document.addEventListener("DOMContentLoaded", () => {
     function initializeWaiterStation() {
         createDineInTables();
 
-        // Add listeners for "Clear" buttons
+        // Listen for "Clear" buttons (Dine-in)
         dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
             btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
         });
 
-        // Add listeners for "Add Order" buttons
+        // Listen for "Add Order" buttons
         dineInGrid.querySelectorAll('.add-order-btn').forEach(btn => {
             btn.addEventListener('click', () => openOrderModal(btn.dataset.tableId));
         });
 
-        // Start the main listener
+        // Main Listener: Listen for NEW, SEEN, READY, and COOKED (Served) orders
         db.collection("orders")
-          .where("status", "in", ["new", "seen", "ready", "cooked"])
+          .where("status", "in", ["new", "seen", "ready", "cooked"]) 
           .onSnapshot(
             (snapshot) => {
                 connectionIconEl.textContent = '✅'; 
                 
                 let changedTables = new Set(); 
-                let changedPickupCustomers = new Set(); 
-
                 snapshot.docChanges().forEach((change) => {
                     const orderData = change.doc.data();
-                    
-                    if(orderData.orderType === 'pickup') {
-                        changedPickupCustomers.add(orderData.table); 
-                    } else {
+                    if(orderData.orderType !== 'pickup') {
                         changedTables.add(orderData.table); 
                     }
                     
-                    // Logic to detect NEWLY READY orders for notifications
                     if (change.type === "modified" && orderData.status === "ready") {
-                        // Ideally check if old status was NOT ready, but 'modified' implies change
-                        // Since we listen to new/seen/ready, a transition from seen->ready triggers this.
                         triggerReadyNotification(orderData);
                     }
-                    
-                    if (change.type === "added") {
+                    if (change.type === "added" || change.type === "modified") {
                         allOrders[orderData.id] = orderData;
                     }
-                    
                     if (change.type === "removed") {
-                        if (allOrders[orderData.id]) {
-                            delete allOrders[orderData.id];
-                        }
-                    }
-                    
-                    if (change.type === "modified") {
-                        allOrders[orderData.id] = orderData;
+                        delete allOrders[orderData.id];
+                        // If it was a table, we need to re-render it to show empty
+                        if(orderData.orderType !== 'pickup') changedTables.add(orderData.table);
+                        // If pickup, re-render pickup grid
+                        if(orderData.orderType === 'pickup') renderPickupGrid();
                     }
                 });
                 
+                // Always re-render pickup on changes
                 renderPickupGrid(); 
 
                 changedTables.forEach(tableIdentifier => {
@@ -275,22 +259,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
                 
-                // Add listeners for all delete 'X' buttons
                 addDeleteItemListeners();
-
             },
             (error) => {
                 console.error("Error connecting to Firestore: ", error);
                 connectionIconEl.textContent = '❌'; 
             }
         );
-    } // End of initializeWaiterStation()
-
+    } 
 
     function triggerReadyNotification(order) {
         readyPopupDetails.innerHTML = `
             <h4 style="color:var(--gold);margin-top:0;">${order.table}</h4>
-            <p>The order is ready for pickup/service.</p>
+            <p>Order is ready!</p>
         `;
         readyPopup.classList.remove('hidden');
         notificationAudio.play().catch(e => console.log(e));
@@ -302,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
+    // --- RENDER DINE-IN TABLE ---
     function renderDineInTable(tableId) {
         const tableBox = document.getElementById(`table-${tableId}`);
         if (!tableBox) return; 
@@ -320,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
             emptyMsg.style.display = 'block';
             clearBtn.disabled = false;
             clearBtn.textContent = `Clear Table ${tableId}`;
-            clearBtn.style.backgroundColor = "#8B0000"; // Reset color
+            clearBtn.style.backgroundColor = "#8B0000"; 
             tableBox.classList.remove('new-order-flash'); 
         } else {
             orderList.style.display = 'block';
@@ -328,19 +309,15 @@ document.addEventListener("DOMContentLoaded", () => {
             
             ordersForThisTable.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
             
-            let allServed = true; // Track if everything is served
+            let allServed = true;
 
             ordersForThisTable.forEach(order => {
-                const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
                 
-                // Determine Status
                 const isReady = order.status === 'ready';
                 const isCooked = order.status === 'cooked';
                 
-                if (!isCooked) allServed = false; // Found an active order
+                if (!isCooked) allServed = false; // If any item is not cooked, table is active
 
                 let itemsHtml = order.items.map((item, index) => `
                     <li class="waiter-item">
@@ -354,30 +331,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     notesHtml = `<p class="order-notes">⚠️ Notes: ${order.notes}</p>`;
                 }
 
-                // Dynamic Styling & Buttons
                 let orderClass = '';
                 let statusBadge = '';
                 let actionBtnHtml = '';
 
                 if (isCooked) {
-                    orderClass = 'order-served'; // You can add css or use inline style below
                     statusBadge = '<span style="color:#aaa;font-weight:bold;float:right;">🔵 SERVED</span>';
-                    // No action button for served items
                 } else if (isReady) {
                     orderClass = 'ready-order';
                     statusBadge = '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>';
                     actionBtnHtml = `<button class="btn-serve" onclick="handleSingleServe('${order.id}')">Serve / Clear</button>`;
                 }
 
-                // Inline style for served items to look "dimmed"
                 const bgStyle = isCooked ? 'background-color: #222; opacity: 0.8; border: 1px solid #444;' : '';
 
                 const orderGroupHtml = `
                     <div class="order-group ${orderClass}" id="${order.id}" style="${bgStyle}">
                         <h4>Order @ ${orderTimestamp} ${statusBadge}</h4>
-                        <ul>
-                            ${itemsHtml}
-                        </ul>
+                        <ul>${itemsHtml}</ul>
                         ${notesHtml} 
                         ${actionBtnHtml}
                     </div>
@@ -385,47 +356,46 @@ document.addEventListener("DOMContentLoaded", () => {
                 orderList.innerHTML += orderGroupHtml;
             });
 
-            // Update the main "Clear Table" button based on status
+            // --- CHANGED LOGIC HERE ---
             if (allServed) {
-                clearBtn.textContent = "Waiting for Payment...";
-                clearBtn.style.backgroundColor = "#444";
-                clearBtn.disabled = true; // Disable clear button if everything is already served
+                // If everything is served, allow Force Close (Archive)
+                clearBtn.textContent = "💰 Paid & Close Table";
+                clearBtn.style.backgroundColor = "#006400"; // Green
+                clearBtn.disabled = false;
             } else {
+                // Standard Clear button (does nothing if not all served)
                 clearBtn.textContent = `Clear Table ${tableId}`;
-                clearBtn.style.backgroundColor = "#8B0000";
+                clearBtn.style.backgroundColor = "#8B0000"; // Red
                 clearBtn.disabled = false;
             }
         }
     }
 
+    // --- RENDER PICKUP GRID ---
     function renderPickupGrid() {
-        pickupGrid.innerHTML = ''; // Clear grid
+        pickupGrid.innerHTML = ''; 
         
         const pickupOrders = Object.values(allOrders).filter(o => o.orderType === 'pickup');
         pickupOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
 
         if (pickupOrders.length === 0) {
-            pickupGrid.innerHTML = `
-                <div class="pickup-box-empty">
-                    <p>Waiting for pickup orders...</p>
-                </div>`;
+            pickupGrid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for pickup orders...</p></div>`;
             return;
         }
 
         pickupOrders.forEach(order => {
-            const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
+            const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
             const isReady = order.status === 'ready';
+            const isCooked = order.status === 'cooked';
+            
             const readyClass = isReady ? 'ready-order' : '';
-            const statusBadge = isReady ? '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>' : '';
+            let statusBadge = isReady ? '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>' : '';
+            if(isCooked) statusBadge = '<span style="color:#aaa;font-weight:bold;float:right;">🔵 SERVED</span>';
 
             let itemsHtml = order.items.map((item, index) => `
                 <li class="waiter-item">
                     <span>${item.quantity}x ${item.name}</span>
-                    <button class="delete-item-btn" data-order-id="${order.id}" data-item-index="${index}">×</button>
+                    ${!isCooked ? `<button class="delete-item-btn" data-order-id="${order.id}" data-item-index="${index}">×</button>` : ''}
                 </li>
             `).join('');
 
@@ -434,115 +404,122 @@ document.addEventListener("DOMContentLoaded", () => {
                 notesHtml = `<p class="order-notes">⚠️ Notes: ${order.notes}</p>`;
             }
 
+            // --- CHANGED BUTTON LOGIC HERE ---
+            let buttonHtml = '';
+            if (isCooked) {
+                // Already served, show "Paid & Close"
+                buttonHtml = `<button class="clear-pickup-btn" style="background-color: #006400;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 Paid & Close</button>`;
+            } else {
+                // Active order, show "Order Complete" (Serve)
+                buttonHtml = `<button class="clear-pickup-btn" onclick="handleClearOrder('${order.id}', 'pickup-serve', this)">Order Served</button>`;
+            }
+
             const pickupBox = document.createElement('div');
             pickupBox.className = `pickup-box ${readyClass}`;
+            if(isCooked) pickupBox.style.opacity = '0.7';
+            
             pickupBox.id = `pickup-${order.id}`;
             pickupBox.innerHTML = `
                 <div class="table-header">
-                    <h2>🛍️ ${order.table}</h2>
-                    <span class="order-time">@ ${orderTimestamp}</span>
+                    <h2>🛍️ ${order.table}</h2> <span class="order-time">@ ${orderTimestamp}</span>
                 </div>
                 <div style="padding:0 15px;">${statusBadge}</div>
-                <ul class="order-list">
-                    ${itemsHtml}
-                </ul>
+                <ul class="order-list">${itemsHtml}</ul>
                 ${notesHtml} 
-                <button class="clear-pickup-btn" data-order-id="${order.id}">Order Complete</button>
+                ${buttonHtml}
             `;
             pickupGrid.appendChild(pickupBox);
-
-            const clearBtn = pickupBox.querySelector('.clear-pickup-btn');
-            clearBtn.addEventListener('click', () => {
-                handleClearOrder(order.id, 'pickup', clearBtn);
-            });
         });
     }
 
-    // Expose this for the inline onclick in renderDineInTable
+    // --- GLOBAL HANDLE FUNCTIONS (For inline onclicks) ---
     window.handleSingleServe = function(orderId) {
-        handleClearOrder(orderId, 'single-order', null);
+        handleClearOrder(orderId, 'single-serve', null);
     }
+    window.handleClearOrder = handleClearOrder; // Ensure global access
 
+    // --- MAIN ACTION LOGIC ---
     async function handleClearOrder(identifier, type, buttonElement) {
-        let ordersToClear = [];
-        let buttonsToDisable = [];
-        if (buttonElement) buttonsToDisable.push(buttonElement);
+        // identifier = tableId OR orderId depending on type
+        
+        let ordersToProcess = [];
+        let action = ""; // 'serve' or 'archive'
 
         if (type === 'dine-in') {
-            ordersToClear = Object.values(allOrders).filter(o => o.table === identifier && o.orderType !== 'pickup');
-            buttonsToDisable = document.querySelectorAll(`button[data-table-id="${identifier}"]`);
-        } else {
-            // 'identifier' is the unique order.id (for pickup or single-order serve)
-            const orderToClear = allOrders[identifier];
-            if (orderToClear) {
-                ordersToClear = [orderToClear];
+            const tableOrders = Object.values(allOrders).filter(o => o.table === identifier && o.orderType !== 'pickup');
+            
+            // Check if ALL are already cooked
+            const allCooked = tableOrders.every(o => o.status === 'cooked');
+            
+            if (allCooked) {
+                action = 'archive';
+                if(!confirm(`Close Table ${identifier}? This will archive all orders.`)) return;
+            } else {
+                action = 'serve';
+                // Only serve items that are NOT YET cooked
+                ordersToProcess = tableOrders.filter(o => o.status !== 'cooked');
             }
+            if (action === 'archive') ordersToProcess = tableOrders;
+
+        } else if (type === 'pickup-serve') {
+            action = 'serve';
+            ordersToProcess = [allOrders[identifier]];
+        } else if (type === 'pickup-archive') {
+            action = 'archive';
+            if(!confirm("Confirm payment received and close order?")) return;
+            ordersToProcess = [allOrders[identifier]];
+        } else if (type === 'single-serve') {
+            action = 'serve';
+            ordersToProcess = [allOrders[identifier]];
         }
 
-        if (ordersToClear.length === 0) return;
+        if (ordersToProcess.length === 0 || !ordersToProcess[0]) return;
 
-        buttonsToDisable.forEach(btn => {
-            btn.disabled = true;
-            btn.textContent = "Clearing...";
-        });
-
-        const batch = db.batch();
-        ordersToClear.forEach(order => {
-            const docRef = db.collection("orders").doc(order.id);
-            batch.update(docRef, { status: "cooked" }); // Waiter marks as Cooked/Served
-        });
+        if (buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.textContent = "Processing...";
+        }
 
         try {
-            await batch.commit();
+            const batch = db.batch();
+            
+            if (action === 'serve') {
+                // Mark as Cooked (Served)
+                ordersToProcess.forEach(order => {
+                    const docRef = db.collection("orders").doc(order.id);
+                    batch.update(docRef, { status: "cooked" });
+                });
+                await batch.commit();
+            } 
+            else if (action === 'archive') {
+                // 1. Move to 'archived_orders'
+                // 2. Delete from 'orders'
+                // We do this one by one to use set() and delete()
+                
+                // Calculate Totals for Archive
+                // For dine-in table, we group them into one archive entry usually, 
+                // but simple way: archive individually or group. 
+                // Let's archive individually to keep it simple and robust.
+                
+                for (const order of ordersToProcess) {
+                    const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
+                    await archiveRef.set({
+                        ...order,
+                        closedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    await db.collection("orders").doc(order.id).delete();
+                }
+            }
+
         } catch (e) {
-            console.error(`Error clearing ${identifier}: `, e);
-            buttonsToDisable.forEach(btn => {
-                btn.disabled = false;
-                if (type === 'dine-in') btn.textContent = `Clear Table ${identifier}`;
-                if (type === 'pickup') btn.textContent = `Order Complete`;
-            });
+            console.error(`Error processing ${type}: `, e);
+            alert("Error updating order. Check console.");
+            if (buttonElement) buttonElement.disabled = false;
         }
     }
 
-    function addDeleteItemListeners() {
-        document.querySelectorAll('.delete-item-btn').forEach(btn => {
-            btn.onclick = async () => {
-                const orderId = btn.dataset.orderId;
-                const itemIndex = parseInt(btn.dataset.itemIndex); 
-                
-                if (isNaN(itemIndex)) return;
-                
-                if (!confirm("Remove this item?")) return;
-
-                btn.disabled = true;
-
-                try {
-                    const docRef = db.collection("orders").doc(orderId);
-                    const doc = await docRef.get();
-
-                    if (!doc.exists) return;
-
-                    const orderData = doc.data();
-                    const items = orderData.items;
-
-                    if (!items) return; 
-
-                    if (items.length === 1) {
-                        await docRef.delete();
-                    } else {
-                        items.splice(itemIndex, 1);
-                        await docRef.update({ items: items });
-                    }
-                } catch (err) {
-                    console.error("Error deleting item:", err);
-                    btn.disabled = false; 
-                }
-            };
-        });
-    }
-
-    // --- 6. WAITER ORDER POPUP LOGIC ---
-
+    // --- WAITER POPUP LOGIC ---
     function openOrderModal(tableId) {
         activeTableId = tableId;
         currentDraftOrder = []; 
@@ -552,7 +529,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderDraftOrder();
         menuSearchInput.value = "";
         
-        // ADD THIS LINE TO CLEAR NOTES:
         const noteEl = document.getElementById('waiter-order-notes');
         if(noteEl) noteEl.value = ""; 
         
@@ -568,7 +544,6 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModalX.addEventListener('click', closeOrderModal);
     cancelModalBtn.addEventListener('click', closeOrderModal);
 
-    // Filter menu items on typing
     menuSearchInput.addEventListener('input', (e) => {
         renderMenu(e.target.value.toLowerCase());
     });
@@ -580,27 +555,16 @@ document.addEventListener("DOMContentLoaded", () => {
         filteredItems.forEach(item => {
             const div = document.createElement('div');
             div.className = 'menu-selection-item';
-            div.innerHTML = `
-                <span>${item.name}</span>
-                <span style="color: var(--gold);">${item.price.toFixed(2)} €</span>
-            `;
+            div.innerHTML = `<span>${item.name}</span><span style="color: var(--gold);">${item.price.toFixed(2)} €</span>`;
             div.addEventListener('click', () => addItemToDraft(item));
             menuListContainer.appendChild(div);
         });
     }
 
     function addItemToDraft(item) {
-        // Check if item already exists in draft to increment qty
         const existing = currentDraftOrder.find(i => i.name === item.name);
-        if (existing) {
-            existing.quantity++;
-        } else {
-            currentDraftOrder.push({
-                name: item.name,
-                price: item.price,
-                quantity: 1
-            });
-        }
+        if (existing) { existing.quantity++; } 
+        else { currentDraftOrder.push({ name: item.name, price: item.price, quantity: 1 }); }
         renderDraftOrder();
     }
 
@@ -610,7 +574,6 @@ document.addEventListener("DOMContentLoaded", () => {
             currentOrderPreview.innerHTML = '<p style="color:#aaa; font-style:italic;">No items selected.</p>';
             return;
         }
-
         currentDraftOrder.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
@@ -622,60 +585,75 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Expose remove function to window so the inline onclick works
     window.removeDraftItem = function(index) {
-        if (currentDraftOrder[index].quantity > 1) {
-            currentDraftOrder[index].quantity--;
-        } else {
-            currentDraftOrder.splice(index, 1);
-        }
+        if (currentDraftOrder[index].quantity > 1) { currentDraftOrder[index].quantity--; } 
+        else { currentDraftOrder.splice(index, 1); }
         renderDraftOrder();
     };
 
-        submitModalBtn.addEventListener('click', async () => {
-        // 1. Validation Check
+    submitModalBtn.addEventListener('click', async () => {
         if (!activeTableId || currentDraftOrder.length === 0) return;
 
-        // 2. Set Button to "Sending..."
         submitModalBtn.textContent = "Sending...";
         submitModalBtn.disabled = true;
 
+        const orderId = `${activeTableId}-${new Date().getTime()}`;
+        
+        // Safe Notes Logic
+        const noteEl = document.getElementById('waiter-order-notes');
+        let finalNote = "Waiter Order"; 
+        if (noteEl && noteEl.value.trim() !== "") { finalNote = noteEl.value.trim(); }
+
+        const newOrder = {
+            id: orderId,
+            table: activeTableId,
+            items: currentDraftOrder,
+            status: "new",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            orderType: "dine-in",
+            notes: finalNote
+        };
+
         try {
-            const orderId = `${activeTableId}-${new Date().getTime()}`;
-            
-            // 3. Safely get Notes (Prevents crashing if element is missing)
-            const noteEl = document.getElementById('waiter-order-notes');
-            let finalNote = "Waiter Order"; // Default value
-            
-            if (noteEl && noteEl.value.trim() !== "") {
-                finalNote = noteEl.value.trim();
-            }
-
-            // 4. Construct Order Object
-            const newOrder = {
-                id: orderId,
-                table: activeTableId,
-                items: currentDraftOrder,
-                status: "new",
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                orderType: "dine-in",
-                notes: finalNote
-            };
-
-            // 5. Send to Firebase
             await db.collection("orders").doc(orderId).set(newOrder);
-            
-            // 6. Close Modal on Success
             closeOrderModal();
-
         } catch (e) {
             console.error("Error submitting waiter order:", e);
-            alert("Error: Could not send order. Please check internet connection.");
+            alert("Failed to submit order.");
         } finally {
-            // 7. Reset Button State
             submitModalBtn.textContent = "Submit Order";
             submitModalBtn.disabled = false;
         }
     });
 
-}); // --- END OF DOMContentLoaded WRAPPER ---
+    function addDeleteItemListeners() {
+        document.querySelectorAll('.delete-item-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const orderId = btn.dataset.orderId;
+                const itemIndex = parseInt(btn.dataset.itemIndex); 
+                if (isNaN(itemIndex)) return;
+                if (!confirm("Remove this item?")) return;
+                btn.disabled = true;
+
+                try {
+                    const docRef = db.collection("orders").doc(orderId);
+                    const doc = await docRef.get();
+                    if (!doc.exists) return;
+                    const orderData = doc.data();
+                    const items = orderData.items;
+                    if (!items) return; 
+
+                    if (items.length === 1) { await docRef.delete(); } 
+                    else {
+                        items.splice(itemIndex, 1);
+                        await docRef.update({ items: items });
+                    }
+                } catch (err) {
+                    console.error("Error deleting item:", err);
+                    btn.disabled = false; 
+                }
+            };
+        });
+    }
+
+});

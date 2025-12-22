@@ -14,8 +14,8 @@ const db = firebase.firestore();
 
 // --- GLOBAL STATE ---
 let cart = [];
-let currentCoupon = null; // Stores currently applied coupon data
-let cartSubtotal = 0;     // Stores total before discount
+let currentCoupon = null; 
+let cartSubtotal = 0;     
 
 document.addEventListener("DOMContentLoaded", async () => {
     
@@ -76,7 +76,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- Cart Open/Close Logic ---
     function openCart() {
         cartContentEl.style.display = 'block'; 
+        // Ensure confirmation is hidden and reset
         orderConfirmationEl.style.display = 'none'; 
+        orderConfirmationEl.classList.add('hidden'); 
+        
         cartOverlay.classList.remove('hidden');
         updateCart(); 
         toggleCheckoutButtons();
@@ -86,7 +89,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         setTimeout(() => {
             cartContentEl.style.display = 'block';
             orderConfirmationEl.style.display = 'none';
-        }, 500);
+            orderConfirmationEl.classList.add('hidden');
+        }, 300);
     }
 
     function toggleCheckoutButtons() {
@@ -142,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateCart();
     }
 
-    // --- COUPON LOGIC (Updated for Fixed/Percent) ---
+    // --- COUPON LOGIC ---
     async function handleApplyCoupon() {
         const codeInput = document.getElementById('coupon-input');
         const msgEl = document.getElementById('coupon-message');
@@ -170,7 +174,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     currentCoupon = null;
                 } else {
                     currentCoupon = data;
-                    // Note: Actual validation happens in updateCart()
                     msgEl.textContent = `Code gefunden. Prüfe...`;
                     msgEl.style.color = "#666";
                     codeInput.value = ""; 
@@ -194,13 +197,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             const isPercent = currentCoupon.discountType === 'percent';
             const value = currentCoupon.discountValue || 0;
 
-            // CHECK MINIMUM ORDER
             if (cartSubtotal < minOrder) {
                 couponStatusMsg = `Gutschein "${currentCoupon.code}": Mindestbestellwert ${minOrder}€ nicht erreicht.`;
                 couponStatusColor = "orange";
                 discountAmount = 0; 
             } else {
-                // Determine Category Validity
                 const isAll = currentCoupon.validCategories === 'all' || 
                               (Array.isArray(currentCoupon.validCategories) && currentCoupon.validCategories.includes('all'));
 
@@ -216,13 +217,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     });
                 }
 
-                // CALCULATE BASED ON TYPE
                 if (eligibleAmount > 0) {
                     if (isPercent) {
                         discountAmount = (eligibleAmount * value) / 100;
                         couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}%) aktiviert: -${discountAmount.toFixed(2)} €`;
                     } else {
-                        // Fixed Amount (capped at eligible amount)
                         discountAmount = Math.min(value, eligibleAmount);
                         couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}€) aktiviert: -${discountAmount.toFixed(2)} €`;
                     }
@@ -340,24 +339,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
     }
 
+    // --- FIX: Show Confirmation Screen Logic ---
     function showConfirmationScreen(summary) {
-        let finalSummaryText = `Kunde: ${summary.customerName}\nTelefon: ${summary.customerPhone}\n\n${summary.summaryText}`;
+        // Use <br> for HTML line breaks to ensure they render
+        let htmlSummary = `<strong>Kunde:</strong> ${summary.customerName}<br><strong>Telefon:</strong> ${summary.customerPhone}<br><br><strong>Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
         
         if (summary.discount > 0) {
-            finalSummaryText += `\nZwischensumme: ${summary.originalTotal.toFixed(2)} €`;
-            finalSummaryText += `\nGutschein (${summary.couponInfo}): -${summary.discount.toFixed(2)} €`;
+            htmlSummary += `<br>Zwischensumme: ${summary.originalTotal.toFixed(2)} €`;
+            htmlSummary += `<br><span style="color:green">Gutschein (${summary.couponInfo}): -${summary.discount.toFixed(2)} €</span>`;
         }
         
-        finalSummaryText += `\nTotal: ${summary.finalTotal.toFixed(2)} €`;
+        htmlSummary += `<br><br><strong style="font-size:1.1rem">Total: ${summary.finalTotal.toFixed(2)} €</strong>`;
 
         if (summary.customerNotes) {
-            finalSummaryText += `\n\nAnmerkungen:\n${summary.customerNotes}`;
+            htmlSummary += `<br><br><strong>Anmerkungen:</strong><br>${summary.customerNotes.replace(/\n/g, '<br>')}`;
         }
         
-        confirmationSummaryEl.innerText = finalSummaryText;
+        // Inject HTML
+        confirmationSummaryEl.innerHTML = htmlSummary;
+        
+        // Hide Form, Show Confirmation
         cartContentEl.style.display = 'none'; 
+        
+        // FIX: Ensure 'hidden' class is removed so it actually shows up
+        orderConfirmationEl.classList.remove('hidden'); 
         orderConfirmationEl.style.display = 'block'; 
         
+        // Cleanup variables
         cart = [];
         currentCoupon = null; 
         if(document.getElementById('coupon-input')) document.getElementById('coupon-input').value = "";
@@ -425,6 +433,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 alert("Fehler beim Senden. Bitte erneut versuchen.");
             } finally {
                 firebaseBtn.innerText = "An Küche senden (Live)";
+                firebaseBtn.disabled = false;
                 toggleCheckoutButtons();
             }
         });

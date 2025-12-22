@@ -217,35 +217,38 @@
         @media (max-width: 768px) {
             .hero-content h1 { font-size: 3rem; }
             
-            /* --- FIXED MOBILE MENU LAYOUT --- */
+            /* --- FIXED MOBILE MENU (FLOATING CARD STYLE) --- */
             .hamburger { display: flex; }
             
             .nav-links { 
                 position: fixed; 
                 top: 70px; /* Below header */
-                left: 0; 
-                width: 100%; 
+                left: 5%; /* Center Horizontally */
+                width: 90%; /* Center Horizontally */
                 
-                /* DRASTICALLY REDUCED HEIGHT TO ENSURE FIT */
+                /* VITAL FIX: RESTRICT HEIGHT TO 70% of Screen */
                 height: auto; 
-                max-height: 65vh; /* Only take up 65% of viewport height */
-                overflow-y: auto; /* Enable scrolling if needed */
+                max-height: 70vh; 
+                overflow-y: auto; /* Enable Scroll */
                 
-                /* SOLID BLACK BACKGROUND FOR DISTINCT BOX */
-                background: #000; 
+                /* STYLE: Floating Box */
+                background: #000; /* Solid Black */
+                border: 2px solid var(--gold); 
+                border-top: none; /* Connect to header */
+                border-radius: 0 0 15px 15px; /* Round Bottom Only */
+                
+                box-shadow: 0 15px 30px rgba(0,0,0,0.9);
                 
                 flex-direction: column; 
-                
-                /* PADDING adjusted for compactness and bottom space */
-                padding: 20px 20px 80px 20px; 
-                
+                padding: 20px 20px 40px 20px; /* Good Padding */
                 display: none; 
-                /* THICKER BOTTOM BORDER */
-                border-bottom: 3px solid var(--gold); 
-                box-shadow: 0 10px 30px rgba(0,0,0,0.8);
                 align-items: center;
-                gap: 15px; /* Reduced gap */
+                gap: 15px; 
             }
+            
+            /* Custom Scrollbar for Menu */
+            .nav-links::-webkit-scrollbar { width: 6px; }
+            .nav-links::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
             
             .nav-links.active { display: flex; } 
             
@@ -253,8 +256,7 @@
                 display: block;
                 width: 100%;
                 text-align: center;
-                /* COMPACT PADDING */
-                padding: 10px 0;
+                padding: 12px 0;
                 font-size: 1.1rem;
                 border-bottom: 1px solid rgba(212, 175, 55, 0.2); 
             }
@@ -612,7 +614,7 @@
                     <h3 data-i18n="contact_info">Kontakt</h3>
                     <ul class="contact-list">
                         <li>
-                            <div class="contact-icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5-2.5 2.5z"/></svg></div>
+                            <div class="contact-icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
                             <div class="contact-details"><span data-i18n="address">Adresse</span><p>Kessenicher Straße 9<br>53879 Euskirchen</p></div>
                         </li>
                         <li>

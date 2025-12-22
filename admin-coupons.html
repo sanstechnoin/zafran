@@ -38,7 +38,12 @@
 
         <div class="form-group">
             <label>Rabatt (%)</label>
-            <input type="number" id="discount" min="1" max="100" placeholder="z.B. 10 für 10%" required>
+            <input type="number" id="discount" min="1" max="100" placeholder="z.B. 10" required>
+        </div>
+
+        <div class="form-group">
+            <label>Mindestbestellwert (€)</label>
+            <input type="number" id="minOrder" value="20" min="0" placeholder="Standard: 20">
         </div>
 
         <div class="form-group">
@@ -69,7 +74,9 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-<script src="script.js"></script> <script>
+<script src="script.js"></script> 
+
+<script>
     const db = firebase.firestore();
 
     document.getElementById('coupon-form').addEventListener('submit', async (e) => {
@@ -77,9 +84,9 @@
         
         const code = document.getElementById('code').value.toUpperCase().trim();
         const discount = Number(document.getElementById('discount').value);
+        const minOrder = Number(document.getElementById('minOrder').value) || 20; // Default 20
         const expiry = document.getElementById('expiry').value;
         
-        // Get selected categories
         const selectedCats = [];
         document.querySelectorAll('input[name="cat"]:checked').forEach((checkbox) => {
             selectedCats.push(checkbox.value);
@@ -91,14 +98,16 @@
             await db.collection('coupons').doc(code).set({
                 code: code,
                 discountPercent: discount,
+                minOrder: minOrder,
                 expiryDate: expiry,
                 validCategories: selectedCats.length > 0 ? selectedCats : 'all',
                 createdAt: new Date()
             });
 
-            msgDiv.textContent = `Coupon ${code} erfolgreich erstellt!`;
+            msgDiv.textContent = `Coupon ${code} erfolgreich erstellt (Min. ${minOrder}€)!`;
             msgDiv.className = 'success';
             document.getElementById('coupon-form').reset();
+            document.getElementById('minOrder').value = "20"; // Reset default
         } catch (error) {
             console.error(error);
             msgDiv.textContent = "Fehler beim Erstellen.";

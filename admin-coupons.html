@@ -3,94 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zafran Admin - Coupons</title>
+    <title>Zafran Admin - Coupons Manager</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { background-color: #f4f4f4; color: #333; padding: 20px; font-family: sans-serif; }
-        .admin-container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { border-bottom: 2px solid #D4AF37; padding-bottom: 10px; margin-bottom: 20px; }
+        body { background-color: #f4f4f4; color: #333; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .admin-container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { border-bottom: 2px solid #D4AF37; padding-bottom: 10px; margin-bottom: 20px; color: #333; }
         
+        /* Form Styles */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .full-width { grid-column: span 2; }
+        
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
         input[type="text"], input[type="number"], input[type="date"] { 
-            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; 
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
         }
         
-        /* Radio Button Group */
-        .radio-group { display: flex; gap: 20px; margin-bottom: 10px; }
+        /* Radio & Checkboxes */
+        .radio-group { display: flex; gap: 20px; margin-top: 5px; }
         .radio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        .radio-item input { width: auto; cursor: pointer; }
+        
+        .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; cursor: pointer; }
 
-        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
-        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
-        .checkbox-item input { width: auto; }
-
-        button { background-color: #D4AF37; color: white; border: none; padding: 12px; width: 100%; font-size: 1rem; cursor: pointer; border-radius: 4px; margin-top: 10px; }
+        /* Buttons */
+        button { background-color: #D4AF37; color: white; border: none; padding: 12px; width: 100%; font-size: 1rem; cursor: pointer; border-radius: 4px; font-weight: bold; transition: background 0.3s; }
         button:hover { background-color: #b39028; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
+        /* Messages */
         #message { margin-top: 15px; padding: 10px; text-align: center; border-radius: 4px; display: none; }
-        .success { background-color: #d4edda; color: #155724; display: block !important; }
-        .error { background-color: #f8d7da; color: #721c24; display: block !important; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .required-star { color: red; }
+
+        /* Coupon List Table */
+        .coupon-list-section { margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #333; color: white; }
+        tr:hover { background-color: #f5f5f5; }
+        .btn-delete { background-color: #dc3545; color: white; padding: 5px 10px; font-size: 0.8rem; width: auto; border-radius: 3px; }
+        .btn-delete:hover { background-color: #a71d2a; }
+        .badge-percent { background: #e3f2fd; color: #0d47a1; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+        .badge-fixed { background: #e8f5e9; color: #1b5e20; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <h2>Coupon Erstellen</h2>
+    <h2>Neue Coupon Erstellen</h2>
     <form id="coupon-form">
-        <div class="form-group">
-            <label>Coupon Code <span class="required-star">*</span></label>
-            <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SAVE5">
-        </div>
-
-        <div class="form-group">
-            <label>Rabatt Typ <span class="required-star">*</span></label>
-            <div class="radio-group">
-                <label class="radio-item">
-                    <input type="radio" name="discountType" value="percent" checked> Prozent (%)
-                </label>
-                <label class="radio-item">
-                    <input type="radio" name="discountType" value="fixed"> Festbetrag (€)
-                </label>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Code <span class="required-star">*</span></label>
+                <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SALE2025">
             </div>
-        </div>
 
-        <div class="form-group">
-            <label>Rabatt Wert <span class="required-star">*</span></label>
-            <input type="number" id="discountValue" min="0.1" step="0.1" placeholder="z.B. 10 (für 10%) oder 5 (für 5€)" required>
-        </div>
+            <div class="form-group">
+                <label>Gültig bis <span class="required-star">*</span></label>
+                <input type="date" id="expiry" required>
+            </div>
 
-        <div class="form-group">
-            <label>Mindestbestellwert (€) <span class="required-star">*</span></label>
-            <input type="number" id="minOrder" value="20" min="0" required placeholder="Standard: 20">
-        </div>
+            <div class="form-group">
+                <label>Rabatt Typ <span class="required-star">*</span></label>
+                <div class="radio-group">
+                    <label class="radio-item"><input type="radio" name="discountType" value="percent" checked> Prozent (%)</label>
+                    <label class="radio-item"><input type="radio" name="discountType" value="fixed"> Festbetrag (€)</label>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label>Gültig bis <span class="required-star">*</span></label>
-            <input type="date" id="expiry" required>
-        </div>
+            <div class="form-group">
+                <label>Wert <span class="required-star">*</span></label>
+                <input type="number" id="discountValue" min="0.1" step="0.1" placeholder="z.B. 10" required>
+            </div>
 
-        <div class="form-group">
-            <label>Gültig für Kategorien (Leer lassen für alle)</label>
-            <div class="checkbox-group">
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="vorspeisen"> Vorspeisen</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="veganes"> Veganes</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Vegetarisches</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="chicken"> Chicken</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="lamm"> Lamm</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="fisch-garnelen"> Fisch</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="tandoori"> Tandoori</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="biryani"> Biryani</label>
-                <label class="checkbox-item"><input type="checkbox" name="cat" value="brot"> Brot</label>
+            <div class="form-group full-width">
+                <label>Mindestbestellwert (€) <span class="required-star">*</span></label>
+                <input type="number" id="minOrder" value="20" min="0" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Gültig für Kategorien (Keine Auswahl = Alle Kategorien)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="vorspeisen"> Vorspeisen</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="veganes"> Veganes</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Veggie</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="chicken"> Chicken</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="lamm"> Lamm</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="fisch-garnelen"> Fisch</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="tandoori"> Tandoori</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="biryani"> Biryani</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="brot"> Brot</label>
+                </div>
             </div>
         </div>
 
         <button type="submit" id="submitBtn">Coupon Speichern</button>
         <div id="message"></div>
     </form>
+
+    <div class="coupon-list-section">
+        <h3>Aktive Coupons</h3>
+        <p style="font-size: 0.8rem; color: #666;">Liste lädt aus Datenbank...</p>
+        <table id="coupons-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Rabatt</th>
+                    <th>Min. Order</th>
+                    <th>Ablaufdatum</th>
+                    <th>Kategorien</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody id="coupons-body">
+                </tbody>
+        </table>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -101,95 +133,153 @@
     const db = firebase.firestore();
     const form = document.getElementById('coupon-form');
     const msgDiv = document.getElementById('message');
+    const tableBody = document.getElementById('coupons-body');
 
+    // --- 1. Load Coupons on Start ---
+    loadCoupons();
+
+    function loadCoupons() {
+        db.collection("coupons").orderBy("createdAt", "desc").get().then((querySnapshot) => {
+            tableBody.innerHTML = ""; // Clear table
+            if (querySnapshot.empty) {
+                tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Keine Coupons gefunden.</td></tr>";
+                return;
+            }
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const typeLabel = data.discountType === 'percent' ? '%' : '€';
+                const typeClass = data.discountType === 'percent' ? 'badge-percent' : 'badge-fixed';
+                
+                const cats = Array.isArray(data.validCategories) ? data.validCategories.join(", ") : "Alle";
+                const displayCats = cats === "all" ? "Alle" : (cats.length > 20 ? cats.substring(0, 20) + "..." : cats);
+
+                const row = `
+                    <tr>
+                        <td><strong>${data.code}</strong></td>
+                        <td><span class="${typeClass}">${data.discountValue}${typeLabel}</span></td>
+                        <td>${data.minOrder} €</td>
+                        <td>${data.expiryDate}</td>
+                        <td title="${cats}">${displayCats}</td>
+                        <td>
+                            <button class="btn-delete" onclick="deleteCoupon('${data.code}')">Löschen</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }).catch((error) => {
+            console.error("Error loading coupons:", error);
+            tableBody.innerHTML = "<tr><td colspan='6' style='color:red; text-align:center;'>Fehler beim Laden.</td></tr>";
+        });
+    }
+
+    // --- 2. Delete Function ---
+    window.deleteCoupon = function(code) {
+        if(confirm(`Coupon "${code}" wirklich löschen?`)) {
+            db.collection("coupons").doc(code).delete().then(() => {
+                loadCoupons(); // Refresh table
+            }).catch((error) => {
+                alert("Fehler beim Löschen: " + error.message);
+            });
+        }
+    };
+
+    // --- 3. Save Function ---
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         msgDiv.style.display = 'none';
         msgDiv.className = '';
 
-        // 1. Get Values
+        // Get Values
         const code = document.getElementById('code').value.toUpperCase().trim();
-        const discountType = document.querySelector('input[name="discountType"]:checked').value;
+        const discountTypeRadio = document.querySelector('input[name="discountType"]:checked');
         const discountValue = parseFloat(document.getElementById('discountValue').value);
         const minOrder = parseFloat(document.getElementById('minOrder').value);
         const expiry = document.getElementById('expiry').value;
         
-        // 2. Strict Validation
+        // Strict Checks
         if (!code || code.length < 2) {
-            showError("Bitte geben Sie einen gültigen Code ein (min. 2 Zeichen).");
+            showError("Code muss mindestens 2 Zeichen haben.");
+            return;
+        }
+        if (!discountTypeRadio) {
+            showError("Bitte Rabatt-Typ wählen.");
             return;
         }
         if (isNaN(discountValue) || discountValue <= 0) {
-            showError("Bitte einen gültigen Rabatt-Wert eingeben.");
+            showError("Ungültiger Rabatt-Wert.");
             return;
         }
         if (isNaN(minOrder) || minOrder < 0) {
-            showError("Bitte einen gültigen Mindestbestellwert eingeben.");
+            showError("Ungültiger Mindestbestellwert.");
             return;
         }
         if (!expiry) {
-            showError("Bitte ein Ablaufdatum wählen.");
+            showError("Bitte Datum wählen.");
             return;
         }
 
-        // Get selected categories
+        // Categories
         const selectedCats = [];
         document.querySelectorAll('input[name="cat"]:checked').forEach((checkbox) => {
             selectedCats.push(checkbox.value);
         });
 
-        // 3. Confirmation Dialog
-        const typeSymbol = discountType === 'percent' ? '%' : '€';
+        // CONFIRM DIALOG
+        const typeSymbol = discountTypeRadio.value === 'percent' ? '%' : '€';
         const catsText = selectedCats.length > 0 ? selectedCats.join(', ') : 'Alle Kategorien';
         
-        const confirmMsg = `Bitte bestätigen Sie die Angaben:\n\n` +
-                           `Code: ${code}\n` +
-                           `Rabatt: ${discountValue}${typeSymbol}\n` +
-                           `Mindestbestellwert: ${minOrder}€\n` +
-                           `Gültig bis: ${expiry}\n` +
-                           `Kategorien: ${catsText}\n\n` +
-                           `Klicken Sie OK zum Speichern.`;
+        const confirmMsg = `Zusammenfassung:\n` +
+                           `- Code: ${code}\n` +
+                           `- Rabatt: ${discountValue}${typeSymbol}\n` +
+                           `- Min. Order: ${minOrder}€\n` +
+                           `- Bis: ${expiry}\n` +
+                           `- Kategorien: ${catsText}\n\n` +
+                           `Speichern?`;
 
-        if (!confirm(confirmMsg)) {
-            return; // Stop execution if user clicks Cancel
-        }
+        // Force browser render before confirm
+        setTimeout(async () => {
+            if (!confirm(confirmMsg)) return;
 
-        // 4. Save to Firebase
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = "Speichern...";
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "Wird gespeichert...";
 
-        try {
-            await db.collection('coupons').doc(code).set({
-                code: code,
-                discountType: discountType, // 'percent' or 'fixed'
-                discountValue: discountValue,
-                minOrder: minOrder,
-                expiryDate: expiry,
-                validCategories: selectedCats.length > 0 ? selectedCats : 'all',
-                createdAt: new Date()
-            });
+            try {
+                await db.collection('coupons').doc(code).set({
+                    code: code,
+                    discountType: discountTypeRadio.value,
+                    discountValue: discountValue,
+                    minOrder: minOrder,
+                    expiryDate: expiry,
+                    validCategories: selectedCats.length > 0 ? selectedCats : 'all',
+                    createdAt: new Date().toISOString() // Better sorting
+                });
 
-            msgDiv.textContent = `Coupon ${code} erfolgreich erstellt!`;
-            msgDiv.className = 'success';
-            
-            // 5. Reset Form (Only on success)
-            form.reset();
-            // Restore defaults
-            document.querySelector('input[value="percent"]').checked = true;
-            document.getElementById('minOrder').value = "20";
-            
-        } catch (error) {
-            console.error(error);
-            showError("Fehler beim Speichern in die Datenbank.");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Coupon Speichern";
-        }
+                msgDiv.innerHTML = `<strong>${code}</strong> erfolgreich gespeichert!`;
+                msgDiv.style.display = "block";
+                msgDiv.className = 'success';
+                
+                form.reset();
+                document.querySelector('input[value="percent"]').checked = true;
+                document.getElementById('minOrder').value = "20";
+                
+                loadCoupons(); // Refresh the list below
+
+            } catch (error) {
+                console.error(error);
+                showError("Datenbank-Fehler: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Coupon Speichern";
+            }
+        }, 10);
     });
 
     function showError(text) {
         msgDiv.textContent = text;
+        msgDiv.style.display = "block";
         msgDiv.className = 'error';
     }
 </script>

@@ -524,10 +524,14 @@ document.addEventListener("DOMContentLoaded", () => {
         currentDraftOrder = []; 
         modalTableTitle.textContent = `Order for Table ${tableId}`;
         waiterModal.classList.remove('hidden');
-        renderMenu(""); // Show all items initially
+        renderMenu(""); 
         renderDraftOrder();
         menuSearchInput.value = "";
-        document.getElementById('waiter-order-notes').value = "";
+        
+        // ADD THIS LINE TO CLEAR NOTES:
+        const noteEl = document.getElementById('waiter-order-notes');
+        if(noteEl) noteEl.value = ""; 
+        
         menuSearchInput.focus();
     }
 
@@ -604,31 +608,47 @@ document.addEventListener("DOMContentLoaded", () => {
         renderDraftOrder();
     };
 
-    submitModalBtn.addEventListener('click', async () => {
+        submitModalBtn.addEventListener('click', async () => {
+        // 1. Validation Check
         if (!activeTableId || currentDraftOrder.length === 0) return;
 
+        // 2. Set Button to "Sending..."
         submitModalBtn.textContent = "Sending...";
         submitModalBtn.disabled = true;
 
-        const orderId = `${activeTableId}-${new Date().getTime()}`;
-        
-        const newOrder = {
-            id: orderId,
-            table: activeTableId,
-            items: currentDraftOrder,
-            status: "new",
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            orderType: "dine-in",
-            notes: noteValue.trim() !== "" ? noteValue : "Waiter Order"
-        };
-
         try {
+            const orderId = `${activeTableId}-${new Date().getTime()}`;
+            
+            // 3. Safely get Notes (Prevents crashing if element is missing)
+            const noteEl = document.getElementById('waiter-order-notes');
+            let finalNote = "Waiter Order"; // Default value
+            
+            if (noteEl && noteEl.value.trim() !== "") {
+                finalNote = noteEl.value.trim();
+            }
+
+            // 4. Construct Order Object
+            const newOrder = {
+                id: orderId,
+                table: activeTableId,
+                items: currentDraftOrder,
+                status: "new",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                orderType: "dine-in",
+                notes: finalNote
+            };
+
+            // 5. Send to Firebase
             await db.collection("orders").doc(orderId).set(newOrder);
+            
+            // 6. Close Modal on Success
             closeOrderModal();
+
         } catch (e) {
             console.error("Error submitting waiter order:", e);
-            alert("Failed to submit order.");
+            alert("Error: Could not send order. Please check internet connection.");
         } finally {
+            // 7. Reset Button State
             submitModalBtn.textContent = "Submit Order";
             submitModalBtn.disabled = false;
         }

@@ -16,22 +16,34 @@ const db = firebase.firestore();
 let cart = [];
 let currentCoupon = null; 
 let cartSubtotal = 0;     
+let globalConfig = { whatsappNumber: "" }; // Store dynamic settings here
 
 document.addEventListener("DOMContentLoaded", async () => {
     
-    // --- Load Config ---
-    let config = { marqueeLines: [], whatsappNumber: "" };
+    // --- LOAD DYNAMIC SETTINGS FROM FIREBASE ---
     try {
-        const response = await fetch('config.json?v=24'); 
-        config = await response.json();
-    } catch (e) { console.warn("Config load failed", e); }
-
-    // --- Marquee Setup ---
-    const marqueeContainer = document.getElementById('marquee-container');
-    const marqueeText = document.getElementById('marquee-text');
-    if (marqueeText && marqueeContainer && config.marqueeLines && config.marqueeLines.length > 0) {
-        marqueeText.innerText = config.marqueeLines.join(" --- ");
-        marqueeContainer.classList.remove('hidden');
+        const doc = await db.collection('settings').doc('general').get();
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // 1. Set WhatsApp
+            if(data.whatsappNumber) globalConfig.whatsappNumber = data.whatsappNumber;
+            
+            // 2. Set Marquee
+            const marqueeContainer = document.getElementById('marquee-container');
+            const marqueeText = document.getElementById('marquee-text');
+            
+            if (marqueeText && marqueeContainer) {
+                if (data.marqueeText && data.marqueeText.trim() !== "") {
+                    marqueeText.innerText = data.marqueeText;
+                    marqueeContainer.classList.remove('hidden');
+                } else {
+                    marqueeContainer.classList.add('hidden'); // Hide if empty
+                }
+            }
+        }
+    } catch (error) {
+        console.warn("Could not load settings from Firebase:", error);
     }
 
     // --- Header Scroll Padding ---
@@ -75,9 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- Modal Logic ---
     function openCart() {
-        // Ensure success modal is CLOSED when opening cart
-        if(successModal) successModal.classList.remove('flex');
-        
+        if(successModal) successModal.classList.remove('flex'); // Ensure success is closed
         cartContentEl.style.display = 'block'; 
         cartOverlay.classList.remove('hidden');
         updateCart(); 
@@ -88,7 +98,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         cartOverlay.classList.add('hidden'); 
     }
 
-    // Global function to close Success Modal (called by button in HTML)
     window.closeSuccessModal = function() {
         if(successModal) successModal.classList.remove('flex');
     };
@@ -338,9 +347,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
     }
 
-    // --- DISPLAY SUCCESS MODAL (The Fix) ---
+    // --- DISPLAY SUCCESS MODAL ---
     function showConfirmationScreen(summary) {
-        // Use <br> for HTML line breaks to ensure they render
         let html = `<strong style="color:var(--gold)">Kunde:</strong> ${summary.customerName}<br>
                     <strong style="color:var(--gold)">Telefon:</strong> ${summary.customerPhone}<br><br>
                     <strong style="color:var(--gold)">Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
@@ -356,23 +364,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             html += `<br><br><strong style="color:var(--gold)">Anmerkungen:</strong><br>${summary.customerNotes.replace(/\n/g, '<br>')}`;
         }
         
-        // 1. Close Cart
         closeCart();
-
-        // 2. Inject Content
         successContent.innerHTML = html;
-
-        // 3. Open Success Modal
-        successModal.classList.add('flex'); // Uses flex class to display
+        successModal.classList.add('flex'); 
         
-        // 4. Reset Logic
         cart = [];
         currentCoupon = null; 
         if(document.getElementById('coupon-input')) document.getElementById('coupon-input').value = "";
         if(document.getElementById('coupon-message')) document.getElementById('coupon-message').textContent = "";
         orderForm.reset();
         if (consentCheckbox) consentCheckbox.checked = false;
-        updateCart(); // Updates UI to show empty cart
+        updateCart(); 
     }
 
     // --- SEND TO FIREBASE ---
@@ -407,19 +409,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 createdAt: new Date()
             };
 
-            const screenSummary = { 
-                ...summaryData, 
-                customerName, 
-                customerPhone, 
-                customerNotes 
-            };
+            const screenSummary = { ...summaryData, customerName, customerPhone, customerNotes };
 
             firebaseBtn.innerText = "Senden...";
             firebaseBtn.disabled = true;
 
             try {
                 await db.collection("orders").doc(orderId).set(orderData);
-                showConfirmationScreen(screenSummary); // CALL THE NEW FUNCTION
+                showConfirmationScreen(screenSummary); 
             } catch (error) {
                 console.error("Error sending order: ", error);
                 alert("Fehler beim Senden. Bitte erneut versuchen.");
@@ -442,8 +439,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             if (!customerName || !customerPhone) return alert("Bitte geben Sie Namen und Telefonnummer ein.");
 
-            const summaryData = generateOrderSummary();
+            // Use configured number OR fallback
+            const WHATSAPP_NUMBER = globalConfig.whatsappNumber; 
+            if (!WHATSAPP_NUMBER) return alert("WhatsApp-Nummer fehlt. Bitte Administrator kontaktieren.");
 
+            const summaryData = generateOrderSummary();
             const orderId = `pickup-${new Date().getTime()}`;
             const orderData = {
                 id: orderId,
@@ -458,18 +458,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
             db.collection("orders").doc(orderId).set(orderData).catch(e => console.error("Firebase err", e));
             
-            const WHATSAPP_NUMBER = config.whatsappNumber;
-            if (!WHATSAPP_NUMBER) return alert("WhatsApp-Nummer fehlt.");
-
             let whatsappMessage = `*Neue Abholbestellung*\n\n*Kunde:* ${customerName}\n*Telefon:* ${customerPhone}\n\n*Bestellung:*\n${summaryData.summaryText}`;
-            
             if (summaryData.discount > 0) {
                 whatsappMessage += `\nZwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
                 whatsappMessage += `\nGutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €`;
             }
-            
             whatsappMessage += `\n*Gesamtbetrag: ${summaryData.finalTotal.toFixed(2)} €*`;
-
             if (customerNotes) whatsappMessage += `\n\n*Anmerkungen:*\n${customerNotes}`;
 
             let encodedMessage = encodeURIComponent(whatsappMessage);

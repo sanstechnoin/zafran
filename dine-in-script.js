@@ -7,7 +7,6 @@ const firebaseConfig = {
   messagingSenderId: "1022960860126",
   appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
 };
-// --- END OF FIREBASE CONFIG ---
 
 // --- 2. Initialize Firebase ---
 firebase.initializeApp(firebaseConfig);
@@ -20,19 +19,22 @@ let lastOrderId = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
     
+    // Get Table Number
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const table = urlParams.get('table');
         if (table) tableNumber = table;
     } catch (e) { console.error("Error getting table number", e); }
     
+    // Update UI with Table Info
     const formboldTableTitleEl = document.getElementById('formbold-table-title');
-    if(formboldTableTitleEl) formboldTableTitleEl.innerText = `Table ${tableNumber} Order`;
+    if(formboldTableTitleEl) formboldTableTitleEl.innerText = `Tisch ${tableNumber}`;
     const cartTitleEl = document.getElementById('cart-title');
-    if(cartTitleEl) cartTitleEl.innerText = `Your Order (Table ${tableNumber})`;
+    if(cartTitleEl) cartTitleEl.innerText = `Bestellung (Tisch ${tableNumber})`;
     const tableNumberInput = document.getElementById('table-number-input');
     if (tableNumberInput) tableNumberInput.value = tableNumber;
 
+    // Config & Marquee
     let config = { marqueeLines: [] };
     try {
         const response = await fetch('config.json?v=24'); 
@@ -46,6 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         marqueeContainer.classList.remove('hidden');
     }
 
+    // Header Offset
     const header = document.querySelector('header');
     const headerNav = document.querySelector('header nav');
     function updateScrollPadding() {
@@ -62,6 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateScrollPadding();
     window.addEventListener('resize', updateScrollPadding);
     
+    // Nav Scroll
     const navLinksContainer = document.getElementById('nav-links-container');
     const scrollLeftBtn = document.getElementById('scroll-left-btn');
     const scrollRightBtn = document.getElementById('scroll-right-btn');
@@ -77,6 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if(scrollRightBtn) scrollRightBtn.addEventListener('click', () => navLinksContainer.scrollBy({ left: 200, behavior: 'smooth' }));
     }
 
+    // Elements
     const cartToggleBtn = document.getElementById('cart-toggle-btn');
     const cartOverlay = document.getElementById('cart-overlay');
     const cartCloseBtn = document.getElementById('cart-close-btn');
@@ -84,29 +89,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cartItemCountEl = document.getElementById('cart-item-count');
     const totalAmountEl = document.getElementById('total-amount');
     const cartContentEl = document.getElementById('cart-content');
-    const orderConfirmationEl = document.getElementById('order-confirmation');
-    const confirmationSummaryEl = document.getElementById('confirmation-summary');
-    const confirmationCloseBtn = document.getElementById('confirmation-close-btn');
     const orderForm = document.getElementById('order-form');
     const firebaseBtn = document.getElementById('firebase-btn');
     
+    // Success Modal Elements
+    const successModal = document.getElementById('success-modal');
+    const successContent = document.getElementById('success-summary-content');
+    const cancelContainer = document.getElementById('cancel-container');
+    const cancelTimerText = document.getElementById('cancel-timer-text');
+    const cancelOrderBtn = document.getElementById('cancel-order-btn');
+
     if (cartToggleBtn) cartToggleBtn.addEventListener('click', openCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', closeCart);
-    if (confirmationCloseBtn) confirmationCloseBtn.addEventListener('click', closeCart);
     
     function openCart() {
+        if(successModal) successModal.classList.remove('flex'); // Ensure success is closed
         cartContentEl.style.display = 'block';
-        orderConfirmationEl.style.display = 'none';
         cartOverlay.classList.remove('hidden');
         updateCart();
     }
     function closeCart() { 
         cartOverlay.classList.add('hidden'); 
-        setTimeout(() => {
-            cartContentEl.style.display = 'block';
-            orderConfirmationEl.style.display = 'none';
-        }, 500);
     }
+
+    // Global Close for Success
+    window.closeSuccessModal = function() {
+        if(successModal) successModal.classList.remove('flex');
+    };
 
     function initItemControls() {
         document.querySelectorAll('.add-btn').forEach(btn => {
@@ -151,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         if (cart.length === 0) {
-            cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
+            cartItemsContainer.innerHTML = "<p>Ihr Warenkorb ist leer.</p>";
         } else {
             cart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
@@ -197,14 +206,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function generateOrderData() {
         let itemsOnly = []; 
-        let summaryText = ""; // NEW: build the text string here
+        let summaryText = ""; 
         let total = 0;
         
         cart.forEach(item => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
-            // Build the text summary line
-            summaryText += `${item.quantity}x ${item.name} (${itemTotal.toFixed(2)} €)\n`;
+            summaryText += `${item.quantity}x ${item.name}\n`; // No price here per request
             
             itemsOnly.push({
                 quantity: item.quantity,
@@ -218,7 +226,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- SEND TO KITCHEN ---
     firebaseBtn.addEventListener('click', async (e) => {
         e.preventDefault(); 
-        
+        if(cart.length === 0) return alert("Warenkorb ist leer.");
+
         firebaseBtn.innerText = "Senden...";
         firebaseBtn.disabled = true;
 
@@ -241,73 +250,80 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             await db.collection("orders").doc(orderId).set(orderData);
-            showConfirmationScreen(summaryText, total, customerNotes);
+            showConfirmationScreen(summaryText, customerNotes);
         } catch (error) {
             console.error("Error sending order to Firebase: ", error);
-            alert("Error sending order. Please try again or call a waiter.");
+            alert("Fehler beim Senden.");
         } finally {
             firebaseBtn.innerText = "An Küche senden (Live)";
             firebaseBtn.disabled = false;
         }
     });
 
-    // --- UPDATED CONFIRMATION SCREEN (TEXT BASED) ---
-    function showConfirmationScreen(summaryText, total, notes) {
-        // Construct the full text block with newlines
-        let finalSummary = `Table: ${tableNumber}\n\n${summaryText}\nTotal: ${total.toFixed(2)} €`;
+    // --- DISPLAY SUCCESS MODAL (NEW) ---
+    function showConfirmationScreen(summaryText, notes) {
+        // Construct HTML Summary (Without Prices)
+        let html = `<strong style="color:var(--gold)">Tisch:</strong> ${tableNumber}<br><br>
+                    <strong style="color:var(--gold)">Bestellung:</strong><br>${summaryText.replace(/\n/g, '<br>')}`;
         
         if (notes && notes.trim() !== "") {
-            finalSummary += `\n\nNotes: ${notes}`;
+            html += `<br><br><strong style="color:var(--gold)">Notiz:</strong><br>${notes.replace(/\n/g, '<br>')}`;
         }
         
-        // Use innerText so \n becomes a line break (handled by pre-wrap CSS)
-        confirmationSummaryEl.innerText = finalSummary;
-        
-        cartContentEl.style.display = 'none';
-        orderConfirmationEl.style.display = 'block';
+        // 1. Close Cart
+        closeCart();
 
-        const cancelBtn = document.getElementById('cancel-order-btn');
-        const cancelText = document.getElementById('cancel-timer-text');
-        
-        if (cancelBtn && cancelText) {
-            cancelBtn.style.display = 'block';
-            cancelText.style.display = 'block';
+        // 2. Inject Content
+        successContent.innerHTML = html;
+
+        // 3. Show Modal
+        successModal.classList.add('flex');
+
+        // 4. Setup Cancellation Logic
+        if (cancelContainer) {
+            cancelContainer.style.display = 'block';
             let secondsLeft = 30;
+            
+            // Clear existing timer if any
             if (window.cancelTimer) clearInterval(window.cancelTimer);
 
-            cancelText.innerText = `You can cancel this order within ${secondsLeft} seconds.`;
+            cancelTimerText.innerText = `Stornierung möglich in ${secondsLeft} Sek.`;
+            cancelOrderBtn.disabled = false;
+            cancelOrderBtn.innerText = "Bestellung stornieren"; 
 
             window.cancelTimer = setInterval(() => {
                 secondsLeft--;
-                cancelText.innerText = `You can cancel this order within ${secondsLeft} seconds.`;
+                cancelTimerText.innerText = `Stornierung möglich in ${secondsLeft} Sek.`;
+                
                 if (secondsLeft <= 0) {
                     clearInterval(window.cancelTimer);
-                    cancelBtn.style.display = 'none';
-                    cancelText.style.display = 'none';
+                    cancelContainer.style.display = 'none'; // Hide cancel option
                 }
             }, 1000);
 
-            cancelBtn.disabled = false;
-            cancelBtn.innerText = "Bestellung stornieren"; 
-            cancelBtn.onclick = async () => {
+            // Cancel Action
+            cancelOrderBtn.onclick = async () => {
                 if (lastOrderId) {
-                    cancelBtn.disabled = true;
-                    cancelBtn.innerText = "Stornieren...";
+                    cancelOrderBtn.disabled = true;
+                    cancelOrderBtn.innerText = "Wird storniert...";
                     try {
                         await db.collection("orders").doc(lastOrderId).delete();
                         clearInterval(window.cancelTimer); 
-                        confirmationSummaryEl.innerText = `Order ${lastOrderId} has been CANCELLED.`;
-                        cancelBtn.style.display = 'none';
-                        cancelText.style.display = 'none';
+                        
+                        // Update Modal Content to show cancellation
+                        successContent.innerHTML = `<span style="color:#d4edda">Bestellung wurde storniert.</span>`;
+                        cancelContainer.style.display = 'none';
+                        
                     } catch (e) {
                         console.error("Error cancelling order:", e);
-                        cancelBtn.innerText = "Error!";
-                        cancelBtn.disabled = false;
+                        cancelOrderBtn.innerText = "Fehler!";
+                        cancelOrderBtn.disabled = false;
                     }
                 }
             };
         }
 
+        // 5. Reset Cart
         cart = [];
         orderForm.reset();
         if(document.getElementById('dine-in-notes')) document.getElementById('dine-in-notes').value = ''; 

@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // 4. Setup Cancellation Logic
         if (cancelContainer) {
             cancelContainer.style.display = 'block';
-            let secondsLeft = 30;
+            let secondsLeft = 15;
             
             // Clear existing timer if any
             if (window.cancelTimer) clearInterval(window.cancelTimer);

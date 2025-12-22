@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         discountAmount = (eligibleAmount * value) / 100;
                         couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}%) aktiviert: -${discountAmount.toFixed(2)} €`;
                     } else {
-                        // Fixed Amount (capped at eligible amount so it doesn't go negative)
+                        // Fixed Amount (capped at eligible amount)
                         discountAmount = Math.min(value, eligibleAmount);
                         couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}€) aktiviert: -${discountAmount.toFixed(2)} €`;
                     }
@@ -370,6 +370,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- SEND TO FIREBASE ---
     if(firebaseBtn) {
         firebaseBtn.addEventListener('click', async () => {
+            if (cart.length === 0) {
+                alert("Ihr Warenkorb ist leer.");
+                return;
+            }
+
             const customerName = document.getElementById('customer-name').value;
             const customerPhone = document.getElementById('customer-phone').value;
             const customerNotes = document.getElementById('customer-notes').value;
@@ -428,6 +433,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- SEND TO WHATSAPP ---
     if(whatsappBtn) {
         whatsappBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert("Ihr Warenkorb ist leer.");
+                return;
+            }
+
             const customerName = document.getElementById('customer-name').value;
             const customerPhone = document.getElementById('customer-phone').value;
             const customerNotes = document.getElementById('customer-notes').value;

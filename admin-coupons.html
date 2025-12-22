@@ -7,58 +7,75 @@
     <link rel="stylesheet" href="style.css">
     <style>
         body { background-color: #f4f4f4; color: #333; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .admin-container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .admin-container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { border-bottom: 2px solid #D4AF37; padding-bottom: 10px; margin-bottom: 20px; color: #333; }
         
-        /* Form Styles */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        /* Grid Layout */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { margin-bottom: 15px; }
         .full-width { grid-column: span 2; }
         
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; }
         input[type="text"], input[type="number"], input[type="date"] { 
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
         }
         
-        /* Radio & Checkboxes */
-        .radio-group { display: flex; gap: 20px; margin-top: 5px; }
-        .radio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        
-        .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #eee; }
-        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; cursor: pointer; }
+        /* Radio Group */
+        .radio-group { display: flex; gap: 20px; padding: 10px 0; }
+        .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 1rem; }
+        .radio-item input { transform: scale(1.2); cursor: pointer; }
 
-        /* Buttons */
-        button { background-color: #D4AF37; color: white; border: none; padding: 12px; width: 100%; font-size: 1rem; cursor: pointer; border-radius: 4px; font-weight: bold; transition: background 0.3s; }
-        button:hover { background-color: #b39028; }
+        /* Checkbox Group */
+        .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 5px; background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #eee; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+        .checkbox-item input { transform: scale(1.1); }
+
+        /* Save Button */
+        button#submitBtn { 
+            background-color: #28a745; /* Green for save */
+            color: white; border: none; padding: 15px; width: 100%; 
+            font-size: 1.1rem; cursor: pointer; border-radius: 4px; 
+            font-weight: bold; margin-top: 20px; transition: background 0.2s; 
+        }
+        button#submitBtn:hover { background-color: #218838; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
         /* Messages */
-        #message { margin-top: 15px; padding: 10px; text-align: center; border-radius: 4px; display: none; }
+        #message { margin-top: 15px; padding: 15px; text-align: center; border-radius: 4px; display: none; font-weight: bold; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .required-star { color: red; }
 
-        /* Coupon List Table */
-        .coupon-list-section { margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #333; color: white; }
-        tr:hover { background-color: #f5f5f5; }
-        .btn-delete { background-color: #dc3545; color: white; padding: 5px 10px; font-size: 0.8rem; width: auto; border-radius: 3px; }
-        .btn-delete:hover { background-color: #a71d2a; }
-        .badge-percent { background: #e3f2fd; color: #0d47a1; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
-        .badge-fixed { background: #e8f5e9; color: #1b5e20; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+        /* Table */
+        .coupon-list-section { margin-top: 50px; border-top: 3px solid #f1f1f1; padding-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem; background: white; }
+        th { background-color: #343a40; color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        /* Badges */
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        .badge-percent { background: #e3f2fd; color: #0d47a1; }
+        .badge-fixed { background: #e8f5e9; color: #1b5e20; }
+        .badge-category { background: #eee; color: #555; padding: 2px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; margin-bottom: 2px; font-size: 0.75rem;}
+
+        /* Delete Button */
+        .btn-delete { 
+            background-color: #dc3545; color: white; border: none; 
+            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; 
+        }
+        .btn-delete:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <h2>Neue Coupon Erstellen</h2>
+    <h2>Coupon Manager</h2>
     <form id="coupon-form">
         <div class="form-grid">
             <div class="form-group">
-                <label>Code <span class="required-star">*</span></label>
-                <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SALE2025">
+                <label>Gutschein-Code <span class="required-star">*</span></label>
+                <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SOMMER25">
             </div>
 
             <div class="form-group">
@@ -70,12 +87,12 @@
                 <label>Rabatt Typ <span class="required-star">*</span></label>
                 <div class="radio-group">
                     <label class="radio-item"><input type="radio" name="discountType" value="percent" checked> Prozent (%)</label>
-                    <label class="radio-item"><input type="radio" name="discountType" value="fixed"> Festbetrag (€)</label>
+                    <label class="radio-item"><input type="radio" name="discountType" value="fixed"> Euro (€)</label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Wert <span class="required-star">*</span></label>
+                <label>Rabatt Wert <span class="required-star">*</span></label>
                 <input type="number" id="discountValue" min="0.1" step="0.1" placeholder="z.B. 10" required>
             </div>
 
@@ -90,7 +107,7 @@
                     <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen</label>
                     <label class="checkbox-item"><input type="checkbox" name="cat" value="vorspeisen"> Vorspeisen</label>
                     <label class="checkbox-item"><input type="checkbox" name="cat" value="veganes"> Veganes</label>
-                    <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Veggie</label>
+                    <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Vegetarisch</label>
                     <label class="checkbox-item"><input type="checkbox" name="cat" value="chicken"> Chicken</label>
                     <label class="checkbox-item"><input type="checkbox" name="cat" value="lamm"> Lamm</label>
                     <label class="checkbox-item"><input type="checkbox" name="cat" value="fisch-garnelen"> Fisch</label>
@@ -106,182 +123,171 @@
     </form>
 
     <div class="coupon-list-section">
-        <h3>Aktive Coupons</h3>
-        <p style="font-size: 0.8rem; color: #666;">Liste lädt aus Datenbank...</p>
+        <h3>Gespeicherte Coupons (Live)</h3>
         <table id="coupons-table">
             <thead>
                 <tr>
                     <th>Code</th>
                     <th>Rabatt</th>
-                    <th>Min. Order</th>
-                    <th>Ablaufdatum</th>
+                    <th>Min. Wert</th>
+                    <th>Gültig bis</th>
                     <th>Kategorien</th>
-                    <th>Aktion</th>
+                    <th style="text-align: center;">Aktion</th>
                 </tr>
             </thead>
             <tbody id="coupons-body">
-                </tbody>
+                <tr><td colspan="6" style="text-align:center; padding: 20px;">Lade Daten...</td></tr>
+            </tbody>
         </table>
     </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-<script src="script.js"></script> 
 
 <script>
+    // 1. Initialize Firebase directly here to avoid conflict with script.js
+    const firebaseConfig = {
+      apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
+      authDomain: "zaffran-delight.firebaseapp.com",
+      projectId: "zaffran-delight",
+      storageBucket: "zaffran-delight.firebasestorage.app",
+      messagingSenderId: "1022960860126",
+      appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
+    };
+    
+    // Check if firebase is already initialized to prevent errors
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
+
+    // 2. Elements
     const form = document.getElementById('coupon-form');
     const msgDiv = document.getElementById('message');
     const tableBody = document.getElementById('coupons-body');
 
-    // --- 1. Load Coupons on Start ---
+    // 3. Load Data Immediately
     loadCoupons();
 
     function loadCoupons() {
-        db.collection("coupons").orderBy("createdAt", "desc").get().then((querySnapshot) => {
-            tableBody.innerHTML = ""; // Clear table
+        console.log("Loading coupons...");
+        db.collection("coupons").orderBy("createdAt", "desc").get()
+        .then((querySnapshot) => {
+            tableBody.innerHTML = "";
+            
             if (querySnapshot.empty) {
-                tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Keine Coupons gefunden.</td></tr>";
+                tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center; color: #666;'>Keine Coupons in der Datenbank gefunden.</td></tr>";
                 return;
             }
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                const typeLabel = data.discountType === 'percent' ? '%' : '€';
-                const typeClass = data.discountType === 'percent' ? 'badge-percent' : 'badge-fixed';
                 
-                const cats = Array.isArray(data.validCategories) ? data.validCategories.join(", ") : "Alle";
-                const displayCats = cats === "all" ? "Alle" : (cats.length > 20 ? cats.substring(0, 20) + "..." : cats);
+                // Format Discount
+                const isPercent = data.discountType === 'percent';
+                const discountDisplay = isPercent ? `${data.discountValue}%` : `${data.discountValue}€`;
+                const badgeClass = isPercent ? 'badge-percent' : 'badge-fixed';
 
+                // Format Categories
+                let catHtml = '<span class="badge badge-category" style="background:#333; color:white;">Alle</span>';
+                if (Array.isArray(data.validCategories) && data.validCategories[0] !== 'all') {
+                    catHtml = data.validCategories.map(cat => 
+                        `<span class="badge badge-category">${cat}</span>`
+                    ).join(" ");
+                }
+
+                // Append Row
                 const row = `
                     <tr>
-                        <td><strong>${data.code}</strong></td>
-                        <td><span class="${typeClass}">${data.discountValue}${typeLabel}</span></td>
-                        <td>${data.minOrder} €</td>
+                        <td style="font-weight:bold; color: #D4AF37; font-size:1.1rem;">${data.code}</td>
+                        <td><span class="badge ${badgeClass}">${discountDisplay}</span></td>
+                        <td>${data.minOrder}€</td>
                         <td>${data.expiryDate}</td>
-                        <td title="${cats}">${displayCats}</td>
-                        <td>
+                        <td style="max-width: 250px;">${catHtml}</td>
+                        <td style="text-align: center;">
                             <button class="btn-delete" onclick="deleteCoupon('${data.code}')">Löschen</button>
                         </td>
                     </tr>
                 `;
                 tableBody.innerHTML += row;
             });
-        }).catch((error) => {
-            console.error("Error loading coupons:", error);
-            tableBody.innerHTML = "<tr><td colspan='6' style='color:red; text-align:center;'>Fehler beim Laden.</td></tr>";
+        })
+        .catch((error) => {
+            console.error("Error loading:", error);
+            tableBody.innerHTML = `<tr><td colspan='6' style='color:red; text-align:center;'>Fehler: ${error.message}</td></tr>`;
         });
     }
 
-    // --- 2. Delete Function ---
-    window.deleteCoupon = function(code) {
-        if(confirm(`Coupon "${code}" wirklich löschen?`)) {
-            db.collection("coupons").doc(code).delete().then(() => {
-                loadCoupons(); // Refresh table
-            }).catch((error) => {
-                alert("Fehler beim Löschen: " + error.message);
-            });
-        }
-    };
-
-    // --- 3. Save Function ---
+    // 4. Save Function
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         msgDiv.style.display = 'none';
-        msgDiv.className = '';
-
-        // Get Values
+        
+        // --- Validation ---
         const code = document.getElementById('code').value.toUpperCase().trim();
-        const discountTypeRadio = document.querySelector('input[name="discountType"]:checked');
+        const discountType = document.querySelector('input[name="discountType"]:checked').value;
         const discountValue = parseFloat(document.getElementById('discountValue').value);
         const minOrder = parseFloat(document.getElementById('minOrder').value);
         const expiry = document.getElementById('expiry').value;
-        
-        // Strict Checks
-        if (!code || code.length < 2) {
-            showError("Code muss mindestens 2 Zeichen haben.");
-            return;
-        }
-        if (!discountTypeRadio) {
-            showError("Bitte Rabatt-Typ wählen.");
-            return;
-        }
-        if (isNaN(discountValue) || discountValue <= 0) {
-            showError("Ungültiger Rabatt-Wert.");
-            return;
-        }
-        if (isNaN(minOrder) || minOrder < 0) {
-            showError("Ungültiger Mindestbestellwert.");
-            return;
-        }
-        if (!expiry) {
-            showError("Bitte Datum wählen.");
-            return;
-        }
 
-        // Categories
+        if (!code || code.length < 2) return alert("Code zu kurz!");
+        if (!expiry) return alert("Datum fehlt!");
+
+        // Collect Categories
         const selectedCats = [];
-        document.querySelectorAll('input[name="cat"]:checked').forEach((checkbox) => {
-            selectedCats.push(checkbox.value);
-        });
+        document.querySelectorAll('input[name="cat"]:checked').forEach(cb => selectedCats.push(cb.value));
+        const finalCats = selectedCats.length > 0 ? selectedCats : 'all';
 
-        // CONFIRM DIALOG
-        const typeSymbol = discountTypeRadio.value === 'percent' ? '%' : '€';
-        const catsText = selectedCats.length > 0 ? selectedCats.join(', ') : 'Alle Kategorien';
-        
-        const confirmMsg = `Zusammenfassung:\n` +
-                           `- Code: ${code}\n` +
-                           `- Rabatt: ${discountValue}${typeSymbol}\n` +
-                           `- Min. Order: ${minOrder}€\n` +
-                           `- Bis: ${expiry}\n` +
-                           `- Kategorien: ${catsText}\n\n` +
-                           `Speichern?`;
+        // --- Save to Firebase ---
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "Speichere...";
 
-        // Force browser render before confirm
-        setTimeout(async () => {
-            if (!confirm(confirmMsg)) return;
+        try {
+            await db.collection("coupons").doc(code).set({
+                code: code,
+                discountType: discountType,
+                discountValue: discountValue,
+                minOrder: minOrder,
+                expiryDate: expiry,
+                validCategories: finalCats,
+                createdAt: new Date().toISOString()
+            });
 
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerText = "Wird gespeichert...";
+            // Success UI
+            msgDiv.textContent = `Coupon "${code}" wurde gespeichert!`;
+            msgDiv.className = 'success';
+            msgDiv.style.display = 'block';
+            
+            form.reset();
+            document.querySelector('input[value="percent"]').checked = true;
+            document.getElementById('minOrder').value = "20";
+            
+            // Reload List
+            loadCoupons();
 
-            try {
-                await db.collection('coupons').doc(code).set({
-                    code: code,
-                    discountType: discountTypeRadio.value,
-                    discountValue: discountValue,
-                    minOrder: minOrder,
-                    expiryDate: expiry,
-                    validCategories: selectedCats.length > 0 ? selectedCats : 'all',
-                    createdAt: new Date().toISOString() // Better sorting
-                });
-
-                msgDiv.innerHTML = `<strong>${code}</strong> erfolgreich gespeichert!`;
-                msgDiv.style.display = "block";
-                msgDiv.className = 'success';
-                
-                form.reset();
-                document.querySelector('input[value="percent"]').checked = true;
-                document.getElementById('minOrder').value = "20";
-                
-                loadCoupons(); // Refresh the list below
-
-            } catch (error) {
-                console.error(error);
-                showError("Datenbank-Fehler: " + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Coupon Speichern";
-            }
-        }, 10);
+        } catch (error) {
+            console.error(error);
+            alert("Fehler beim Speichern: " + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Coupon Speichern";
+        }
     });
 
-    function showError(text) {
-        msgDiv.textContent = text;
-        msgDiv.style.display = "block";
-        msgDiv.className = 'error';
-    }
+    // 5. Delete Function
+    window.deleteCoupon = function(code) {
+        if(confirm(`Möchten Sie den Coupon "${code}" wirklich löschen?`)) {
+            db.collection("coupons").doc(code).delete()
+            .then(() => {
+                loadCoupons();
+            })
+            .catch((error) => {
+                alert("Löschen fehlgeschlagen: " + error.message);
+            });
+        }
+    };
 </script>
 
 </body>

@@ -225,17 +225,23 @@
                 top: 70px; /* Below header */
                 left: 0; 
                 width: 100%; 
-                height: auto; /* Allow auto height */
-                max-height: calc(100vh - 70px); /* Prevent cutting off on small screens */
+                
+                /* Limit height to allow space for mobile browser bars */
+                height: auto; 
+                max-height: 80vh; 
+                overflow-y: auto; /* Enable scrolling */
+                
                 background: var(--card-bg); 
                 flex-direction: column; 
-                padding: 30px 20px 50px 20px; /* Extra bottom padding for button */
+                
+                /* BIG PADDING BOTTOM TO ENSURE BUTTON IS VISIBLE */
+                padding: 30px 20px 100px 20px; 
+                
                 display: none; 
                 border-bottom: 1px solid var(--gold); 
                 box-shadow: 0 10px 20px rgba(0,0,0,0.5);
                 align-items: center;
-                gap: 20px; /* Spacing between items */
-                overflow-y: auto; /* Scroll if too tall */
+                gap: 20px; 
             }
             
             .nav-links.active { display: flex; } 
@@ -246,7 +252,7 @@
                 text-align: center;
                 padding: 12px 0;
                 font-size: 1.1rem;
-                border-bottom: 1px solid rgba(212, 175, 55, 0.1); /* Separator line */
+                border-bottom: 1px solid rgba(212, 175, 55, 0.1); 
             }
             .nav-links a:last-of-type { border-bottom: none; }
 
@@ -256,6 +262,8 @@
                 gap: 15px; 
                 margin-top: 15px;
                 align-items: center;
+                /* Ensure actions don't get cut off */
+                flex-shrink: 0; 
             }
             
             .header-actions .btn { 

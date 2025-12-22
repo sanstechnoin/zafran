@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zafran Admin - Coupons Manager</title>
+    <title>Zafran Admin - Dashboard</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         body { 
@@ -27,12 +27,13 @@
             border-radius: 8px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
             box-sizing: border-box;
+            margin-bottom: 30px;
         }
 
         /* Header Logo */
         .header-logo {
             display: block;
-            height: 60px; /* Slightly smaller */
+            height: 60px;
             margin: 0 auto 10px auto;
         }
         
@@ -45,10 +46,12 @@
             text-transform: uppercase;
             font-size: 1.4rem;
         }
+
+        h3 { margin-top: 0; color: #555; font-size: 1.1rem; border-left: 4px solid #D4AF37; padding-left: 10px; }
         
         /* Grid Layout */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group { margin-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
         .full-width { grid-column: span 2; }
         
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.85rem; }
@@ -66,20 +69,23 @@
         .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; }
         .checkbox-item input { transform: scale(1.05); }
 
-        /* Save Button */
-        button#submitBtn { 
+        /* Buttons */
+        button { 
             background-color: #28a745; 
             color: white; border: none; padding: 12px; width: 100%; 
             font-size: 1rem; cursor: pointer; border-radius: 4px; 
-            font-weight: bold; margin-top: 15px; transition: background 0.2s; 
+            font-weight: bold; margin-top: 10px; transition: background 0.2s; 
         }
-        button#submitBtn:hover { background-color: #218838; }
+        button:hover { background-color: #218838; }
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         
+        button.btn-blue { background-color: #007bff; }
+        button.btn-blue:hover { background-color: #0056b3; }
+
         /* Messages */
-        #message { margin-top: 15px; padding: 10px; text-align: center; border-radius: 4px; display: none; font-weight: bold; font-size: 0.9rem; }
-        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message-box { margin-top: 10px; padding: 10px; text-align: center; border-radius: 4px; display: none; font-weight: bold; font-size: 0.9rem; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
         .required-star { color: red; }
 
         /* Table */
@@ -112,7 +118,7 @@
             margin-top: auto;
             text-align: center;
             padding: 10px 20px;
-            font-size: 0.75rem; /* Smaller font */
+            font-size: 0.75rem;
             color: #888;
             border-top: 1px solid #ddd;
             width: 100%;
@@ -126,15 +132,9 @@
         .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
         .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .btn-modal { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem; color: white; }
-        
         .btn-reactivate { background-color: #007bff; }
-        .btn-reactivate:hover { background-color: #0056b3; }
-        
         .btn-confirm-delete { background-color: #dc3545; }
-        .btn-confirm-delete:hover { background-color: #a71d2a; }
-        
         .btn-cancel { background-color: #6c757d; }
-        .btn-cancel:hover { background-color: #545b62; }
 
     </style>
 </head>
@@ -142,7 +142,26 @@
 
 <div class="admin-container">
     <img src="logo.png" alt="Zafran Logo" class="header-logo">
+    <h2>Webseiten Einstellungen</h2>
     
+    <form id="settings-form">
+        <div class="form-group">
+            <label>Laufschrift (Marquee) Text</label>
+            <input type="text" id="marqueeText" placeholder="z.B. Willkommen! 10% Rabatt bei Abholung...">
+            <small style="color:#666;">Leer lassen, um die Laufschrift auszuschalten.</small>
+        </div>
+
+        <div class="form-group">
+            <label>WhatsApp Nummer (Internationales Format)</label>
+            <input type="text" id="whatsappNumber" placeholder="4915123456789">
+        </div>
+
+        <button type="submit" id="settingsBtn" class="btn-blue">Einstellungen Speichern</button>
+        <div id="settings-message" class="message-box"></div>
+    </form>
+</div>
+
+<div class="admin-container">
     <h2>Coupon Manager</h2>
     <form id="coupon-form">
         <div class="form-grid">
@@ -192,7 +211,7 @@
         </div>
 
         <button type="submit" id="submitBtn">Coupon Speichern</button>
-        <div id="message"></div>
+        <div id="message" class="message-box"></div>
     </form>
 
     <div class="coupon-list-section">
@@ -202,8 +221,8 @@
                 <tr>
                     <th>Code</th>
                     <th>Rabatt</th>
-                    <th>Min. Wert</th>
-                    <th>Ablaufdatum</th>
+                    <th>Min.</th>
+                    <th>Bis</th>
                     <th>Status</th>
                     <th style="text-align: right;">Aktion</th>
                 </tr>
@@ -250,7 +269,53 @@
     }
     const db = firebase.firestore();
 
-    // 2. Elements & Variables
+    // 2. Load Data on Start
+    loadCoupons();
+    loadSettings();
+
+    // --- SETTINGS LOGIC (NEW) ---
+    const settingsForm = document.getElementById('settings-form');
+    const settingsMsg = document.getElementById('settings-message');
+
+    function loadSettings() {
+        db.collection('settings').doc('general').get().then((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('marqueeText').value = data.marqueeText || "";
+                document.getElementById('whatsappNumber').value = data.whatsappNumber || "";
+            }
+        }).catch((error) => console.error("Error loading settings:", error));
+    }
+
+    settingsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('settingsBtn');
+        btn.disabled = true;
+        btn.innerText = "Speichern...";
+        
+        const marqueeText = document.getElementById('marqueeText').value.trim();
+        const whatsappNumber = document.getElementById('whatsappNumber').value.trim();
+
+        try {
+            await db.collection('settings').doc('general').set({
+                marqueeText: marqueeText,
+                whatsappNumber: whatsappNumber,
+                updatedAt: new Date()
+            }, { merge: true });
+
+            settingsMsg.textContent = "Einstellungen erfolgreich gespeichert!";
+            settingsMsg.className = "message-box success";
+        } catch (error) {
+            console.error(error);
+            settingsMsg.textContent = "Fehler beim Speichern.";
+            settingsMsg.className = "message-box error";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Einstellungen Speichern";
+        }
+    });
+
+    // --- COUPON LOGIC (EXISTING) ---
     const form = document.getElementById('coupon-form');
     const msgDiv = document.getElementById('message');
     const tableBody = document.getElementById('coupons-body');
@@ -258,41 +323,30 @@
     let couponsList = []; 
     let selectedCouponId = null;
 
-    // 3. Load Data Immediately
-    loadCoupons();
-
     function loadCoupons() {
-        console.log("Loading coupons...");
         db.collection("coupons").orderBy("createdAt", "desc").get()
         .then((querySnapshot) => {
             tableBody.innerHTML = "";
-            couponsList = []; // Reset list
-            
+            couponsList = [];
             if (querySnapshot.empty) {
                 tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center; color: #666;'>Keine Coupons in der Datenbank gefunden.</td></tr>";
                 return;
             }
-
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                couponsList.push(data); // Add to local array
-
-                // Format Discount
+                couponsList.push(data);
                 const isPercent = data.discountType === 'percent';
                 const discountDisplay = isPercent ? `${data.discountValue}%` : `${data.discountValue}€`;
                 const badgeClass = isPercent ? 'badge-percent' : 'badge-fixed';
-
-                // Check Active Status
                 const today = new Date().toISOString().split('T')[0];
                 const isExpired = data.expiryDate < today;
                 const statusHtml = isExpired 
                     ? '<span class="status-inactive">Abgelaufen</span>' 
                     : '<span class="status-active">Aktiv</span>';
 
-                // Append Row
                 const row = `
                     <tr>
-                        <td style="font-weight:bold; color: #D4AF37; font-size:1rem;">${data.code}</td>
+                        <td style="font-weight:bold; color: #D4AF37;">${data.code}</td>
                         <td><span class="badge ${badgeClass}">${discountDisplay}</span></td>
                         <td>${data.minOrder}€</td>
                         <td>${data.expiryDate}</td>
@@ -305,19 +359,14 @@
                 tableBody.innerHTML += row;
             });
         })
-        .catch((error) => {
-            console.error("Error loading:", error);
-            tableBody.innerHTML = `<tr><td colspan='6' style='color:red; text-align:center;'>Fehler: ${error.message}</td></tr>`;
-        });
+        .catch((error) => console.error("Error loading:", error));
     }
 
-    // 4. Modal Logic
+    // Modal Logic
     window.openActionModal = function(code) {
         selectedCouponId = code;
         document.getElementById('modalTitle').innerText = `Optionen für "${code}"`;
         modal.style.display = 'flex';
-        
-        // Setup buttons
         document.getElementById('btnReactivate').onclick = function() { reactivateCoupon(code); };
         document.getElementById('btnConfirmDelete').onclick = function() { deleteCoupon(code); };
     };
@@ -327,83 +376,46 @@
         selectedCouponId = null;
     };
 
-    // 5. Delete Logic
     function deleteCoupon(code) {
-        if(confirm(`Endgültig löschen: ${code}?`)) {
-            db.collection("coupons").doc(code).delete()
-            .then(() => {
-                closeModal();
-                loadCoupons(); // Refresh table
-            })
-            .catch((error) => {
-                alert("Löschen fehlgeschlagen: " + error.message);
-            });
-        }
+        db.collection("coupons").doc(code).delete()
+        .then(() => {
+            closeModal();
+            loadCoupons();
+        }).catch((error) => alert("Fehler: " + error.message));
     }
 
-    // 6. Reactivate Logic (Fill Form)
     function reactivateCoupon(code) {
-        // Find data in local array
         const coupon = couponsList.find(c => c.code === code);
         if (!coupon) return;
-
-        // Fill Form
         document.getElementById('code').value = coupon.code;
-        document.getElementById('expiry').value = ""; // Clear date to force update
+        document.getElementById('expiry').value = ""; 
         document.getElementById('discountValue').value = coupon.discountValue;
         document.getElementById('minOrder').value = coupon.minOrder;
-        
-        // Set Radio
         const radios = document.getElementsByName('discountType');
-        for(let r of radios) {
-            if(r.value === coupon.discountType) r.checked = true;
-        }
-
-        // Set Checkboxes
+        for(let r of radios) { if(r.value === coupon.discountType) r.checked = true; }
         const checkboxes = document.querySelectorAll('input[name="cat"]');
-        // If saved as 'all', clear checkboxes
         if (coupon.validCategories === 'all') {
             checkboxes.forEach(cb => cb.checked = false);
         } else {
-            checkboxes.forEach(cb => {
-                cb.checked = coupon.validCategories.includes(cb.value);
-            });
+            checkboxes.forEach(cb => { cb.checked = coupon.validCategories.includes(cb.value); });
         }
-
         closeModal();
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to form
-        document.getElementById('expiry').focus(); // Focus date field
-        
-        // Update Message
-        msgDiv.style.display = 'block';
-        msgDiv.className = 'success';
-        msgDiv.style.background = '#e2e3e5';
-        msgDiv.style.color = '#383d41';
-        msgDiv.style.borderColor = '#d6d8db';
-        msgDiv.textContent = `Daten für "${code}" geladen. Bitte neues Datum eingeben und speichern.`;
+        window.scrollTo({ top: 300, behavior: 'smooth' });
     }
 
-    // 7. Save Function
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         msgDiv.style.display = 'none';
-        
-        // --- Validation ---
         const code = document.getElementById('code').value.toUpperCase().trim();
         const discountType = document.querySelector('input[name="discountType"]:checked').value;
         const discountValue = parseFloat(document.getElementById('discountValue').value);
         const minOrder = parseFloat(document.getElementById('minOrder').value);
         const expiry = document.getElementById('expiry').value;
-
         if (!code || code.length < 2) return alert("Code zu kurz!");
         if (!expiry) return alert("Datum fehlt!");
-
-        // Collect Categories
         const selectedCats = [];
         document.querySelectorAll('input[name="cat"]:checked').forEach(cb => selectedCats.push(cb.value));
         const finalCats = selectedCats.length > 0 ? selectedCats : 'all';
-
-        // --- Save to Firebase ---
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerText = "Speichere...";
@@ -418,24 +430,15 @@
                 validCategories: finalCats,
                 createdAt: new Date().toISOString()
             });
-
-            // Success UI
-            msgDiv.textContent = `Coupon "${code}" wurde erfolgreich gespeichert!`;
-            msgDiv.className = 'success';
-            msgDiv.style.display = 'block';
-            msgDiv.style.background = '#d4edda';
-            msgDiv.style.color = '#155724';
-            
+            msgDiv.textContent = `Coupon "${code}" gespeichert!`;
+            msgDiv.className = 'message-box success';
             form.reset();
             document.querySelector('input[value="percent"]').checked = true;
             document.getElementById('minOrder').value = "20";
-            
-            // Reload List
             loadCoupons();
-
         } catch (error) {
             console.error(error);
-            alert("Fehler beim Speichern: " + error.message);
+            alert("Fehler: " + error.message);
         } finally {
             btn.disabled = false;
             btn.innerText = "Coupon Speichern";

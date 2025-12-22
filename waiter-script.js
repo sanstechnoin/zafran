@@ -527,6 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMenu(""); // Show all items initially
         renderDraftOrder();
         menuSearchInput.value = "";
+        document.getElementById('waiter-order-notes').value = "";
         menuSearchInput.focus();
     }
 
@@ -618,7 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
             status: "new",
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             orderType: "dine-in",
-            notes: "Waiter Order" 
+            notes: noteValue.trim() !== "" ? noteValue : "Waiter Order"
         };
 
         try {

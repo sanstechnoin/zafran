@@ -217,38 +217,25 @@
         @media (max-width: 768px) {
             .hero-content h1 { font-size: 3rem; }
             
-            /* --- FIXED MOBILE MENU (FLOATING CARD STYLE) --- */
+            /* --- FIXED MOBILE MENU (Standard Full Width) --- */
             .hamburger { display: flex; }
             
             .nav-links { 
                 position: fixed; 
-                top: 70px; /* Below header */
-                left: 5%; /* Center Horizontally */
-                width: 90%; /* Center Horizontally */
+                top: 70px; /* Directly below header */
+                left: 0; 
+                width: 100%; 
                 
-                /* VITAL FIX: RESTRICT HEIGHT TO 70% of Screen */
-                height: auto; 
-                max-height: 70vh; 
-                overflow-y: auto; /* Enable Scroll */
-                
-                /* STYLE: Floating Box */
-                background: #000; /* Solid Black */
-                border: 2px solid var(--gold); 
-                border-top: none; /* Connect to header */
-                border-radius: 0 0 15px 15px; /* Round Bottom Only */
-                
-                box-shadow: 0 15px 30px rgba(0,0,0,0.9);
-                
+                background: var(--card-bg); /* Use Theme Background */
                 flex-direction: column; 
-                padding: 20px 20px 40px 20px; /* Good Padding */
+                
+                padding: 40px 20px; 
                 display: none; 
+                border-bottom: 1px solid var(--gold); 
+                box-shadow: 0 10px 20px rgba(0,0,0,0.5);
                 align-items: center;
-                gap: 15px; 
+                gap: 25px; /* Spacing between links */
             }
-            
-            /* Custom Scrollbar for Menu */
-            .nav-links::-webkit-scrollbar { width: 6px; }
-            .nav-links::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
             
             .nav-links.active { display: flex; } 
             
@@ -256,9 +243,9 @@
                 display: block;
                 width: 100%;
                 text-align: center;
-                padding: 12px 0;
+                padding: 10px 0;
                 font-size: 1.1rem;
-                border-bottom: 1px solid rgba(212, 175, 55, 0.2); 
+                border-bottom: 1px dashed rgba(212, 175, 55, 0.2); 
             }
             .nav-links a:last-of-type { border-bottom: none; }
 
@@ -268,14 +255,8 @@
                 gap: 15px; 
                 margin-top: 15px;
                 align-items: center;
-                flex-shrink: 0; 
             }
-            
-            .header-actions .btn { 
-                width: 100%; 
-                text-align: center; 
-                padding: 15px;
-            }
+            /* The Order button is removed from header structure below */
 
             /* Content Adjustments */
             .features-wrapper { grid-template-columns: 1fr; } 
@@ -303,8 +284,7 @@
                         <button class="lang-btn active" onclick="setLang('de')">DE</button>
                         <button class="lang-btn" onclick="setLang('en')">EN</button>
                     </div>
-                    <a href="pickup.html" class="btn btn-outline" data-i18n="btn_order">Bestellen</a>
-                </div>
+                    </div>
             </nav>
             <div class="hamburger" onclick="toggleMenu()">
                 <div class="bar"></div><div class="bar"></div><div class="bar"></div>

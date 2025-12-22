@@ -116,6 +116,19 @@
         #main { 
             padding-top: 20px; 
         }
+
+        /* --- NEW FOOTER STYLES (From dine-in-menu.html) --- */
+        footer {
+            background-color: #000;
+            color: #aaa;
+            padding: 40px 20px;
+            font-size: 0.8rem;
+            border-top: 1px solid #333;
+            margin-top: auto;
+            text-align: center;
+        }
+        .footer-links a { color: var(--gold); text-decoration: none; margin: 0 10px; }
+        .footer-links a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -1589,24 +1602,19 @@
         
     </main>
     
-    <footer class="site-footer">
-        <div class="container text-center">
-            <img src="logo.png" class="footer-logo" alt="Zafran">
-            <div style="margin-bottom: 30px;">
-                <h5 style="color: var(--gold);">Impressum</h5>
-                <p style="font-size: 0.9rem; color: #666;">Inhaber: Syed Hussain Haider Zaidi | Kessenicher Str. 9, 53879 Euskirchen | USt-IdNr gemäß § 27 a UStG</p>
-                <p style="font-size: 0.8rem; margin-top: 10px;">
-                    <a href="imprint.html" target="_blank" style="color: #666;">Impressum</a> | 
-                    <a href="privacy.html" target="_blank" style="color: #666;">Datenschutz</a>
-                </p>
-            </div>
-            <div style="border-top: 1px solid #333; padding-top: 20px;">
-                <p style="font-size: 0.8rem; color: #444;">© 2025 Zafran Delight. Created & Developed by Shri Avinash Narendhran S V +49 162 3757839</p>
-            </div>
-        </div>
-        <div class="container" style="margin-top: 20px; font-size: 0.7rem; text-align: left; color: #444;">
+    <footer>
+        <div style="max-width: 800px; margin: 0 auto; margin-bottom: 20px; line-height: 1.4;">
             <p><strong>Zusatzstoffe:</strong> 1) mit Farbstoffen 2) Schwärzungsmittel 3) mit Konservierungsstoffen 4) Schwefeloxid 5) mit Phosphat 6) mit Antioxidationsmittel 7) mit Geschmacksverstärkern 8) gewachst 9) mit Süßungsmittel 10) mit Zuckerart(en) 11) enthält eine Phenylalaninquelle 12) kann bei übermäßigem Verzehr abführend wirken 13) chininhaltig 14) koffeinhaltig 15) Stärke 16) Eiklar 17) Sojaeiweiß 18) mit Milcheweiß</p>
             <p><strong>Allergene:</strong> A) enthält Weizen B) enthält Krebstiere C) enthält Eier D) enthält Fisch E) enthält Erdnüsse F) enthält Soja G) enthält Milch/Laktose H) enthält Pistazien I) enthält Sellerie J) enthält Senf K) enthält Sesamsamen I) enthält Schwefeldioxid und Sulfite M) enthält Lupine N) enthält Weichtiere und Weichtiererzeugnisse</p>
+            <p>Alle Preise inkl. MwSt.. Änderungen, Irrtümer, Druckfehler vorbehalten.</p>
+        </div>
+
+        <div class="footer-links" style="border-top: 1px solid #333; padding-top: 20px;">
+            <p style="margin-bottom: 10px;">
+                <a href="imprint.html" target="_blank">Impressum</a> | 
+                <a href="privacy.html" target="_blank">Datenschutzerklärung</a>
+            </p>
+            <p>&copy; 2025 Zafran Delight. Created by <a href="https://sanstechno.in/" target="_blank" style="color: #666;">Shri Avinash Narendhran S V</a></p>
         </div>
     </footer>
 

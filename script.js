@@ -75,6 +75,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- Modal Logic ---
     function openCart() {
+        // Ensure success modal is CLOSED when opening cart
+        if(successModal) successModal.classList.remove('flex');
+        
         cartContentEl.style.display = 'block'; 
         cartOverlay.classList.remove('hidden');
         updateCart(); 
@@ -337,20 +340,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- DISPLAY SUCCESS MODAL (The Fix) ---
     function showConfirmationScreen(summary) {
-        // Use <br> for breaks
-        let html = `<strong>Kunde:</strong> ${summary.customerName}<br>
-                    <strong>Telefon:</strong> ${summary.customerPhone}<br><br>
-                    <strong>Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
+        // Use <br> for HTML line breaks to ensure they render
+        let html = `<strong style="color:var(--gold)">Kunde:</strong> ${summary.customerName}<br>
+                    <strong style="color:var(--gold)">Telefon:</strong> ${summary.customerPhone}<br><br>
+                    <strong style="color:var(--gold)">Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
         
         if (summary.discount > 0) {
             html += `<br>Zwischensumme: ${summary.originalTotal.toFixed(2)} €`;
-            html += `<br><span style="color:green">Gutschein (${summary.couponInfo}): -${summary.discount.toFixed(2)} €</span>`;
+            html += `<br><span style="color:#28a745">Gutschein (${summary.couponInfo}): -${summary.discount.toFixed(2)} €</span>`;
         }
         
-        html += `<br><br><strong style="font-size:1.1rem">Total: ${summary.finalTotal.toFixed(2)} €</strong>`;
+        html += `<br><br><strong style="font-size:1.1rem; color:#fff;">Total: ${summary.finalTotal.toFixed(2)} €</strong>`;
 
         if (summary.customerNotes) {
-            html += `<br><br><strong>Anmerkungen:</strong><br>${summary.customerNotes.replace(/\n/g, '<br>')}`;
+            html += `<br><br><strong style="color:var(--gold)">Anmerkungen:</strong><br>${summary.customerNotes.replace(/\n/g, '<br>')}`;
         }
         
         // 1. Close Cart
@@ -381,7 +384,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             const customerPhone = document.getElementById('customer-phone').value;
             const customerNotes = document.getElementById('customer-notes').value;
             
-            if (!customerName || !customerPhone) return alert("Bitte geben Sie Namen und Telefonnummer ein.");
+            if (!customerName || !customerPhone) {
+                alert("Bitte geben Sie Namen und Telefonnummer ein.");
+                return; 
+            }
 
             const summaryData = generateOrderSummary();
 

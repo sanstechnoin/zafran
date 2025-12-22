@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
-        /* Local overrides for unified header layout */
+        /* --- UPDATED HEADER STYLES --- */
         header { 
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--gold);
@@ -18,14 +18,31 @@
             top: 0;
             z-index: 1000;
         }
+
+        /* 1. New Container to constrain width */
+        .container { 
+            width: 100%; 
+            max-width: 1200px; /* Matches index.html */
+            margin: 0 auto; 
+            padding: 0 20px; 
+            box-sizing: border-box;
+        }
+
+        /* 2. Top Row Wrapper (Full Width Background) */
         .header-top-row {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 10px 20px;
+            display: block; /* changed from flex to block to allow inner container */
+            padding: 10px 0; /* padding handled by container */
             border-bottom: 1px solid rgba(255,255,255,0.1);
             background-color: var(--card-bg);
         }
+
+        /* 3. Inner Flex Container for Logo & Link */
+        .header-inner-content {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
         .header-link {
             color: var(--gold);
             font-weight: bold;
@@ -35,11 +52,7 @@
         }
         .header-link:hover { color: #fff; }
         
-        /* Nav Bar Adjustments */
-        nav {
-            background-color: var(--bg-dark);
-        }
-        
+        /* Footer Styles */
         footer {
             background-color: #000;
             color: #aaa;
@@ -57,8 +70,10 @@
 
     <header>
         <div class="header-top-row">
-            <a href="index.html"><img src="logo.png" alt="Zaffran Logo" class="logo" style="height: 50px; width: auto;"></a>
-            <a href="index.html" class="header-link">Startseite</a>
+            <div class="container header-inner-content">
+                <a href="index.html"><img src="logo.png" alt="Zaffran Logo" class="logo" style="height: 50px; width: auto;"></a>
+                <a href="index.html" class="header-link">Startseite</a>
+            </div>
         </div>
         
         <nav>

@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cartContentEl = document.getElementById('cart-content');
     const orderForm = document.getElementById('order-form');
     const firebaseBtn = document.getElementById('firebase-btn');
+    const callWaiterBtn = document.getElementById('btn-call-waiter'); // NEW BUTTON
     
     // Success Modal Elements
     const successModal = document.getElementById('success-modal');
@@ -116,6 +117,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.closeSuccessModal = function() {
         if(successModal) successModal.classList.remove('flex');
     };
+
+    // --- NEW: CALL WAITER LOGIC ---
+    if(callWaiterBtn) {
+        callWaiterBtn.addEventListener('click', async () => {
+            if(confirm("Möchten Sie den Kellner rufen?")) {
+                callWaiterBtn.disabled = true;
+                callWaiterBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Rufe...';
+                
+                try {
+                    // Send special order type
+                    await db.collection("orders").add({
+                        table: tableNumber,
+                        items: [{name: "⚠️ KELLNER RUF", quantity: 1, price: 0}],
+                        total: 0,
+                        status: "new",
+                        createdAt: new Date(),
+                        orderType: "assistance", // Key for KDS to trigger Bell
+                        notes: "Gast bittet um Service am Tisch"
+                    });
+
+                    alert("Kellner wurde gerufen! Bitte warten Sie einen Moment.");
+                    
+                    // Cooldown
+                    setTimeout(() => {
+                        callWaiterBtn.disabled = false;
+                        callWaiterBtn.innerHTML = '<i class="fa fa-bell"></i> Service';
+                    }, 60000); // 1 minute cooldown
+
+                } catch (e) {
+                    console.error("Error calling waiter", e);
+                    alert("Fehler beim Rufen. Bitte rufen Sie persönlich.");
+                    callWaiterBtn.disabled = false;
+                    callWaiterBtn.innerHTML = '<i class="fa fa-bell"></i> Service';
+                }
+            }
+        });
+    }
 
     function initItemControls() {
         document.querySelectorAll('.add-btn').forEach(btn => {
@@ -212,7 +250,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         cart.forEach(item => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
-            summaryText += `${item.quantity}x ${item.name}\n`; // No price here per request
+            summaryText += `${item.quantity}x ${item.name}\n`; 
             
             itemsOnly.push({
                 quantity: item.quantity,
@@ -260,9 +298,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // --- DISPLAY SUCCESS MODAL (NEW) ---
+    // --- DISPLAY SUCCESS MODAL ---
     function showConfirmationScreen(summaryText, notes) {
-        // Construct HTML Summary (Without Prices)
         let html = `<strong style="color:var(--gold)">Tisch:</strong> ${tableNumber}<br><br>
                     <strong style="color:var(--gold)">Bestellung:</strong><br>${summaryText.replace(/\n/g, '<br>')}`;
         
@@ -282,9 +319,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         // 4. Setup Cancellation Logic
         if (cancelContainer) {
             cancelContainer.style.display = 'block';
-            let secondsLeft = 15;
+            let secondsLeft = 15; // 15 Seconds Timer
             
-            // Clear existing timer if any
             if (window.cancelTimer) clearInterval(window.cancelTimer);
 
             cancelTimerText.innerText = `Stornierung möglich in ${secondsLeft} Sek.`;
@@ -297,7 +333,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 
                 if (secondsLeft <= 0) {
                     clearInterval(window.cancelTimer);
-                    cancelContainer.style.display = 'none'; // Hide cancel option
+                    cancelContainer.style.display = 'none'; 
                 }
             }, 1000);
 
@@ -309,11 +345,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     try {
                         await db.collection("orders").doc(lastOrderId).delete();
                         clearInterval(window.cancelTimer); 
-                        
-                        // Update Modal Content to show cancellation
                         successContent.innerHTML = `<span style="color:#d4edda">Bestellung wurde storniert.</span>`;
                         cancelContainer.style.display = 'none';
-                        
                     } catch (e) {
                         console.error("Error cancelling order:", e);
                         cancelOrderBtn.innerText = "Fehler!";

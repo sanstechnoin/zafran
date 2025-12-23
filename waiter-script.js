@@ -167,14 +167,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const readyPopupDetails = document.getElementById('ready-popup-details');
     const closeReadyPopupBtn = document.getElementById('close-ready-popup-btn');
     
-    // NEW: Waiter Call Elements
+    // Waiter Call Elements
     const waiterCallOverlay = document.getElementById('waiter-call-overlay');
     const waiterCallTableText = document.getElementById('waiter-call-table');
     const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
     let currentWaiterCallId = null;
 
     let notificationAudio = new Audio('notification.mp3');
-    let alertAudio = document.getElementById('alertSound'); // Use the audio tag for waiter calls
+    let alertAudio = document.getElementById('alertSound'); 
 
     let allOrders = {}; 
     let activeTableId = null; 
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.addEventListener('click', () => openOrderModal(btn.dataset.tableId));
         });
 
-        // Main Listener: Listen for NEW, SEEN, READY, and COOKED (Served) orders
+        // Main Listener
         db.collection("orders")
           .where("status", "in", ["new", "seen", "ready", "cooked"]) 
           .onSnapshot(
@@ -240,16 +240,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 snapshot.docChanges().forEach((change) => {
                     const orderData = change.doc.data();
                     
-                    // --- NEW: INTERCEPT WAITER CALLS ---
-                    if (orderData.orderType === 'assistance') {
-                        if (change.type === "added") {
-                            showWaiterCall(orderData.table, change.doc.id);
-                        }
-                        return; // Stop processing further
-                    }
-                    // -----------------------------------
+                    // --- NEW: Identify Order Type ---
+                    const isOnline = orderData.orderType === 'pickup' || orderData.orderType === 'delivery';
 
-                    if(orderData.orderType !== 'pickup') {
+                    // Intercept Waiter Calls
+                    if (orderData.orderType === 'assistance') {
+                        if (change.type === "added") showWaiterCall(orderData.table, change.doc.id);
+                        return; 
+                    }
+
+                    // Only track table changes for Dine-In
+                    if(!isOnline) {
                         changedTables.add(orderData.table); 
                     }
                     
@@ -261,15 +262,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     if (change.type === "removed") {
                         delete allOrders[orderData.id];
-                        // If it was a table, we need to re-render it to show empty
-                        if(orderData.orderType !== 'pickup') changedTables.add(orderData.table);
-                        // If pickup, re-render pickup grid
-                        if(orderData.orderType === 'pickup') renderPickupGrid();
+                        if(!isOnline) changedTables.add(orderData.table);
+                        // Online orders re-render below automatically
                     }
                 });
                 
-                // Always re-render pickup on changes
-                renderPickupGrid(); 
+                // --- NEW: Render Combined Online Grid ---
+                renderOnlineGrid(); 
 
                 changedTables.forEach(tableIdentifier => {
                     if (!isNaN(parseInt(tableIdentifier))) { 
@@ -297,7 +296,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(dismissWaiterBtn) {
         dismissWaiterBtn.addEventListener('click', () => {
             if(currentWaiterCallId) {
-                // DELETE the order so it disappears from database
                 db.collection("orders").doc(currentWaiterCallId).delete()
                 .then(() => {
                     waiterCallOverlay.classList.add('hidden');
@@ -320,9 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     if (closeReadyPopupBtn) {
-        closeReadyPopupBtn.addEventListener('click', () => {
-            readyPopup.classList.add('hidden');
-        });
+        closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
     }
 
     // --- RENDER DINE-IN TABLE ---
@@ -334,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const emptyMsg = tableBox.querySelector('.order-list-empty');
         const clearBtn = tableBox.querySelector('.clear-table-btn'); 
 
-        const ordersForThisTable = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup');
+        const ordersForThisTable = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
         
         orderList.innerHTML = ""; 
         
@@ -359,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const isReady = order.status === 'ready';
                 const isCooked = order.status === 'cooked';
                 
-                if (!isCooked) allServed = false; // If any item is not cooked, table is active
+                if (!isCooked) allServed = false; 
 
                 let itemsHtml = order.items.map((item, index) => `
                     <li class="waiter-item">
@@ -398,14 +394,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 orderList.innerHTML += orderGroupHtml;
             });
 
-            // --- CHANGED LOGIC HERE ---
             if (allServed) {
-                // If everything is served, allow Force Close (Archive)
                 clearBtn.textContent = "💰 Paid & Close Table";
                 clearBtn.style.backgroundColor = "#006400"; // Green
                 clearBtn.disabled = false;
             } else {
-                // Standard Clear button (does nothing if not all served)
                 clearBtn.textContent = `Clear Table ${tableId}`;
                 clearBtn.style.backgroundColor = "#8B0000"; // Red
                 clearBtn.disabled = false;
@@ -413,26 +406,53 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- RENDER PICKUP GRID ---
-    function renderPickupGrid() {
-        pickupGrid.innerHTML = ''; 
-        
-        const pickupOrders = Object.values(allOrders).filter(o => o.orderType === 'pickup');
-        pickupOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+    // --- RENDER ONLINE ORDERS (PICKUP & DELIVERY) ---
+    function renderOnlineGrid() {
+        // We reuse the 'pickup-grid' ID for CSS compatibility
+        const grid = document.getElementById('pickup-grid'); 
+        if (!grid) return;
 
-        if (pickupOrders.length === 0) {
-            pickupGrid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for pickup orders...</p></div>`;
+        grid.innerHTML = ''; 
+        
+        // Filter for BOTH types
+        const onlineOrders = Object.values(allOrders).filter(o => 
+            o.orderType === 'pickup' || o.orderType === 'delivery'
+        );
+        onlineOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+
+        if (onlineOrders.length === 0) {
+            grid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for online orders...</p></div>`;
             return;
         }
 
-        pickupOrders.forEach(order => {
+        onlineOrders.forEach(order => {
             const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
             const isReady = order.status === 'ready';
             const isCooked = order.status === 'cooked';
             
-            const readyClass = isReady ? 'ready-order' : '';
-            let statusBadge = isReady ? '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>' : '';
-            if(isCooked) statusBadge = '<span style="color:#aaa;font-weight:bold;float:right;">🔵 SERVED</span>';
+            // 1. DETERMINE TYPE
+            let typeBadge = "";
+            let typeColor = "";
+            let addressHtml = "";
+
+            if (order.orderType === 'delivery') {
+                typeBadge = "🚚 DELIVERY";
+                typeColor = "#e67e22"; // Orange
+                if (order.deliveryAddress) {
+                    addressHtml = `
+                        <div style="font-size:0.85rem; color:#ccc; margin-bottom:8px; padding:5px; background:rgba(255,255,255,0.1); border-radius:4px;">
+                            <strong>📍</strong> ${order.deliveryAddress.street} ${order.deliveryAddress.house}, ${order.deliveryAddress.zip}
+                        </div>`;
+                }
+            } else {
+                typeBadge = "🛍️ PICKUP";
+                typeColor = "#3498db"; // Blue
+            }
+
+            // 2. STATUS BADGE
+            let statusHtml = `<span style="background:${typeColor}; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${typeBadge}</span>`;
+            if (isReady) statusHtml += ' <span style="color:#25D366; font-weight:bold; float:right;">✅ READY</span>';
+            else if (isCooked) statusHtml += ' <span style="color:#aaa; font-weight:bold; float:right;">🔵 COMPLETED</span>';
 
             let itemsHtml = order.items.map((item, index) => `
                 <li class="waiter-item">
@@ -443,54 +463,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let notesHtml = '';
             if (order.notes && order.notes.trim() !== '') {
-                notesHtml = `<p class="order-notes">⚠️ Notes: ${order.notes}</p>`;
+                notesHtml = `<div style="font-style:italic; color:#888; font-size:0.8rem; margin-bottom:5px;">📝 "${order.notes}"</div>`;
             }
 
-            // --- CHANGED BUTTON LOGIC HERE ---
-            let buttonHtml = '';
-            if (isCooked) {
-                // Already served, show "Paid & Close"
-                buttonHtml = `<button class="clear-pickup-btn" style="background-color: #006400;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 Paid & Close</button>`;
-            } else {
-                // Active order, show "Order Complete" (Serve)
-                buttonHtml = `<button class="clear-pickup-btn" onclick="handleClearOrder('${order.id}', 'pickup-serve', this)">Order Served</button>`;
-            }
+            let buttonHtml = isCooked 
+                ? `<button class="clear-pickup-btn" style="background-color: #006400;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 Paid & Close</button>`
+                : `<button class="clear-pickup-btn" onclick="handleClearOrder('${order.id}', 'pickup-serve', this)">Mark Ready / Sent</button>`;
 
-            const pickupBox = document.createElement('div');
-            pickupBox.className = `pickup-box ${readyClass}`;
-            if(isCooked) pickupBox.style.opacity = '0.7';
-            
-            pickupBox.id = `pickup-${order.id}`;
-            pickupBox.innerHTML = `
-                <div class="table-header">
-                    <h2>🛍️ ${order.table}</h2> <span class="order-time">@ ${orderTimestamp}</span>
-                </div>
-                <div style="padding:0 15px;">${statusBadge}</div>
-                <ul class="order-list">${itemsHtml}</ul>
-                ${notesHtml} 
-                ${buttonHtml}
-            `;
-            pickupGrid.appendChild(pickupBox);
+            // 3. RENDER CARD
+            grid.innerHTML += `
+                <div class="pickup-box ${isReady ? 'ready-order' : ''}" style="${isCooked ? 'opacity:0.6; border:1px solid #444;' : 'border-top: 3px solid ' + typeColor}">
+                    
+                    <div class="table-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <h2 style="font-size:1.1rem; margin:0;">${order.customerName}</h2> 
+                        <span class="order-time" style="font-size:0.9rem;">@ ${orderTimestamp}</span>
+                    </div>
+                    
+                    <div style="margin-bottom:8px;">${statusHtml}</div>
+                    
+                    <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">
+                        📞 <a href="tel:${order.customerPhone}" style="color:#aaa; text-decoration:none;">${order.customerPhone}</a>
+                    </div>
+
+                    ${addressHtml}
+
+                    <div style="font-weight:bold; color:#D4AF37; margin-bottom:5px;">Target: ${order.timeSlot} Uhr</div>
+
+                    ${notesHtml}
+
+                    <ul class="order-list" style="margin-top:5px;">${itemsHtml}</ul>
+                    
+                    ${buttonHtml}
+                </div>`;
         });
     }
 
-    // --- GLOBAL HANDLE FUNCTIONS (For inline onclicks) ---
-    window.handleSingleServe = function(orderId) {
-        handleClearOrder(orderId, 'single-serve', null);
-    }
-    window.handleClearOrder = handleClearOrder; // Ensure global access
+    // --- GLOBAL HANDLERS ---
+    window.handleSingleServe = function(orderId) { handleClearOrder(orderId, 'single-serve', null); }
+    window.handleClearOrder = handleClearOrder; 
 
     // --- MAIN ACTION LOGIC ---
     async function handleClearOrder(identifier, type, buttonElement) {
-        // identifier = tableId OR orderId depending on type
         
         let ordersToProcess = [];
-        let action = ""; // 'serve' or 'archive'
+        let action = ""; 
 
         if (type === 'dine-in') {
-            const tableOrders = Object.values(allOrders).filter(o => o.table === identifier && o.orderType !== 'pickup');
+            const tableOrders = Object.values(allOrders).filter(o => o.table === identifier && o.orderType !== 'pickup' && o.orderType !== 'delivery');
             
-            // Check if ALL are already cooked
             const allCooked = tableOrders.every(o => o.status === 'cooked');
             
             if (allCooked) {
@@ -498,7 +518,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(!confirm(`Close Table ${identifier}? This will archive all orders.`)) return;
             } else {
                 action = 'serve';
-                // Only serve items that are NOT YET cooked
                 ordersToProcess = tableOrders.filter(o => o.status !== 'cooked');
             }
             if (action === 'archive') ordersToProcess = tableOrders;
@@ -526,7 +545,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const batch = db.batch();
             
             if (action === 'serve') {
-                // Mark as Cooked (Served)
                 ordersToProcess.forEach(order => {
                     const docRef = db.collection("orders").doc(order.id);
                     batch.update(docRef, { status: "cooked" });
@@ -632,7 +650,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const orderId = `${activeTableId}-${new Date().getTime()}`;
         
-        // Safe Notes Logic
         const noteEl = document.getElementById('waiter-order-notes');
         let finalNote = "Waiter Order"; 
         if (noteEl && noteEl.value.trim() !== "") { finalNote = noteEl.value.trim(); }

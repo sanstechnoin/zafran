@@ -1732,8 +1732,6 @@
 
                     </div>
 
-
-
                     <div class="coupon-section">
 
                         <div class="coupon-row">
@@ -1764,34 +1762,49 @@
                 
                 <h3>Ihre Details</h3>
                 
-                <form id="order-form">
-                    <label for="customer-name">Name:</label>
-                    <input type="text" id="customer-name" name="name" required>
-                    
-                    <label for="customer-phone">Telefon (für Rückfragen):</label>
-                    <input type="tel" id="customer-phone" name="phone" required>
-                    
-                    <label for="customer-notes">Anmerkungen (Allergien etc.):</label>
-                    <textarea id="customer-notes" name="notes" rows="3"></textarea>
-                    
-                    <div class="consent-checkbox">
-                        <input type="checkbox" id="privacy-consent" name="privacy-consent" required>
-                        <label for="privacy-consent">
-                            I have read and agree to the 
-                            <a href="privacy.html" target="_blank">Privacy Policy</a>.
-                        </label>
-                    </div>
+<form id="order-form">
+    
+    <div id="shop-status-message" style="display:none; padding:15px; background:#8B0000; color:white; text-align:center; border-radius:4px; margin-bottom:15px; font-weight:bold;">
+    </div>
 
-                    <div class="checkout-buttons">
-                        <button type="button" id="firebase-btn" class="checkout-kitchen">
-                            An Küche senden (Live)
-                        </button>
-                        
-                        <button type="button" id="whatsapp-btn" class="checkout-whatsapp">
-                            per WhatsApp senden
-                        </button>
-                    </div>
-                </form>
+    <label for="customer-name">Name:</label>
+    <input type="text" id="customer-name" name="name" required>
+    
+    <label for="customer-phone">Telefon (für Rückfragen):</label>
+    <input type="tel" id="customer-phone" name="phone" required>
+    
+    <div class="form-group" id="pickup-time-container" style="margin-bottom: 15px;">
+        <label for="pickup-time" style="display:block; margin-bottom:5px;">Abholzeit / Pickup Time *</label>
+        <select id="pickup-time" style="width:100%; padding:10px; border-radius:4px; border:1px solid #ccc; background:#fff; color:#000;" required>
+            <option value="" disabled selected>-- Bitte Zeit wählen --</option>
+            </select>
+        <small style="color:#888;">Früheste Abholung: 13:00 Uhr</small>
+    </div>
+    
+    <label for="customer-notes">Anmerkungen (Allergien etc.):</label>
+    <textarea id="customer-notes" name="notes" rows="3"></textarea>
+    
+    <div class="consent-checkbox">
+        <input type="checkbox" id="privacy-consent" name="privacy-consent" required>
+        <label for="privacy-consent">
+            I have read and agree to the 
+            <a href="privacy.html" target="_blank">Privacy Policy</a>.
+        </label>
+    </div>
+
+    <div id="checkout-buttons-wrapper">
+        <div class="checkout-buttons">
+            <button type="button" id="firebase-btn" class="checkout-kitchen">
+                An Küche senden (Live)
+            </button>
+            
+            <button type="button" id="whatsapp-btn" class="checkout-whatsapp">
+                per WhatsApp senden
+            </button>
+        </div>
+    </div>
+
+</form>
             </div>
            </div>
 </div>
@@ -1830,6 +1843,7 @@
 </body>
 
 </html>
+
 
 
 

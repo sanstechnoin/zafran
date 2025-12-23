@@ -1875,14 +1875,29 @@ select#pickup-time:focus {
         </button>
     </div>
 </div>
- 
+<div id="cookie-banner" style="position:fixed; bottom:0; left:0; width:100%; background:#222; border-top:2px solid #D4AF37; padding:15px; text-align:center; z-index:10000; display:none;">
+    <p style="color:#fff; margin:0 0 10px 0; font-size:0.9rem;">
+        Wir nutzen technisch notwendige Speichertechnologien (z.B. für den Warenkorb). 
+        Mehr Infos in der <a href="privacy.html" style="color:#D4AF37; text-decoration:underline;">Datenschutzerklärung</a>.
+    </p>
+    <button onclick="acceptCookies()" style="background:#D4AF37; border:none; padding:8px 20px; font-weight:bold; cursor:pointer; border-radius:4px;">
+        Alles klar
+    </button>
+</div>
+
+<script>
+    // Simple Cookie Logic
+    function acceptCookies() {
+        localStorage.setItem('zafran_cookie_consent', 'true');
+        document.getElementById('cookie-banner').style.display = 'none';
+    }
+
+    // Check on load
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!localStorage.getItem('zafran_cookie_consent')) {
+            document.getElementById('cookie-banner').style.display = 'block';
+        }
+    });
+</script>
 </body>
-
 </html>
-
-
-
-
-
-
-

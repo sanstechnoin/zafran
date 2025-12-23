@@ -538,12 +538,32 @@ function disableShop(message) {
     const statusMsg = document.getElementById('shop-status-message');
     const btnWrapper = document.getElementById('checkout-buttons-wrapper');
     const timeContainer = document.getElementById('pickup-time-container');
+    
+    // 1. Existing Logic: Hide Buttons & Show Inline Message
+    // (We keep this so if they close the popup, the buttons are STILL gone)
+    if (statusMsg) {
+        statusMsg.textContent = message;
+        statusMsg.style.display = 'block';
+    }
+    if (btnWrapper) btnWrapper.style.display = 'none';
+    if (timeContainer) timeContainer.style.display = 'none';
 
-    statusMsg.textContent = message;
-    statusMsg.style.display = 'block';
+    // 2. NEW LOGIC: Show the "Shop Closed" Popup
+    const closedModal = document.getElementById('closed-modal');
+    const closedModalText = document.getElementById('closed-modal-text');
+    const closeBtn = document.getElementById('close-closed-modal-btn');
 
-    btnWrapper.style.display = 'none';
-    if(timeContainer) timeContainer.style.display = 'none';
+    if (closedModal && closedModalText) {
+        closedModalText.textContent = message; // Set the specific error text
+        closedModal.style.display = 'flex';    // Show the modal
+        
+        // Handle "Verstanden" button click
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                closedModal.style.display = 'none';
+            };
+        }
+    }
 }
 
 function generatePickupSlots(now, selectElement) {
@@ -583,3 +603,4 @@ function generatePickupSlots(now, selectElement) {
         }
     }
 }
+

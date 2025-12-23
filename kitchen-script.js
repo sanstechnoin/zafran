@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const popupOrderDetails = document.getElementById('popup-order-details');
     const acceptOrderBtn = document.getElementById('accept-order-btn');
 
-    // Waiter Call Elements (New)
+    // Waiter Call Elements
     const waiterCallOverlay = document.getElementById('waiter-call-overlay');
     const waiterCallTableText = document.getElementById('waiter-call-table');
     const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentPopupOrder = null; // The order currently in the popup
     let allOrders = {}; // Holds all active orders, keyed by order.id
     let notificationAudio = new Audio('notification.mp3'); 
-    let alertAudio = document.getElementById('alertSound'); // Use the audio tag for waiter calls
+    let alertAudio = document.getElementById('alertSound'); 
 
     const KITCHEN_PASSWORD = "zafran"; 
     const TOTAL_DINE_IN_TABLES = 12; 
@@ -96,30 +96,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 connectionIconEl.textContent = '✅'; 
                 
                 let changedTables = new Set(); 
-                let changedPickupCustomers = new Set(); 
-
+                
                 snapshot.docChanges().forEach((change) => {
                     const orderData = change.doc.data();
                     
-                    // --- NEW: INTERCEPT WAITER CALLS ---
+                    // --- NEW: Identify Order Type ---
+                    const isOnline = orderData.orderType === 'pickup' || orderData.orderType === 'delivery';
+
+                    // --- INTERCEPT WAITER CALLS ---
                     if (orderData.orderType === 'assistance') {
                         if (change.type === "added") {
                             showWaiterCall(orderData.table, change.doc.id);
                         }
-                        // Stop processing this order further (don't add to grids)
-                        return; 
+                        return; // Stop processing
                     }
-                    // -----------------------------------
                     
-                    if(orderData.orderType === 'pickup') {
-                        changedPickupCustomers.add(orderData.table); 
-                    } else {
+                    // Track table changes (only for Dine-In)
+                    if (!isOnline) {
                         changedTables.add(orderData.table); 
                     }
                     
                     if (change.type === "added") {
                         allOrders[orderData.id] = orderData;
                         
+                        // Add to Popup Queue only if new
                         if (orderData.status === 'new') {
                             orderQueue.push(orderData);
                             if (orderQueue.length === 1 && newOrderPopup.classList.contains('hidden')) {
@@ -132,6 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (allOrders[orderData.id]) {
                             delete allOrders[orderData.id];
                         }
+                        // If it was a table, re-render
+                        if(!isOnline) changedTables.add(orderData.table);
                     }
                     
                     if (change.type === "modified") {
@@ -139,7 +141,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
                 
-                renderPickupGrid(); 
+                // --- NEW: Render Combined Online Grid ---
+                renderOnlineGrid(); 
 
                 changedTables.forEach(tableIdentifier => {
                     if (!isNaN(parseInt(tableIdentifier))) { 
@@ -190,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const orderList = tableBox.querySelector('.order-list');
         const emptyMsg = tableBox.querySelector('.order-list-empty');
 
-        const ordersForThisTable = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup');
+        const ordersForThisTable = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
         
         orderList.innerHTML = ""; 
         
@@ -248,28 +251,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * Re-renders the entire Pickup Order grid
+     * Re-renders the Combined Online Order Grid (Pickup & Delivery)
      */
-    function renderPickupGrid() {
-        pickupGrid.innerHTML = ''; 
-        
-        const pickupOrders = Object.values(allOrders).filter(o => o.orderType === 'pickup');
-        pickupOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+    function renderOnlineGrid() {
+        const grid = document.getElementById('pickup-grid'); 
+        if (!grid) return;
 
-        if (pickupOrders.length === 0) {
-            pickupGrid.innerHTML = `
-                <div class="pickup-box-empty">
-                    <p>Waiting for pickup orders...</p>
-                </div>`;
+        grid.innerHTML = ''; 
+        
+        // Filter for BOTH types
+        const onlineOrders = Object.values(allOrders).filter(o => 
+            o.orderType === 'pickup' || o.orderType === 'delivery'
+        );
+        onlineOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+
+        if (onlineOrders.length === 0) {
+            grid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for online orders...</p></div>`;
             return;
         }
 
-        pickupOrders.forEach(order => {
-            const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+        onlineOrders.forEach(order => {
+            const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
             
+            // 1. DETERMINE TYPE
+            let typeBadge = "";
+            let typeColor = "";
+            let addressHtml = "";
+
+            if (order.orderType === 'delivery') {
+                typeBadge = "🚚 DELIVERY";
+                typeColor = "#e67e22"; // Orange
+                if (order.deliveryAddress) {
+                    addressHtml = `
+                        <div style="font-size:0.85rem; color:#ccc; margin-bottom:8px; padding:5px; background:rgba(255,255,255,0.1); border-radius:4px;">
+                            <strong>📍</strong> ${order.deliveryAddress.street} ${order.deliveryAddress.house}, ${order.deliveryAddress.zip}
+                        </div>`;
+                }
+            } else {
+                typeBadge = "🛍️ PICKUP";
+                typeColor = "#3498db"; // Blue
+            }
+
             let itemsHtml = order.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('');
 
             let notesHtml = '';
@@ -279,29 +301,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const isReady = order.status === 'ready';
             let actionBtnHtml = '';
-            let readyClass = '';
+            let readyClass = isReady ? 'kitchen-ready-highlight' : '';
+            let statusBadge = `<span style="background:${typeColor}; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${typeBadge}</span>`;
 
             if (isReady) {
-                readyClass = 'kitchen-ready-highlight';
                 actionBtnHtml = `<div class="kitchen-status-badge">✅ Ready for Pickup</div>`;
             } else {
                 actionBtnHtml = `<button class="clear-pickup-btn" onclick="handleMarkReady('${order.id}')">Mark Ready</button>`;
             }
 
+            // Render Card
             const pickupBox = document.createElement('div');
             pickupBox.className = `pickup-box ${readyClass}`;
+            pickupBox.style.borderTop = `3px solid ${typeColor}`; // Top border color match
             pickupBox.id = `pickup-${order.id}`;
+            
             pickupBox.innerHTML = `
                 <div class="table-header">
-                    <h2>🛍️ ${order.table}</h2> <span class="order-time">@ ${orderTimestamp}</span>
+                    <h2>${order.customerName}</h2> <span class="order-time">@ ${orderTimestamp}</span>
                 </div>
+                
+                <div style="margin-bottom:8px;">${statusBadge}</div>
+                
+                <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">
+                     📞 ${order.customerPhone}
+                </div>
+
+                ${addressHtml}
+
+                <div style="font-weight:bold; color:#D4AF37; margin-bottom:5px;">Target: ${order.timeSlot} Uhr</div>
+
                 <ul class="order-list">
                     ${itemsHtml}
                 </ul>
                 ${notesHtml} 
                 ${actionBtnHtml}
             `;
-            pickupGrid.appendChild(pickupBox);
+            grid.appendChild(pickupBox);
         });
     }
 
@@ -338,8 +374,12 @@ document.addEventListener("DOMContentLoaded", () => {
         let itemsHtml = currentPopupOrder.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('');
         
         let title = '';
+        
+        // --- NEW: Smart Title for Popup ---
         if (currentPopupOrder.orderType === 'pickup') {
-            title = `🛍️ Pickup for ${currentPopupOrder.table}`; 
+            title = `🛍️ New Pickup: ${currentPopupOrder.customerName}`; 
+        } else if (currentPopupOrder.orderType === 'delivery') {
+            title = `🚚 New Delivery: ${currentPopupOrder.customerName}`; 
         } else {
             title = `🔔 Table ${currentPopupOrder.table}`;
         }
@@ -349,8 +389,14 @@ document.addEventListener("DOMContentLoaded", () => {
             notesHtml = `<p class="popup-notes">⚠️ Notes: ${currentPopupOrder.notes}</p>`;
         }
 
+        let addressHtml = "";
+        if (currentPopupOrder.orderType === 'delivery' && currentPopupOrder.deliveryAddress) {
+            addressHtml = `<p style="font-size:0.9rem; color:#ccc;">📍 ${currentPopupOrder.deliveryAddress.street}, ${currentPopupOrder.deliveryAddress.zip}</p>`;
+        }
+
         popupOrderDetails.innerHTML = `
             <h4>${title}</h4>
+            ${addressHtml}
             <ul>${itemsHtml}</ul>
             ${notesHtml} 
         `;

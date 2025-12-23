@@ -18,10 +18,16 @@ let currentCoupon = null;
 let cartSubtotal = 0;      
 let globalConfig = { whatsappNumber: "" }; 
 
+// --- CONFIGURATION ---
+const MIN_ORDER_DELIVERY = 20.00; // Minimum order for delivery
+
+// --- HELPER: DETECT PAGE TYPE ---
+// Returns true if we are on delivery.html (checks for street input)
+const isDeliveryPage = () => document.getElementById('delivery-street') !== null;
+
 document.addEventListener("DOMContentLoaded", async () => {
     
     // --- 1. RUN BUSINESS LOGIC IMMEDIATELY ---
-    // Checks if shop is open and populates the time dropdown
     checkBusinessStatus();
 
     // --- LOAD DYNAMIC SETTINGS FROM FIREBASE ---
@@ -29,11 +35,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const doc = await db.collection('settings').doc('general').get();
         if (doc.exists) {
             const data = doc.data();
-            
-            // Set WhatsApp
             if(data.whatsappNumber) globalConfig.whatsappNumber = data.whatsappNumber;
             
-            // Set Marquee
             const marqueeContainer = document.getElementById('marquee-container');
             const marqueeText = document.getElementById('marquee-text');
             
@@ -352,11 +355,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // --- DISPLAY SUCCESS MODAL ---
-    function showConfirmationScreen(summary) {
-        let html = `<strong style="color:var(--gold)">Kunde:</strong> ${summary.customerName}<br>
-                    <strong style="color:var(--gold)">Telefon:</strong> ${summary.customerPhone}<br>
-                    <strong style="color:var(--gold)">Abholzeit:</strong> ${summary.pickupTime} Uhr<br><br>
-                    <strong style="color:var(--gold)">Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
+    function showConfirmationScreen(formData, summary) {
+        let html = `<strong style="color:var(--gold)">Kunde:</strong> ${formData.name}<br>`;
+        
+        if (isDeliveryPage()) {
+            html += `<strong style="color:var(--gold)">Lieferung an:</strong> ${formData.address.street} ${formData.address.house}, ${formData.address.zip}<br>`;
+        }
+
+        html += `<strong style="color:var(--gold)">Zeit:</strong> ${formData.time} Uhr<br>
+                 <strong style="color:var(--gold)">Telefon:</strong> ${formData.phone}<br><br>
+                 <strong style="color:var(--gold)">Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
         
         if (summary.discount > 0) {
             html += `<br>Zwischensumme: ${summary.originalTotal.toFixed(2)} €`;
@@ -365,8 +373,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         html += `<br><br><strong style="font-size:1.1rem; color:#fff;">Total: ${summary.finalTotal.toFixed(2)} €</strong>`;
 
-        if (summary.customerNotes) {
-            html += `<br><br><strong style="color:var(--gold)">Anmerkungen:</strong><br>${summary.customerNotes.replace(/\n/g, '<br>')}`;
+        if (formData.notes) {
+            html += `<br><br><strong style="color:var(--gold)">Anmerkungen:</strong><br>${formData.notes.replace(/\n/g, '<br>')}`;
         }
         
         closeCart();
@@ -387,47 +395,48 @@ document.addEventListener("DOMContentLoaded", async () => {
         firebaseBtn.addEventListener('click', async () => {
             if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
 
-            // --- VALIDATE FORM (Time + Info) ---
-            if (!validatePickupForm()) return; 
+            // VALIDATE
+            if (!validateForm()) return; 
 
-            const customerName = document.getElementById('customer-name').value;
-            const customerPhone = document.getElementById('customer-phone').value;
-            const customerNotes = document.getElementById('customer-notes').value;
-            const pickupTime = document.getElementById('pickup-time').value; // NEW
+            // MIN ORDER CHECK (Delivery Only)
+            if (isDeliveryPage() && cartSubtotal < MIN_ORDER_DELIVERY) {
+                alert(`Der Mindestbestellwert für Lieferungen beträgt ${MIN_ORDER_DELIVERY.toFixed(2)}€.`);
+                return;
+            }
 
+            const formData = getFormData();
             const summaryData = generateOrderSummary();
-            const orderId = `pickup-${new Date().getTime()}`;
+            const orderId = `${isDeliveryPage() ? 'delivery' : 'pickup'}-${new Date().getTime()}`;
             
             const orderData = {
                 id: orderId,
-                table: `${customerName} (${customerPhone})`,
-                customerName, 
-                customerPhone, 
-                pickupTime: pickupTime, 
-                notes: customerNotes,
+                table: `${formData.name} (${formData.phone})`, // Display for Kitchen
+                customerName: formData.name, 
+                customerPhone: formData.phone, 
+                orderType: isDeliveryPage() ? 'delivery' : 'pickup',
+                timeSlot: formData.time, 
+                notes: formData.notes,
+                deliveryAddress: isDeliveryPage() ? formData.address : null, // Save address if delivery
                 items: summaryData.itemsOnly,
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
                 coupon: summaryData.couponInfo || "None",
                 total: summaryData.finalTotal,
                 status: "new",
-                orderType: "pickup", 
                 createdAt: new Date()
             };
-
-            const screenSummary = { ...summaryData, customerName, customerPhone, customerNotes, pickupTime };
 
             firebaseBtn.innerText = "Senden...";
             firebaseBtn.disabled = true;
 
             try {
                 await db.collection("orders").doc(orderId).set(orderData);
-                showConfirmationScreen(screenSummary); 
+                showConfirmationScreen(formData, summaryData); 
             } catch (error) {
                 console.error("Error sending order: ", error);
                 alert("Fehler beim Senden. Bitte erneut versuchen.");
             } finally {
-                firebaseBtn.innerText = "An Küche senden (Live)";
+                firebaseBtn.innerText = "Kostenpflichtig Bestellen";
                 firebaseBtn.disabled = false;
                 toggleCheckoutButtons();
             }
@@ -439,45 +448,64 @@ document.addEventListener("DOMContentLoaded", async () => {
         whatsappBtn.addEventListener('click', () => {
             if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
 
-            // --- VALIDATE FORM ---
-            if (!validatePickupForm()) return;
+            // VALIDATE
+            if (!validateForm()) return;
 
-            const customerName = document.getElementById('customer-name').value;
-            const customerPhone = document.getElementById('customer-phone').value;
-            const customerNotes = document.getElementById('customer-notes').value;
-            const pickupTime = document.getElementById('pickup-time').value; // NEW
+            // MIN ORDER CHECK (Delivery Only)
+            if (isDeliveryPage() && cartSubtotal < MIN_ORDER_DELIVERY) {
+                alert(`Der Mindestbestellwert für Lieferungen beträgt ${MIN_ORDER_DELIVERY.toFixed(2)}€.`);
+                return;
+            }
 
+            const formData = getFormData();
+            
             // Use configured number OR fallback
             const WHATSAPP_NUMBER = globalConfig.whatsappNumber; 
             if (!WHATSAPP_NUMBER) return alert("WhatsApp-Nummer fehlt. Bitte Administrator kontaktieren.");
 
             const summaryData = generateOrderSummary();
             
-            // Note: We also save to Firebase so KDS sees it
-            const orderId = `pickup-${new Date().getTime()}`;
+            // Also save to Firebase for KDS
+            const orderId = `${isDeliveryPage() ? 'delivery' : 'pickup'}-${new Date().getTime()}`;
             const orderData = {
                 id: orderId,
-                table: `${customerName} (${customerPhone})`,
-                customerName, customerPhone, pickupTime, notes: customerNotes,
+                table: `${formData.name} (${formData.phone})`,
+                customerName: formData.name, 
+                customerPhone: formData.phone,
+                orderType: isDeliveryPage() ? 'delivery' : 'pickup',
+                timeSlot: formData.time, 
+                notes: formData.notes,
+                deliveryAddress: isDeliveryPage() ? formData.address : null,
                 items: summaryData.itemsOnly, 
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
                 coupon: summaryData.couponInfo || "None",
                 total: summaryData.finalTotal,
-                status: "new", orderType: "pickup", createdAt: new Date()
+                status: "new", 
+                createdAt: new Date()
             };
             db.collection("orders").doc(orderId).set(orderData).catch(e => console.error("Firebase err", e));
             
-            // Build Message
-            let whatsappMessage = `*Neue Abholbestellung*\n\n*Kunde:* ${customerName}\n*Telefon:* ${customerPhone}\n*Abholzeit:* ${pickupTime} Uhr\n\n*Bestellung:*\n${summaryData.summaryText}`;
-            if (summaryData.discount > 0) {
-                whatsappMessage += `\nZwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
-                whatsappMessage += `\nGutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €`;
+            // Build WhatsApp Message
+            let msg = `*Neue ${isDeliveryPage() ? 'Lieferung' : 'Abholung'}*\n\n`;
+            msg += `*Kunde:* ${formData.name}\n*Telefon:* ${formData.phone}\n`;
+            
+            if (isDeliveryPage()) {
+                msg += `*Adresse:* ${formData.address.street} ${formData.address.house}\n`;
+                msg += `*Ort:* ${formData.address.zip}\n`;
             }
-            whatsappMessage += `\n*Gesamtbetrag: ${summaryData.finalTotal.toFixed(2)} €*`;
-            if (customerNotes) whatsappMessage += `\n\n*Anmerkungen:*\n${customerNotes}`;
 
-            let encodedMessage = encodeURIComponent(whatsappMessage);
+            msg += `*Zeit:* ${formData.time} Uhr\n\n`;
+            msg += `*Bestellung:*\n${summaryData.summaryText}`;
+            
+            if (summaryData.discount > 0) {
+                msg += `\nZwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
+                msg += `\nGutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €`;
+            }
+            msg += `\n*Gesamtbetrag: ${summaryData.finalTotal.toFixed(2)} €*`;
+            if (formData.notes) msg += `\n\n*Anmerkungen:*\n${formData.notes}`;
+
+            let encodedMessage = encodeURIComponent(msg);
             window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
         });
     }
@@ -485,18 +513,45 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // --- HELPER FUNCTIONS ---
 
-function validatePickupForm() {
+// 1. EXTRACT FORM DATA (Unified)
+function getFormData() {
     const name = document.getElementById('customer-name').value;
     const phone = document.getElementById('customer-phone').value;
     const time = document.getElementById('pickup-time').value;
+    const notes = document.getElementById('customer-notes').value;
+    
+    let address = null;
+    if (isDeliveryPage()) {
+        address = {
+            street: document.getElementById('delivery-street').value,
+            house: document.getElementById('delivery-house').value,
+            zip: document.getElementById('delivery-zip').value
+        };
+    }
+
+    return { name, phone, time, notes, address };
+}
+
+// 2. VALIDATE FORM (Unified)
+function validateForm() {
+    const data = getFormData();
     const privacy = document.getElementById('privacy-consent');
 
-    if (!name || !phone) {
+    if (!data.name || !data.phone) {
         alert("Bitte Namen und Telefonnummer eingeben.");
         return false;
     }
-    if (!time) {
-        alert("Bitte eine Abholzeit wählen.");
+    
+    // Check Address ONLY if Delivery
+    if (isDeliveryPage()) {
+        if (!data.address.street || !data.address.house) {
+            alert("Bitte die Lieferadresse vollständig ausfüllen.");
+            return false;
+        }
+    }
+
+    if (!data.time) {
+        alert("Bitte eine Zeit wählen.");
         return false;
     }
     if (!privacy.checked) {
@@ -506,6 +561,7 @@ function validatePickupForm() {
     return true;
 }
 
+// 3. BUSINESS RULES
 function checkBusinessStatus() {
     const statusMsg = document.getElementById('shop-status-message');
     const btnWrapper = document.getElementById('checkout-buttons-wrapper');
@@ -524,23 +580,23 @@ function checkBusinessStatus() {
     }
 
     // 2. BLOCK OUTSIDE ORDER WINDOW (12:00 - 20:00)
-    // If < 12:00 OR >= 20:00, show closed message
     if (currentHour < 12 || currentHour >= 20) {
         disableShop("Online-Bestellungen sind nur von 12:00 bis 20:00 Uhr möglich.");
         return;
     }
 
-    // 3. GENERATE SLOTS IF OPEN
-    generatePickupSlots(now, timeSelect);
+    // 3. GENERATE SLOTS
+    // If delivery, buffer is 60 min. If pickup, 30 min.
+    const bufferMinutes = isDeliveryPage() ? 60 : 30;
+    generateTimeSlots(now, timeSelect, bufferMinutes);
 }
 
 function disableShop(message) {
     const statusMsg = document.getElementById('shop-status-message');
     const btnWrapper = document.getElementById('checkout-buttons-wrapper');
     const timeContainer = document.getElementById('pickup-time-container');
-    
-    // 1. Existing Logic: Hide Buttons & Show Inline Message
-    // (We keep this so if they close the popup, the buttons are STILL gone)
+
+    // Hide Buttons / Input on Form
     if (statusMsg) {
         statusMsg.textContent = message;
         statusMsg.style.display = 'block';
@@ -548,16 +604,15 @@ function disableShop(message) {
     if (btnWrapper) btnWrapper.style.display = 'none';
     if (timeContainer) timeContainer.style.display = 'none';
 
-    // 2. NEW LOGIC: Show the "Shop Closed" Popup
+    // Show Popup
     const closedModal = document.getElementById('closed-modal');
     const closedModalText = document.getElementById('closed-modal-text');
     const closeBtn = document.getElementById('close-closed-modal-btn');
 
     if (closedModal && closedModalText) {
-        closedModalText.textContent = message; // Set the specific error text
-        closedModal.style.display = 'flex';    // Show the modal
+        closedModalText.textContent = message; 
+        closedModal.style.display = 'flex';    
         
-        // Handle "Verstanden" button click
         if (closeBtn) {
             closeBtn.onclick = function() {
                 closedModal.style.display = 'none';
@@ -566,19 +621,19 @@ function disableShop(message) {
     }
 }
 
-function generatePickupSlots(now, selectElement) {
+function generateTimeSlots(now, selectElement, bufferMinutes) {
     if(!selectElement) return;
-    selectElement.innerHTML = '<option value="" disabled selected>-- Bitte Zeit wählen --</option>';
+    selectElement.innerHTML = '<option value="" disabled selected>-- Zeit wählen --</option>';
 
-    let startHour = 13; // Pickup starts at 1 PM
+    let startHour = 13; // Shop officially starts orders at 1 PM
     let startMin = 0;
 
-    // Buffer: Now + 30 mins
-    let bufferTime = new Date(now.getTime() + 30 * 60000); 
+    // Calculate Buffer based on current time
+    let bufferTime = new Date(now.getTime() + bufferMinutes * 60000); 
     let bufferHour = bufferTime.getHours();
     let bufferMin = bufferTime.getMinutes();
 
-    // If buffer is later than 13:00, shift start time
+    // If buffer pushes past 13:00, move start time forward
     if (bufferHour > startHour || (bufferHour === startHour && bufferMin > startMin)) {
         startHour = bufferHour;
         startMin = Math.ceil(bufferMin / 15) * 15;
@@ -591,10 +646,7 @@ function generatePickupSlots(now, selectElement) {
     // Loop until 21:00
     for (let h = startHour; h <= 21; h++) {
         for (let m = (h === startHour ? startMin : 0); m < 60; m += 15) {
-            
-            // Stop loop exactly at 21:00
             if (h === 21 && m > 0) break; 
-
             let timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
             let option = document.createElement('option');
             option.value = timeStr;
@@ -603,4 +655,3 @@ function generatePickupSlots(now, selectElement) {
         }
     }
 }
-

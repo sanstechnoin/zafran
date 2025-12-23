@@ -14,13 +14,18 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // --- 3. Global State and DOM Elements ---
-// THIS FIXES THE "STUCK LOGIN" BUG by waiting for the page to load
 document.addEventListener("DOMContentLoaded", () => {
 
     const connectionIconEl = document.getElementById('connection-icon'); 
     const newOrderPopup = document.getElementById('new-order-popup-overlay');
     const popupOrderDetails = document.getElementById('popup-order-details');
     const acceptOrderBtn = document.getElementById('accept-order-btn');
+
+    // Waiter Call Elements (New)
+    const waiterCallOverlay = document.getElementById('waiter-call-overlay');
+    const waiterCallTableText = document.getElementById('waiter-call-table');
+    const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
+    let currentWaiterCallId = null;
 
     // KDS Login
     const loginOverlay = document.getElementById('kitchen-login-overlay');
@@ -37,9 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentPopupOrder = null; // The order currently in the popup
     let allOrders = {}; // Holds all active orders, keyed by order.id
     let notificationAudio = new Audio('notification.mp3'); 
+    let alertAudio = document.getElementById('alertSound'); // Use the audio tag for waiter calls
 
-    const KITCHEN_PASSWORD = "zafran"; // <-- NEW PASSWORD
-    const TOTAL_DINE_IN_TABLES = 12; // We'll use 12 tables for Zaffran too
+    const KITCHEN_PASSWORD = "zafran"; 
+    const TOTAL_DINE_IN_TABLES = 12; 
 
     // --- 4. KDS Login Logic ---
     loginButton.addEventListener('click', () => {
@@ -64,14 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 1; i <= TOTAL_DINE_IN_TABLES; i++) {
             const tableBox = document.createElement('div');
             tableBox.className = 'table-box';
-            tableBox.id = `table-${i}`; // e.g., table-1
-            // Removed the bottom "Clear Table" button here
+            tableBox.id = `table-${i}`; 
             tableBox.innerHTML = `
                 <div class="table-header">
                     <h2>Table ${i}</h2>
                 </div>
                 <ul class="order-list" data-table-id="${i}">
-                    </ul>
+                </ul>
                 <p class="order-list-empty" data-table-id="${i}">Waiting for order...</p>
             `;
             dineInGrid.appendChild(tableBox);
@@ -82,11 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
      * Initializes the main Firestore listener.
      */
     function initializeKDS() {
-        // 1. Create the empty tables first
         createDineInTables();
 
-        // 2. Start the main listener
-        // We listen for 'new', 'seen', AND 'ready' so ready orders stay visible until served
         db.collection("orders")
           .where("status", "in", ["new", "seen", "ready"]) 
           .onSnapshot(
@@ -99,6 +101,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 snapshot.docChanges().forEach((change) => {
                     const orderData = change.doc.data();
                     
+                    // --- NEW: INTERCEPT WAITER CALLS ---
+                    if (orderData.orderType === 'assistance') {
+                        if (change.type === "added") {
+                            showWaiterCall(orderData.table, change.doc.id);
+                        }
+                        // Stop processing this order further (don't add to grids)
+                        return; 
+                    }
+                    // -----------------------------------
+                    
                     if(orderData.orderType === 'pickup') {
                         changedPickupCustomers.add(orderData.table); 
                     } else {
@@ -108,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (change.type === "added") {
                         allOrders[orderData.id] = orderData;
                         
-                        // Only show popup if it's genuinely new
                         if (orderData.status === 'new') {
                             orderQueue.push(orderData);
                             if (orderQueue.length === 1 && newOrderPopup.classList.contains('hidden')) {
@@ -142,7 +153,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 connectionIconEl.textContent = '❌'; 
             }
         );
-    } // End of initializeKDS()
+    } 
+
+    // --- WAITER CALL FUNCTIONS ---
+    function showWaiterCall(tableNum, docId) {
+        currentWaiterCallId = docId;
+        waiterCallTableText.innerText = `TABLE ${tableNum}`;
+        waiterCallOverlay.classList.remove('hidden');
+        if(alertAudio) alertAudio.play().catch(e => console.log("Audio block", e));
+    }
+
+    if(dismissWaiterBtn) {
+        dismissWaiterBtn.addEventListener('click', () => {
+            if(currentWaiterCallId) {
+                // DELETE to remove from everywhere
+                db.collection("orders").doc(currentWaiterCallId).delete()
+                .then(() => {
+                    waiterCallOverlay.classList.add('hidden');
+                    currentWaiterCallId = null;
+                })
+                .catch(err => console.error("Error deleting call:", err));
+            } else {
+                waiterCallOverlay.classList.add('hidden');
+            }
+        });
+    }
 
 
     /**
@@ -181,17 +216,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     notesHtml = `<p class="order-notes">⚠️ Notes: ${order.notes}</p>`;
                 }
 
-                // Determine button/display based on status
                 const isReady = order.status === 'ready';
                 let actionBtnHtml = '';
                 let readyClass = '';
 
                 if (isReady) {
-                    // If already ready, kitchen sees "Waiting for Waiter"
                     readyClass = 'kitchen-ready-highlight'; 
                     actionBtnHtml = `<div class="kitchen-status-badge">✅ Waiting for Waiter</div>`;
                 } else {
-                    // If new/seen, kitchen sees "Mark Ready"
                     actionBtnHtml = `<button class="btn-mark-ready" onclick="handleMarkReady('${order.id}')">Mark Ready</button>`;
                 }
 
@@ -208,7 +240,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 orderList.innerHTML += orderGroupHtml;
             });
 
-            // Flash effect if there is at least one new order
             if (ordersForThisTable.some(o => o.status === 'new')) {
                 tableBox.classList.add('new-order-flash');
                 setTimeout(() => tableBox.classList.remove('new-order-flash'), 1500);
@@ -220,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
      * Re-renders the entire Pickup Order grid
      */
     function renderPickupGrid() {
-        pickupGrid.innerHTML = ''; // Clear grid
+        pickupGrid.innerHTML = ''; 
         
         const pickupOrders = Object.values(allOrders).filter(o => o.orderType === 'pickup');
         pickupOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
@@ -246,7 +277,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 notesHtml = `<p class="order-notes">⚠️ Notes: ${order.notes}</p>`;
             }
 
-            // Status Logic for Pickup
             const isReady = order.status === 'ready';
             let actionBtnHtml = '';
             let readyClass = '';
@@ -276,12 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /**
-     * Handles "Mark Ready" button clicks.
-     * Accessible globally for inline onclicks.
-     */
     window.handleMarkReady = async function(orderId) {
-        // Find the button to show loading state
         const btn = document.querySelector(`button[onclick="handleMarkReady('${orderId}')"]`);
         if(btn) {
             btn.disabled = true;
@@ -289,7 +314,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            // Update ONLY this specific order to 'ready'
             await db.collection("orders").doc(orderId).update({ status: "ready" });
             console.log(`Order ${orderId} marked ready.`);
         } catch (e) {
@@ -340,8 +364,6 @@ document.addEventListener("DOMContentLoaded", () => {
         currentPopupOrder = null;
     }
 
-    // --- 7. Event Listener for Popup Button ---
-
     acceptOrderBtn.addEventListener('click', () => {
         const acceptedOrder = currentPopupOrder; 
         
@@ -355,4 +377,4 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-}); // --- END OF DOMContentLoaded WRAPPER ---
+});

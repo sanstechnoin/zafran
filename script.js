@@ -15,21 +15,25 @@ const db = firebase.firestore();
 // --- GLOBAL STATE ---
 let cart = [];
 let currentCoupon = null; 
-let cartSubtotal = 0;     
-let globalConfig = { whatsappNumber: "" }; // Store dynamic settings here
+let cartSubtotal = 0;      
+let globalConfig = { whatsappNumber: "" }; 
 
 document.addEventListener("DOMContentLoaded", async () => {
     
+    // --- 1. RUN BUSINESS LOGIC IMMEDIATELY ---
+    // Checks if shop is open and populates the time dropdown
+    checkBusinessStatus();
+
     // --- LOAD DYNAMIC SETTINGS FROM FIREBASE ---
     try {
         const doc = await db.collection('settings').doc('general').get();
         if (doc.exists) {
             const data = doc.data();
             
-            // 1. Set WhatsApp
+            // Set WhatsApp
             if(data.whatsappNumber) globalConfig.whatsappNumber = data.whatsappNumber;
             
-            // 2. Set Marquee
+            // Set Marquee
             const marqueeContainer = document.getElementById('marquee-container');
             const marqueeText = document.getElementById('marquee-text');
             
@@ -38,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     marqueeText.innerText = data.marqueeText;
                     marqueeContainer.classList.remove('hidden');
                 } else {
-                    marqueeContainer.classList.add('hidden'); // Hide if empty
+                    marqueeContainer.classList.add('hidden'); 
                 }
             }
         }
@@ -87,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- Modal Logic ---
     function openCart() {
-        if(successModal) successModal.classList.remove('flex'); // Ensure success is closed
+        if(successModal) successModal.classList.remove('flex'); 
         cartContentEl.style.display = 'block'; 
         cartOverlay.classList.remove('hidden');
         updateCart(); 
@@ -350,7 +354,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- DISPLAY SUCCESS MODAL ---
     function showConfirmationScreen(summary) {
         let html = `<strong style="color:var(--gold)">Kunde:</strong> ${summary.customerName}<br>
-                    <strong style="color:var(--gold)">Telefon:</strong> ${summary.customerPhone}<br><br>
+                    <strong style="color:var(--gold)">Telefon:</strong> ${summary.customerPhone}<br>
+                    <strong style="color:var(--gold)">Abholzeit:</strong> ${summary.pickupTime} Uhr<br><br>
                     <strong style="color:var(--gold)">Bestellung:</strong><br>${summary.summaryText.replace(/\n/g, '<br>')}`;
         
         if (summary.discount > 0) {
@@ -382,23 +387,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         firebaseBtn.addEventListener('click', async () => {
             if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
 
+            // --- VALIDATE FORM (Time + Info) ---
+            if (!validatePickupForm()) return; 
+
             const customerName = document.getElementById('customer-name').value;
             const customerPhone = document.getElementById('customer-phone').value;
             const customerNotes = document.getElementById('customer-notes').value;
-            
-            if (!customerName || !customerPhone) {
-                alert("Bitte geben Sie Namen und Telefonnummer ein.");
-                return; 
-            }
+            const pickupTime = document.getElementById('pickup-time').value; // NEW
 
             const summaryData = generateOrderSummary();
-
             const orderId = `pickup-${new Date().getTime()}`;
             
             const orderData = {
                 id: orderId,
                 table: `${customerName} (${customerPhone})`,
-                customerName, customerPhone, notes: customerNotes,
+                customerName, 
+                customerPhone, 
+                pickupTime: pickupTime, 
+                notes: customerNotes,
                 items: summaryData.itemsOnly,
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
@@ -409,7 +415,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 createdAt: new Date()
             };
 
-            const screenSummary = { ...summaryData, customerName, customerPhone, customerNotes };
+            const screenSummary = { ...summaryData, customerName, customerPhone, customerNotes, pickupTime };
 
             firebaseBtn.innerText = "Senden...";
             firebaseBtn.disabled = true;
@@ -433,22 +439,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         whatsappBtn.addEventListener('click', () => {
             if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
 
+            // --- VALIDATE FORM ---
+            if (!validatePickupForm()) return;
+
             const customerName = document.getElementById('customer-name').value;
             const customerPhone = document.getElementById('customer-phone').value;
             const customerNotes = document.getElementById('customer-notes').value;
-            
-            if (!customerName || !customerPhone) return alert("Bitte geben Sie Namen und Telefonnummer ein.");
+            const pickupTime = document.getElementById('pickup-time').value; // NEW
 
             // Use configured number OR fallback
             const WHATSAPP_NUMBER = globalConfig.whatsappNumber; 
             if (!WHATSAPP_NUMBER) return alert("WhatsApp-Nummer fehlt. Bitte Administrator kontaktieren.");
 
             const summaryData = generateOrderSummary();
+            
+            // Note: We also save to Firebase so KDS sees it
             const orderId = `pickup-${new Date().getTime()}`;
             const orderData = {
                 id: orderId,
                 table: `${customerName} (${customerPhone})`,
-                customerName, customerPhone, notes: customerNotes,
+                customerName, customerPhone, pickupTime, notes: customerNotes,
                 items: summaryData.itemsOnly, 
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
@@ -458,7 +468,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
             db.collection("orders").doc(orderId).set(orderData).catch(e => console.error("Firebase err", e));
             
-            let whatsappMessage = `*Neue Abholbestellung*\n\n*Kunde:* ${customerName}\n*Telefon:* ${customerPhone}\n\n*Bestellung:*\n${summaryData.summaryText}`;
+            // Build Message
+            let whatsappMessage = `*Neue Abholbestellung*\n\n*Kunde:* ${customerName}\n*Telefon:* ${customerPhone}\n*Abholzeit:* ${pickupTime} Uhr\n\n*Bestellung:*\n${summaryData.summaryText}`;
             if (summaryData.discount > 0) {
                 whatsappMessage += `\nZwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
                 whatsappMessage += `\nGutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €`;
@@ -471,3 +482,104 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 });
+
+// --- HELPER FUNCTIONS ---
+
+function validatePickupForm() {
+    const name = document.getElementById('customer-name').value;
+    const phone = document.getElementById('customer-phone').value;
+    const time = document.getElementById('pickup-time').value;
+    const privacy = document.getElementById('privacy-consent');
+
+    if (!name || !phone) {
+        alert("Bitte Namen und Telefonnummer eingeben.");
+        return false;
+    }
+    if (!time) {
+        alert("Bitte eine Abholzeit wählen.");
+        return false;
+    }
+    if (!privacy.checked) {
+        alert("Bitte akzeptieren Sie die Datenschutzbestimmungen.");
+        return false;
+    }
+    return true;
+}
+
+function checkBusinessStatus() {
+    const statusMsg = document.getElementById('shop-status-message');
+    const btnWrapper = document.getElementById('checkout-buttons-wrapper');
+    const timeSelect = document.getElementById('pickup-time');
+    
+    if (!statusMsg || !btnWrapper) return; 
+
+    const now = new Date();
+    const day = now.getDay(); 
+    const currentHour = now.getHours();
+
+    // 1. BLOCK MONDAYS
+    if (day === 1) {
+        disableShop("Montags ist Ruhetag. Keine Bestellungen möglich.");
+        return; 
+    }
+
+    // 2. BLOCK OUTSIDE ORDER WINDOW (12:00 - 20:00)
+    // If < 12:00 OR >= 20:00, show closed message
+    if (currentHour < 12 || currentHour >= 20) {
+        disableShop("Online-Bestellungen sind nur von 12:00 bis 20:00 Uhr möglich.");
+        return;
+    }
+
+    // 3. GENERATE SLOTS IF OPEN
+    generatePickupSlots(now, timeSelect);
+}
+
+function disableShop(message) {
+    const statusMsg = document.getElementById('shop-status-message');
+    const btnWrapper = document.getElementById('checkout-buttons-wrapper');
+    const timeContainer = document.getElementById('pickup-time-container');
+
+    statusMsg.textContent = message;
+    statusMsg.style.display = 'block';
+
+    btnWrapper.style.display = 'none';
+    if(timeContainer) timeContainer.style.display = 'none';
+}
+
+function generatePickupSlots(now, selectElement) {
+    if(!selectElement) return;
+    selectElement.innerHTML = '<option value="" disabled selected>-- Bitte Zeit wählen --</option>';
+
+    let startHour = 13; // Pickup starts at 1 PM
+    let startMin = 0;
+
+    // Buffer: Now + 30 mins
+    let bufferTime = new Date(now.getTime() + 30 * 60000); 
+    let bufferHour = bufferTime.getHours();
+    let bufferMin = bufferTime.getMinutes();
+
+    // If buffer is later than 13:00, shift start time
+    if (bufferHour > startHour || (bufferHour === startHour && bufferMin > startMin)) {
+        startHour = bufferHour;
+        startMin = Math.ceil(bufferMin / 15) * 15;
+        if (startMin === 60) { 
+            startMin = 0; 
+            startHour++; 
+        }
+    }
+
+    // Loop until 21:00
+    for (let h = startHour; h <= 21; h++) {
+        for (let m = (h === startHour ? startMin : 0); m < 60; m += 15) {
+            
+            // Stop loop exactly at 21:00
+            if (h === 21 && m > 0) break; 
+
+            let timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+            let option = document.createElement('option');
+            option.value = timeStr;
+            option.textContent = timeStr + " Uhr";
+            selectElement.appendChild(option);
+        }
+    }
+}

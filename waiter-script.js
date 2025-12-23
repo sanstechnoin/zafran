@@ -9,7 +9,7 @@ const firebaseConfig = {
 };
 // --- END OF FIREBASE CONFIG ---
 
-// --- WAITER MENU LIST ---
+// --- WAITER MENU LIST (Kept as provided) ---
 const MENU_ITEMS = [
     { name: "Tomatensuppe", price: 5.00 },
     { name: "Daal Linsensuppe", price: 5.00 },
@@ -166,13 +166,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const readyPopup = document.getElementById('ready-notification-popup');
     const readyPopupDetails = document.getElementById('ready-popup-details');
     const closeReadyPopupBtn = document.getElementById('close-ready-popup-btn');
+    
+    // NEW: Waiter Call Elements
+    const waiterCallOverlay = document.getElementById('waiter-call-overlay');
+    const waiterCallTableText = document.getElementById('waiter-call-table');
+    const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
+    let currentWaiterCallId = null;
+
     let notificationAudio = new Audio('notification.mp3');
+    let alertAudio = document.getElementById('alertSound'); // Use the audio tag for waiter calls
 
     let allOrders = {}; 
     let activeTableId = null; 
     let currentDraftOrder = []; 
 
-    const KITCHEN_PASSWORD = "zafran"; // Waiter Password
+    const KITCHEN_PASSWORD = "zafran"; 
     const TOTAL_DINE_IN_TABLES = 12;
 
     // --- 4. Login Logic ---
@@ -231,6 +239,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 let changedTables = new Set(); 
                 snapshot.docChanges().forEach((change) => {
                     const orderData = change.doc.data();
+                    
+                    // --- NEW: INTERCEPT WAITER CALLS ---
+                    if (orderData.orderType === 'assistance') {
+                        if (change.type === "added") {
+                            showWaiterCall(orderData.table, change.doc.id);
+                        }
+                        return; // Stop processing further
+                    }
+                    // -----------------------------------
+
                     if(orderData.orderType !== 'pickup') {
                         changedTables.add(orderData.table); 
                     }
@@ -267,6 +285,30 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         );
     } 
+
+    // --- WAITER CALL FUNCTIONS ---
+    function showWaiterCall(tableNum, docId) {
+        currentWaiterCallId = docId;
+        waiterCallTableText.innerText = `TABLE ${tableNum}`;
+        waiterCallOverlay.classList.remove('hidden');
+        if(alertAudio) alertAudio.play().catch(e => console.log("Audio block", e));
+    }
+
+    if(dismissWaiterBtn) {
+        dismissWaiterBtn.addEventListener('click', () => {
+            if(currentWaiterCallId) {
+                // DELETE the order so it disappears from database
+                db.collection("orders").doc(currentWaiterCallId).delete()
+                .then(() => {
+                    waiterCallOverlay.classList.add('hidden');
+                    currentWaiterCallId = null;
+                })
+                .catch(err => console.error("Error deleting call:", err));
+            } else {
+                waiterCallOverlay.classList.add('hidden');
+            }
+        });
+    }
 
     function triggerReadyNotification(order) {
         readyPopupDetails.innerHTML = `
@@ -492,15 +534,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 await batch.commit();
             } 
             else if (action === 'archive') {
-                // 1. Move to 'archived_orders'
-                // 2. Delete from 'orders'
-                // We do this one by one to use set() and delete()
-                
-                // Calculate Totals for Archive
-                // For dine-in table, we group them into one archive entry usually, 
-                // but simple way: archive individually or group. 
-                // Let's archive individually to keep it simple and robust.
-                
                 for (const order of ordersToProcess) {
                     const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
                     await archiveRef.set({

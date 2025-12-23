@@ -6,6 +6,27 @@
     <title>Zaffran Waiter Station</title>
     <link rel="stylesheet" href="style.css?v=35"> 
     <link rel="icon" type="image/png" href="favlogo.png">
+    <style>
+        /* Specific Style for Service Alert Overlay */
+        #waiter-call-overlay .kitchen-popup-box {
+            border: 4px solid #ff4444;
+            background-color: #2a0a0a; /* Dark Red Background */
+            box-shadow: 0 0 30px #ff4444;
+        }
+        #waiter-call-overlay h3 { color: #ff4444; font-size: 2rem; margin-bottom: 10px; }
+        #waiter-call-table { font-size: 3.5rem; color: white; margin: 20px 0; font-weight: bold; }
+        #dismiss-waiter-btn {
+            background-color: #ff4444; 
+            color: white; 
+            font-size: 1.5rem; 
+            padding: 15px; 
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #dismiss-waiter-btn:hover { background-color: #cc0000; }
+    </style>
 </head>
 <body class="kitchen-body">
 
@@ -57,6 +78,15 @@
         </div>
     </div>
     
+    <div id="waiter-call-overlay" class="kitchen-popup-overlay hidden">
+        <div class="kitchen-popup-box">
+            <h3>⚠️ SERVICE REQUEST ⚠️</h3>
+            <div id="waiter-call-table">TABLE ?</div>
+            <p style="color: #ccc; margin-bottom: 20px;">Customer is calling for assistance.</p>
+            <button id="dismiss-waiter-btn">DISMISS</button>
+        </div>
+    </div>
+    
     <div id="kitchen-login-overlay" class="kitchen-popup-overlay">
         <div class="kitchen-popup-box">
             <h3>Waiter Station Login</h3>
@@ -75,10 +105,9 @@
             </div>
             <div class="waiter-popup-body">
                 <input type="text" id="menu-search" class="menu-search-bar" placeholder="Search item...">
-                <div id="menu-list" class="menu-selection-list">
-                    </div>
+                <div id="menu-list" class="menu-selection-list"></div>
                 
-                    <div class="current-order-preview">
+                <div class="current-order-preview">
                     <h4>Current Selection:</h4>
                     <div id="new-order-items-list">
                         <p style="color:#aaa; font-style:italic;">No items selected.</p>
@@ -98,9 +127,10 @@
         </div>
     </div>
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+    <audio id="notificationSound" src="notification.mp3"></audio> <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="waiter-script.js?v=3"></script> 
+    <script src="waiter-script.js?v=4"></script> 
 
 </body>
 </html>

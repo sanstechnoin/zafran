@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speisekarte - Zaffran Delight</title>
-    <link rel="stylesheet" href="style.css?v=33">
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="style.css?v=38">
+    <link rel="icon" type="image/png" href="favlogo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
            /* --- GLOBAL VARIABLES --- */
@@ -53,6 +53,12 @@
             align-items: center; 
         }
 
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .header-link {
             color: var(--gold);
             font-weight: bold;
@@ -61,6 +67,35 @@
             font-size: 1rem;
         }
         .header-link:hover { color: #fff; }
+
+        
+
+        /* CALL WAITER BUTTON */
+
+        .btn-call-waiter {
+            background-color: #28a745; /* Green */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            animation: pulse-green 2s infinite;
+            text-transform: uppercase;
+        }
+
+        .btn-call-waiter:hover { background-color: #218838; }
+        .btn-call-waiter:disabled { background-color: #555; animation: none; cursor: not-allowed; }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
         
         /* Footer Styles */
         footer {
@@ -174,8 +209,12 @@
     <header>
         <div class="header-top-row">
             <div class="container header-inner-content">
-                <a href="index.html"><img src="logo.png" alt="Zaffran Logo" class="logo" style="height: 50px; width: auto;"></a>
-                <a href="index.html" class="header-link">Startseite</a>
+                <div class="logo-group">
+                    <a href="index.html"><img src="logo.png" alt="Zaffran Logo" class="logo" style="height: 50px; width: auto;"></a>
+                </div>            
+                <button id="btn-call-waiter" class="btn-call-waiter">
+                    <i class="fa fa-bell"></i> <span style="display:inline-block;">Service</span>
+                </button>
             </div>
         </div>
         
@@ -1689,6 +1728,6 @@
     </div>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="dine-in-script.js?v=26"></script>
+    <script src="dine-in-script.js?v=28"></script>
 </body>
 </html>

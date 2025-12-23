@@ -3,286 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zafran Kitchen - KDS</title>
+    <title>Zaffran Kitchen Display</title>
+    <link rel="stylesheet" href="style.css?v=33"> 
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
-        body {
-            background-color: #121212;
-            color: #e0e0e0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding: 20px;
+        /* Add specific style for the Service Alert here to ensure it pops */
+        #waiter-call-overlay .kitchen-popup-box {
+            border: 4px solid #ff4444;
+            background-color: #2a0a0a; /* Dark Red Background */
+            box-shadow: 0 0 30px #ff4444;
         }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #D4AF37; padding-bottom: 10px; margin-bottom: 20px; }
-        h1 { margin: 0; color: #D4AF37; }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 Tables per row */
-            gap: 15px;
-        }
-
-        .table-card {
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 6px;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* WAITER CALL ALERT STYLE */
-        .table-card.alert {
-            border: 2px solid red;
-            background-color: #2a0000;
-            animation: pulse-border 1.5s infinite;
-        }
-        @keyframes pulse-border {
-            0% { border-color: red; box-shadow: 0 0 5px red; }
-            50% { border-color: #ff4444; box-shadow: 0 0 15px red; }
-            100% { border-color: red; box-shadow: 0 0 5px red; }
-        }
-
-        .card-header {
-            background-color: #2a2a2a;
-            padding: 10px;
-            border-bottom: 1px solid #444;
-            font-weight: bold;
-            color: #D4AF37;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .card-body {
-            padding: 10px;
-            flex-grow: 1;
-            font-size: 0.95rem;
-        }
-
-        .order-item {
-            border-bottom: 1px dashed #444;
-            padding: 4px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        .order-item.assistance {
-            color: #ff4444;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .card-footer {
-            padding: 10px;
-            border-top: 1px solid #444;
-        }
-
-        .btn-clear {
+        #waiter-call-overlay h3 { color: #ff4444; font-size: 2rem; margin-bottom: 10px; }
+        #waiter-call-table { font-size: 3.5rem; color: white; margin: 20px 0; font-weight: bold; }
+        #dismiss-waiter-btn {
+            background-color: #ff4444; 
+            color: white; 
+            font-size: 1.5rem; 
+            padding: 15px; 
             width: 100%;
-            padding: 8px;
-            background-color: #8B0000;
-            color: white;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
+            border-radius: 5px;
         }
-        .btn-clear:hover { background-color: #a10000; }
-        
-        .btn-ready {
-            width: 100%;
-            padding: 8px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-ready:hover { background-color: #218838; }
-
-        .wait-text { color: #555; font-style: italic; text-align: center; margin-top: 50px; }
-        
-        /* Pickup Section */
-        .pickup-section { margin-top: 40px; border-top: 2px solid #D4AF37; padding-top: 20px; }
-        .pickup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        #dismiss-waiter-btn:hover { background-color: #cc0000; }
     </style>
 </head>
-<body>
+<body class="kitchen-body">
 
-    <div class="header">
-        <h1>Kitchen Display System</h1>
-        <div id="clock" style="font-size:1.5rem; font-weight:bold;">00:00</div>
-    </div>
-
-    <h2 style="color:#D4AF37;">Dine-In Orders</h2>
-    <div id="dine-in-grid" class="grid-container">
+    <header class="kitchen-header">
+        <div class="header-logo">
+            <img src="logo.png" alt="Zaffran Logo">
+            <h1>Kitchen Display System</h1>
+            <span id="connection-icon">...</span>
         </div>
+    </header>
 
-    <h2 style="color:#D4AF37; margin-top:30px;">Pickup Orders</h2>
-    <div id="pickup-grid" class="pickup-grid">
-        <p style="color:#666;">Warte auf Abholungen...</p>
+    <main class="kitchen-main">
+        <div id="kds-content-wrapper">
+            
+            <div class="kds-section-header">
+                <h2>Dine-In Orders</h2>
+            </div>
+            <div class="table-grid" id="dine-in-grid">
+                </div>
+
+            <div class="kds-section-header">
+                <h2>Pickup Orders</h2>
+            </div>
+            <div class="pickup-grid" id="pickup-grid">
+                <div class="pickup-box-empty">
+                    <p>Waiting for pickup orders...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="site-credit-footer" id="footer-bar">
+        <div class="footer-line-one">
+            <p class="footer-developer">
+                Created & Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a> +49 162 3757839
+            </p>
+            <p class="footer-copyright">
+                &copy; Zaffran Delight, Euskirchen 2025
+            </p>
+        </div>
+   </footer>   
+
+    <div id="new-order-popup-overlay" class="kitchen-popup-overlay hidden">
+        <div class="kitchen-popup-box">
+            <h3>🔔 New Order! 🔔</h3>
+            <div id="popup-order-details">
+                </div>
+            <button id="accept-order-btn">Accept Order</button>
+        </div>
     </div>
 
+    <div id="waiter-call-overlay" class="kitchen-popup-overlay hidden">
+        <div class="kitchen-popup-box">
+            <h3>⚠️ SERVICE REQUEST ⚠️</h3>
+            <div id="waiter-call-table">TABLE ?</div>
+            <p style="color: #ccc; margin-bottom: 20px;">Customer is calling for assistance.</p>
+            <button id="dismiss-waiter-btn">DISMISS</button>
+        </div>
+    </div>
+    
+    <div id="kitchen-login-overlay" class="kitchen-popup-overlay">
+        <div class="kitchen-popup-box">
+            <h3>KDS Login</h3>
+            <p>Please enter the kitchen password.</p>
+            <input type="password" id="kitchen-password" placeholder="Password">
+            <p id="login-error" style="color: red; display: none;">Invalid Password</p>
+            <button id="login-button">Login</button>
+        </div>
+    </div>
+    
     <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="kitchen-script.js?v=2"></script> 
 
-    <script>
-        const firebaseConfig = {
-          apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
-          authDomain: "zaffran-delight.firebaseapp.com",
-          projectId: "zaffran-delight",
-          storageBucket: "zaffran-delight.firebasestorage.app",
-          messagingSenderId: "1022960860126",
-          appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const audio = document.getElementById('alertSound');
-
-        // CLOCK
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        }, 1000);
-
-        // 1. GENERATE TABLE SLOTS (1-12)
-        const dineInGrid = document.getElementById('dine-in-grid');
-        for (let i = 1; i <= 12; i++) {
-            dineInGrid.innerHTML += `
-                <div class="table-card" id="table-card-${i}">
-                    <div class="card-header">
-                        <span>Table ${i}</span>
-                        <span id="timer-${i}" style="font-weight:normal; font-size:0.8rem;"></span>
-                    </div>
-                    <div class="card-body" id="body-${i}">
-                        <div class="wait-text">Waiting...</div>
-                    </div>
-                    <div class="card-footer" id="footer-${i}" style="display:none;"></div>
-                </div>`;
-        }
-
-        // 2. LISTEN FOR ORDERS
-        db.collection("orders")
-          .where("status", "==", "new")
-          .onSnapshot((snapshot) => {
-            
-            // Reset UI state before re-rendering
-            document.querySelectorAll('.table-card').forEach(el => {
-                el.classList.remove('alert');
-                el.querySelector('.card-body').innerHTML = '<div class="wait-text">Waiting...</div>';
-                el.querySelector('.card-footer').style.display = 'none';
-            });
-            document.getElementById('pickup-grid').innerHTML = "";
-
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    audio.play().catch(e => {});
-                }
-            });
-
-            const pickupOrders = [];
-
-            snapshot.forEach((doc) => {
-                const order = doc.data();
-                order.id = doc.id; // Attach ID
-
-                if (order.orderType === "pickup") {
-                    pickupOrders.push(order);
-                } else {
-                    renderTableOrder(order);
-                }
-            });
-
-            renderPickupOrders(pickupOrders);
-        });
-
-        // 3. RENDER TABLE ORDER
-        function renderTableOrder(order) {
-            const tableNum = order.table;
-            const card = document.getElementById(`table-card-${tableNum}`);
-            const body = document.getElementById(`body-${tableNum}`);
-            const footer = document.getElementById(`footer-${tableNum}`);
-            
-            if (!card) return; // Ignore if table number not 1-12
-
-            // Highlight if Assistance
-            const isAssistance = order.orderType === "assistance";
-            if (isAssistance) card.classList.add('alert');
-
-            // Build Items
-            let itemsHtml = "";
-            order.items.forEach(item => {
-                const styleClass = isAssistance ? "order-item assistance" : "order-item";
-                const icon = isAssistance ? "⚠️ " : "";
-                itemsHtml += `<div class="${styleClass}">
-                                <span>${icon}${item.quantity}x ${item.name}</span>
-                              </div>`;
-            });
-
-            if (order.notes) {
-                itemsHtml += `<div style="color:orange; font-size:0.85rem; margin-top:5px;">Note: ${order.notes}</div>`;
-            }
-
-            body.innerHTML = itemsHtml;
-            footer.style.display = "block";
-            
-            // BUTTON LOGIC: If assistance -> "Clear" (Delete), If Food -> "Ready" (Delete or Update)
-            // Per request: "anyone accept, it disappear". So we use DELETE for both.
-            const btnText = isAssistance ? "ERLEDIGT (Clear)" : "FERTIG (Clear)";
-            const btnColor = isAssistance ? "#dc3545" : "#28a745"; // Red for Alert, Green for Food
-
-            footer.innerHTML = `<button class="btn-clear" style="background:${btnColor}" onclick="clearOrder('${order.id}')">${btnText}</button>`;
-        }
-
-        // 4. RENDER PICKUP ORDERS
-        function renderPickupOrders(orders) {
-            const container = document.getElementById('pickup-grid');
-            if (orders.length === 0) {
-                container.innerHTML = "<p style='color:#555;'>No active pickup orders.</p>";
-                return;
-            }
-            container.innerHTML = ""; // Clear
-            
-            orders.forEach(order => {
-                let itemsHtml = "";
-                order.items.forEach(i => itemsHtml += `<div>${i.quantity}x ${i.name}</div>`);
-                
-                const card = document.createElement('div');
-                card.className = 'table-card';
-                card.style.minHeight = "auto";
-                card.innerHTML = `
-                    <div class="card-header">
-                        <span>${order.customerName}</span>
-                        <span>${order.total.toFixed(2)}€</span>
-                    </div>
-                    <div class="card-body">${itemsHtml}</div>
-                    <div class="card-footer">
-                        <button class="btn-ready" onclick="clearOrder('${order.id}')">ABHOLEN (Clear)</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // 5. GLOBAL CLEAR FUNCTION (SAFE DELETE)
-        window.clearOrder = function(id) {
-            // "Processing..." feedback not needed if it disappears instantly, 
-            // but prevents double clicking
-            const btn = document.activeElement;
-            if(btn) { btn.innerText = "..."; btn.disabled = true; }
-
-            db.collection("orders").doc(id).delete()
-            .then(() => {
-                console.log("Order deleted successfully");
-            })
-            .catch((error) => {
-                console.warn("Order was likely already deleted by Waiter:", error);
-                // We ignore the error because the goal (order gone) is achieved
-            });
-        };
-    </script>
 </body>
 </html>

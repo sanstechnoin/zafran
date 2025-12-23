@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tisch Reservieren - Zafran Delight</title>
+    <link rel="icon" href="favlogo.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        /* --- KDS THEME VARIABLES --- */
+        :root {
+            --bg-dark: #1a1a1a;       
+            --card-bg: #2a2a2a;      
+            --gold: #D4AF37;
+            --text-main: #f0f0f0;
+            --text-subtle: #aaa;
+            --border-color: #444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6; 
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        /* HEADER & FOOTER (Matches Index) */
+        header { position: fixed; width: 100%; top: 0; z-index: 1000; background: rgba(42, 42, 42, 0.95); border-bottom: 1px solid var(--gold); padding: 10px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; }
+        .logo img { height: 50px; display: block; }
+        .nav-links a { color: var(--gold); font-weight: 600; text-transform: uppercase; text-decoration: none; margin-left: 20px; font-size: 0.95rem; }
+        
+        /* RESERVATION CONTENT */
+        main { padding-top: 100px; padding-bottom: 60px; flex: 1; display: flex; justify-content: center; align-items: center; }
+        
+        .reservation-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1 { color: var(--gold); text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        p.subtitle { text-align: center; color: var(--text-subtle); margin-bottom: 30px; font-style: italic; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        label { display: block; margin-bottom: 8px; color: var(--gold); font-weight: bold; font-size: 0.9rem; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: #111;
+            border: 1px solid var(--border-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+
+        button.btn-submit {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--gold);
+            color: #000;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        button.btn-submit:hover { background-color: #fff; }
+        button.btn-submit:disabled { background-color: #555; cursor: not-allowed; }
+
+        /* SUCCESS MODAL */
+        #success-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;
+        }
+        .success-box {
+            background: var(--card-bg); padding: 30px; border-radius: 8px; width: 90%; max-width: 400px;
+            text-align: center; border: 2px solid var(--gold);
+        }
+        .success-icon { font-size: 50px; color: var(--gold); margin-bottom: 15px; }
+        .btn-close { background: var(--gold); color: #000; border: none; padding: 10px 30px; margin-top: 20px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+
+        footer { background: #000; padding: 40px 0; border-top: 1px solid var(--border-color); color: #666; font-size: 0.9rem; margin-top: auto; text-align: center; }
+
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; gap: 0; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="logo"><img src="logo.png" alt="Zafran Delight"></a>
+            <div class="nav-links">
+                <a href="index.html">Startseite</a>
+                <a href="index.html#menu">Speisekarte</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="reservation-card">
+            <h1>Tisch Reservieren</h1>
+            <p class="subtitle">Genießen Sie authentische Küche in gemütlicher Atmosphäre.</p>
+            
+            <form id="reservation-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="res-name" required placeholder="Ihr Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefon *</label>
+                        <input type="tel" id="res-phone" required placeholder="Für Rückfragen">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>E-Mail</label>
+                    <input type="email" id="res-email" placeholder="Optional für Bestätigung">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Datum *</label>
+                        <input type="date" id="res-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Uhrzeit *</label>
+                        <input type="time" id="res-time" required>
+                        <small style="color:#666;">Geöffnet: 12:00 - 22:00 Uhr</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Anzahl Personen *</label>
+                    <select id="res-guests" required>
+                        <option value="1">1 Person</option>
+                        <option value="2" selected>2 Personen</option>
+                        <option value="3">3 Personen</option>
+                        <option value="4">4 Personen</option>
+                        <option value="5">5 Personen</option>
+                        <option value="6">6 Personen</option>
+                        <option value="7">7 Personen</option>
+                        <option value="8">8 Personen</option>
+                        <option value="group">Mehr als 8 (Gruppe)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Anmerkungen (Optional)</label>
+                    <textarea id="res-notes" rows="2" placeholder="Besondere Wünsche, Hochstuhl, etc."></textarea>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-submit">Jetzt Reservieren</button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Zafran Delight. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+    <div id="success-modal">
+        <div class="success-box">
+            <div class="success-icon">✓</div>
+            <h2 style="color:white; margin-bottom:10px;">Anfrage Gesendet!</h2>
+            <p style="color:#ccc;">Vielen Dank für Ihre Reservierung.<br>Wir bestätigen diese in Kürze.</p>
+            <button class="btn-close" onclick="window.location.href='index.html'">Zurück zur Startseite</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="reservation-script.js?v=1"></script>
+
+</body>
+</html>

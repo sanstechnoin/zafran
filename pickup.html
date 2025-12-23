@@ -1855,18 +1855,31 @@ select#pickup-time:focus {
     </div>
 
 
-
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    
-
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script> 
     <script src="script.js?v=102"></script>
 
+ <div id="closed-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:#2a2a2a; padding:30px; border-radius:8px; border:2px solid #D4AF37; max-width:400px; width:90%; text-align:center; box-shadow: 0 0 20px rgba(0,0,0,0.8);">
+        
+        <div style="font-size:3rem; margin-bottom:15px;">🕒</div>
+        
+        <h2 style="color:#D4AF37; margin-top:0; margin-bottom:15px; text-transform:uppercase;">Derzeit Geschlossen</h2>
+        
+        <p id="closed-modal-text" style="color:#eee; line-height:1.5; font-size:1.1rem; margin-bottom:25px;">
+            Bestellungen sind nur von 12:00 bis 20:00 Uhr möglich.
+        </p>
+        
+        <button id="close-closed-modal-btn" style="background:#D4AF37; color:black; border:none; padding:12px 25px; font-weight:bold; border-radius:4px; cursor:pointer; font-size:1rem;">
+            Verstanden, Menü ansehen
+        </button>
+    </div>
+</div>
+ 
 </body>
 
 </html>
+
 
 
 

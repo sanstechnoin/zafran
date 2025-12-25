@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Dashboard - Zafran</title>
+    <link rel="icon" href="favlogo.png" type="image/png">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* DRIVER SPECIFIC STYLES */
+        body { padding-top: 20px; padding-bottom: 50px; background-color: #121212; }
+        
+        .driver-header {
+            text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px;
+        }
+        
+        .order-card {
+            background: #1e1e1e; border: 1px solid #333; border-radius: 8px; 
+            padding: 20px; margin-bottom: 20px; position: relative;
+        }
+
+        /* Status Stripe */
+        .order-card.status-ready { border-left: 5px solid #4CAF50; } /* Green = Ready to go */
+        .order-card.status-preparing { border-left: 5px solid #FFC107; opacity: 0.7; } /* Yellow = Wait */
+
+        .order-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .order-id { font-weight: bold; color: #888; font-size: 0.9rem; }
+        .order-time { font-weight: bold; color: #D4AF37; font-size: 1.1rem; }
+
+        .customer-info { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #333; }
+        .customer-name { font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .customer-address { font-size: 1.1rem; color: #ccc; line-height: 1.4; margin-bottom: 10px; }
+        
+        .action-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 10px 15px; border-radius: 4px; text-decoration: none; font-weight: bold;
+            margin-right: 10px; font-size: 0.9rem; border: none; cursor: pointer;
+        }
+        .btn-map { background: #4285F4; color: white; width: 100%; margin-bottom: 10px; }
+        .btn-call { background: #333; color: white; width: 48%; }
+        .btn-whatsapp { background: #25D366; color: white; width: 48%; }
+
+        .items-list { margin: 15px 0; font-size: 0.95rem; color: #bbb; }
+        .payment-info { 
+            background: #2a2a2a; padding: 10px; border-radius: 4px; 
+            text-align: center; font-weight: bold; color: #D4AF37; margin-bottom: 15px;
+        }
+
+        .complete-btn {
+            width: 100%; padding: 15px; background: #4CAF50; color: white; font-size: 1.1rem;
+            font-weight: bold; border: none; border-radius: 4px; cursor: pointer;
+        }
+        
+        .empty-state { text-align: center; color: #666; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="driver-header">
+            <h2 style="color: #D4AF37;">🚗 Driver Dashboard</h2>
+            <p style="color: #888; font-size: 0.9rem;">Live Delivery Feed</p>
+        </div>
+
+        <div id="driver-orders">
+            <div class="empty-state">
+                <span class="material-icons" style="font-size: 48px;">local_shipping</span>
+                <p>No active deliveries.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script src="config.json"></script> <script src="driver-script.js"></script> 
+</body>
+</html>

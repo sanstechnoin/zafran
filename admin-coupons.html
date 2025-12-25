@@ -8,7 +8,7 @@
     <style>
         /* --- KDS THEME VARIABLES --- */
         :root {
-            --bg-dark: #1a1a1a;       
+            --bg-dark: #1a1a1a;        
             --card-bg: #2a2a2a;      
             --gold: #D4AF37;
             --text-main: #f0f0f0;
@@ -67,14 +67,14 @@
         
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; color: var(--gold); }
         
-        input[type="text"], input[type="number"], input[type="date"], input[type="password"] { 
+        input[type="text"], input[type="number"], input[type="date"], input[type="password"], select { 
             width: 100%; padding: 12px; 
             border: 1px solid var(--border-color); 
             background-color: #111;
             color: white;
             border-radius: 4px; box-sizing: border-box; font-size: 1rem;
         }
-        input:focus { border-color: var(--gold); outline: none; }
+        input:focus, select:focus { border-color: var(--gold); outline: none; }
         
         /* Radio Group */
         .radio-group { display: flex; gap: 20px; padding: 10px 0; }
@@ -209,14 +209,51 @@
         <h2>Coupon Manager</h2>
         <form id="coupon-form">
             <div class="form-grid">
+                
                 <div class="form-group">
                     <label>Gutschein-Code <span class="required-star">*</span></label>
                     <input type="text" id="code" required style="text-transform: uppercase;" placeholder="z.B. SOMMER25">
                 </div>
 
                 <div class="form-group">
-                    <label>Gültig bis <span class="required-star">*</span></label>
-                    <input type="date" id="expiry" required>
+                    <label>Gültigkeits-Modus <span class="required-star">*</span></label>
+                    <select id="validityMode" onchange="toggleDateInputs()">
+                        <option value="range" selected>📅 Datums-Bereich (Standard)</option>
+                        <option value="recurring">🔄 Monatlich Wiederkehrend</option>
+                    </select>
+                </div>
+
+                <div id="rangeInputs" class="form-group-row full-width" style="background:#222; padding:15px; border-radius:4px; border:1px solid #444;">
+                    
+                    <div style="margin-bottom:15px;">
+                        <label class="checkbox-item" style="font-size:1rem; color:white;">
+                            <input type="checkbox" id="startNow" checked onchange="toggleStartField()">
+                            <span style="color:var(--gold); font-weight:bold;">Gültig ab sofort? (Heute)</span>
+                        </label>
+                    </div>
+
+                    <div style="display:flex; gap:20px; width:100%;">
+                        <div class="form-group" id="startDateGroup" style="flex:1; display:none;">
+                            <label>Gültig ab (Start)</label>
+                            <input type="date" id="startDate">
+                        </div>
+                        
+                        <div class="form-group" style="flex:1;">
+                            <label>Gültig bis (Ende) <span class="required-star">*</span></label>
+                            <input type="date" id="expiry">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="recurringInputs" class="form-group full-width" style="display:none;">
+                    <label>In welcher Woche gültig?</label>
+                    <select id="recurringRule">
+                        <option value="week1">1. Woche des Monats (Tag 1-7)</option>
+                        <option value="week2">2. Woche des Monats (Tag 8-14) [z.B. Lamm]</option>
+                        <option value="week3">3. Woche des Monats (Tag 15-21) [z.B. Huhn]</option>
+                        <option value="week4">4. Woche des Monats (Tag 22-Ende)</option>
+                    </select>
+                    <small style="color: var(--text-subtle); display:block; margin-top:5px;">Dieser Coupon aktiviert sich jeden Monat automatisch in der gewählten Woche.</small>
                 </div>
 
                 <div class="form-group">
@@ -266,7 +303,7 @@
                         <th>Code</th>
                         <th>Rabatt</th>
                         <th>Min.</th>
-                        <th>Bis</th>
+                        <th>Gültigkeit</th>
                         <th>Status</th>
                         <th style="text-align: right;">Aktion</th>
                     </tr>
@@ -301,7 +338,7 @@
 
 <script>
     // --- 1. ADMIN CONFIGURATION ---
-    const ADMIN_PASSWORD = "zafran2025"; // CHANGE THIS PASSWORD HERE
+    const ADMIN_PASSWORD = "zafran2025"; 
 
     // --- 2. Initialize Firebase ---
     const firebaseConfig = {
@@ -320,7 +357,6 @@
 
     // --- 3. LOGIN LOGIC ---
     document.addEventListener("DOMContentLoaded", () => {
-        // Check if already logged in
         if(sessionStorage.getItem('zafran_admin_logged_in') === 'true') {
             showAdminContent();
         }
@@ -342,9 +378,50 @@
         document.getElementById('admin-content').style.display = 'block';
         loadCoupons();
         loadSettings();
+        toggleDateInputs();
+        toggleStartField(); // Init state of checkbox
     }
 
-    // --- 4. SETTINGS LOGIC ---
+    // --- 4. UI TOGGLES (Date & Mode) ---
+    
+    // Toggle between Standard Range & Recurring
+    window.toggleDateInputs = function() {
+        const mode = document.getElementById('validityMode').value;
+        const rangeInputs = document.getElementById('rangeInputs');
+        const recurringInputs = document.getElementById('recurringInputs');
+        const endInput = document.getElementById('expiry');
+        
+        if (mode === 'recurring') {
+            rangeInputs.style.display = 'none';
+            recurringInputs.style.display = 'block';
+            endInput.required = false;
+        } else {
+            rangeInputs.style.display = 'block';
+            recurringInputs.style.display = 'none';
+            endInput.required = true;
+        }
+    }
+
+    // NEW: Toggle "Start Immediately" checkbox
+    window.toggleStartField = function() {
+        const isImmediate = document.getElementById('startNow').checked;
+        const startGroup = document.getElementById('startDateGroup');
+        const startInput = document.getElementById('startDate');
+
+        if (isImmediate) {
+            startGroup.style.display = 'none';
+            startInput.required = false;
+        } else {
+            startGroup.style.display = 'block';
+            startInput.required = true;
+            // Pre-fill with today if empty, just for UX
+            if(!startInput.value) {
+                startInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+    }
+
+    // --- 5. SETTINGS LOGIC ---
     const settingsForm = document.getElementById('settings-form');
     const settingsMsg = document.getElementById('settings-message');
 
@@ -386,7 +463,7 @@
         }
     });
 
-    // --- 5. COUPON LOGIC ---
+    // --- 6. COUPON LOGIC ---
     const form = document.getElementById('coupon-form');
     const msgDiv = document.getElementById('message');
     const tableBody = document.getElementById('coupons-body');
@@ -409,18 +486,42 @@
                 const isPercent = data.discountType === 'percent';
                 const discountDisplay = isPercent ? `${data.discountValue}%` : `${data.discountValue}€`;
                 const badgeClass = isPercent ? 'badge-percent' : 'badge-fixed';
-                const today = new Date().toISOString().split('T')[0];
-                const isExpired = data.expiryDate < today;
-                const statusHtml = isExpired 
-                    ? '<span class="status-inactive">Abgelaufen</span>' 
-                    : '<span class="status-active">Aktiv</span>';
+                
+                // Display Validity
+                let validityDisplay = "";
+                if(data.mode === 'recurring') {
+                    if(data.recurringRule === 'week1') validityDisplay = "🔄 Mtl. Woche 1";
+                    if(data.recurringRule === 'week2') validityDisplay = "🔄 Mtl. Woche 2";
+                    if(data.recurringRule === 'week3') validityDisplay = "🔄 Mtl. Woche 3";
+                    if(data.recurringRule === 'week4') validityDisplay = "🔄 Mtl. Woche 4";
+                } else {
+                    // Calculate if started today
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    if(data.validFrom === todayStr) {
+                         validityDisplay = `Ab Heute bis ${data.validUntil}`;
+                    } else if(data.validFrom) {
+                         validityDisplay = `${data.validFrom} bis ${data.validUntil}`;
+                    } else if (data.expiryDate) {
+                        validityDisplay = `Bis ${data.expiryDate}`;
+                    }
+                }
+
+                // Status
+                let statusHtml = '<span class="status-active">Aktiv</span>';
+                if(data.mode !== 'recurring') {
+                    const today = new Date().toISOString().split('T')[0];
+                    const endDate = data.validUntil || data.expiryDate;
+                    if(endDate < today) {
+                        statusHtml = '<span class="status-inactive">Abgelaufen</span>';
+                    }
+                }
 
                 const row = `
                     <tr>
                         <td style="font-weight:bold; color: var(--gold);">${data.code}</td>
                         <td><span class="badge ${badgeClass}">${discountDisplay}</span></td>
                         <td>${data.minOrder}€</td>
-                        <td>${data.expiryDate}</td>
+                        <td>${validityDisplay}</td>
                         <td>${statusHtml}</td>
                         <td style="text-align: right;">
                             <button class="btn-action-x" onclick="openActionModal('${data.code}')">X</button>
@@ -457,18 +558,44 @@
     function reactivateCoupon(code) {
         const coupon = couponsList.find(c => c.code === code);
         if (!coupon) return;
+        
         document.getElementById('code').value = coupon.code;
-        document.getElementById('expiry').value = ""; 
         document.getElementById('discountValue').value = coupon.discountValue;
         document.getElementById('minOrder').value = coupon.minOrder;
+        
+        if(coupon.mode === 'recurring') {
+            document.getElementById('validityMode').value = 'recurring';
+            document.getElementById('recurringRule').value = coupon.recurringRule;
+        } else {
+            document.getElementById('validityMode').value = 'range';
+            
+            // Logic to handle "Start Now" checkbox state during edit
+            const todayStr = new Date().toISOString().split('T')[0];
+            const startInput = document.getElementById('startDate');
+            
+            // If validFrom is missing or today, assume "Start Now"
+            if(!coupon.validFrom || coupon.validFrom === todayStr) {
+                 document.getElementById('startNow').checked = true;
+            } else {
+                 document.getElementById('startNow').checked = false;
+                 startInput.value = coupon.validFrom;
+            }
+            document.getElementById('expiry').value = coupon.validUntil || coupon.expiryDate || ""; 
+        }
+        
+        toggleDateInputs();
+        toggleStartField();
+
         const radios = document.getElementsByName('discountType');
         for(let r of radios) { if(r.value === coupon.discountType) r.checked = true; }
+        
         const checkboxes = document.querySelectorAll('input[name="cat"]');
         if (coupon.validCategories === 'all') {
             checkboxes.forEach(cb => cb.checked = false);
         } else {
             checkboxes.forEach(cb => { cb.checked = coupon.validCategories.includes(cb.value); });
         }
+        
         closeModal();
         window.scrollTo({ top: 300, behavior: 'smooth' });
     }
@@ -476,35 +603,75 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         msgDiv.style.display = 'none';
+        
         const code = document.getElementById('code').value.toUpperCase().trim();
+        const mode = document.getElementById('validityMode').value;
         const discountType = document.querySelector('input[name="discountType"]:checked').value;
         const discountValue = parseFloat(document.getElementById('discountValue').value);
         const minOrder = parseFloat(document.getElementById('minOrder').value);
-        const expiry = document.getElementById('expiry').value;
+        
+        let couponData = {
+            code: code,
+            mode: mode,
+            discountType: discountType,
+            discountValue: discountValue,
+            minOrder: minOrder,
+            createdAt: new Date().toISOString(),
+            active: true
+        };
+
+        if (mode === 'recurring') {
+            couponData.recurringRule = document.getElementById('recurringRule').value;
+            couponData.validFrom = null;
+            couponData.validUntil = null;
+            couponData.expiryDate = "Recurring";
+        } else {
+            // Check Start Date Logic
+            const isStartNow = document.getElementById('startNow').checked;
+            let start = "";
+            
+            if(isStartNow) {
+                // Set to today's date in YYYY-MM-DD
+                start = new Date().toISOString().split('T')[0];
+            } else {
+                start = document.getElementById('startDate').value;
+            }
+
+            const end = document.getElementById('expiry').value;
+            
+            if(!start || !end) return alert("Bitte Gültigkeitsdauer wählen!");
+            
+            couponData.validFrom = start;
+            couponData.validUntil = end;
+            couponData.expiryDate = end; 
+        }
+
         if (!code || code.length < 2) return alert("Code zu kurz!");
-        if (!expiry) return alert("Datum fehlt!");
+        
         const selectedCats = [];
         document.querySelectorAll('input[name="cat"]:checked').forEach(cb => selectedCats.push(cb.value));
-        const finalCats = selectedCats.length > 0 ? selectedCats : 'all';
+        couponData.validCategories = selectedCats.length > 0 ? selectedCats : 'all';
+
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerText = "Speichere...";
 
         try {
-            await db.collection("coupons").doc(code).set({
-                code: code,
-                discountType: discountType,
-                discountValue: discountValue,
-                minOrder: minOrder,
-                expiryDate: expiry,
-                validCategories: finalCats,
-                createdAt: new Date().toISOString()
-            });
+            await db.collection("coupons").doc(code).set(couponData);
+            
             msgDiv.textContent = `Coupon "${code}" gespeichert!`;
             msgDiv.className = 'message-box success';
+            msgDiv.style.display = 'block';
+            
             form.reset();
+            // Reset Defaults
             document.querySelector('input[value="percent"]').checked = true;
             document.getElementById('minOrder').value = "20";
+            document.getElementById('validityMode').value = 'range';
+            document.getElementById('startNow').checked = true; // Reset checkbox
+            toggleDateInputs();
+            toggleStartField();
+            
             loadCoupons();
         } catch (error) {
             console.error(error);

@@ -9,7 +9,7 @@ const firebaseConfig = {
 };
 // --- END OF FIREBASE CONFIG ---
 
-// --- WAITER MENU LIST (Kept as provided) ---
+// --- WAITER MENU LIST ---
 const MENU_ITEMS = [
     { name: "Tomatensuppe", price: 5.00 },
     { name: "Daal Linsensuppe", price: 5.00 },
@@ -173,8 +173,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
     let currentWaiterCallId = null;
 
-    let notificationAudio = new Audio('notification.mp3');
-    let alertAudio = document.getElementById('alertSound'); 
+    // --- NEW: WAITER NOTIFICATION SOUND SETUP ---
+    // We use a new Audio object for the loop
+    const serviceBell = new Audio('waiter-notification.mp3');
+    serviceBell.loop = true; // IMPORTANT: Makes it ring continuously
+    serviceBell.preload = 'auto';
+    
+    // This existing audio is for "Order Ready" notifications (single ping)
+    let notificationAudio = new Audio('notification.mp3'); 
 
     let allOrders = {}; 
     let activeTableId = null; 
@@ -183,11 +189,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const KITCHEN_PASSWORD = "zafran"; 
     const TOTAL_DINE_IN_TABLES = 12;
 
-    // --- 4. Login Logic ---
+    // --- 4. Login Logic & SOUND ENABLE ---
     loginButton.addEventListener('click', () => {
         if (passwordInput.value === KITCHEN_PASSWORD) {
             loginOverlay.classList.add('hidden');
             kdsContentWrapper.style.opacity = '1';
+            
+            // --- ENABLE SOUND ON LOGIN ---
+            // Browsers block audio unless user interacts. The login click is that interaction.
+            // We play and immediately pause to "unlock" the audio capability.
+            serviceBell.play().then(() => {
+                serviceBell.pause();
+                serviceBell.currentTime = 0;
+                console.log("Service Bell Audio Unlocked");
+            }).catch(e => console.log("Audio unlock failed (will try again on alert):", e));
+
             initializeWaiterStation(); 
         } else {
             loginError.style.display = 'block';
@@ -240,12 +256,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 snapshot.docChanges().forEach((change) => {
                     const orderData = change.doc.data();
                     
-                    // --- NEW: Identify Order Type ---
                     const isOnline = orderData.orderType === 'pickup' || orderData.orderType === 'delivery';
 
-                    // Intercept Waiter Calls
+                    // --- WAITER CALL LOGIC ---
                     if (orderData.orderType === 'assistance') {
-                        if (change.type === "added") showWaiterCall(orderData.table, change.doc.id);
+                        if (change.type === "added") {
+                            showWaiterCall(orderData.table, change.doc.id);
+                        }
+                        // If the call is removed (deleted), we must stop the sound
+                        if (change.type === "removed" && currentWaiterCallId === change.doc.id) {
+                            stopWaiterSound();
+                        }
                         return; 
                     }
 
@@ -263,11 +284,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (change.type === "removed") {
                         delete allOrders[orderData.id];
                         if(!isOnline) changedTables.add(orderData.table);
-                        // Online orders re-render below automatically
                     }
                 });
                 
-                // --- NEW: Render Combined Online Grid ---
                 renderOnlineGrid(); 
 
                 changedTables.forEach(tableIdentifier => {
@@ -285,25 +304,35 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     } 
 
-    // --- WAITER CALL FUNCTIONS ---
+    // --- WAITER CALL FUNCTIONS (MODIFIED FOR SOUND) ---
+    
     function showWaiterCall(tableNum, docId) {
         currentWaiterCallId = docId;
         waiterCallTableText.innerText = `TABLE ${tableNum}`;
         waiterCallOverlay.classList.remove('hidden');
-        if(alertAudio) alertAudio.play().catch(e => console.log("Audio block", e));
+        
+        // Play the looping sound
+        serviceBell.currentTime = 0;
+        serviceBell.play().catch(e => console.log("Audio play blocked. Interact with page first.", e));
+    }
+
+    function stopWaiterSound() {
+        serviceBell.pause();
+        serviceBell.currentTime = 0;
+        waiterCallOverlay.classList.add('hidden');
     }
 
     if(dismissWaiterBtn) {
         dismissWaiterBtn.addEventListener('click', () => {
+            // STOP SOUND IMMEDIATELY
+            stopWaiterSound();
+
             if(currentWaiterCallId) {
                 db.collection("orders").doc(currentWaiterCallId).delete()
                 .then(() => {
-                    waiterCallOverlay.classList.add('hidden');
                     currentWaiterCallId = null;
                 })
                 .catch(err => console.error("Error deleting call:", err));
-            } else {
-                waiterCallOverlay.classList.add('hidden');
             }
         });
     }

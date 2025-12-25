@@ -1,5 +1,5 @@
-// --- 1. FIREBASE CONFIGURATION ---
-// (Matched to your existing project settings)
+// --- 1. CONFIGURATION ---
+// These are your specific project keys
 const firebaseConfig = {
   apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
   authDomain: "zaffran-delight.firebaseapp.com",
@@ -9,18 +9,18 @@ const firebaseConfig = {
   appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
 };
 
-// Initialize Firebase if not already running
+// --- 2. INITIALIZE FIREBASE ---
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
 const driverContainer = document.getElementById('driver-orders');
 
-// Global Tracking Variable
-let watchId = null;
+// Global variable to hold the GPS watcher ID
+let watchId = null; 
 
-// --- 2. MAIN LISTENER (Real-Time Updates) ---
-// Listens for delivery orders that are NOT completed.
+// --- 3. MAIN LISTENER (Real-Time Updates) ---
+// We listen for 'delivery' orders that are NOT completed yet.
 db.collection("orders")
     .where("orderType", "==", "delivery")
     .where("status", "in", ["preparing", "ready", "out_for_delivery"]) 
@@ -45,32 +45,26 @@ db.collection("orders")
         });
     }, (error) => {
         console.error("Firebase Error:", error);
-        // Alert developer if Index is missing (Common Firebase issue)
         if(error.message.includes("index")) {
-            driverContainer.innerHTML = `<p style="color:red; text-align:center; padding:20px; border:1px solid red;">⚠️ SYSTEM ALERT: Database Index Missing.<br>Open Console (F12) & click the Firebase link to fix.</p>`;
+            driverContainer.innerHTML = `<p style="color:red; text-align:center; padding:20px; border:1px solid red;">⚠️ SYSTEM ALERT: Index Missing.<br>Open Console (F12) & click the Firebase link to fix.</p>`;
         }
     });
 
 
-// --- 3. RENDER FUNCTION ---
+// --- 4. RENDER CARD FUNCTION ---
 function renderDriverCard(id, order, now) {
-    // A. Address Construction
+    // A. Address Setup
     const addr = order.deliveryAddress || {};
     const fullAddress = `${addr.street} ${addr.house}, ${addr.zip} Euskirchen`;
     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
     
-    // B. Items List
-    let itemsHtml = "";
-    if(order.items && Array.isArray(order.items)) {
-        itemsHtml = order.items.map(item => `
-            <div>• ${item.quantity}x ${item.name}</div>
-        `).join('');
-    }
+    // B. Generate the Unique Tracking Link
+    const domain = window.location.origin; 
+    const trackerUrl = `${domain}/tracker.html?id=${id}`;
 
-    // C. Overdue Logic (Red Card)
+    // C. Overdue Logic (Check if current time > delivery time)
     let isOverdue = false;
     const timeSlot = order.timeSlot || "";
-    // Parse HH:MM to check if we are late
     if (timeSlot.includes(':')) {
         const [hours, minutes] = timeSlot.split(':').map(Number);
         const deadline = new Date();
@@ -78,25 +72,25 @@ function renderDriverCard(id, order, now) {
         if (now > deadline) isOverdue = true;
     }
 
-    // D. Status Logic
+    // D. Status & Button States
     let statusClass = 'status-preparing';
-    let statusText = "Kitchen is Preparing...";
-    let canComplete = false;
+    let isDisabled = true; // Buttons disabled by default (while cooking)
 
+    // If Kitchen marked "Ready" OR Driver already started
     if (order.status === 'ready' || order.status === 'out_for_delivery') {
         statusClass = 'status-ready';
-        canComplete = true;
+        isDisabled = false; // Enable buttons
     }
     if (isOverdue) statusClass = 'status-overdue';
 
-    // E. HTML TEMPLATE
+    // E. Build HTML
     const html = `
     <div class="order-card ${statusClass}" id="card-${id}">
         
         <div class="order-header">
             <div>
                 <span class="order-id">#${id.slice(-4).toUpperCase()}</span>
-                ${isOverdue ? `<span class="overdue-badge"><span class="material-icons" style="font-size:12px">warning</span> LATE</span>` : ''}
+                ${isOverdue ? `<span class="overdue-badge">⚠️ LATE</span>` : ''}
             </div>
             <span class="order-time" style="${isOverdue ? 'color:#D44437' : ''}">
                 🕒 ${timeSlot || 'ASAP'}
@@ -105,54 +99,39 @@ function renderDriverCard(id, order, now) {
 
         <div id="in-app-map-${id}" class="in-app-map-container"></div>
 
-        <div style="margin-bottom:15px;">
+        <div style="background:#222; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">
+            
+            <button onclick="startInAppNav('${id}', '${fullAddress}')" class="btn-action" style="width:100%; background:#4285F4; margin-bottom:15px;">
+                <span class="material-icons" style="margin-right:8px;">near_me</span> START GPS & TRACKING
+            </button>
+            
+            <button onclick="nativeShare('${order.customerPhone}', '${trackerUrl}')" class="btn-action" style="width:100%; background:#25D366; color:white;" ${isDisabled ? 'disabled style="opacity:0.5"' : ''}>
+                <span class="material-icons" style="margin-right:8px;">share</span> SHARE LINK (WHATSAPP)
+            </button>
+        </div>
+
+        <div class="customer-section">
             <div class="customer-name">${order.customerName}</div>
             <div class="customer-address">
-                <span class="material-icons" style="font-size:18px; color:#D4AF37; margin-top:2px;">place</span> 
+                <span class="material-icons" style="font-size:16px; color:#D4AF37;">place</span> 
                 ${fullAddress}
             </div>
             
             <div class="action-grid">
-                <button onclick="startInAppNav('${id}', '${fullAddress}')" class="btn-action btn-nav">
-                    <span class="material-icons" style="margin-right:8px;">near_me</span> 
-                    Start GPS Nav
-                </button>
-
                 <a href="${mapsLink}" target="_blank" class="btn-action btn-google">
-                    <span class="material-icons" style="margin-right:5px; font-size:16px;">map</span> External Map
+                    <span class="material-icons" style="margin-right:5px; font-size:16px;">map</span> Map
                 </a>
-
                 <a href="tel:${order.customerPhone}" class="btn-action btn-call">
                     <span class="material-icons" style="margin-right:5px;">call</span> Call
                 </a>
-                <a href="https://wa.me/${order.customerPhone.replace(/[^0-9]/g, '')}" target="_blank" class="btn-action btn-whatsapp">
-                    <span class="material-icons" style="margin-right:5px;">chat</span> WhatsApp
-                </a>
             </div>
         </div>
 
-        <div style="background:#2a2a2a; padding:12px; border-radius:6px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
-            <span style="color:#aaa;">To Collect:</span>
-            <span style="color:#D4AF37; font-weight:bold; font-size:1.2rem;">${order.total.toFixed(2)} €</span>
-        </div>
+        <div class="payment-info">💰 To Collect: ${order.total.toFixed(2)} €</div>
 
-        <div style="font-size:0.9rem; color:#888; margin-bottom:15px; line-height:1.5;">
-            <strong>Items:</strong><br>
-            ${itemsHtml}
-            ${order.notes ? `<div style="margin-top:5px; color:#FFC107;">⚠️ Note: ${order.notes}</div>` : ''}
-        </div>
-
-        ${canComplete ? `
-            <button onclick="completeDelivery('${id}')" class="complete-btn" style="${isOverdue ? 'background:#D44437' : ''}">
-                <span class="material-icons" style="vertical-align:middle; margin-right:5px;">check_circle</span>
-                ${isOverdue ? 'COMPLETE URGENT DELIVERY' : 'DELIVERED & PAID'}
-            </button>
-        ` : `
-            <div style="background:#333; color:#888; padding:15px; text-align:center; border-radius:8px;">
-                <span class="material-icons" style="vertical-align:middle;">soup_kitchen</span>
-                ${statusText}
-            </div>
-        `}
+        <button onclick="completeDelivery('${id}')" class="complete-btn" ${isDisabled ? 'disabled style="opacity:0.5"' : ''}>
+            DELIVERED
+        </button>
     </div>
     `;
     
@@ -160,101 +139,74 @@ function renderDriverCard(id, order, now) {
 }
 
 
-// --- 4. START IN-APP NAVIGATION (The Cool Feature) ---
+// --- 5. NAVIGATION & TRACKING LOGIC ---
 window.startInAppNav = function(orderId, addressText) {
     const mapDiv = document.getElementById(`in-app-map-${orderId}`);
     
-    // Toggle Logic: If open, close it.
+    // Accordion Logic: Close if open
     if (mapDiv.classList.contains('active')) {
         mapDiv.classList.remove('active');
-        // Stop tracking if they close the map? Optional.
         return; 
     }
     
-    // Close any OTHER open maps (Accordion style)
+    // Close other maps
     document.querySelectorAll('.in-app-map-container').forEach(el => el.classList.remove('active'));
-    
-    // Open this map
     mapDiv.classList.add('active');
 
-    // Check GPS
-    if (!navigator.geolocation) return alert("GPS is not supported on this device.");
+    if (!navigator.geolocation) return alert("GPS Error: Not supported");
 
-    // Get Driver Position
     navigator.geolocation.getCurrentPosition((pos) => {
         const driverLat = pos.coords.latitude;
         const driverLng = pos.coords.longitude;
 
         // Initialize Leaflet Map
-        // We use a dark theme tile layer to match the app
         const map = L.map(mapDiv).setView([driverLat, driverLng], 15);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO'
-        }).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-        // Find Customer Coordinates (Geocoding via Nominatim)
-        // Note: Using free OpenStreetMap API. In production, consider Mapbox for higher limits.
-        const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressText)}`;
-        
-        fetch(searchUrl)
+        // Geocode Customer Address
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressText)}`)
             .then(res => res.json())
             .then(data => {
                 if(data && data.length > 0) {
                     const custLat = data[0].lat;
                     const custLon = data[0].lon;
 
-                    // Draw Route (Driver -> Customer)
+                    // Draw Route
                     L.Routing.control({
                         waypoints: [
                             L.latLng(driverLat, driverLng),
                             L.latLng(custLat, custLon)
                         ],
-                        routeWhileDragging: false,
+                        createMarker: function() { return null; }, // Hide default markers
                         showAlternatives: false,
-                        addWaypoints: false,
-                        fitSelectedRoutes: true,
-                        lineOptions: { styles: [{color: '#4285F4', opacity: 0.8, weight: 6}] },
-                        createMarker: function() { return null; } // Hide default markers to add our own
+                        lineOptions: { styles: [{color: '#4285F4', opacity: 0.8, weight: 6}] }
                     }).addTo(map);
                     
-                    // Add Custom Markers
-                    const carIcon = L.divIcon({html: '🚗', className: 'map-icon', iconSize: [24,24]});
-                    const homeIcon = L.divIcon({html: '🏠', className: 'map-icon', iconSize: [24,24]});
+                    // Custom Markers
+                    L.marker([driverLat, driverLng]).addTo(map).bindPopup("You").openPopup();
+                    L.marker([custLat, custLon]).addTo(map).bindPopup("Customer");
 
-                    L.marker([driverLat, driverLng], {icon: carIcon}).addTo(map).bindPopup("You").openPopup();
-                    L.marker([custLat, custLon], {icon: homeIcon}).addTo(map).bindPopup("Customer");
-
-                    // 🚀 START LIVE TRACKING BACKGROUND PROCESS
+                    // 🚀 START BROADCASTING LOCATION
                     startLiveTracking(orderId);
 
                 } else {
-                    alert("Exact address not found on In-App Map. Please use the External Map button.");
-                    mapDiv.classList.remove('active');
+                    alert("Address not found on internal map. Use Google Maps button.");
                 }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Map Error. Check internet connection.");
             });
 
-    }, (err) => {
-        alert("GPS Error: " + err.message);
-        mapDiv.classList.remove('active');
-    });
+    }, (err) => alert("GPS Error: " + err.message));
 }
 
-
-// --- 5. LIVE TRACKING HELPER ---
+// Helper: Send Location to Firebase
 function startLiveTracking(orderId) {
     if(watchId) return; // Already tracking
 
-    // Update status to 'Out for Delivery' immediately
+    // Update status to 'out_for_delivery'
     db.collection("orders").doc(orderId).update({ status: 'out_for_delivery' });
 
-    alert("GPS Tracking Active! 🛰️\nKeep your screen ON for the customer to see you.");
+    alert("GPS Active! 🛰️\nLocation is being shared.");
 
     watchId = navigator.geolocation.watchPosition((pos) => {
-        // Send location to Firebase every time the driver moves
         db.collection("orders").doc(orderId).update({
             driverLocation: { 
                 lat: pos.coords.latitude, 
@@ -262,31 +214,47 @@ function startLiveTracking(orderId) {
             },
             lastLocationUpdate: firebase.firestore.FieldValue.serverTimestamp()
         });
-        console.log("📍 Location sent");
-    }, (err) => console.error("Tracking Error", err), {
-        enableHighAccuracy: true,
-        maximumAge: 0
-    });
+    }, null, { enableHighAccuracy: true });
 }
 
 
-// --- 6. COMPLETE DELIVERY ---
+// --- 6. NATIVE SHARE (For WhatsApp Business Landline) ---
+window.nativeShare = function(phone, url) {
+    
+    // A. Use Native Share (Works on Mobile)
+    // This allows the driver to pick "WhatsApp Business" from the list
+    if (navigator.share) {
+        navigator.share({
+            title: 'Zafran Delivery',
+            text: 'Your order is on the way! Track here:',
+            url: url
+        }).catch((err) => console.log('Share canceled', err));
+    } 
+    
+    // B. Fallback for Desktop (Direct WhatsApp Link)
+    else {
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const text = `Hi! 🚗 Your Zafran delivery is on the way. Track live here: ${url}`;
+        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+}
+
+
+// --- 7. COMPLETE DELIVERY ---
 window.completeDelivery = function(orderId) {
-    // Haptic feedback
     if(navigator.vibrate) navigator.vibrate(50);
 
-    if(!confirm("💰 Confirm: Money collected & Food delivered?")) return;
+    if(!confirm("💰 Confirm: Food delivered & Money collected?")) return;
 
     db.collection("orders").doc(orderId).update({
         status: "completed",
         deliveredAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        // Stop tracking
+        // Stop tracking to save battery
         if(watchId !== null) {
             navigator.geolocation.clearWatch(watchId);
             watchId = null;
         }
-        console.log("Order Completed");
     }).catch((error) => {
         alert("Error: " + error.message);
     });

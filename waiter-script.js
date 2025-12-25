@@ -8,7 +8,7 @@ const firebaseConfig = {
   appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
 };
 
-// --- WAITER MENU LIST (Identical to Kitchen) ---
+// --- WAITER MENU LIST (MASTER KEY) ---
 const MENU_ITEMS = [
     { name: "Tomatensuppe", price: 5.00 },        // 1
     { name: "Daal Linsensuppe", price: 5.00 },    // 2
@@ -132,68 +132,77 @@ const MENU_ITEMS = [
     { name: "Ipanema", price: 5.50 }             // 120
 ];
 
+// --- HELPER: GET DISH NUMBER ---
 function getDishNumber(name) {
     const index = MENU_ITEMS.findIndex(item => item.name === name);
     return index !== -1 ? ` - ${index + 1}` : "";
 }
 
-// --- 2. INIT FIREBASE ---
+// --- 2. Initialize Firebase ---
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// --- 3. DOM ELEMENTS ---
-const connectionIconEl = document.getElementById('connection-icon');
-const loginOverlay = document.getElementById('kitchen-login-overlay');
-const loginButton = document.getElementById('login-button');
-const passwordInput = document.getElementById('kitchen-password');
-const loginError = document.getElementById('login-error');
-const kdsContentWrapper = document.getElementById('kds-content-wrapper');
-const dineInGrid = document.getElementById('dine-in-grid');
-const pickupGrid = document.getElementById('pickup-grid');
-
-// Popups
-const waiterModal = document.getElementById('waiter-order-modal');
-const closeModalX = document.getElementById('close-modal-x');
-const cancelModalBtn = document.getElementById('btn-cancel-modal');
-const submitModalBtn = document.getElementById('btn-submit-modal');
-const menuSearchInput = document.getElementById('menu-search');
-const menuListContainer = document.getElementById('menu-list');
-const currentOrderPreview = document.getElementById('new-order-items-list');
-const modalTableTitle = document.getElementById('modal-table-title');
-
-const readyPopup = document.getElementById('ready-notification-popup');
-const readyPopupDetails = document.getElementById('ready-popup-details');
-const closeReadyPopupBtn = document.getElementById('close-ready-popup-btn');
-const waiterCallOverlay = document.getElementById('waiter-call-overlay');
-const waiterCallTableText = document.getElementById('waiter-call-table');
-const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
-let currentWaiterCallId = null;
-
-const paymentModal = document.getElementById('payment-modal');
-const paymentItemsList = document.getElementById('payment-items-list');
-const paymentTotalDisplay = document.getElementById('payment-total-display');
-const paymentTitle = document.getElementById('payment-title');
-let ordersToArchive = [];
-
-// Audio
-const serviceBell = new Audio('waiter-notification.mp3');
-serviceBell.loop = true; 
-serviceBell.preload = 'auto';
-let notificationAudio = new Audio('notification.mp3'); 
-
-let allOrders = {};
-let activeTableId = null;
-let currentDraftOrder = [];
-const KITCHEN_PASSWORD = "zafran"; 
-const TOTAL_DINE_IN_TABLES = 12;
-
-// --- 4. LOGIN ---
+// --- 3. MAIN SCRIPT LOGIC (Inside Event Listener) ---
 document.addEventListener("DOMContentLoaded", () => {
+
+    // --- DOM Elements ---
+    const connectionIconEl = document.getElementById('connection-icon'); 
+    const loginOverlay = document.getElementById('kitchen-login-overlay');
+    const loginButton = document.getElementById('login-button');
+    const passwordInput = document.getElementById('kitchen-password');
+    const loginError = document.getElementById('login-error');
+    const kdsContentWrapper = document.getElementById('kds-content-wrapper');
+    const dineInGrid = document.getElementById('dine-in-grid');
+    const pickupGrid = document.getElementById('pickup-grid');
+
+    // Waiter Order Popup Elements
+    const waiterModal = document.getElementById('waiter-order-modal');
+    const closeModalX = document.getElementById('close-modal-x');
+    const cancelModalBtn = document.getElementById('btn-cancel-modal');
+    const submitModalBtn = document.getElementById('btn-submit-modal');
+    const menuSearchInput = document.getElementById('menu-search');
+    const menuListContainer = document.getElementById('menu-list');
+    const currentOrderPreview = document.getElementById('new-order-items-list');
+    const modalTableTitle = document.getElementById('modal-table-title');
+
+    // Notification Elements
+    const readyPopup = document.getElementById('ready-notification-popup');
+    const readyPopupDetails = document.getElementById('ready-popup-details');
+    const closeReadyPopupBtn = document.getElementById('close-ready-popup-btn');
+    
+    // Waiter Call Elements
+    const waiterCallOverlay = document.getElementById('waiter-call-overlay');
+    const waiterCallTableText = document.getElementById('waiter-call-table');
+    const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
+    let currentWaiterCallId = null;
+
+    // Payment Modal Elements
+    const paymentModal = document.getElementById('payment-modal');
+    const paymentItemsList = document.getElementById('payment-items-list');
+    const paymentTotalDisplay = document.getElementById('payment-total-display');
+    const paymentTitle = document.getElementById('payment-title');
+    let ordersToArchive = []; 
+
+    // --- SOUND SETUP ---
+    const serviceBell = new Audio('waiter-notification.mp3');
+    serviceBell.loop = true; 
+    serviceBell.preload = 'auto';
+    let notificationAudio = new Audio('notification.mp3'); 
+
+    // --- STATE VARIABLES ---
+    let allOrders = {}; 
+    let activeTableId = null; 
+    let currentDraftOrder = []; 
+    const KITCHEN_PASSWORD = "zafran"; 
+    const TOTAL_DINE_IN_TABLES = 12;
+
+    // --- 4. Login Logic ---
     loginButton.addEventListener('click', () => {
         if (passwordInput.value === KITCHEN_PASSWORD) {
             loginOverlay.classList.add('hidden');
             kdsContentWrapper.style.opacity = '1';
             
+            // Enable audio on interaction
             serviceBell.play().then(() => {
                 serviceBell.pause();
                 serviceBell.currentTime = 0;
@@ -205,269 +214,357 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
-});
 
-// --- 5. INITIALIZE WAITER ---
-function initializeWaiterStation() {
-    createDineInTables();
+    // --- 5. Main Waiter Station Functions ---
 
-    dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
-        btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
-    });
-
-    dineInGrid.querySelectorAll('.add-order-btn').forEach(btn => {
-        btn.addEventListener('click', () => openOrderModal(btn.dataset.tableId));
-    });
-
-    db.collection("orders")
-      .where("status", "in", ["new", "seen", "ready", "cooked"]) 
-      .onSnapshot((snapshot) => {
-            connectionIconEl.textContent = '✅'; 
-            let changedTables = new Set(); 
-            snapshot.docChanges().forEach((change) => {
-                const orderData = change.doc.data();
-                const isOnline = orderData.orderType === 'pickup' || orderData.orderType === 'delivery';
-
-                if (orderData.orderType === 'assistance') {
-                    if (change.type === "added") showWaiterCall(orderData.table, change.doc.id);
-                    if (change.type === "removed" && currentWaiterCallId === change.doc.id) stopWaiterSound();
-                    return; 
-                }
-
-                if(!isOnline) changedTables.add(orderData.table); 
-                
-                if (change.type === "modified" && orderData.status === "ready") {
-                    triggerReadyNotification(orderData);
-                }
-                if (change.type === "added" || change.type === "modified") {
-                    allOrders[orderData.id] = orderData;
-                }
-                if (change.type === "removed") {
-                    delete allOrders[orderData.id];
-                    if(!isOnline) changedTables.add(orderData.table);
-                }
-            });
-            
-            renderOnlineGrid(); 
-            changedTables.forEach(tableIdentifier => {
-                if (!isNaN(parseInt(tableIdentifier))) renderDineInTable(tableIdentifier);
-            });
-            addDeleteItemListeners();
-      }, (error) => {
-          console.error("Firebase Error:", error);
-          connectionIconEl.textContent = '❌'; 
-      });
-} 
-
-function createDineInTables() {
-    dineInGrid.innerHTML = '';
-    for (let i = 1; i <= TOTAL_DINE_IN_TABLES; i++) {
-        const tableBox = document.createElement('div');
-        tableBox.className = 'table-box';
-        tableBox.id = `table-${i}`; 
-        tableBox.innerHTML = `
-            <div class="table-header">
-                <h2>Table ${i}</h2>
-                <button class="add-order-btn" data-table-id="${i}">➕ Order</button>
-            </div>
-            <ul class="order-list" data-table-id="${i}"></ul>
-            <p class="order-list-empty" data-table-id="${i}">Waiting for order...</p>
-            <button class="clear-table-btn" data-table-id="${i}">Clear Table ${i}</button>
-        `;
-        dineInGrid.appendChild(tableBox);
-    }
-}
-
-// --- WAITER CALL & NOTIFICATION ---
-function showWaiterCall(tableNum, docId) {
-    currentWaiterCallId = docId;
-    waiterCallTableText.innerText = `TABLE ${tableNum}`;
-    waiterCallOverlay.classList.remove('hidden');
-    serviceBell.currentTime = 0;
-    serviceBell.play().catch(e => console.log("Audio play blocked", e));
-}
-
-function stopWaiterSound() {
-    serviceBell.pause();
-    serviceBell.currentTime = 0;
-    waiterCallOverlay.classList.add('hidden');
-}
-
-dismissWaiterBtn.addEventListener('click', () => {
-    stopWaiterSound();
-    if(currentWaiterCallId) {
-        db.collection("orders").doc(currentWaiterCallId).delete();
-    }
-});
-
-function triggerReadyNotification(order) {
-    readyPopupDetails.innerHTML = `
-        <h4 style="color:var(--gold);margin-top:0;">${order.table}</h4>
-        <p>Order is ready!</p>
-    `;
-    readyPopup.classList.remove('hidden');
-    notificationAudio.play().catch(e => console.log(e));
-}
-
-closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
-
-// --- PAYMENT & ARCHIVE ---
-function showPaymentSummary(ordersList, title) {
-    ordersToArchive = ordersList; 
-    paymentTitle.innerText = title;
-    paymentItemsList.innerHTML = "";
-    let grandTotal = 0;
-
-    ordersList.forEach(order => {
-        order.items.forEach(item => {
-            let price = item.price;
-            if (!price) {
-                const menuItem = MENU_ITEMS.find(m => m.name === item.name);
-                price = menuItem ? menuItem.price : 0;
-            }
-            const itemTotal = price * item.quantity;
-            grandTotal += itemTotal;
-
-            const row = document.createElement('div');
-            row.style.display = "flex";
-            row.style.justifyContent = "space-between";
-            row.style.marginBottom = "10px";
-            row.style.borderBottom = "1px solid #333";
-            row.style.paddingBottom = "5px";
-            row.style.fontSize = "1.1rem";
-            
-            row.innerHTML = `
-                <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
-                <span style="color:var(--gold); font-weight:bold;">${itemTotal.toFixed(2)} €</span>
+    function createDineInTables() {
+        dineInGrid.innerHTML = '';
+        for (let i = 1; i <= TOTAL_DINE_IN_TABLES; i++) {
+            const tableBox = document.createElement('div');
+            tableBox.className = 'table-box';
+            tableBox.id = `table-${i}`; 
+            tableBox.innerHTML = `
+                <div class="table-header">
+                    <h2>Table ${i}</h2>
+                    <button class="add-order-btn" data-table-id="${i}">➕ Order</button>
+                </div>
+                <ul class="order-list" data-table-id="${i}"></ul>
+                <p class="order-list-empty" data-table-id="${i}">Waiting for order...</p>
+                <button class="clear-table-btn" data-table-id="${i}">Clear Table ${i}</button>
             `;
-            paymentItemsList.appendChild(row);
+            dineInGrid.appendChild(tableBox);
+        }
+    }
+
+    function initializeWaiterStation() {
+        createDineInTables();
+
+        // Button Listeners
+        dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
+            btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
         });
-    });
+
+        dineInGrid.querySelectorAll('.add-order-btn').forEach(btn => {
+            btn.addEventListener('click', () => openOrderModal(btn.dataset.tableId));
+        });
+
+        // Firebase Listener
+        db.collection("orders")
+          .where("status", "in", ["new", "seen", "ready", "cooked"]) 
+          .onSnapshot(
+            (snapshot) => {
+                connectionIconEl.textContent = '✅'; 
+                let changedTables = new Set(); 
+                snapshot.docChanges().forEach((change) => {
+                    const orderData = change.doc.data();
+                    const isOnline = orderData.orderType === 'pickup' || orderData.orderType === 'delivery';
+
+                    // Waiter Call
+                    if (orderData.orderType === 'assistance') {
+                        if (change.type === "added") showWaiterCall(orderData.table, change.doc.id);
+                        if (change.type === "removed" && currentWaiterCallId === change.doc.id) stopWaiterSound();
+                        return; 
+                    }
+
+                    if(!isOnline) changedTables.add(orderData.table); 
+                    
+                    if (change.type === "modified" && orderData.status === "ready") {
+                        triggerReadyNotification(orderData);
+                    }
+                    if (change.type === "added" || change.type === "modified") {
+                        allOrders[orderData.id] = orderData;
+                    }
+                    if (change.type === "removed") {
+                        delete allOrders[orderData.id];
+                        if(!isOnline) changedTables.add(orderData.table);
+                    }
+                });
+                
+                renderOnlineGrid(); 
+                changedTables.forEach(tableIdentifier => {
+                    if (!isNaN(parseInt(tableIdentifier))) renderDineInTable(tableIdentifier);
+                });
+                addDeleteItemListeners();
+            },
+            (error) => {
+                console.error("Error connecting to Firestore: ", error);
+                connectionIconEl.textContent = '❌'; 
+            }
+        );
+    } 
+
+    // --- WAITER CALL FUNCTIONS ---
+    function showWaiterCall(tableNum, docId) {
+        currentWaiterCallId = docId;
+        waiterCallTableText.innerText = `TABLE ${tableNum}`;
+        waiterCallOverlay.classList.remove('hidden');
+        serviceBell.currentTime = 0;
+        serviceBell.play().catch(e => console.log("Audio play blocked", e));
+    }
+
+    function stopWaiterSound() {
+        serviceBell.pause();
+        serviceBell.currentTime = 0;
+        waiterCallOverlay.classList.add('hidden');
+    }
+
+    if(dismissWaiterBtn) {
+        dismissWaiterBtn.addEventListener('click', () => {
+            stopWaiterSound();
+            if(currentWaiterCallId) {
+                db.collection("orders").doc(currentWaiterCallId).delete()
+                .then(() => { currentWaiterCallId = null; })
+                .catch(err => console.error("Error deleting call:", err));
+            }
+        });
+    }
+
+    function triggerReadyNotification(order) {
+        readyPopupDetails.innerHTML = `
+            <h4 style="color:var(--gold);margin-top:0;">${order.table}</h4>
+            <p>Order is ready!</p>
+        `;
+        readyPopup.classList.remove('hidden');
+        notificationAudio.play().catch(e => console.log(e));
+    }
     
-    paymentTotalDisplay.innerText = grandTotal.toFixed(2) + " €";
-    paymentModal.classList.remove('hidden');
-}
-
-window.closePaymentModal = function() {
-    paymentModal.classList.add('hidden');
-    ordersToArchive = [];
-}
-
-window.finalizePayment = async function() {
-    if(ordersToArchive.length === 0) return;
-    const btn = document.querySelector('#payment-modal .btn-submit-order');
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = "Processing...";
-
-    try {
-        const batch = db.batch();
-        for (const order of ordersToArchive) {
-            const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
-            batch.set(archiveRef, { ...order, closedAt: firebase.firestore.FieldValue.serverTimestamp() });
-            const docRef = db.collection("orders").doc(order.id);
-            batch.delete(docRef);
-        }
-        await batch.commit();
-        closePaymentModal();
-    } catch (e) {
-        console.error("Payment Error:", e);
-        alert("Error closing order. Check console.");
-    } finally {
-        btn.disabled = false;
-        btn.innerText = originalText;
+    if (closeReadyPopupBtn) {
+        closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
     }
-}
 
-window.handleSingleServe = function(orderId) { handleClearOrder(orderId, 'single-serve', null); }
-window.handleClearOrder = handleClearOrder; 
+    // --- PAYMENT SUMMARY LOGIC ---
+    function showPaymentSummary(ordersList, title) {
+        ordersToArchive = ordersList; 
+        paymentTitle.innerText = title;
+        paymentItemsList.innerHTML = "";
+        let grandTotal = 0;
 
-async function handleClearOrder(identifier, type, buttonElement) {
-    let ordersToProcess = [];
-    let action = ""; 
-    let title = "";
+        ordersList.forEach(order => {
+            order.items.forEach(item => {
+                let price = item.price;
+                if (!price) {
+                    const menuItem = MENU_ITEMS.find(m => m.name === item.name);
+                    price = menuItem ? menuItem.price : 0;
+                }
+                const itemTotal = price * item.quantity;
+                grandTotal += itemTotal;
 
-    if (type === 'dine-in') {
-        const tableOrders = Object.values(allOrders).filter(o => o.table === identifier && o.orderType !== 'pickup' && o.orderType !== 'delivery');
-        const allCooked = tableOrders.every(o => o.status === 'cooked');
+                const row = document.createElement('div');
+                row.style.display = "flex";
+                row.style.justifyContent = "space-between";
+                row.style.marginBottom = "10px";
+                row.style.borderBottom = "1px solid #333";
+                row.style.paddingBottom = "5px";
+                row.style.fontSize = "1.1rem";
+                
+                row.innerHTML = `
+                    <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
+                    <span style="color:var(--gold); font-weight:bold;">${itemTotal.toFixed(2)} €</span>
+                `;
+                paymentItemsList.appendChild(row);
+            });
+        });
         
-        if (allCooked) {
-            action = 'payment'; 
-            ordersToProcess = tableOrders;
-            title = `Payment: Table ${identifier}`;
-        } else {
-            action = 'serve';
-            ordersToProcess = tableOrders.filter(o => o.status !== 'cooked');
-        }
-    } 
-    else if (type === 'pickup-serve') {
-        action = 'serve';
-        ordersToProcess = [allOrders[identifier]];
-    } 
-    else if (type === 'pickup-archive') {
-        action = 'payment';
-        ordersToProcess = [allOrders[identifier]];
-        title = `Payment: ${ordersToProcess[0].customerName}`;
-    } 
-    else if (type === 'single-serve') {
-        action = 'serve';
-        ordersToProcess = [allOrders[identifier]];
+        paymentTotalDisplay.innerText = grandTotal.toFixed(2) + " €";
+        paymentModal.classList.remove('hidden');
     }
 
-    if (ordersToProcess.length === 0) return;
+    window.closePaymentModal = function() {
+        paymentModal.classList.add('hidden');
+        ordersToArchive = [];
+    }
 
-    if (action === 'payment') {
-        showPaymentSummary(ordersToProcess, title);
-    } 
-    else if (action === 'serve') {
-        if (buttonElement) {
-            buttonElement.disabled = true;
-            buttonElement.textContent = "Processing...";
-        }
+    window.finalizePayment = async function() {
+        if(ordersToArchive.length === 0) return;
+        const btn = document.querySelector('#payment-modal .btn-submit-order');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+
         try {
             const batch = db.batch();
-            ordersToProcess.forEach(order => {
+            for (const order of ordersToArchive) {
+                const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
+                batch.set(archiveRef, {
+                    ...order,
+                    closedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 const docRef = db.collection("orders").doc(order.id);
-                batch.update(docRef, { status: "cooked" });
-            });
+                batch.delete(docRef);
+            }
             await batch.commit();
+            closePaymentModal();
         } catch (e) {
-            console.error("Error serving:", e);
-            if (buttonElement) buttonElement.disabled = false;
+            console.error("Payment Error:", e);
+            alert("Error closing order. Check console.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
         }
     }
-}
 
-// --- RENDER DINE-IN ---
-function renderDineInTable(tableId) {
-    const tableBox = document.getElementById(`table-${tableId}`);
-    if (!tableBox) return; 
-    
-    const orderList = tableBox.querySelector('.order-list');
-    const emptyMsg = tableBox.querySelector('.order-list-empty');
-    const clearBtn = tableBox.querySelector('.clear-table-btn'); 
+    // --- MAIN ACTION LOGIC ---
+    window.handleSingleServe = function(orderId) { handleClearOrder(orderId, 'single-serve', null); }
+    window.handleClearOrder = handleClearOrder; 
 
-    const ordersForThisTable = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
-    orderList.innerHTML = ""; 
-    
-    if (ordersForThisTable.length === 0) {
-        orderList.style.display = 'none';
-        emptyMsg.style.display = 'block';
-        clearBtn.disabled = false;
-        clearBtn.textContent = `Clear Table ${tableId}`;
-        clearBtn.style.backgroundColor = "#8B0000"; 
-        tableBox.classList.remove('new-order-flash'); 
-    } else {
-        orderList.style.display = 'block';
-        emptyMsg.style.display = 'none';
-        ordersForThisTable.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
-        let allServed = true;
+    async function handleClearOrder(identifier, type, buttonElement) {
+        let ordersToProcess = [];
+        let action = ""; 
+        let title = "";
 
-        ordersForThisTable.forEach(order => {
+        if (type === 'dine-in') {
+            const tableOrders = Object.values(allOrders).filter(o => o.table === identifier && o.orderType !== 'pickup' && o.orderType !== 'delivery');
+            const allCooked = tableOrders.every(o => o.status === 'cooked');
+            
+            if (allCooked) {
+                action = 'payment'; 
+                ordersToProcess = tableOrders;
+                title = `Payment: Table ${identifier}`;
+            } else {
+                action = 'serve';
+                ordersToProcess = tableOrders.filter(o => o.status !== 'cooked');
+            }
+        } 
+        else if (type === 'pickup-serve') {
+            action = 'serve';
+            ordersToProcess = [allOrders[identifier]];
+        } 
+        else if (type === 'pickup-archive') {
+            action = 'payment';
+            ordersToProcess = [allOrders[identifier]];
+            title = `Payment: ${ordersToProcess[0].customerName}`;
+        } 
+        else if (type === 'single-serve') {
+            action = 'serve';
+            ordersToProcess = [allOrders[identifier]];
+        }
+
+        if (ordersToProcess.length === 0) return;
+
+        if (action === 'payment') {
+            showPaymentSummary(ordersToProcess, title);
+        } 
+        else if (action === 'serve') {
+            if (buttonElement) {
+                buttonElement.disabled = true;
+                buttonElement.textContent = "Processing...";
+            }
+            try {
+                const batch = db.batch();
+                ordersToProcess.forEach(order => {
+                    const docRef = db.collection("orders").doc(order.id);
+                    batch.update(docRef, { status: "cooked" });
+                });
+                await batch.commit();
+            } catch (e) {
+                console.error("Error serving:", e);
+                if (buttonElement) buttonElement.disabled = false;
+            }
+        }
+    }
+
+    // --- RENDER DINE-IN TABLE ---
+    function renderDineInTable(tableId) {
+        const tableBox = document.getElementById(`table-${tableId}`);
+        if (!tableBox) return; 
+        
+        const orderList = tableBox.querySelector('.order-list');
+        const emptyMsg = tableBox.querySelector('.order-list-empty');
+        const clearBtn = tableBox.querySelector('.clear-table-btn'); 
+
+        const ordersForThisTable = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
+        
+        orderList.innerHTML = ""; 
+        
+        if (ordersForThisTable.length === 0) {
+            orderList.style.display = 'none';
+            emptyMsg.style.display = 'block';
+            clearBtn.disabled = false;
+            clearBtn.textContent = `Clear Table ${tableId}`;
+            clearBtn.style.backgroundColor = "#8B0000"; 
+            tableBox.classList.remove('new-order-flash'); 
+        } else {
+            orderList.style.display = 'block';
+            emptyMsg.style.display = 'none';
+            ordersForThisTable.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+            let allServed = true;
+
+            ordersForThisTable.forEach(order => {
+                const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                const isReady = order.status === 'ready';
+                const isCooked = order.status === 'cooked';
+                if (!isCooked) allServed = false; 
+
+                let itemsHtml = order.items.map((item, index) => `
+                    <li class="waiter-item">
+                        <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
+                        ${!isCooked ? `<button class="delete-item-btn" data-order-id="${order.id}" data-item-index="${index}">×</button>` : ''}
+                    </li>
+                `).join('');
+                
+                let notesHtml = order.notes ? `<p class="order-notes">⚠️ Notes: ${order.notes}</p>` : '';
+                let orderClass = '';
+                let statusBadge = '';
+                let actionBtnHtml = '';
+
+                if (isCooked) {
+                    statusBadge = '<span style="color:#aaa;font-weight:bold;float:right;">🔵 SERVED</span>';
+                } else if (isReady) {
+                    orderClass = 'ready-order';
+                    statusBadge = '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>';
+                    actionBtnHtml = `<button class="btn-serve" onclick="handleSingleServe('${order.id}')">Serve / Clear</button>`;
+                }
+
+                const bgStyle = isCooked ? 'background-color: #222; opacity: 0.8; border: 1px solid #444;' : '';
+
+                orderList.innerHTML += `
+                    <div class="order-group ${orderClass}" id="${order.id}" style="${bgStyle}">
+                        <h4>Order @ ${orderTimestamp} ${statusBadge}</h4>
+                        <ul>${itemsHtml}</ul>
+                        ${notesHtml} 
+                        ${actionBtnHtml}
+                    </div>
+                `;
+            });
+
+            if (allServed) {
+                clearBtn.textContent = "💰 Paid & Close Table";
+                clearBtn.style.backgroundColor = "#006400"; 
+                clearBtn.disabled = false;
+            } else {
+                clearBtn.textContent = `Clear Table ${tableId}`;
+                clearBtn.style.backgroundColor = "#8B0000"; 
+                clearBtn.disabled = false;
+            }
+        }
+    }
+
+    // --- RENDER ONLINE ORDERS ---
+    function renderOnlineGrid() {
+        const grid = document.getElementById('pickup-grid'); 
+        if (!grid) return;
+        grid.innerHTML = ''; 
+        
+        const onlineOrders = Object.values(allOrders).filter(o => o.orderType === 'pickup' || o.orderType === 'delivery');
+        onlineOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+
+        if (onlineOrders.length === 0) {
+            grid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for online orders...</p></div>`;
+            return;
+        }
+
+        onlineOrders.forEach(order => {
             const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
             const isReady = order.status === 'ready';
             const isCooked = order.status === 'cooked';
-            if (!isCooked) allServed = false; 
+            
+            let typeBadge = order.orderType === 'delivery' ? "🚚 DELIVERY" : "🛍️ PICKUP";
+            let typeColor = order.orderType === 'delivery' ? "#e67e22" : "#3498db"; 
+            let addressHtml = order.deliveryAddress ? `<div style="font-size:0.85rem; color:#ccc; margin-bottom:8px; padding:5px; background:rgba(255,255,255,0.1); border-radius:4px;"><strong>📍</strong> ${order.deliveryAddress.street} ${order.deliveryAddress.house}, ${order.deliveryAddress.zip}</div>` : "";
+
+            let statusHtml = `<span style="background:${typeColor}; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${typeBadge}</span>`;
+            if (isReady) statusHtml += ' <span style="color:#25D366; font-weight:bold; float:right;">✅ READY</span>';
+            else if (isCooked) statusHtml += ' <span style="color:#aaa; font-weight:bold; float:right;">🔵 COMPLETED</span>';
 
             let itemsHtml = order.items.map((item, index) => `
                 <li class="waiter-item">
@@ -475,224 +572,158 @@ function renderDineInTable(tableId) {
                     ${!isCooked ? `<button class="delete-item-btn" data-order-id="${order.id}" data-item-index="${index}">×</button>` : ''}
                 </li>
             `).join('');
-            
-            let notesHtml = order.notes ? `<p class="order-notes">⚠️ Notes: ${order.notes}</p>` : '';
-            let orderClass = '';
-            let statusBadge = '';
-            let actionBtnHtml = '';
 
-            if (isCooked) {
-                statusBadge = '<span style="color:#aaa;font-weight:bold;float:right;">🔵 SERVED</span>';
-            } else if (isReady) {
-                orderClass = 'ready-order';
-                statusBadge = '<span style="color:#25D366;font-weight:bold;float:right;">✅ READY</span>';
-                actionBtnHtml = `<button class="btn-serve" onclick="handleSingleServe('${order.id}')">Serve / Clear</button>`;
-            }
+            let notesHtml = order.notes ? `<div style="font-style:italic; color:#888; font-size:0.8rem; margin-bottom:5px;">📝 "${order.notes}"</div>` : '';
 
-            const bgStyle = isCooked ? 'background-color: #222; opacity: 0.8; border: 1px solid #444;' : '';
+            let buttonHtml = isCooked 
+                ? `<button class="clear-pickup-btn" style="background-color: #006400;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 Paid & Close</button>`
+                : `<button class="clear-pickup-btn" onclick="handleClearOrder('${order.id}', 'pickup-serve', this)">Mark Ready / Sent</button>`;
 
-            orderList.innerHTML += `
-                <div class="order-group ${orderClass}" id="${order.id}" style="${bgStyle}">
-                    <h4>Order @ ${orderTimestamp} ${statusBadge}</h4>
-                    <ul>${itemsHtml}</ul>
-                    ${notesHtml} 
-                    ${actionBtnHtml}
-                </div>
-            `;
+            grid.innerHTML += `
+                <div class="pickup-box ${isReady ? 'ready-order' : ''}" style="${isCooked ? 'opacity:0.6; border:1px solid #444;' : 'border-top: 3px solid ' + typeColor}">
+                    <div class="table-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <h2 style="font-size:1.1rem; margin:0;">${order.customerName}</h2> 
+                        <span class="order-time" style="font-size:0.9rem;">@ ${orderTimestamp}</span>
+                    </div>
+                    <div style="margin-bottom:8px;">${statusHtml}</div>
+                    <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">📞 ${order.customerPhone}</div>
+                    ${addressHtml}
+                    <div style="font-weight:bold; color:#D4AF37; margin-bottom:5px;">Target: ${order.timeSlot} Uhr</div>
+                    ${notesHtml}
+                    <ul class="order-list" style="margin-top:5px;">${itemsHtml}</ul>
+                    ${buttonHtml}
+                </div>`;
+        });
+    }
+
+    // --- POPUP: SEARCH & ADD ITEM ---
+    function openOrderModal(tableId) {
+        activeTableId = tableId;
+        currentDraftOrder = []; 
+        modalTableTitle.textContent = `Order for Table ${tableId}`;
+        waiterModal.classList.remove('hidden');
+        renderMenu(""); 
+        renderDraftOrder();
+        menuSearchInput.value = "";
+        const noteEl = document.getElementById('waiter-order-notes');
+        if(noteEl) noteEl.value = ""; 
+        menuSearchInput.focus();
+    }
+
+    function closeOrderModal() {
+        waiterModal.classList.add('hidden');
+        activeTableId = null;
+        currentDraftOrder = [];
+    }
+
+    closeModalX.addEventListener('click', closeOrderModal);
+    cancelModalBtn.addEventListener('click', closeOrderModal);
+
+    menuSearchInput.addEventListener('input', (e) => { renderMenu(e.target.value.toLowerCase()); });
+
+    function renderMenu(query) {
+        menuListContainer.innerHTML = "";
+        // Updated Filter: Checks name OR number
+        const filteredItems = MENU_ITEMS.filter((item, index) => {
+            const num = (index + 1).toString();
+            return item.name.toLowerCase().includes(query) || num.includes(query);
         });
 
-        if (allServed) {
-            clearBtn.textContent = "💰 Paid & Close Table";
-            clearBtn.style.backgroundColor = "#006400"; 
-            clearBtn.disabled = false;
-        } else {
-            clearBtn.textContent = `Clear Table ${tableId}`;
-            clearBtn.style.backgroundColor = "#8B0000"; 
-            clearBtn.disabled = false;
+        filteredItems.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'menu-selection-item';
+            div.innerHTML = `<span>${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span><span style="color: var(--gold);">${item.price.toFixed(2)} €</span>`;
+            div.addEventListener('click', () => addItemToDraft(item));
+            menuListContainer.appendChild(div);
+        });
+    }
+
+    function addItemToDraft(item) {
+        const existing = currentDraftOrder.find(i => i.name === item.name);
+        if (existing) { existing.quantity++; } 
+        else { currentDraftOrder.push({ name: item.name, price: item.price, quantity: 1 }); }
+        renderDraftOrder();
+    }
+
+    function renderDraftOrder() {
+        currentOrderPreview.innerHTML = "";
+        if (currentDraftOrder.length === 0) {
+            currentOrderPreview.innerHTML = '<p style="color:#aaa; font-style:italic;">No items selected.</p>';
+            return;
         }
-    }
-}
-
-// --- RENDER ONLINE ---
-function renderOnlineGrid() {
-    const grid = document.getElementById('pickup-grid'); 
-    if (!grid) return;
-    grid.innerHTML = ''; 
-    
-    const onlineOrders = Object.values(allOrders).filter(o => o.orderType === 'pickup' || o.orderType === 'delivery');
-    onlineOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
-
-    if (onlineOrders.length === 0) {
-        grid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for online orders...</p></div>`;
-        return;
-    }
-
-    onlineOrders.forEach(order => {
-        const orderTimestamp = order.createdAt.toDate().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-        const isReady = order.status === 'ready';
-        const isCooked = order.status === 'cooked';
-        
-        let typeBadge = order.orderType === 'delivery' ? "🚚 DELIVERY" : "🛍️ PICKUP";
-        let typeColor = order.orderType === 'delivery' ? "#e67e22" : "#3498db"; 
-        let addressHtml = order.deliveryAddress ? `<div style="font-size:0.85rem; color:#ccc; margin-bottom:8px; padding:5px; background:rgba(255,255,255,0.1); border-radius:4px;"><strong>📍</strong> ${order.deliveryAddress.street} ${order.deliveryAddress.house}, ${order.deliveryAddress.zip}</div>` : "";
-
-        let statusHtml = `<span style="background:${typeColor}; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${typeBadge}</span>`;
-        if (isReady) statusHtml += ' <span style="color:#25D366; font-weight:bold; float:right;">✅ READY</span>';
-        else if (isCooked) statusHtml += ' <span style="color:#aaa; font-weight:bold; float:right;">🔵 COMPLETED</span>';
-
-        let itemsHtml = order.items.map((item, index) => `
-            <li class="waiter-item">
+        currentDraftOrder.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `
                 <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
-                ${!isCooked ? `<button class="delete-item-btn" data-order-id="${order.id}" data-item-index="${index}">×</button>` : ''}
-            </li>
-        `).join('');
-
-        let notesHtml = order.notes ? `<div style="font-style:italic; color:#888; font-size:0.8rem; margin-bottom:5px;">📝 "${order.notes}"</div>` : '';
-
-        let buttonHtml = isCooked 
-            ? `<button class="clear-pickup-btn" style="background-color: #006400;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 Paid & Close</button>`
-            : `<button class="clear-pickup-btn" onclick="handleClearOrder('${order.id}', 'pickup-serve', this)">Mark Ready / Sent</button>`;
-
-        grid.innerHTML += `
-            <div class="pickup-box ${isReady ? 'ready-order' : ''}" style="${isCooked ? 'opacity:0.6; border:1px solid #444;' : 'border-top: 3px solid ' + typeColor}">
-                <div class="table-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                    <h2 style="font-size:1.1rem; margin:0;">${order.customerName}</h2> 
-                    <span class="order-time" style="font-size:0.9rem;">@ ${orderTimestamp}</span>
-                </div>
-                <div style="margin-bottom:8px;">${statusHtml}</div>
-                <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">📞 ${order.customerPhone}</div>
-                ${addressHtml}
-                <div style="font-weight:bold; color:#D4AF37; margin-bottom:5px;">Target: ${order.timeSlot} Uhr</div>
-                ${notesHtml}
-                <ul class="order-list" style="margin-top:5px;">${itemsHtml}</ul>
-                ${buttonHtml}
-            </div>`;
-    });
-}
-
-// --- POPUP: SEARCH & ADD ITEM ---
-function openOrderModal(tableId) {
-    activeTableId = tableId;
-    currentDraftOrder = []; 
-    modalTableTitle.textContent = `Order for Table ${tableId}`;
-    waiterModal.classList.remove('hidden');
-    renderMenu(""); 
-    renderDraftOrder();
-    menuSearchInput.value = "";
-    const noteEl = document.getElementById('waiter-order-notes');
-    if(noteEl) noteEl.value = ""; 
-    menuSearchInput.focus();
-}
-
-function closeOrderModal() {
-    waiterModal.classList.add('hidden');
-    activeTableId = null;
-    currentDraftOrder = [];
-}
-
-closeModalX.addEventListener('click', closeOrderModal);
-cancelModalBtn.addEventListener('click', closeOrderModal);
-
-menuSearchInput.addEventListener('input', (e) => { renderMenu(e.target.value.toLowerCase()); });
-
-function renderMenu(query) {
-    menuListContainer.innerHTML = "";
-    const filteredItems = MENU_ITEMS.filter(item => item.name.toLowerCase().includes(query));
-    filteredItems.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'menu-selection-item';
-        // Show number in menu search too
-        div.innerHTML = `<span>${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span><span style="color: var(--gold);">${item.price.toFixed(2)} €</span>`;
-        div.addEventListener('click', () => addItemToDraft(item));
-        menuListContainer.appendChild(div);
-    });
-}
-
-function addItemToDraft(item) {
-    const existing = currentDraftOrder.find(i => i.name === item.name);
-    if (existing) { existing.quantity++; } 
-    else { currentDraftOrder.push({ name: item.name, price: item.price, quantity: 1 }); }
-    renderDraftOrder();
-}
-
-function renderDraftOrder() {
-    currentOrderPreview.innerHTML = "";
-    if (currentDraftOrder.length === 0) {
-        currentOrderPreview.innerHTML = '<p style="color:#aaa; font-style:italic;">No items selected.</p>';
-        return;
+                <button style="background:#8B0000;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;" onclick="removeDraftItem(${index})">×</button>
+            `;
+            currentOrderPreview.appendChild(div);
+        });
     }
-    currentDraftOrder.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'preview-item';
-        div.innerHTML = `
-            <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
-            <button style="background:#8B0000;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;" onclick="removeDraftItem(${index})">×</button>
-        `;
-        currentOrderPreview.appendChild(div);
-    });
-}
 
-window.removeDraftItem = function(index) {
-    if (currentDraftOrder[index].quantity > 1) { currentDraftOrder[index].quantity--; } 
-    else { currentDraftOrder.splice(index, 1); }
-    renderDraftOrder();
-};
-
-submitModalBtn.addEventListener('click', async () => {
-    if (!activeTableId || currentDraftOrder.length === 0) return;
-    submitModalBtn.textContent = "Sending...";
-    submitModalBtn.disabled = true;
-    const orderId = `${activeTableId}-${new Date().getTime()}`;
-    const noteEl = document.getElementById('waiter-order-notes');
-    let finalNote = "Waiter Order"; 
-    if (noteEl && noteEl.value.trim() !== "") { finalNote = noteEl.value.trim(); }
-
-    const newOrder = {
-        id: orderId,
-        table: activeTableId,
-        items: currentDraftOrder,
-        status: "new",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        orderType: "dine-in",
-        notes: finalNote
+    window.removeDraftItem = function(index) {
+        if (currentDraftOrder[index].quantity > 1) { currentDraftOrder[index].quantity--; } 
+        else { currentDraftOrder.splice(index, 1); }
+        renderDraftOrder();
     };
 
-    try {
-        await db.collection("orders").doc(orderId).set(newOrder);
-        closeOrderModal();
-    } catch (e) {
-        console.error("Error submitting waiter order:", e);
-        alert("Failed to submit order.");
-    } finally {
-        submitModalBtn.textContent = "Submit Order";
-        submitModalBtn.disabled = false;
+    submitModalBtn.addEventListener('click', async () => {
+        if (!activeTableId || currentDraftOrder.length === 0) return;
+        submitModalBtn.textContent = "Sending...";
+        submitModalBtn.disabled = true;
+        const orderId = `${activeTableId}-${new Date().getTime()}`;
+        const noteEl = document.getElementById('waiter-order-notes');
+        let finalNote = "Waiter Order"; 
+        if (noteEl && noteEl.value.trim() !== "") { finalNote = noteEl.value.trim(); }
+
+        const newOrder = {
+            id: orderId,
+            table: activeTableId,
+            items: currentDraftOrder,
+            status: "new",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            orderType: "dine-in",
+            notes: finalNote
+        };
+
+        try {
+            await db.collection("orders").doc(orderId).set(newOrder);
+            closeOrderModal();
+        } catch (e) {
+            console.error("Error submitting waiter order:", e);
+            alert("Failed to submit order.");
+        } finally {
+            submitModalBtn.textContent = "Submit Order";
+            submitModalBtn.disabled = false;
+        }
+    });
+
+    function addDeleteItemListeners() {
+        document.querySelectorAll('.delete-item-btn').forEach(btn => {
+            btn.onclick = async () => {
+                const orderId = btn.dataset.orderId;
+                const itemIndex = parseInt(btn.dataset.itemIndex); 
+                if (isNaN(itemIndex)) return;
+                if (!confirm("Remove this item?")) return;
+                btn.disabled = true;
+                try {
+                    const docRef = db.collection("orders").doc(orderId);
+                    const doc = await docRef.get();
+                    if (!doc.exists) return;
+                    const orderData = doc.data();
+                    const items = orderData.items;
+                    if (!items) return; 
+                    if (items.length === 1) { await docRef.delete(); } 
+                    else {
+                        items.splice(itemIndex, 1);
+                        await docRef.update({ items: items });
+                    }
+                } catch (err) {
+                    console.error("Error deleting item:", err);
+                    btn.disabled = false; 
+                }
+            };
+        });
     }
 });
-
-function addDeleteItemListeners() {
-    document.querySelectorAll('.delete-item-btn').forEach(btn => {
-        btn.onclick = async () => {
-            const orderId = btn.dataset.orderId;
-            const itemIndex = parseInt(btn.dataset.itemIndex); 
-            if (isNaN(itemIndex)) return;
-            if (!confirm("Remove this item?")) return;
-            btn.disabled = true;
-            try {
-                const docRef = db.collection("orders").doc(orderId);
-                const doc = await docRef.get();
-                if (!doc.exists) return;
-                const orderData = doc.data();
-                const items = orderData.items;
-                if (!items) return; 
-                if (items.length === 1) { await docRef.delete(); } 
-                else {
-                    items.splice(itemIndex, 1);
-                    await docRef.update({ items: items });
-                }
-            } catch (err) {
-                console.error("Error deleting item:", err);
-                btn.disabled = false; 
-            }
-        };
-    });
-}

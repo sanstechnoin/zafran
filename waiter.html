@@ -7,25 +7,51 @@
     <link rel="stylesheet" href="style.css?v=35"> 
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
-        /* Specific Style for Service Alert Overlay */
+        /* --- SERVICE ALERT STYLES --- */
         #waiter-call-overlay .kitchen-popup-box {
             border: 4px solid #ff4444;
             background-color: #2a0a0a; /* Dark Red Background */
-            box-shadow: 0 0 30px #ff4444;
+            box-shadow: 0 0 50px #ff4444; /* Glowing Red Effect */
+            animation: pulse-red 1s infinite alternate;
         }
-        #waiter-call-overlay h3 { color: #ff4444; font-size: 2rem; margin-bottom: 10px; }
-        #waiter-call-table { font-size: 3.5rem; color: white; margin: 20px 0; font-weight: bold; }
+        
+        #waiter-call-overlay h3 { 
+            color: #ff4444; 
+            font-size: 2rem; 
+            margin-bottom: 10px; 
+            text-transform: uppercase;
+        }
+        
+        #waiter-call-table { 
+            font-size: 4rem; 
+            color: white; 
+            margin: 20px 0; 
+            font-weight: bold; 
+            text-shadow: 2px 2px 4px black;
+        }
+        
         #dismiss-waiter-btn {
             background-color: #ff4444; 
             color: white; 
             font-size: 1.5rem; 
-            padding: 15px; 
+            padding: 20px; 
             width: 100%;
             border: none;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
+        
         #dismiss-waiter-btn:hover { background-color: #cc0000; }
+
+        @keyframes pulse-red {
+            from { box-shadow: 0 0 20px #ff4444; }
+            to { box-shadow: 0 0 60px #ff4444; }
+        }
+        
+        /* Utility to hide elements */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="kitchen-body">
@@ -38,9 +64,7 @@
     </header>
 
     <main class="kitchen-main">
-        <div id="kds-content-wrapper">
-            
-            <div class="kds-section-header">
+        <div id="kds-content-wrapper" style="opacity: 0.2;"> <div class="kds-section-header">
                 <h2>Dine-In Orders</h2>
             </div>
             <div class="table-grid" id="dine-in-grid">
@@ -61,7 +85,7 @@
     <footer class="site-credit-footer" id="footer-bar">
         <div class="footer-line-one">
             <p class="footer-developer">
-                Created & Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a> +49 162 3757839
+                Created & Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a>
             </p>
             <p class="footer-copyright">
                 &copy; Zaffran Delight, Euskirchen 2025
@@ -72,8 +96,7 @@
     <div id="ready-notification-popup" class="kitchen-popup-overlay hidden">
         <div class="kitchen-popup-box">
             <h3>✅ Order Ready!</h3>
-            <div id="ready-popup-details">
-                </div>
+            <div id="ready-popup-details"></div>
             <button id="close-ready-popup-btn">OK</button>
         </div>
     </div>
@@ -82,8 +105,8 @@
         <div class="kitchen-popup-box">
             <h3>⚠️ SERVICE REQUEST ⚠️</h3>
             <div id="waiter-call-table">TABLE ?</div>
-            <p style="color: #ccc; margin-bottom: 20px;">Customer is calling for assistance.</p>
-            <button id="dismiss-waiter-btn">DISMISS</button>
+            <p style="color: #ccc; margin-bottom: 20px; font-size: 1.2rem;">Customer is calling for assistance.</p>
+            <button id="dismiss-waiter-btn">✅ I AM GOING</button>
         </div>
     </div>
     
@@ -91,9 +114,10 @@
         <div class="kitchen-popup-box">
             <h3>Waiter Station Login</h3>
             <p>Please enter the admin password.</p>
-            <input type="password" id="kitchen-password" placeholder="Password">
+            <input type="password" id="kitchen-password" placeholder="Password" style="text-align: center; margin-bottom: 10px;">
             <p id="login-error" style="color: red; display: none;">Invalid Password</p>
             <button id="login-button">Login</button>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">(Login enables notification sounds)</p>
         </div>
     </div>
 
@@ -127,8 +151,7 @@
         </div>
     </div>
     
-    <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-    <audio id="notificationSound" src="notification.mp3"></audio> <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="waiter-script.js?v=4"></script> 
 

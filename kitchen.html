@@ -85,57 +85,76 @@
             transform: scale(1.02);
         }
 
-        /* --- UNIFIED LARGE DASHBOARD FONTS (Clean Alignment) --- */
+        /* --- FIXED DASHBOARD LAYOUT (Balanced Size & Alignment) --- */
 
-/* 1. Master Rule: Set Table Name, Time, and Items to SAME size */
-.table-box .table-header h2,       /* Table Name */
-.pickup-box .table-header h2,      /* Online Customer Name */
-.order-group h4,                   /* Time Header */
-.pickup-box .order-time,           /* Online Time */
-.waiter-item,                      /* Food Items */
-.order-list li,
-.pickup-box ul li {
-    font-size: 1.6rem !important;  /* Uniform Size (~26px) */
-    line-height: 1.4 !important;   /* Tighter spacing to fix alignment */
-    font-weight: 600 !important;   /* Bold for readability */
-    margin-bottom: 5px !important; /* Small gap between lines */
-}
-
-/* 2. Colors (Keep them distinct even if size is same) */
+/* 1. Table Headers */
 .table-box .table-header h2,
 .pickup-box .table-header h2 {
+    font-size: 1.8rem !important; /* Keep headers big */
     color: var(--gold) !important;
     border-bottom: 1px solid #444;
-    padding-bottom: 8px !important;
+    padding-bottom: 10px !important;
     margin-bottom: 10px !important;
+    white-space: nowrap; /* Prevent header wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* 2. Food Items - THE FIX */
+.waiter-item, 
+.order-list li,
+.pickup-box ul li {
+    font-size: 1.35rem !important; /* Adjusted to fit the column width */
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    
+    /* Layout Fixes */
+    display: flex !important;
+    justify-content: space-between; /* Push number to right if space permits */
+    align-items: flex-start;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.1); /* Subtle separator */
+    padding-bottom: 4px;
+}
+
+/* 3. The Dish Number Highlight */
+.order-list li strong,
+.pickup-box ul li strong {
+    font-size: 1.5rem !important; /* Make the number slightly bigger/pop */
+    color: var(--gold) !important;
+    margin-left: 8px; /* Space between name and number */
+    white-space: nowrap; /* Don't wrap the number alone */
+}
+
+/* 4. Remove List Indentation to gain width */
+.order-list, .pickup-box ul {
+    padding-left: 0 !important;
+    list-style: none !important;
+}
+
+/* 5. Order Time */
 .order-group h4, 
 .pickup-box .order-time {
-    color: #ccc !important;        /* Grey for time */
+    font-size: 1.1rem !important;
+    color: #ccc !important;
+    margin-bottom: 10px;
 }
 
-/* 3. Buttons (Match the text size) */
+/* 6. Buttons */
 .btn-serve, 
 .clear-pickup-btn,
 .clear-table-btn {
-    font-size: 1.6rem !important;  /* Same size as text */
-    padding: 12px !important;
+    font-size: 1.3rem !important;
+    padding: 10px !important;
     width: 100% !important;
-    margin-top: 10px !important;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
-/* 4. Notes (Slightly smaller to save space, but red) */
-.order-notes,
-.pickup-box div[style*="font-style:italic"] {
-    font-size: 1.4rem !important;
-    color: #ff8888 !important;
-    margin-top: 5px !important;
-}
-
-/* 5. Card Padding (Ensure text doesn't hit edges) */
+/* 7. Optimize Card Padding */
 .table-box, .pickup-box {
-    padding: 15px !important;
+    padding: 10px 15px !important; /* Less horizontal padding = more text room */
 }
     </style>
 </head>

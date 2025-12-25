@@ -84,6 +84,60 @@
             background-color: white;
             transform: scale(1.02);
         }
+
+        /* --- BIGGER DASHBOARD CARDS (Dine-In & Online) --- */
+
+/* 1. Table Headers (e.g., "Table 9") */
+.table-box .table-header h2,
+.pickup-box .table-header h2 {
+    font-size: 2.5rem !important; /* Very Large */
+    margin-bottom: 15px !important;
+    color: var(--gold) !important;
+}
+
+/* 2. Order Time & Status Header (e.g., "Order @ 16:13") */
+.order-group h4,
+.pickup-box .order-time {
+    font-size: 1.8rem !important; /* Larger and clear */
+    margin-bottom: 15px !important;
+    color: #ccc !important;
+}
+
+/* 3. Food Items List */
+.waiter-item, 
+.order-list li,
+.pickup-box ul li {
+    font-size: 2.0rem !important; /* Main focus: Big food text */
+    line-height: 1.6 !important;
+    padding: 5px 0 !important;
+}
+
+/* 4. Notes (e.g., "No onions") */
+.order-notes,
+.pickup-box div[style*="font-style:italic"] {
+    font-size: 1.6rem !important;
+    color: #ff9999 !important; /* Make notes slightly reddish to stand out */
+}
+
+/* 5. Address (For Delivery) */
+.pickup-box div[style*="background:rgba(255,255,255,0.1)"] {
+    font-size: 1.6rem !important;
+}
+
+/* 6. Buttons ("Mark Ready", "Paid", "Serve") */
+.btn-serve, 
+.clear-pickup-btn,
+.clear-table-btn {
+    font-size: 1.8rem !important; /* Big text inside buttons */
+    padding: 15px 20px !important;
+    font-weight: bold !important;
+    margin-top: 15px !important;
+}
+
+/* 7. Adjust Card Spacing to fit big text */
+.table-box, .pickup-box {
+    padding: 20px !important;
+}
     </style>
 </head>
 <body class="kitchen-body">

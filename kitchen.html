@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css?v=33"> 
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
-        /* Add specific style for the Service Alert here to ensure it pops */
+        /* --- 1. WAITER CALL ALERT (Red Box) --- */
         #waiter-call-overlay .kitchen-popup-box {
             border: 4px solid #ff4444;
             background-color: #2a0a0a; /* Dark Red Background */
@@ -26,6 +26,64 @@
             border-radius: 5px;
         }
         #dismiss-waiter-btn:hover { background-color: #cc0000; }
+
+        /* --- 2. NEW ORDER NOTIFICATION (Massive Font Update) --- */
+        
+        /* Make the box wider to fit large text */
+        #new-order-popup-overlay .kitchen-popup-box {
+            width: 85% !important;
+            max-width: 800px !important;
+            padding: 40px !important;
+            border: 3px solid #D4AF37; /* Gold border to verify style is applied */
+        }
+
+        /* "New Order!" Title -> HUGE */
+        #new-order-popup-overlay h3 { 
+            font-size: 4rem !important; 
+            margin-bottom: 30px !important;
+        }
+
+        /* The dynamic content container */
+        #popup-order-details {
+            text-align: center;
+        }
+
+        /* Table Name (e.g. "Table 4") -> Matches "New Order" Size */
+        #popup-order-details h2, 
+        #popup-order-details h3, 
+        #popup-order-details h4 {
+            font-size: 4rem !important; 
+            color: #D4AF37 !important; /* Gold */
+            margin: 20px 0 30px 0 !important;
+            text-decoration: underline;
+        }
+
+        /* The Food Items -> Matches old Table Size (Large & Readable) */
+        #popup-order-details ul li,
+        #popup-order-details div, 
+        #popup-order-details p {
+            font-size: 2.5rem !important;
+            line-height: 1.4 !important;
+            margin-bottom: 10px !important;
+        }
+
+        /* The Accept Button -> Matches Item Size & Huge Click Area */
+        #accept-order-btn {
+            font-size: 2.5rem !important;
+            padding: 30px !important;
+            margin-top: 40px !important;
+            width: 100% !important;
+            font-weight: bold;
+            background-color: #D4AF37;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #accept-order-btn:hover {
+            background-color: white;
+            transform: scale(1.02);
+        }
     </style>
 </head>
 <body class="kitchen-body">

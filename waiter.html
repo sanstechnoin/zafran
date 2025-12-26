@@ -3,183 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaffran Waiter Station</title>
-    <link rel="stylesheet" href="style.css?v=35"> 
+    <title>Kellner Dashboard | Zafran Delight</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
-        /* --- SERVICE ALERT STYLES --- */
-        #waiter-call-overlay .kitchen-popup-box {
-            border: 4px solid #ff4444;
-            background-color: #2a0a0a; /* Dark Red Background */
-            box-shadow: 0 0 50px #ff4444; /* Glowing Red Effect */
-            animation: pulse-red 1s infinite alternate;
+        /* --- KDS THEME VARIABLES --- */
+        :root {
+            --bg-dark: #1a1a1a;        
+            --card-bg: #2a2a2a;       
+            --gold: #D4AF37;
+            --text-main: #f0f0f0;
+            --text-subtle: #aaa;
+            --border-color: #444;
+            --success-green: #2e7d32;
+            --alert-red: #c62828;
         }
-        
-        #waiter-call-overlay h3 { 
-            color: #ff4444; 
-            font-size: 2rem; 
-            margin-bottom: 10px; 
-            text-transform: uppercase;
-        }
-        
-        #waiter-call-table { 
-            font-size: 4rem; 
-            color: white; 
-            margin: 20px 0; 
-            font-weight: bold; 
-            text-shadow: 2px 2px 4px black;
-        }
-        
-        #dismiss-waiter-btn {
-            background-color: #ff4444; 
-            color: white; 
-            font-size: 1.5rem; 
-            padding: 20px; 
-            width: 100%;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        
-        #dismiss-waiter-btn:hover { background-color: #cc0000; }
 
-        @keyframes pulse-red {
-            from { box-shadow: 0 0 20px #ff4444; }
-            to { box-shadow: 0 0 60px #ff4444; }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Utility to hide elements */
-        .hidden { display: none !important; }
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6; 
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        header { 
+            background: rgba(42, 42, 42, 0.95); 
+            border-bottom: 1px solid var(--gold); 
+            padding: 15px 20px; 
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo-text { font-size: 1.5rem; font-weight: bold; color: var(--gold); text-transform: uppercase; }
+        .staff-badge { background: var(--gold); color: black; padding: 5px 15px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; }
+
+        /* --- DASHBOARD GRID --- */
+        main { flex: 1; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        h2 { color: var(--gold); margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+
+        .tables-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 20px; 
+        }
+
+        /* --- TABLE CARD --- */
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .table-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 10px; }
+        .table-num { font-size: 1.4rem; font-weight: bold; color: var(--gold); }
+        .order-time { font-size: 0.85rem; color: #888; }
+        
+        .order-items { margin-bottom: 20px; font-size: 0.95rem; color: #ddd; min-height: 60px; }
+        .order-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .total-price { font-size: 1.3rem; font-weight: bold; color: var(--text-main); }
+        
+        .btn-pay {
+            background: var(--gold); color: black; border: none; padding: 10px 20px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-pay:hover { background: #fff; }
+
+        /* --- PAYMENT MODAL (The Fix) --- */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); z-index: 2000; 
+            display: none; justify-content: center; align-items: center; 
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.open { display: flex; }
+        
+        .payment-modal { 
+            background: var(--card-bg); 
+            width: 90%; max-width: 500px; 
+            border-radius: 8px; border: 2px solid var(--gold); 
+            padding: 30px; 
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.7);
+            position: relative;
+        }
+
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: #888; }
+        .close-modal:hover { color: var(--gold); }
+
+        .bill-header { border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 20px; }
+        .bill-table-title { font-size: 1.8rem; color: var(--gold); margin-bottom: 5px; }
+        
+        .bill-summary { 
+            background: #222; padding: 15px; border-radius: 4px; 
+            text-align: left; margin-bottom: 25px; border: 1px solid #444;
+        }
+        .bill-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; }
+        .bill-row.total { 
+            border-top: 1px solid #555; margin-top: 10px; padding-top: 10px; 
+            font-size: 1.4rem; font-weight: bold; color: var(--gold); 
+        }
+
+        .payment-methods { display: flex; gap: 10px; justify-content: center; margin-bottom: 25px; }
+        .p-btn { 
+            flex: 1; padding: 12px; background: #333; border: 1px solid #555; color: white; 
+            border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+        .p-btn.active { background: var(--gold); color: black; border-color: var(--gold); }
+
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; }
+        .btn-finalize { 
+            background: var(--success-green); color: white; padding: 15px; 
+            border: none; border-radius: 4px; font-size: 1.1rem; font-weight: bold; cursor: pointer; 
+            width: 100%; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-finalize:hover { background: #1b5e20; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="kitchen-body">
+<body>
 
-    <header class="kitchen-header">
-        <div class="header-logo">
-            <img src="logo.png" alt="Zaffran Logo">
-            <h1>Waiter Station</h1> <span id="connection-icon">...</span>
-        </div>
+    <header>
+        <div class="logo-text">Zafran Staff</div>
+        <div class="staff-badge">Kellner Modus</div>
     </header>
 
-    <main class="kitchen-main">
-        <div id="kds-content-wrapper" style="opacity: 0.2;"> 
-            <div class="kds-section-header">
-                <h2>Dine-In Orders</h2>
-            </div>
-            <div class="table-grid" id="dine-in-grid">
+    <main>
+        <h2>Offene Tische (Active Orders)</h2>
+        
+        <div class="tables-grid" id="tablesContainer">
+            <div class="table-card" id="table-card-1">
+                <div class="card-header">
+                    <span class="table-num">Tisch 1</span>
+                    <span class="order-time">12:30 Uhr</span>
                 </div>
-
-            <div class="kds-section-header">
-                <h2>Online Orders</h2>
+                <div class="order-items">
+                    <div class="order-item"><span>2x Butter Chicken</span><span>31,00 €</span></div>
+                    <div class="order-item"><span>2x Naan</span><span>6,00 €</span></div>
+                    <div class="order-item"><span>1x Cola</span><span>3,50 €</span></div>
+                </div>
+                <div class="card-footer">
+                    <span class="total-price">40,50 €</span>
+                    <button class="btn-pay" onclick="openPaymentModal(1, '40,50')">Abrechnen</button>
+                </div>
             </div>
-            <div class="pickup-grid" id="pickup-grid">
-                <div class="pickup-box-empty">
-                    <p>Waiting for online orders...</p>
+
+            <div class="table-card" id="table-card-4">
+                <div class="card-header">
+                    <span class="table-num">Tisch 4</span>
+                    <span class="order-time">12:45 Uhr</span>
+                </div>
+                <div class="order-items">
+                    <div class="order-item"><span>1x Lamb Korma</span><span>17,00 €</span></div>
+                    <div class="order-item"><span>1x Wasser</span><span>2,50 €</span></div>
+                </div>
+                <div class="card-footer">
+                    <span class="total-price">19,50 €</span>
+                    <button class="btn-pay" onclick="openPaymentModal(4, '19,50')">Abrechnen</button>
+                </div>
+            </div>
+            
+            <div class="table-card" id="table-card-7">
+                <div class="card-header">
+                    <span class="table-num">Tisch 7</span>
+                    <span class="order-time">13:00 Uhr</span>
+                </div>
+                <div class="order-items">
+                    <div class="order-item"><span>1x Vegi Biryani</span><span>14,50 €</span></div>
+                    <div class="order-item"><span>1x Mango Lassi</span><span>4,50 €</span></div>
+                </div>
+                <div class="card-footer">
+                    <span class="total-price">19,00 €</span>
+                    <button class="btn-pay" onclick="openPaymentModal(7, '19,00')">Abrechnen</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="site-credit-footer" id="footer-bar">
-        <div class="footer-line-one">
-            <p class="footer-developer">
-                Created & Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a>
-            </p>
-            <p class="footer-copyright">
-                &copy; Zaffran Delight, Euskirchen 2025
-            </p>
-        </div>
-   </footer>   
-
-    <div id="ready-notification-popup" class="kitchen-popup-overlay hidden">
-        <div class="kitchen-popup-box">
-            <h3>✅ Order Ready!</h3>
-            <div id="ready-popup-details"></div>
-            <button id="close-ready-popup-btn">OK</button>
-        </div>
-    </div>
-    
-    <div id="waiter-call-overlay" class="kitchen-popup-overlay hidden">
-        <div class="kitchen-popup-box">
-            <h3>⚠️ SERVICE REQUEST ⚠️</h3>
-            <div id="waiter-call-table">TABLE ?</div>
-            <p style="color: #ccc; margin-bottom: 20px; font-size: 1.2rem;">Customer is calling for assistance.</p>
-            <button id="dismiss-waiter-btn">✅ I AM GOING</button>
-        </div>
-    </div>
-    
-    <div id="kitchen-login-overlay" class="kitchen-popup-overlay">
-        <div class="kitchen-popup-box">
-            <h3>Waiter Station Login</h3>
-            <p>Please enter the admin password.</p>
-            <input type="password" id="kitchen-password" placeholder="Password" style="text-align: center; margin-bottom: 10px;">
-            <p id="login-error" style="color: red; display: none;">Invalid Password</p>
-            <button id="login-button">Login</button>
-            <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">(Login enables notification sounds)</p>
-        </div>
-    </div>
-
-    <div id="waiter-order-modal" class="hidden">
-        <div class="waiter-popup-content">
-            <div class="waiter-popup-header">
-                <h3 id="modal-table-title">Order for Table ?</h3>
-                <button id="close-modal-x" style="background:none;border:none;color:white;font-size:1.5em;cursor:pointer;">&times;</button>
-            </div>
-            <div class="waiter-popup-body">
-                <input type="text" id="menu-search" class="menu-search-bar" placeholder="Search item...">
-                <div id="menu-list" class="menu-selection-list"></div>
-                
-                <div class="current-order-preview">
-                    <h4>Current Selection:</h4>
-                    <div id="new-order-items-list">
-                        <p style="color:#aaa; font-style:italic;">No items selected.</p>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 15px;">
-                    <label for="waiter-order-notes" style="display:block; margin-bottom:5px; font-weight:bold;">Notes / Special Request:</label>
-                    <textarea id="waiter-order-notes" class="menu-search-bar" placeholder="e.g. No onions, Extra spicy..." rows="2" style="resize: vertical; color: white;"></textarea>
-                </div>
-
-            </div>
-            <div class="waiter-popup-footer">
-                <button class="btn-cancel-order" id="btn-cancel-modal">Cancel</button>
-                <button class="btn-submit-order" id="btn-submit-modal">Submit Order</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="payment-modal" class="hidden">
-        <div class="waiter-popup-content" style="max-width: 500px; border: 2px solid #D4AF37;">
-            <div class="waiter-popup-header" style="border-bottom: 1px solid #444;">
-                <h3 id="payment-title" style="margin:0; color:white;">Payment Summary</h3>
-                <button onclick="closePaymentModal()" style="background:none;border:none;color:white;font-size:2rem;cursor:pointer;">&times;</button>
-            </div>
+    <div class="modal-overlay" id="paymentModal">
+        <div class="payment-modal">
+            <span class="close-modal" onclick="closePaymentModal()">×</span>
             
-            <div class="waiter-popup-body" style="padding: 20px;">
-                <div id="payment-items-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
-                    </div>
-                
-                <div style="border-top: 2px solid #555; padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 1.2rem; color: #aaa;">Total Amount:</span>
-                    <span id="payment-total-display" style="font-size: 2rem; font-weight: bold; color: #D4AF37;">0.00 €</span>
-                </div>
+            <div class="bill-header">
+                <div class="bill-table-title" id="modalTableTitle">Tisch 1</div>
+                <div style="color: #888;">Zusammenfassung</div>
             </div>
 
-            <div class="waiter-popup-footer" style="padding: 20px; border-top: 1px solid #444; display: flex; gap: 10px;">
-                <button class="btn-cancel-order" onclick="closePaymentModal()" style="flex:1; padding: 15px; background: #333; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Cancel</button>
-                <button class="btn-submit-order" onclick="finalizePayment()" style="flex:1; padding: 15px; background: #006400; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer;">
-                    ✅ PAID & CLOSE
-                </button>
+            <div class="bill-summary">
+                <div class="bill-row"><span>Zwischensumme</span><span id="modalSubtotal">0,00 €</span></div>
+                <div class="bill-row"><span>Service / MwSt.</span><span>inkl.</span></div>
+                <div class="bill-row total"><span>Gesamtbetrag</span><span id="modalTotal">0,00 €</span></div>
+            </div>
+
+            <p style="text-align: left; color: var(--gold); margin-bottom: 5px; font-weight: bold;">Zahlungsart:</p>
+            <div class="payment-methods">
+                <button class="p-btn active" onclick="selectMethod(this, 'Bar')">💵 Bar</button>
+                <button class="p-btn" onclick="selectMethod(this, 'Karte')">💳 Karte</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-finalize" onclick="finalizePayment()">Bezahlt & Schließen</button>
+                <button class="btn-pay" style="background: transparent; border: 1px solid #555; color: #aaa; width: 100%;" onclick="closePaymentModal()">Abbrechen</button>
             </div>
         </div>
     </div>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="waiter-script.js?v=4"></script> 
+
+    <script>
+        let currentTableId = null;
+
+        // Open the Modal with Table Data
+        function openPaymentModal(tableId, amount) {
+            currentTableId = tableId;
+            
+            // Update Modal Content
+            document.getElementById('modalTableTitle').innerText = "Tisch " + tableId;
+            document.getElementById('modalSubtotal').innerText = amount + " €";
+            document.getElementById('modalTotal').innerText = amount + " €";
+            
+            // Show Modal
+            document.getElementById('paymentModal').classList.add('open');
+        }
+
+        // Close Modal
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('open');
+            currentTableId = null;
+        }
+
+        // Toggle Payment Method Visuals
+        function selectMethod(btn, method) {
+            document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Finalize Payment (Removes the card from the UI to simulate completion)
+        function finalizePayment() {
+            if (currentTableId) {
+                // Here you would normally send data to Firebase
+                // For now, we simulate success by removing the card
+                
+                const card = document.getElementById('table-card-' + currentTableId);
+                if (card) {
+                    card.style.opacity = '0';
+                    setTimeout(() => card.remove(), 300); // Animation removal
+                }
+
+                // Close Modal
+                closePaymentModal();
+                
+                // Optional: Show a small toast notification
+                alert("Tisch " + currentTableId + " erfolgreich abgerechnet!");
+            }
+        }
+    </script>
 
 </body>
 </html>

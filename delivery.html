@@ -1939,8 +1939,10 @@ select#pickup-time:focus {
     function acceptAllCookies() {
         localStorage.setItem('cookieConsent', 'all');
         document.getElementById('cookie-banner').style.display = 'none';
-        // Auto-load map if consent given
+        // Only load map if the function exists (prevents errors on other pages)
+        if (typeof loadMap === 'function') {
         loadMap();
+        }
     }
 
     function acceptEssentialCookies() {

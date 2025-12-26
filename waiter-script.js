@@ -29,7 +29,7 @@ const MENU_ITEMS = [
     { name: "Saag Aallu", price: 13.00 },
     { name: "Tarka Daal", price: 12.50 },
     { name: "Bhindi Masala", price: 13.00 },
-    { name: "Baingen Aallu", price: 13.00 },     // 20
+    { name: "Baingen Aallu", price: 13.00 },      // 20
     { name: "Mushroom Aallu", price: 13.00 },
     { name: "Gobi Aallu", price: 13.00 },
     { name: "Channa Masala", price: 12.50 },
@@ -39,7 +39,7 @@ const MENU_ITEMS = [
     { name: "Paneer Tikka Masala", price: 14.50 },
     { name: "Paneer Jalfrezi", price: 14.00 },
     { name: "Paneer Bhunna Masala", price: 14.00 },
-    { name: "Palak Paneer", price: 14.00 },      // 30
+    { name: "Palak Paneer", price: 14.00 },       // 30
     { name: "Paneer Muttar Aallu", price: 14.50 },
     { name: "Chicken Curry", price: 14.50 },
     { name: "Chicken Tikka Masala", price: 15.50 },
@@ -49,7 +49,7 @@ const MENU_ITEMS = [
     { name: "Chicken Goan Curry", price: 15.50 },
     { name: "Chicken Jalfrezi", price: 15.50 },
     { name: "Chicken Kadai", price: 15.50 },
-    { name: "Chicken Bhuna", price: 15.50 },     // 40
+    { name: "Chicken Bhuna", price: 15.50 },      // 40
     { name: "Vegi Chicken", price: 15.00 },
     { name: "Chicken Palak", price: 15.50 },
     { name: "Chicken Dhansik", price: 15.50 },
@@ -59,7 +59,7 @@ const MENU_ITEMS = [
     { name: "Lamb Tikka Masala", price: 17.50 },
     { name: "Lamb Korma", price: 17.00 },
     { name: "Butter Lamb", price: 17.50 },
-    { name: "Kashmiri Lamb", price: 17.50 },     // 50
+    { name: "Kashmiri Lamb", price: 17.50 },      // 50
     { name: "Lamb Goan Curry", price: 17.50 },
     { name: "Lamb Jalfrezi", price: 17.50 },
     { name: "Lamb Kadai", price: 17.50 },
@@ -69,7 +69,7 @@ const MENU_ITEMS = [
     { name: "Lamb Dhansik", price: 17.50 },
     { name: "Lamb Madras", price: 17.50 },
     { name: "Lamb Vindalo", price: 17.50 },
-    { name: "Prawn Curry", price: 18.50 },       // 60
+    { name: "Prawn Curry", price: 18.50 },        // 60
     { name: "Prawn Korma", price: 18.50 },
     { name: "Prawn Tikka Masala", price: 18.50 },
     { name: "Fish Curry", price: 18.50 },
@@ -79,7 +79,7 @@ const MENU_ITEMS = [
     { name: "Malai Tikka", price: 17.50 },
     { name: "Haryali Tikka", price: 17.50 },
     { name: "Lamb Tikka", price: 18.50 },
-    { name: "Lamb Chops", price: 20.50 },        // 70
+    { name: "Lamb Chops", price: 20.50 },         // 70
     { name: "Seekh Kabab", price: 19.50 },
     { name: "Prawn Tikka", price: 20.50 },
     { name: "Paneer Tikka", price: 17.50 },
@@ -99,7 +99,7 @@ const MENU_ITEMS = [
     { name: "Tandoori Parantha", price: 4.50 },
     { name: "Mint Sauce", price: 3.00 },
     { name: "Natur Joghurt", price: 2.50 },
-    { name: "Raita", price: 4.00 },              // 90
+    { name: "Raita", price: 4.00 },               // 90
     { name: "Mango Chutney", price: 3.00 },
     { name: "Imli (Tamarind) Chutney", price: 3.00 },
     { name: "Laal Chutney (scharfe...)", price: 3.50 },
@@ -109,7 +109,7 @@ const MENU_ITEMS = [
     { name: "Gemüse-Frühlingsrollen", price: 5.00 },
     { name: "Pommes frites", price: 3.50 },
     { name: "Chicken Nuggets (6 Stk.)", price: 4.50 },
-    { name: "Basmati - Reis", price: 3.50 },     // 100
+    { name: "Basmati - Reis", price: 3.50 },      // 100
     { name: "Zeera - Reis", price: 4.00 },
     { name: "Zafrani - Reis", price: 5.50 },
     { name: "Gemischter Salat", price: 6.00 },
@@ -119,7 +119,7 @@ const MENU_ITEMS = [
     { name: "Almond Kulfi", price: 5.50 },
     { name: "Pista Kulfi", price: 5.50 },
     { name: "Gulab Jamun", price: 5.50 },
-    { name: "Ras Malai", price: 5.50 },          // 110
+    { name: "Ras Malai", price: 5.50 },           // 110
     { name: "Lassi", price: 4.00 },
     { name: "Mango Lassi", price: 4.50 },
     { name: "Rosé Lassi", price: 4.50 },
@@ -128,8 +128,8 @@ const MENU_ITEMS = [
     { name: "Sprite", price: 3.50 },
     { name: "Fanta", price: 3.50 },
     { name: "Pinacolada", price: 5.50 },
-    { name: "Mint-Margarita", price: 5.50 },     // 119
-    { name: "Ipanema", price: 5.50 }             // 120
+    { name: "Mint-Margarita", price: 5.50 },      // 119
+    { name: "Ipanema", price: 5.50 }              // 120
 ];
 
 // --- HELPER: GET DISH NUMBER ---
@@ -139,7 +139,9 @@ function getDishNumber(name) {
 }
 
 // --- 2. Initialize Firebase ---
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
 // --- 3. MAIN SCRIPT LOGIC (Inside Event Listener) ---
@@ -176,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
     let currentWaiterCallId = null;
 
-    // Payment Modal Elements
+    // Payment Modal Elements (The New Integration)
     const paymentModal = document.getElementById('payment-modal');
     const paymentItemsList = document.getElementById('payment-items-list');
     const paymentTotalDisplay = document.getElementById('payment-total-display');
@@ -197,27 +199,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const TOTAL_DINE_IN_TABLES = 12;
 
     // --- 4. Login Logic ---
-    loginButton.addEventListener('click', () => {
-        if (passwordInput.value === KITCHEN_PASSWORD) {
-            loginOverlay.classList.add('hidden');
-            kdsContentWrapper.style.opacity = '1';
-            
-            // Enable audio on interaction
-            serviceBell.play().then(() => {
-                serviceBell.pause();
-                serviceBell.currentTime = 0;
-            }).catch(e => console.log("Audio unlock failed:", e));
+    if(loginButton) {
+        loginButton.addEventListener('click', () => {
+            if (passwordInput.value === KITCHEN_PASSWORD) {
+                loginOverlay.classList.add('hidden');
+                kdsContentWrapper.style.opacity = '1';
+                
+                // Enable audio on interaction
+                serviceBell.play().then(() => {
+                    serviceBell.pause();
+                    serviceBell.currentTime = 0;
+                }).catch(e => console.log("Audio unlock failed:", e));
 
-            initializeWaiterStation(); 
-        } else {
-            loginError.style.display = 'block';
-        }
-    });
-    passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
+                initializeWaiterStation(); 
+            } else {
+                loginError.style.display = 'block';
+            }
+        });
+        passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
+    } else {
+        // If no login button (records page), just init
+        initializeWaiterStation();
+    }
 
     // --- 5. Main Waiter Station Functions ---
 
     function createDineInTables() {
+        if(!dineInGrid) return; // Guard for Records Page
         dineInGrid.innerHTML = '';
         for (let i = 1; i <= TOTAL_DINE_IN_TABLES; i++) {
             const tableBox = document.createElement('div');
@@ -239,21 +247,23 @@ document.addEventListener("DOMContentLoaded", () => {
     function initializeWaiterStation() {
         createDineInTables();
 
-        // Button Listeners
-        dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
-            btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
-        });
+        // Button Listeners (Only if elements exist)
+        if(dineInGrid) {
+            dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
+            });
 
-        dineInGrid.querySelectorAll('.add-order-btn').forEach(btn => {
-            btn.addEventListener('click', () => openOrderModal(btn.dataset.tableId));
-        });
+            dineInGrid.querySelectorAll('.add-order-btn').forEach(btn => {
+                btn.addEventListener('click', () => openOrderModal(btn.dataset.tableId));
+            });
+        }
 
-        // Firebase Listener
+        // Firebase Listener - Handles Orders & Updates UI
         db.collection("orders")
           .where("status", "in", ["new", "seen", "ready", "cooked"]) 
           .onSnapshot(
             (snapshot) => {
-                connectionIconEl.textContent = '✅'; 
+                if(connectionIconEl) connectionIconEl.textContent = '✅'; 
                 let changedTables = new Set(); 
                 snapshot.docChanges().forEach((change) => {
                     const orderData = change.doc.data();
@@ -288,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             (error) => {
                 console.error("Error connecting to Firestore: ", error);
-                connectionIconEl.textContent = '❌'; 
+                if(connectionIconEl) connectionIconEl.textContent = '❌'; 
             }
         );
     } 
@@ -332,63 +342,77 @@ document.addEventListener("DOMContentLoaded", () => {
         closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
     }
 
-    // --- PAYMENT SUMMARY LOGIC ---
+    // --- PAYMENT SUMMARY LOGIC (Integrated New Modal) ---
     function showPaymentSummary(ordersList, title) {
         ordersToArchive = ordersList; 
-        paymentTitle.innerText = title;
-        paymentItemsList.innerHTML = "";
-        let grandTotal = 0;
-
-        ordersList.forEach(order => {
-            order.items.forEach(item => {
-                let price = item.price;
-                if (!price) {
-                    const menuItem = MENU_ITEMS.find(m => m.name === item.name);
-                    price = menuItem ? menuItem.price : 0;
-                }
-                const itemTotal = price * item.quantity;
-                grandTotal += itemTotal;
-
-                const row = document.createElement('div');
-                row.style.display = "flex";
-                row.style.justifyContent = "space-between";
-                row.style.marginBottom = "10px";
-                row.style.borderBottom = "1px solid #333";
-                row.style.paddingBottom = "5px";
-                row.style.fontSize = "1.1rem";
-                
-                row.innerHTML = `
-                    <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
-                    <span style="color:var(--gold); font-weight:bold;">${itemTotal.toFixed(2)} €</span>
-                `;
-                paymentItemsList.appendChild(row);
-            });
-        });
         
-        paymentTotalDisplay.innerText = grandTotal.toFixed(2) + " €";
-        paymentModal.classList.remove('hidden');
+        if(paymentTitle) paymentTitle.innerText = title;
+        if(paymentItemsList) {
+            paymentItemsList.innerHTML = "";
+            let grandTotal = 0;
+
+            ordersList.forEach(order => {
+                order.items.forEach(item => {
+                    let price = item.price;
+                    if (!price) {
+                        const menuItem = MENU_ITEMS.find(m => m.name === item.name);
+                        price = menuItem ? menuItem.price : 0;
+                    }
+                    const itemTotal = price * item.quantity;
+                    grandTotal += itemTotal;
+
+                    const row = document.createElement('div');
+                    row.className = 'pay-item-row'; // Use CSS class
+                    // Fallback Styles if CSS missing
+                    row.style.display = "flex";
+                    row.style.justifyContent = "space-between";
+                    row.style.borderBottom = "1px dashed #444";
+                    row.style.padding = "8px 0";
+                    row.style.color = "#ddd";
+                    
+                    row.innerHTML = `
+                        <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
+                        <span style="color:var(--gold); font-weight:bold;">${itemTotal.toFixed(2)} €</span>
+                    `;
+                    paymentItemsList.appendChild(row);
+                });
+            });
+            
+            if(paymentTotalDisplay) paymentTotalDisplay.innerText = grandTotal.toFixed(2) + " €";
+        }
+        
+        if(paymentModal) paymentModal.classList.remove('hidden');
     }
 
     window.closePaymentModal = function() {
-        paymentModal.classList.add('hidden');
+        if(paymentModal) paymentModal.classList.add('hidden');
         ordersToArchive = [];
     }
 
     window.finalizePayment = async function() {
         if(ordersToArchive.length === 0) return;
         const btn = document.querySelector('#payment-modal .btn-submit-order');
-        const originalText = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "Processing...";
+        let originalText = "✅ Paid & Close";
+        if(btn) {
+             originalText = btn.innerText;
+             btn.disabled = true;
+             btn.innerText = "Processing...";
+        }
 
         try {
             const batch = db.batch();
             for (const order of ordersToArchive) {
+                // Save to 'archived_orders' (for Records Page)
                 const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
                 batch.set(archiveRef, {
                     ...order,
-                    closedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    status: 'paid', // Mark as paid
+                    paidAmount: parseFloat(document.getElementById('payment-total-display').innerText.replace(' €','')), // Capture total
+                    closedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    day: new Date().toISOString().split('T')[0] // For easy filtering
                 });
+                
+                // Delete from active 'orders'
                 const docRef = db.collection("orders").doc(order.id);
                 batch.delete(docRef);
             }
@@ -398,8 +422,10 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Payment Error:", e);
             alert("Error closing order. Check console.");
         } finally {
-            btn.disabled = false;
-            btn.innerText = originalText;
+            if(btn) {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
         }
     }
 
@@ -419,7 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (allCooked) {
                 action = 'payment'; 
                 ordersToProcess = tableOrders;
-                title = `Payment: Table ${identifier}`;
+                title = `Bill: Table ${identifier}`;
             } else {
                 action = 'serve';
                 ordersToProcess = tableOrders.filter(o => o.status !== 'cooked');
@@ -432,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (type === 'pickup-archive') {
             action = 'payment';
             ordersToProcess = [allOrders[identifier]];
-            title = `Payment: ${ordersToProcess[0].customerName}`;
+            title = `Bill: ${ordersToProcess[0].customerName}`;
         } 
         else if (type === 'single-serve') {
             action = 'serve';
@@ -541,15 +567,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- RENDER ONLINE ORDERS ---
     function renderOnlineGrid() {
-        const grid = document.getElementById('pickup-grid'); 
-        if (!grid) return;
-        grid.innerHTML = ''; 
+        if(!pickupGrid) return;
+        pickupGrid.innerHTML = ''; 
         
         const onlineOrders = Object.values(allOrders).filter(o => o.orderType === 'pickup' || o.orderType === 'delivery');
         onlineOrders.sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
 
         if (onlineOrders.length === 0) {
-            grid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for online orders...</p></div>`;
+            pickupGrid.innerHTML = `<div class="pickup-box-empty"><p>Waiting for online orders...</p></div>`;
             return;
         }
 
@@ -579,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? `<button class="clear-pickup-btn" style="background-color: #006400;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 Paid & Close</button>`
                 : `<button class="clear-pickup-btn" onclick="handleClearOrder('${order.id}', 'pickup-serve', this)">Mark Ready / Sent</button>`;
 
-            grid.innerHTML += `
+            pickupGrid.innerHTML += `
                 <div class="pickup-box ${isReady ? 'ready-order' : ''}" style="${isCooked ? 'opacity:0.6; border:1px solid #444;' : 'border-top: 3px solid ' + typeColor}">
                     <div class="table-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                         <h2 style="font-size:1.1rem; margin:0;">${order.customerName}</h2> 
@@ -600,14 +625,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function openOrderModal(tableId) {
         activeTableId = tableId;
         currentDraftOrder = []; 
-        modalTableTitle.textContent = `Order for Table ${tableId}`;
+        if(modalTableTitle) modalTableTitle.textContent = `Order for Table ${tableId}`;
         waiterModal.classList.remove('hidden');
         renderMenu(""); 
         renderDraftOrder();
-        menuSearchInput.value = "";
+        if(menuSearchInput) {
+            menuSearchInput.value = "";
+            menuSearchInput.focus();
+        }
         const noteEl = document.getElementById('waiter-order-notes');
         if(noteEl) noteEl.value = ""; 
-        menuSearchInput.focus();
     }
 
     function closeOrderModal() {
@@ -616,12 +643,13 @@ document.addEventListener("DOMContentLoaded", () => {
         currentDraftOrder = [];
     }
 
-    closeModalX.addEventListener('click', closeOrderModal);
-    cancelModalBtn.addEventListener('click', closeOrderModal);
+    if(closeModalX) closeModalX.addEventListener('click', closeOrderModal);
+    if(cancelModalBtn) cancelModalBtn.addEventListener('click', closeOrderModal);
 
-    menuSearchInput.addEventListener('input', (e) => { renderMenu(e.target.value.toLowerCase()); });
+    if(menuSearchInput) menuSearchInput.addEventListener('input', (e) => { renderMenu(e.target.value.toLowerCase()); });
 
     function renderMenu(query) {
+        if(!menuListContainer) return;
         menuListContainer.innerHTML = "";
         // Updated Filter: Checks name OR number
         const filteredItems = MENU_ITEMS.filter((item, index) => {
@@ -646,6 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderDraftOrder() {
+        if(!currentOrderPreview) return;
         currentOrderPreview.innerHTML = "";
         if (currentDraftOrder.length === 0) {
             currentOrderPreview.innerHTML = '<p style="color:#aaa; font-style:italic;">No items selected.</p>';
@@ -668,36 +697,38 @@ document.addEventListener("DOMContentLoaded", () => {
         renderDraftOrder();
     };
 
-    submitModalBtn.addEventListener('click', async () => {
-        if (!activeTableId || currentDraftOrder.length === 0) return;
-        submitModalBtn.textContent = "Sending...";
-        submitModalBtn.disabled = true;
-        const orderId = `${activeTableId}-${new Date().getTime()}`;
-        const noteEl = document.getElementById('waiter-order-notes');
-        let finalNote = "Waiter Order"; 
-        if (noteEl && noteEl.value.trim() !== "") { finalNote = noteEl.value.trim(); }
+    if(submitModalBtn) {
+        submitModalBtn.addEventListener('click', async () => {
+            if (!activeTableId || currentDraftOrder.length === 0) return;
+            submitModalBtn.textContent = "Sending...";
+            submitModalBtn.disabled = true;
+            const orderId = `${activeTableId}-${new Date().getTime()}`;
+            const noteEl = document.getElementById('waiter-order-notes');
+            let finalNote = "Waiter Order"; 
+            if (noteEl && noteEl.value.trim() !== "") { finalNote = noteEl.value.trim(); }
 
-        const newOrder = {
-            id: orderId,
-            table: activeTableId,
-            items: currentDraftOrder,
-            status: "new",
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            orderType: "dine-in",
-            notes: finalNote
-        };
+            const newOrder = {
+                id: orderId,
+                table: activeTableId,
+                items: currentDraftOrder,
+                status: "new",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                orderType: "dine-in",
+                notes: finalNote
+            };
 
-        try {
-            await db.collection("orders").doc(orderId).set(newOrder);
-            closeOrderModal();
-        } catch (e) {
-            console.error("Error submitting waiter order:", e);
-            alert("Failed to submit order.");
-        } finally {
-            submitModalBtn.textContent = "Submit Order";
-            submitModalBtn.disabled = false;
-        }
-    });
+            try {
+                await db.collection("orders").doc(orderId).set(newOrder);
+                closeOrderModal();
+            } catch (e) {
+                console.error("Error submitting waiter order:", e);
+                alert("Failed to submit order.");
+            } finally {
+                submitModalBtn.textContent = "Submit Order";
+                submitModalBtn.disabled = false;
+            }
+        });
+    }
 
     function addDeleteItemListeners() {
         document.querySelectorAll('.delete-item-btn').forEach(btn => {

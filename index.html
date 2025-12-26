@@ -192,6 +192,12 @@
         /* --- NEW MAP OVERLAY STYLES (GDPR) --- */
         .map-container-3col { width: 100%; height: 100%; min-height: 350px; border-radius: 4px; overflow: hidden; border: 1px solid var(--gold); }
         
+        /* Ensures map has height even after placeholder is removed */
+        #google-map-container {
+            min-height: 350px;
+            display: block;
+        }
+
         .map-placeholder {
             background-color: #222; /* Dark background instead of map */
             display: flex;
@@ -299,10 +305,10 @@
                 <a href="#visit" data-i18n="nav_contact">Kontakt</a>
                 <div class="header-actions">
                     <div class="lang-switch">
-                        <button class="lang-btn active" onclick="setLang('de')">DE</button>
-                        <button class="lang-btn" onclick="setLang('en')">EN</button>
+                        <button class="lang-btn active" data-lang="de" onclick="setLang('de')">DE</button>
+                        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
                     </div>
-                    </div>
+                </div>
             </nav>
             <div class="hamburger" onclick="toggleMenu()">
                 <div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -825,12 +831,20 @@
         };
 
         function setLang(lang) {
+            // Update Text Content
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if(translations[lang][key]) el.textContent = translations[lang][key];
             });
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+
+            // Update Active Button State (MORE ROBUST)
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
 
         let currentPage = 1; const totalPages = 12;
@@ -857,18 +871,18 @@
         }
         window.addEventListener('resize', updateBookView); updateBookView();
         
-        // --- NEW MAP LOADER SCRIPT ---
+        // --- FIXED MAP LOADER SCRIPT ---
         function loadMap() {
             var container = document.getElementById('google-map-container');
             
             // 1. Remove the placeholder styling
             container.classList.remove('map-placeholder');
             
-            // 2. Inject the real Google Maps Iframe
-            // IMPORTANT: PASTE YOUR GOOGLE MAPS EMBED LINK BELOW WHERE IT SAYS src=""
-             var mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2526.438881283629!2d6.784416476196207!3d50.65955927547211!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47bf6540711066f7%3A0x575916438007038!2sKessenicher%20Str.%209%2C%2053879%20Euskirchen%2C%20Germany!5e0!3m2!1sen!2sus!4v1708900000000!5m2!1sen!2sus" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade";
+            // 2. Inject the real Google Maps Iframe (SECURE HTTPS LINK)
+            // This is a generic embed for your address. 
+            var mapUrl = "https://maps.google.com/maps?q=Kessenicher+Str.+9,+53879+Euskirchen&t=&z=13&ie=UTF8&iwloc=&output=embed";
 
-            container.innerHTML = '<iframe src="' + mapUrl + '" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+            container.innerHTML = '<iframe src="' + mapUrl + '" width="100%" height="100%" style="border:0; min-height: 350px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>';
         }
 
         // Optional: Auto-load map if user previously accepted "All Cookies"
@@ -905,7 +919,6 @@
     function acceptAllCookies() {
         localStorage.setItem('cookieConsent', 'all');
         document.getElementById('cookie-banner').style.display = 'none';
-        // Here you would trigger Google Analytics if you had it
         // Auto-load map if consent given
         loadMap();
     }

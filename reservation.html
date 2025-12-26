@@ -55,7 +55,8 @@
         
         label { display: block; margin-bottom: 8px; color: var(--gold); font-weight: bold; font-size: 0.9rem; }
         
-        input, select, textarea {
+        /* GENERAL INPUT STYLE (Except Checkbox) */
+        input:not([type="checkbox"]), select, textarea {
             width: 100%;
             padding: 12px;
             background-color: #111;
@@ -66,7 +67,15 @@
             outline: none;
             transition: border-color 0.3s;
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+        input:not([type="checkbox"]):focus, select:focus, textarea:focus { border-color: var(--gold); }
+
+        /* CHECKBOX STYLE */
+        .consent-checkbox { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+        input[type="checkbox"] {
+            width: 20px; height: 20px; accent-color: var(--gold); cursor: pointer; margin-top: 3px;
+        }
+        .consent-label { font-size: 0.9rem; color: #ccc; line-height: 1.4; font-weight: normal; }
+        .consent-label a { color: var(--gold); text-decoration: underline; }
 
         button.btn-submit {
             width: 100%;
@@ -168,6 +177,13 @@
                     <textarea id="res-notes" rows="2" placeholder="Besondere Wünsche, Hochstuhl, etc."></textarea>
                 </div>
 
+                <div class="consent-checkbox">
+                    <input type="checkbox" id="privacy-consent" required>
+                    <label for="privacy-consent" class="consent-label">
+                        Ich habe die <a href="privacy.html" target="_blank">Datenschutzerklärung</a> gelesen und stimme zu.
+                    </label>
+                </div>
+
                 <button type="submit" id="submit-btn" class="btn-submit">Jetzt Reservieren</button>
             </form>
         </div>
@@ -185,7 +201,7 @@
     <div class="footer-links" style="border-top: 1px solid #333; padding-top: 20px; max-width: 900px; margin: 0 auto;">
         
         <p style="margin-bottom: 15px; font-size: 0.9rem;">
-            <a href="impressum.html" style="color: #D4AF37; text-decoration: none; margin: 0 10px;">Impressum</a> | 
+            <a href="imprint.html" style="color: #D4AF37; text-decoration: none; margin: 0 10px;">Impressum</a> | 
             <a href="privacy.html" style="color: #D4AF37; text-decoration: none; margin: 0 10px;">Datenschutzerklärung</a>
         </p>
         
@@ -213,5 +229,45 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="reservation-script.js?v=1"></script>
 
+<div id="cookie-banner" style="position:fixed; bottom:0; left:0; width:100%; background:#111; color:white; padding:20px; border-top:2px solid #D4AF37; z-index:10000; display:none; box-shadow: 0 -5px 20px rgba(0,0,0,0.8);">
+    <div style="max-width: 1200px; margin: 0 auto; display:flex; flex-direction:column; gap:15px; align-items:center; text-align:center;">
+        
+        <h3 style="margin:0; color:#D4AF37;">🍪 Datenschutzeinstellungen</h3>
+        <p style="font-size:0.9rem; color:#ccc; margin:0;">
+            Wir nutzen Cookies und externe Dienste (Google Fonts, Firebase, OpenStreetMap), um unsere Website zu betreiben. 
+            Einige sind technisch notwendig, andere helfen uns, unser Angebot zu verbessern.
+            <br>
+            <a href="privacy.html" style="color:#fff; text-decoration:underline;">Mehr erfahren</a> | 
+            <a href="imprint.html" style="color:#fff; text-decoration:underline;">Impressum</a>
+        </p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+            <button onclick="acceptAllCookies()" style="background:#D4AF37; color:black; border:none; padding:10px 25px; border-radius:5px; font-weight:bold; cursor:pointer;">Alle Akzeptieren</button>
+            <button onclick="acceptEssentialCookies()" style="background:#333; color:white; border:1px solid #666; padding:10px 25px; border-radius:5px; cursor:pointer;">Nur Notwendige</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Check if user already decided
+    if (!localStorage.getItem('cookieConsent')) {
+        document.getElementById('cookie-banner').style.display = 'block';
+    }
+
+    function acceptAllCookies() {
+        localStorage.setItem('cookieConsent', 'all');
+        document.getElementById('cookie-banner').style.display = 'none';
+        // Only load map if the function exists (prevents errors on other pages)
+        if (typeof loadMap === 'function') {
+        loadMap();
+        }
+    }
+
+    function acceptEssentialCookies() {
+        localStorage.setItem('cookieConsent', 'essential');
+        document.getElementById('cookie-banner').style.display = 'none';
+    }
+</script>
 </body>
 </html>

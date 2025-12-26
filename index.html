@@ -828,29 +828,42 @@
         }
         window.addEventListener('resize', updateBookView); updateBookView();
     </script>
-    <div id="cookie-banner" style="position:fixed; bottom:0; left:0; width:100%; background:#222; border-top:2px solid #D4AF37; padding:15px; text-align:center; z-index:10000; display:none;">
-    <p style="color:#fff; margin:0 0 10px 0; font-size:0.9rem;">
-        Wir nutzen technisch notwendige Speichertechnologien (z.B. für den Warenkorb). 
-        Mehr Infos in der <a href="privacy.html" style="color:#D4AF37; text-decoration:underline;">Datenschutzerklärung</a>.
-    </p>
-    <button onclick="acceptCookies()" style="background:#D4AF37; border:none; padding:8px 20px; font-weight:bold; cursor:pointer; border-radius:4px;">
-        Alles klar
-    </button>
+<div id="cookie-banner" style="position:fixed; bottom:0; left:0; width:100%; background:#111; color:white; padding:20px; border-top:2px solid #D4AF37; z-index:10000; display:none; box-shadow: 0 -5px 20px rgba(0,0,0,0.8);">
+    <div style="max-width: 1200px; margin: 0 auto; display:flex; flex-direction:column; gap:15px; align-items:center; text-align:center;">
+        
+        <h3 style="margin:0; color:#D4AF37;">🍪 Datenschutzeinstellungen</h3>
+        <p style="font-size:0.9rem; color:#ccc; margin:0;">
+            Wir nutzen Cookies und externe Dienste (Google Fonts, Firebase, OpenStreetMap), um unsere Website zu betreiben. 
+            Einige sind technisch notwendig, andere helfen uns, unser Angebot zu verbessern.
+            <br>
+            <a href="datenschutz.html" style="color:#fff; text-decoration:underline;">Mehr erfahren</a> | 
+            <a href="impressum.html" style="color:#fff; text-decoration:underline;">Impressum</a>
+        </p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+            <button onclick="acceptAllCookies()" style="background:#D4AF37; color:black; border:none; padding:10px 25px; border-radius:5px; font-weight:bold; cursor:pointer;">Alle Akzeptieren</button>
+            <button onclick="acceptEssentialCookies()" style="background:#333; color:white; border:1px solid #666; padding:10px 25px; border-radius:5px; cursor:pointer;">Nur Notwendige</button>
+        </div>
+
+    </div>
 </div>
 
 <script>
-    // Simple Cookie Logic
-    function acceptCookies() {
-        localStorage.setItem('zafran_cookie_consent', 'true');
-        document.getElementById('cookie-banner').style.display = 'none';
+    // Check if user already decided
+    if (!localStorage.getItem('cookieConsent')) {
+        document.getElementById('cookie-banner').style.display = 'block';
     }
 
-    // Check on load
-    document.addEventListener("DOMContentLoaded", () => {
-        if (!localStorage.getItem('zafran_cookie_consent')) {
-            document.getElementById('cookie-banner').style.display = 'block';
-        }
-    });
+    function acceptAllCookies() {
+        localStorage.setItem('cookieConsent', 'all');
+        document.getElementById('cookie-banner').style.display = 'none';
+        // Here you would trigger Google Analytics if you had it
+    }
+
+    function acceptEssentialCookies() {
+        localStorage.setItem('cookieConsent', 'essential');
+        document.getElementById('cookie-banner').style.display = 'none';
+    }
 </script>
 </body>
 </html>

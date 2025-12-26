@@ -1,4 +1,4 @@
-// --- 1. ZAFFRAN FIREBASE CONFIG ---
+// --- 1. FIREBASE CONFIG ---
 const firebaseConfig = {
   apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
   authDomain: "zaffran-delight.firebaseapp.com",
@@ -7,31 +7,42 @@ const firebaseConfig = {
   messagingSenderId: "1022960860126",
   appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
 };
-// --- END OF FIREBASE CONFIG ---
 
-// --- 2. Initialize Firebase ---
+// --- 2. Initialize ---
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
 
-// --- 3. Global State and DOM Elements ---
+// --- 3. DOM & State ---
 document.addEventListener("DOMContentLoaded", () => {
-    const connectionIconEl = document.getElementById('connection-icon');
+    // UI Elements
     const loginOverlay = document.getElementById('records-login-overlay');
     const loginButton = document.getElementById('login-button');
     const passwordInput = document.getElementById('records-password');
     const loginError = document.getElementById('login-error');
     const contentWrapper = document.getElementById('records-content-wrapper');
+    const statusDot = document.getElementById('status-dot');
+    const connectionText = document.getElementById('connection-text');
 
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
     const filterBtn = document.getElementById('filter-btn');
+    const exportBtn = document.getElementById('export-btn');
     const printBtn = document.getElementById('print-btn');
 
     const totalRevenueEl = document.getElementById('total-revenue');
     const totalOrdersEl = document.getElementById('total-orders');
-    const recordsListEl = document.getElementById('records-list');
+    const avgTicketEl = document.getElementById('avg-ticket');
+    const recordsTbody = document.getElementById('records-list');
+
+    // Side Panel Elements
+    const detailPanel = document.getElementById('detailPanel');
+    const panelTitle = document.getElementById('panel-title');
+    const panelId = document.getElementById('panel-id');
+    const panelTime = document.getElementById('panel-time');
+    const panelItems = document.getElementById('panel-items');
+    const panelTotal = document.getElementById('panel-total');
 
     const RECORDS_PASSWORD = "zafran"; 
     let allFetchedRecords = []; 
@@ -39,8 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- 4. Login Logic ---
     loginButton.addEventListener('click', () => {
         if (passwordInput.value === RECORDS_PASSWORD) {
-            loginOverlay.classList.add('hidden');
-            contentWrapper.style.opacity = '1'; 
+            loginOverlay.style.display = 'none';
+            contentWrapper.style.opacity = '1';
             initializeRecordsPage(); 
         } else {
             loginError.style.display = 'block';
@@ -49,48 +60,36 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 
     function initializeRecordsPage() {
-        if(connectionIconEl) connectionIconEl.textContent = '✅'; 
+        // Init UI
+        statusDot.classList.add('online');
+        connectionText.textContent = "System Online";
         
+        // Set Today's Date
         const today = new Date().toISOString().split('T')[0];
         startDateInput.value = today;
         endDateInput.value = today;
 
+        // Listeners
         filterBtn.addEventListener('click', fetchRecords);
-        printBtn.addEventListener('click', () => {
-            window.print();
-        });
+        printBtn.addEventListener('click', () => window.print());
+        exportBtn.addEventListener('click', exportToCSV);
+        
+        // Auto Load
+        fetchRecords();
     }
 
     async function fetchRecords() {
         let startDate = new Date(startDateInput.value + 'T00:00:00');
         let endDate = new Date(endDateInput.value + 'T23:59:59');
 
-        if (isNaN(startDate) || isNaN(endDate)) {
-            alert("Please select valid start and end dates.");
-            return;
-        }
-
-        if (endDate < startDate) {
-            alert("End date must be after the start date.");
-            return;
-        }
-
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-        oneYearAgo.setHours(0, 0, 0, 0); 
-
-        if (startDate < oneYearAgo) {
-            alert("Cannot fetch data older than 1 year. Setting start date to 1 year ago.");
-            startDate = oneYearAgo;
-            startDateInput.value = oneYearAgo.toISOString().split('T')[0];
-        }
+        if (isNaN(startDate) || isNaN(endDate)) { alert("Please check dates."); return; }
 
         filterBtn.disabled = true;
-        filterBtn.textContent = "Loading...";
-        recordsListEl.innerHTML = "<p>Loading records...</p>";
+        filterBtn.innerHTML = "<span>⏳</span> Loading...";
+        recordsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Retrieving Data from Cloud...</td></tr>`;
 
         try {
-            // Query must order by "asc" to work with the range filter
+            // Query for archived orders
             const query = db.collection("archived_orders")
                 .where("closedAt", ">=", firebase.firestore.Timestamp.fromDate(startDate))
                 .where("closedAt", "<=", firebase.firestore.Timestamp.fromDate(endDate))
@@ -98,93 +97,167 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const snapshot = await query.get();
             
-            // Reverse to show newest first
-            const records = snapshot.docs.map(doc => doc.data());
+            // Map and Reverse
+            const records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             allFetchedRecords = records.reverse(); 
             
             renderRecords(allFetchedRecords);
-            calculateSummary(allFetchedRecords);
+            calculateKPIs(allFetchedRecords);
 
         } catch (error) {
-            console.error("Error fetching records: ", error);
-            recordsListEl.innerHTML = `<p style="color: red;">Error: ${error.message}. <br>If this is your first run, check the console (F12) for a link to create the Firestore Index.</p>`;
+            console.error("Error:", error);
+            recordsTbody.innerHTML = `<tr><td colspan="6" style="color:#ff5252; text-align:center; padding:20px;">
+                <strong>System Error:</strong> ${error.message}<br>
+                <small>Check browser console (F12) for Index Creation Link if first run.</small>
+            </td></tr>`;
         } finally {
             filterBtn.disabled = false;
-            filterBtn.textContent = "Filter Records";
+            filterBtn.innerHTML = "<span>🔍</span> Filter Records";
         }
     }
 
     function renderRecords(records) {
-        recordsListEl.innerHTML = ""; 
+        recordsTbody.innerHTML = ""; 
 
         if (records.length === 0) {
-            recordsListEl.innerHTML = "<p>No records found for this date range.</p>";
+            recordsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#666;">No sales records found for this period.</td></tr>`;
             return;
         }
 
         records.forEach(record => {
-            // Safely handle Missing Dates
-            let recordDate = "Unknown Date";
+            let recordDate = "N/A";
+            let recordTime = "N/A";
+            
             if (record.closedAt && record.closedAt.toDate) {
-                recordDate = record.closedAt.toDate().toLocaleString('de-DE', {
-                    dateStyle: 'short',
-                    timeStyle: 'short'
-                });
+                const dateObj = record.closedAt.toDate();
+                recordDate = dateObj.toLocaleDateString('de-DE');
+                recordTime = dateObj.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
             }
             
-            // --- THE FIX: Handle different field names for the Amount ---
-            // Some records might have 'total', others might have 'paidAmount'
+            // --- THE FIX IS HERE: CHECK BOTH FIELDS ---
             const amount = record.paidAmount || record.total || 0;
-
-            const details = document.createElement('details');
-            details.className = 'record-item';
-
-            const summary = document.createElement('summary');
-            summary.className = 'record-summary';
             
-            // Safely handle Table Name
+            // Logic to determine Table or Customer Name
             let tableName = record.table || "Unknown";
-            if(record.customerName) tableName = record.customerName; // Pickup Order
-
-            const isPickup = tableName.toString().includes('(') || record.orderType === 'pickup';
-            const tableDisplay = isPickup ? `🛍️ ${tableName}` : `Table ${tableName}`;
+            let typeBadge = "";
             
-            summary.innerHTML = `
-                <span class="record-date">${recordDate}</span>
-                <span class="record-table">${tableDisplay}</span>
-                <span class="record-total">${Number(amount).toFixed(2)} €</span>
-            `;
-
-            const itemsList = document.createElement('div');
-            itemsList.className = 'record-item-details';
-            
-            let itemsHtml = '<ul>';
-            if (record.items && Array.isArray(record.items)) {
-                record.items.forEach(item => {
-                    const price = item.price || 0;
-                    itemsHtml += `<li>${item.quantity}x ${item.name} (${Number(price).toFixed(2)} €)</li>`;
-                });
+            if (record.orderType === 'pickup') {
+                typeBadge = `<span class="badge badge-pickup">Pickup</span>`;
+                tableName = record.customerName || "Walk-in";
+            } else if (record.orderType === 'delivery') {
+                typeBadge = `<span class="badge badge-delivery">Delivery</span>`;
+                tableName = record.customerName || "Delivery";
             } else {
-                itemsHtml += `<li>No item details available</li>`;
+                typeBadge = `<span class="badge badge-dinein">Dine-In</span>`;
+                tableName = `Table ${tableName}`;
             }
-            itemsHtml += '</ul>';
-            itemsList.innerHTML = itemsHtml;
 
-            details.appendChild(summary);
-            details.appendChild(itemsList);
-            recordsListEl.appendChild(details);
+            // Create Table Row
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${recordDate}</td>
+                <td>${recordTime}</td>
+                <td style="font-weight:600; color:#fff;">${tableName}</td>
+                <td>${typeBadge}</td>
+                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
+                <td style="text-align:center;">
+                    <button class="btn-tool" style="padding:4px 10px; font-size:0.8rem; background:transparent; border:1px solid #555;" onclick="window.showDetail('${record.id}')">View</button>
+                </td>
+            `;
+            recordsTbody.appendChild(tr);
         });
     }
 
-    function calculateSummary(records) {
+    function calculateKPIs(records) {
         let totalRevenue = 0;
-        records.forEach(record => {
-            // --- THE FIX: Sum up correctly ---
-            const amount = record.paidAmount || record.total || 0;
-            totalRevenue += Number(amount);
-        });
+        records.forEach(r => totalRevenue += Number(r.paidAmount || r.total || 0));
+        
+        const count = records.length;
+        const avg = count > 0 ? (totalRevenue / count) : 0;
 
         totalRevenueEl.textContent = `${totalRevenue.toFixed(2)} €`;
-        totalOrdersEl.textContent = records.length;
+        totalOrdersEl.textContent = count;
+        avgTicketEl.textContent = `${avg.toFixed(2)} €`;
+    }
+
+    // --- SIDE PANEL LOGIC ---
+    window.showDetail = function(id) {
+        const record = allFetchedRecords.find(r => r.id === id);
+        if(!record) return;
+
+        let title = record.table;
+        if(record.orderType === 'pickup' || record.orderType === 'delivery') title = record.customerName;
+
+        panelTitle.innerText = record.orderType === 'dine-in' ? `Table ${title}` : title;
+        panelId.innerText = `#${record.id.substring(0, 8)}...`;
+        
+        if (record.closedAt && record.closedAt.toDate) {
+            panelTime.innerText = record.closedAt.toDate().toLocaleString('de-DE');
+        }
+
+        panelItems.innerHTML = "";
+        if (record.items && Array.isArray(record.items)) {
+            record.items.forEach(item => {
+                const price = item.price || 0;
+                const row = document.createElement('div');
+                row.className = 'receipt-item';
+                row.innerHTML = `
+                    <span>${item.quantity}x ${item.name}</span>
+                    <span>${(item.quantity * price).toFixed(2)} €</span>
+                `;
+                panelItems.appendChild(row);
+            });
+        } else {
+            panelItems.innerHTML = "<p style='color:#666;'>No item details stored.</p>";
+        }
+
+        // --- THE FIX IS HERE ALSO ---
+        const total = record.paidAmount || record.total || 0;
+        panelTotal.innerText = `${Number(total).toFixed(2)} €`;
+
+        detailPanel.classList.add('open');
+    }
+
+    window.closePanel = function() {
+        detailPanel.classList.remove('open');
+    }
+
+    // --- EXPORT TO CSV ---
+    function exportToCSV() {
+        if(allFetchedRecords.length === 0) {
+            alert("No data to export.");
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Date,Time,OrderType,Table/Customer,Items,TotalAmount(EUR)\n";
+
+        allFetchedRecords.forEach(r => {
+            let dateStr = "", timeStr = "";
+            if (r.closedAt && r.closedAt.toDate) {
+                const d = r.closedAt.toDate();
+                dateStr = d.toLocaleDateString('de-DE');
+                timeStr = d.toLocaleTimeString('de-DE');
+            }
+            
+            const name = (r.orderType === 'dine-in') ? `Table ${r.table}` : (r.customerName || "Customer");
+            // --- THE FIX IS HERE TOO ---
+            const total = Number(r.paidAmount || r.total || 0).toFixed(2);
+            
+            // Item Summary
+            let itemStr = "";
+            if(r.items) itemStr = r.items.map(i => `${i.quantity}x ${i.name}`).join(" | ");
+            itemStr = itemStr.replace(/,/g, "").replace(/"/g, "'"); 
+
+            csvContent += `${dateStr},${timeStr},${r.orderType},${name},"${itemStr}",${total}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `sales_report_${startDateInput.value}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 });

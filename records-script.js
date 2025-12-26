@@ -10,7 +10,9 @@ const firebaseConfig = {
 // --- END OF FIREBASE CONFIG ---
 
 // --- 2. Initialize Firebase ---
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
 // --- 3. Global State and DOM Elements ---
@@ -31,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalOrdersEl = document.getElementById('total-orders');
     const recordsListEl = document.getElementById('records-list');
 
-    const RECORDS_PASSWORD = "zafran"; // <-- NEW PASSWORD
+    const RECORDS_PASSWORD = "zafran"; 
     let allFetchedRecords = []; 
 
     // --- 4. Login Logic ---
@@ -47,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 
     function initializeRecordsPage() {
-        connectionIconEl.textContent = '✅'; 
+        if(connectionIconEl) connectionIconEl.textContent = '✅'; 
         
         const today = new Date().toISOString().split('T')[0];
         startDateInput.value = today;
@@ -88,29 +90,24 @@ document.addEventListener("DOMContentLoaded", () => {
         recordsListEl.innerHTML = "<p>Loading records...</p>";
 
         try {
-            // --- THIS IS THE FIX ---
-            // Query must order by "asc" (ascending) to work with the index
+            // Query must order by "asc" to work with the range filter
             const query = db.collection("archived_orders")
                 .where("closedAt", ">=", firebase.firestore.Timestamp.fromDate(startDate))
                 .where("closedAt", "<=", firebase.firestore.Timestamp.fromDate(endDate))
                 .orderBy("closedAt", "asc"); 
-            // --- END OF FIX ---
 
             const snapshot = await query.get();
             
-            // --- THIS IS THE FIX (Part 2) ---
-            // We get the records in oldest-first ("asc"), then reverse them
-            // so they appear newest-first on the page.
+            // Reverse to show newest first
             const records = snapshot.docs.map(doc => doc.data());
             allFetchedRecords = records.reverse(); 
-            // --- END OF FIX ---
             
             renderRecords(allFetchedRecords);
             calculateSummary(allFetchedRecords);
 
         } catch (error) {
             console.error("Error fetching records: ", error);
-            recordsListEl.innerHTML = `<p style="color: red;">Error: ${error.message}. You may need to create a Firestore Index. See console (F12) for details.</p>`;
+            recordsListEl.innerHTML = `<p style="color: red;">Error: ${error.message}. <br>If this is your first run, check the console (F12) for a link to create the Firestore Index.</p>`;
         } finally {
             filterBtn.disabled = false;
             filterBtn.textContent = "Filter Records";
@@ -126,35 +123,50 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         records.forEach(record => {
-            const recordDate = record.closedAt.toDate().toLocaleString('de-DE', {
-                dateStyle: 'short',
-                timeStyle: 'short'
-            });
+            // Safely handle Missing Dates
+            let recordDate = "Unknown Date";
+            if (record.closedAt && record.closedAt.toDate) {
+                recordDate = record.closedAt.toDate().toLocaleString('de-DE', {
+                    dateStyle: 'short',
+                    timeStyle: 'short'
+                });
+            }
             
+            // --- THE FIX: Handle different field names for the Amount ---
+            // Some records might have 'total', others might have 'paidAmount'
+            const amount = record.paidAmount || record.total || 0;
+
             const details = document.createElement('details');
             details.className = 'record-item';
 
             const summary = document.createElement('summary');
             summary.className = 'record-summary';
             
-            // Check if it was a pickup order (it has '(' in the name)
-            const isPickup = record.table.includes('(');
-            const tableDisplay = isPickup ? `🛍️ ${record.table}` : `Table ${record.table}`;
+            // Safely handle Table Name
+            let tableName = record.table || "Unknown";
+            if(record.customerName) tableName = record.customerName; // Pickup Order
+
+            const isPickup = tableName.toString().includes('(') || record.orderType === 'pickup';
+            const tableDisplay = isPickup ? `🛍️ ${tableName}` : `Table ${tableName}`;
             
             summary.innerHTML = `
                 <span class="record-date">${recordDate}</span>
                 <span class="record-table">${tableDisplay}</span>
-                <span class="record-total">${record.total.toFixed(2)} €</span>
+                <span class="record-total">${Number(amount).toFixed(2)} €</span>
             `;
 
             const itemsList = document.createElement('div');
             itemsList.className = 'record-item-details';
             
             let itemsHtml = '<ul>';
-            record.items.forEach(item => {
-                const price = item.price || 0;
-                itemsHtml += `<li>${item.quantity}x ${item.name} (${price.toFixed(2)} €)</li>`;
-            });
+            if (record.items && Array.isArray(record.items)) {
+                record.items.forEach(item => {
+                    const price = item.price || 0;
+                    itemsHtml += `<li>${item.quantity}x ${item.name} (${Number(price).toFixed(2)} €)</li>`;
+                });
+            } else {
+                itemsHtml += `<li>No item details available</li>`;
+            }
             itemsHtml += '</ul>';
             itemsList.innerHTML = itemsHtml;
 
@@ -167,10 +179,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function calculateSummary(records) {
         let totalRevenue = 0;
         records.forEach(record => {
-            totalRevenue += (record.total || 0);
+            // --- THE FIX: Sum up correctly ---
+            const amount = record.paidAmount || record.total || 0;
+            totalRevenue += Number(amount);
         });
 
         totalRevenueEl.textContent = `${totalRevenue.toFixed(2)} €`;
         totalOrdersEl.textContent = records.length;
     }
-}); // --- END OF DOMContentLoaded WRAPPER ---
+});

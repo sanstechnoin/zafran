@@ -4,219 +4,298 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zaffran Kitchen Display</title>
-    <link rel="stylesheet" href="style.css?v=33"> 
+    <link rel="stylesheet" href="style.css?v=35"> 
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
-        /* --- 1. WAITER CALL ALERT (Red Box) --- */
+        /* --- KITCHEN THEME --- */
+        :root {
+            --kds-bg: #000000;
+            --kds-panel: #1a1a1a;
+            --kds-border: #333;
+            --gold: #D4AF37;
+            --text-white: #ffffff;
+            --ticket-bg: #222;
+            --ticket-header: #333;
+            --alert: #ff4444;
+            
+            /* LAYOUT CONSTRAINT */
+            --content-width: 1400px;
+        }
+
+        body { 
+            background-color: var(--kds-bg); 
+            color: var(--text-white); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+
+        /* --- LAYOUT CONTAINER --- */
+        .layout-container {
+            width: 100%;
+            max-width: var(--content-width);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- HEADER --- */
+        header { 
+            background: #111; 
+            border-bottom: 2px solid var(--gold); 
+            height: 70px; 
+            flex-shrink: 0;
+            display: flex; 
+            align-items: center;
+        }
+        .header-inner {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%;
+        }
+        .brand { display: flex; align-items: center; gap: 15px; font-weight: bold; color: var(--gold); font-size: 1.5rem; text-transform: uppercase; }
+        .brand img { height: 45px; }
+        
+        .header-controls { display: flex; gap: 20px; align-items: center; }
+
+        /* STATUS */
+        .status-badge { 
+            font-size: 0.9rem; padding: 5px 15px; border-radius: 4px; border: 1px solid #444; color: #888; display: flex; align-items: center; gap: 8px; 
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #555; }
+        .dot.online { background: #00c853; box-shadow: 0 0 8px #00c853; }
+
+        /* MASTER CLEAR BUTTON */
+        .btn-master-clear {
+            background-color: #e65100; /* Dark Orange */
+            color: white;
+            border: 1px solid #ff9800;
+            padding: 8px 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-master-clear:hover { background-color: #ff9800; color: black; }
+
+        /* --- MAIN GRID --- */
+        .kitchen-main {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        #kds-content-wrapper {
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            height: 100%;
+            padding: 20px 0; 
+        }
+
+        .lane { 
+            background: var(--kds-panel); 
+            border: 1px solid var(--kds-border);
+            border-radius: 6px;
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        
+        .lane-header {
+            background: #151515;
+            padding: 15px;
+            border-bottom: 1px solid var(--kds-border);
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ccc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .ticket-container {
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column; 
+            gap: 15px;
+            flex: 1;
+        }
+
+        /* --- TICKET --- */
+        .ticket {
+            background: var(--ticket-bg);
+            border: 1px solid var(--kds-border);
+            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease-out;
+            position: relative;
+        }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { opacity: 1; transform: translateY(0); } }
+
+        .ticket-header {
+            padding: 10px 15px;
+            background: var(--ticket-header);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        .table-no { font-size: 1.4rem; font-weight: bold; color: var(--gold); }
+        .timer { font-size: 0.9rem; color: #888; font-family: monospace; }
+        
+        .ticket-body { padding: 15px; }
+        .ticket-item { 
+            font-size: 1.1rem; 
+            margin-bottom: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 1px dashed #333; 
+            padding-bottom: 5px; 
+        }
+        .ticket-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .qty { color: var(--gold); font-weight: bold; margin-right: 10px; font-size: 1.2rem; }
+        .item-name { color: #eee; }
+
+        .ticket-note {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff8a80;
+            padding: 8px;
+            font-size: 0.9rem;
+            border-top: 1px solid #444;
+            font-style: italic;
+        }
+
+        .ticket-actions { display: flex; }
+        .btn-done {
+            width: 100%;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .btn-done:hover { background: #00e676; color: black; }
+
+        /* --- POPUPS --- */
+        .kitchen-popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .kitchen-popup-box {
+            background: #222; border: 2px solid var(--gold);
+            padding: 30px; border-radius: 8px; text-align: center;
+            max-width: 600px; width: 90%;
+        }
+        .hidden { display: none !important; }
+
+        /* WAITER CALL ALERT */
         #waiter-call-overlay .kitchen-popup-box {
             border: 4px solid #ff4444;
-            background-color: #2a0a0a; /* Dark Red Background */
+            background-color: #2a0a0a;
             box-shadow: 0 0 30px #ff4444;
         }
         #waiter-call-overlay h3 { color: #ff4444; font-size: 2rem; margin-bottom: 10px; }
         #waiter-call-table { font-size: 3.5rem; color: white; margin: 20px 0; font-weight: bold; }
         #dismiss-waiter-btn {
-            background-color: #ff4444; 
-            color: white; 
-            font-size: 1.5rem; 
-            padding: 15px; 
-            width: 100%;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
+            background-color: #ff4444; color: white; font-size: 1.5rem; padding: 15px; width: 100%; border: none; cursor: pointer; border-radius: 5px;
         }
         #dismiss-waiter-btn:hover { background-color: #cc0000; }
 
-        /* --- 2. NEW ORDER NOTIFICATION (Massive Font Update) --- */
-        
-        /* Make the box wider to fit large text */
+        /* NEW ORDER NOTIFICATION (Big Fonts) */
         #new-order-popup-overlay .kitchen-popup-box {
-            width: 85% !important;
-            max-width: 800px !important;
-            padding: 40px !important;
-            border: 3px solid #D4AF37; /* Gold border to verify style is applied */
+            width: 85% !important; max-width: 800px !important; padding: 40px !important; border: 3px solid #D4AF37;
         }
+        #new-order-popup-overlay h3 { font-size: 3rem !important; margin-bottom: 30px !important; color: #fff; }
+        
+        #popup-order-details h2 { font-size: 3.5rem !important; color: #D4AF37 !important; margin: 20px 0 30px 0 !important; text-decoration: underline; }
+        #popup-order-details ul { text-align: left; margin: 0 auto; display: inline-block; }
+        #popup-order-details li { font-size: 2rem !important; line-height: 1.5 !important; margin-bottom: 10px !important; }
 
-        /* "New Order!" Title -> HUGE */
-        #new-order-popup-overlay h3 { 
-            font-size: 4rem !important; 
-            margin-bottom: 30px !important;
-        }
-
-        /* The dynamic content container */
-        #popup-order-details {
-            text-align: center;
-        }
-
-        /* Table Name (e.g. "Table 4") -> Matches "New Order" Size */
-        #popup-order-details h2, 
-        #popup-order-details h3, 
-        #popup-order-details h4 {
-            font-size: 4rem !important; 
-            color: #D4AF37 !important; /* Gold */
-            margin: 20px 0 30px 0 !important;
-            text-decoration: underline;
-        }
-
-        /* The Food Items -> Matches old Table Size (Large & Readable) */
-        #popup-order-details ul li,
-        #popup-order-details div, 
-        #popup-order-details p {
-            font-size: 2.5rem !important;
-            line-height: 1.4 !important;
-            margin-bottom: 10px !important;
-        }
-
-        /* The Accept Button -> Matches Item Size & Huge Click Area */
         #accept-order-btn {
-            font-size: 2.5rem !important;
-            padding: 30px !important;
-            margin-top: 40px !important;
-            width: 100% !important;
-            font-weight: bold;
-            background-color: #D4AF37;
-            color: black;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
+            font-size: 2rem !important; padding: 25px !important; margin-top: 40px !important; width: 100% !important;
+            font-weight: bold; background-color: #D4AF37; color: black; border: none; border-radius: 10px; cursor: pointer;
         }
-        #accept-order-btn:hover {
-            background-color: white;
-            transform: scale(1.02);
-        }
+        #accept-order-btn:hover { background-color: white; transform: scale(1.02); }
 
-        /* --- FIXED DASHBOARD LAYOUT (Balanced Size & Alignment) --- */
-
-        /* 1. Table Headers */
-        .table-box .table-header h2,
-        .pickup-box .table-header h2 {
-            font-size: 1.8rem !important; /* Keep headers big */
-            color: var(--gold) !important;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px !important;
-            margin-bottom: 10px !important;
-            white-space: nowrap; /* Prevent header wrapping */
-            overflow: hidden;
-            text-overflow: ellipsis;
+        /* --- FOOTER --- */
+        .site-credit-footer {
+            background: #111;
+            border-top: 1px solid var(--gold);
+            padding: 10px 0;
+            font-size: 0.8rem;
+            color: #888;
+            flex-shrink: 0;
         }
+        .footer-line-one { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .footer-developer a { color: var(--gold); text-decoration: none; font-weight: bold; }
 
-        /* 2. Food Items - THE FIX */
-        .waiter-item, 
-        .order-list li,
-        .pickup-box ul li {
-            font-size: 1.35rem !important; /* Adjusted to fit the column width */
-            line-height: 1.3 !important;
-            font-weight: 600 !important;
-            margin-bottom: 8px !important;
-            
-            /* Layout Fixes */
-            display: flex !important;
-            justify-content: space-between; /* Push number to right if space permits */
-            align-items: flex-start;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1); /* Subtle separator */
-            padding-bottom: 4px;
-        }
-
-        /* 3. The Dish Number Highlight */
-        .order-list li strong,
-        .pickup-box ul li strong {
-            font-size: 1.5rem !important; /* Make the number slightly bigger/pop */
-            color: var(--gold) !important;
-            margin-left: 8px; /* Space between name and number */
-            white-space: nowrap; /* Don't wrap the number alone */
-        }
-
-        /* 4. Remove List Indentation to gain width */
-        .order-list, .pickup-box ul {
-            padding-left: 0 !important;
-            list-style: none !important;
-        }
-
-        /* 5. Order Time */
-        .order-group h4, 
-        .pickup-box .order-time {
-            font-size: 1.1rem !important;
-            color: #ccc !important;
-            margin-bottom: 10px;
-        }
-
-        /* 6. Buttons */
-        .btn-serve, 
-        .clear-pickup-btn,
-        .clear-table-btn {
-            font-size: 1.3rem !important;
-            padding: 10px !important;
-            width: 100% !important;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        /* 7. Optimize Card Padding */
-        .table-box, .pickup-box {
-            padding: 10px 15px !important; /* Less horizontal padding = more text room */
-        }
-
-        /* --- MASTER CLEAR BUTTON STYLE --- */
-        #master-clear-btn {
-            background-color: #ff9800; /* Orange */
-            color: black;
-            font-weight: bold;
-            font-size: 1.2rem;
-            padding: 15px 30px;
-            border: 2px solid #e65100;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: all 0.2s;
-        }
-        #master-clear-btn:hover {
-            background-color: #ffb74d;
-            transform: scale(1.05);
+        @media (max-width: 900px) {
+            #kds-content-wrapper { grid-template-columns: 1fr; }
+            .lane { min-height: 50vh; }
         }
     </style>
 </head>
 <body class="kitchen-body">
 
     <header class="kitchen-header">
-        <div class="header-logo">
-            <img src="logo.png" alt="Zaffran Logo">
-            <h1>Kitchen Display System</h1>
-            <span id="connection-icon">...</span>
-        </div>
-        <div>
-            <button id="master-clear-btn">⚠️ MASTER CLEAR</button>
+        <div class="layout-container header-inner">
+            <div class="brand">
+                <img src="logo.png" alt="Zaffran">
+                <span>CHEF STATION</span>
+            </div>
+            
+            <div class="header-controls">
+                <div class="status-badge">
+                    <div class="dot" id="status-dot"></div>
+                    <span id="connection-text">Connecting...</span>
+                </div>
+                <button class="btn-master-clear" id="master-clear-btn">
+                    <span>⚠️</span> Clear All
+                </button>
+            </div>
         </div>
     </header>
 
     <main class="kitchen-main">
-        <div id="kds-content-wrapper">
-            
-            <div class="kds-section-header">
-                <h2>Dine-In Orders</h2>
-            </div>
-            <div class="table-grid" id="dine-in-grid">
+        <div class="layout-container" style="height: 100%;">
+            <div id="kds-content-wrapper" style="opacity: 0.1;">
+                
+                <div class="lane">
+                    <div class="lane-header">🍽️ Dine-In Tables</div>
+                    <div class="ticket-container" id="dine-in-container"></div>
                 </div>
 
-            <div class="kds-section-header">
-                <h2>Online Orders</h2>
-            </div>
-            <div class="pickup-grid" id="pickup-grid">
-                <div class="pickup-box-empty">
-                    <p>Waiting for online orders...</p>
+                <div class="lane">
+                    <div class="lane-header" style="color: #3498db;">🛍️ Online / Pickup</div>
+                    <div class="ticket-container" id="pickup-container"></div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </main>
 
     <footer class="site-credit-footer" id="footer-bar">
-        <div class="footer-line-one">
-            <p class="footer-developer">
-                Created & Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a> +49 162 3757839
-            </p>
+        <div class="layout-container footer-line-one">
             <p class="footer-copyright">
                 &copy; Zaffran Delight, Euskirchen 2025
+            </p>
+            <p class="footer-developer">
+                Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a>
             </p>
         </div>
    </footer>   
@@ -224,9 +303,8 @@
     <div id="new-order-popup-overlay" class="kitchen-popup-overlay hidden">
         <div class="kitchen-popup-box">
             <h3>🔔 New Order! 🔔</h3>
-            <div id="popup-order-details">
-                </div>
-            <button id="accept-order-btn">Accept Order</button>
+            <div id="popup-order-details"></div>
+            <button id="accept-order-btn">ACCEPT (Next)</button>
         </div>
     </div>
 
@@ -240,20 +318,20 @@
     </div>
     
     <div id="kitchen-login-overlay" class="kitchen-popup-overlay">
-        <div class="kitchen-popup-box">
-            <h3>KDS Login</h3>
-            <p>Please enter the kitchen password.</p>
-            <input type="password" id="kitchen-password" placeholder="Password">
-            <p id="login-error" style="color: red; display: none;">Invalid Password</p>
-            <button id="login-button">Login</button>
+        <div class="kitchen-popup-box" style="border: 2px solid var(--gold); background: #1a1a1a;">
+            <h3 style="color:var(--gold);">CHEF LOGIN</h3>
+            <p style="color:#aaa;">Enter Kitchen Passcode</p>
+            <input type="password" id="kitchen-password" placeholder="PIN" style="width:100%; padding:10px; margin:15px 0; text-align:center; background:#333; border:1px solid #555; color:white; font-size:1.2rem;">
+            <p id="login-error" style="color: red; display: none;">Invalid PIN</p>
+            <button id="login-button" style="width:100%; padding:12px; background:var(--gold); border:none; font-weight:bold; cursor:pointer;">ACCESS KITCHEN</button>
         </div>
     </div>
     
-    <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+    <audio id="alertSound" src="notification.mp3"></audio>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="kitchen-script.js?v=3"></script> 
+    <script src="kitchen-script.js?v=5"></script> 
 
 </body>
 </html>

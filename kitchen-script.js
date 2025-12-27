@@ -10,136 +10,35 @@ const firebaseConfig = {
 
 // --- MASTER MENU LIST (For Numbering) ---
 const MENU_ITEMS = [
-    { name: "Tomatensuppe", price: 5.00 },        // 1
-    { name: "Daal Linsensuppe", price: 5.00 },    // 2
-    { name: "Hähnchen Suppe", price: 6.00 },      // 3
-    { name: "Mulligatawny Suppe", price: 6.50 },
-    { name: "Veg. Samosa", price: 5.00 },
-    { name: "Chicken Samosa", price: 5.50 },
-    { name: "Aloo Tiki", price: 5.00 },
-    { name: "Mix Pakora", price: 5.50 },
-    { name: "Paneer Pakora", price: 6.00 },
-    { name: "Aloo Pakora", price: 5.50 },        // 10
-    { name: "Gobi Pakora", price: 5.50 },
-    { name: "Mashroom Pakora", price: 5.50 },
-    { name: "Chicken Pakora", price: 6.00 },
-    { name: "Prawn Pakora", price: 7.50 },
-    { name: "Vegi Mix", price: 13.00 },
-    { name: "Palak Aallu", price: 13.00 },
-    { name: "Saag Aallu", price: 13.00 },
-    { name: "Tarka Daal", price: 12.50 },
-    { name: "Bhindi Masala", price: 13.00 },
-    { name: "Baingen Aallu", price: 13.00 },     // 20
-    { name: "Mushroom Aallu", price: 13.00 },
-    { name: "Gobi Aallu", price: 13.00 },
-    { name: "Channa Masala", price: 12.50 },
-    { name: "Veg. Korma", price: 13.50 },
-    { name: "Nauratan Korma", price: 14.00 },
-    { name: "Shahi Paneer", price: 14.00 },
-    { name: "Paneer Tikka Masala", price: 14.50 },
-    { name: "Paneer Jalfrezi", price: 14.00 },
-    { name: "Paneer Bhunna Masala", price: 14.00 },
-    { name: "Palak Paneer", price: 14.00 },      // 30
-    { name: "Paneer Muttar Aallu", price: 14.50 },
-    { name: "Chicken Curry", price: 14.50 },
-    { name: "Chicken Tikka Masala", price: 15.50 },
-    { name: "Chicken Korma", price: 15.00 },
-    { name: "Butter Chicken", price: 15.50 },
-    { name: "Kashmiri Chicken", price: 15.50 },
-    { name: "Chicken Goan Curry", price: 15.50 },
-    { name: "Chicken Jalfrezi", price: 15.50 },
-    { name: "Chicken Kadai", price: 15.50 },
-    { name: "Chicken Bhuna", price: 15.50 },     // 40
-    { name: "Vegi Chicken", price: 15.00 },
-    { name: "Chicken Palak", price: 15.50 },
-    { name: "Chicken Dhansik", price: 15.50 },
-    { name: "Chicken Madras", price: 15.50 },
-    { name: "Chicken Vindalo", price: 15.50 },
-    { name: "Lamb Curry", price: 17.00 },
-    { name: "Lamb Tikka Masala", price: 17.50 },
-    { name: "Lamb Korma", price: 17.00 },
-    { name: "Butter Lamb", price: 17.50 },
-    { name: "Kashmiri Lamb", price: 17.50 },     // 50
-    { name: "Lamb Goan Curry", price: 17.50 },
-    { name: "Lamb Jalfrezi", price: 17.50 },
-    { name: "Lamb Kadai", price: 17.50 },
-    { name: "Lamb Bhuna", price: 17.50 },
-    { name: "Vegi Lamb", price: 17.00 },
-    { name: "Lamb Palak", price: 17.50 },
-    { name: "Lamb Dhansik", price: 17.50 },
-    { name: "Lamb Madras", price: 17.50 },
-    { name: "Lamb Vindalo", price: 17.50 },
-    { name: "Prawn Curry", price: 18.50 },       // 60
-    { name: "Prawn Korma", price: 18.50 },
-    { name: "Prawn Tikka Masala", price: 18.50 },
-    { name: "Fish Curry", price: 18.50 },
-    { name: "Fish Tikka Masala", price: 18.50 },
-    { name: "Chicken Tikka", price: 17.50 },
-    { name: "Tandoori Chicken", price: 17.50 },
-    { name: "Malai Tikka", price: 17.50 },
-    { name: "Haryali Tikka", price: 17.50 },
-    { name: "Lamb Tikka", price: 18.50 },
-    { name: "Lamb Chops", price: 20.50 },        // 70
-    { name: "Seekh Kabab", price: 19.50 },
-    { name: "Prawn Tikka", price: 20.50 },
-    { name: "Paneer Tikka", price: 17.50 },
-    { name: "Fish Tawa Fry", price: 20.50 },
-    { name: "Zafrani Mix Grill", price: 24.00 },
-    { name: "Vegi Biryani", price: 14.50 },
-    { name: "Chicken Bombay Biryani", price: 16.50 },
-    { name: "Lamb Karachi Biryani", price: 17.50 },
-    { name: "Prawn Zafran Biryani", price: 20.50 },
-    { name: "Frisches Tandoori Brot", price: 3.50 }, // 80
-    { name: "Chapati Roti", price: 3.50 },
-    { name: "Naan", price: 3.00 },
-    { name: "Allo Naan", price: 4.50 },
-    { name: "Cheese Naan", price: 5.00 },
-    { name: "Butter Naan", price: 3.50 },
-    { name: "Garlic Naan", price: 4.50 },
-    { name: "Tandoori Parantha", price: 4.50 },
-    { name: "Mint Sauce", price: 3.00 },
-    { name: "Natur Joghurt", price: 2.50 },
-    { name: "Raita", price: 4.00 },              // 90
-    { name: "Mango Chutney", price: 3.00 },
-    { name: "Imli (Tamarind) Chutney", price: 3.00 },
-    { name: "Laal Chutney (scharfe...)", price: 3.50 },
-    { name: "Green Chutney", price: 3.50 },
-    { name: "Pickles", price: 3.50 },
-    { name: "Soße nach Wahl", price: 5.00 },
-    { name: "Gemüse-Frühlingsrollen", price: 5.00 },
-    { name: "Pommes frites", price: 3.50 },
-    { name: "Chicken Nuggets (6 Stk.)", price: 4.50 },
-    { name: "Basmati - Reis", price: 3.50 },     // 100
-    { name: "Zeera - Reis", price: 4.00 },
-    { name: "Zafrani - Reis", price: 5.50 },
-    { name: "Gemischter Salat", price: 6.00 },
-    { name: "Chicken Salat", price: 7.50 },
-    { name: "Zafrani Chicken Salat", price: 8.50 },
-    { name: "Mango Kulfi", price: 5.50 },
-    { name: "Almond Kulfi", price: 5.50 },
-    { name: "Pista Kulfi", price: 5.50 },
-    { name: "Gulab Jamun", price: 5.50 },
-    { name: "Ras Malai", price: 5.50 },          // 110
-    { name: "Lassi", price: 4.00 },
-    { name: "Mango Lassi", price: 4.50 },
-    { name: "Rosé Lassi", price: 4.50 },
-    { name: "Coca Cola", price: 3.50 },
-    { name: "Cola Zero", price: 3.50 },
-    { name: "Sprite", price: 3.50 },
-    { name: "Fanta", price: 3.50 },
-    { name: "Pinacolada", price: 5.50 },
-    { name: "Mint-Margarita", price: 5.50 },     // 119
-    { name: "Ipanema", price: 5.50 }             // 120
+    { name: "Tomatensuppe", price: 5.00 }, { name: "Daal Linsensuppe", price: 5.00 }, { name: "Hähnchen Suppe", price: 6.00 }, { name: "Mulligatawny Suppe", price: 6.50 },
+    { name: "Veg. Samosa", price: 5.00 }, { name: "Chicken Samosa", price: 5.50 }, { name: "Aloo Tiki", price: 5.00 }, { name: "Mix Pakora", price: 5.50 }, { name: "Paneer Pakora", price: 6.00 }, { name: "Aloo Pakora", price: 5.50 },
+    { name: "Gobi Pakora", price: 5.50 }, { name: "Mashroom Pakora", price: 5.50 }, { name: "Chicken Pakora", price: 6.00 }, { name: "Prawn Pakora", price: 7.50 },
+    { name: "Vegi Mix", price: 13.00 }, { name: "Palak Aallu", price: 13.00 }, { name: "Saag Aallu", price: 13.00 }, { name: "Tarka Daal", price: 12.50 }, { name: "Bhindi Masala", price: 13.00 }, { name: "Baingen Aallu", price: 13.00 },
+    { name: "Mushroom Aallu", price: 13.00 }, { name: "Gobi Aallu", price: 13.00 }, { name: "Channa Masala", price: 12.50 },
+    { name: "Veg. Korma", price: 13.50 }, { name: "Nauratan Korma", price: 14.00 }, { name: "Shahi Paneer", price: 14.00 }, { name: "Paneer Tikka Masala", price: 14.50 }, { name: "Paneer Jalfrezi", price: 14.00 }, { name: "Paneer Bhunna Masala", price: 14.00 }, { name: "Palak Paneer", price: 14.00 }, { name: "Paneer Muttar Aallu", price: 14.50 },
+    { name: "Chicken Curry", price: 14.50 }, { name: "Chicken Tikka Masala", price: 15.50 }, { name: "Chicken Korma", price: 15.00 }, { name: "Butter Chicken", price: 15.50 }, { name: "Kashmiri Chicken", price: 15.50 }, { name: "Chicken Goan Curry", price: 15.50 }, { name: "Chicken Jalfrezi", price: 15.50 }, { name: "Chicken Kadai", price: 15.50 }, { name: "Chicken Bhuna", price: 15.50 }, { name: "Vegi Chicken", price: 15.00 }, { name: "Chicken Palak", price: 15.50 }, { name: "Chicken Dhansik", price: 15.50 }, { name: "Chicken Madras", price: 15.50 }, { name: "Chicken Vindalo", price: 15.50 },
+    { name: "Lamb Curry", price: 17.00 }, { name: "Lamb Tikka Masala", price: 17.50 }, { name: "Lamb Korma", price: 17.00 }, { name: "Butter Lamb", price: 17.50 }, { name: "Kashmiri Lamb", price: 17.50 }, { name: "Lamb Goan Curry", price: 17.50 }, { name: "Lamb Jalfrezi", price: 17.50 }, { name: "Lamb Kadai", price: 17.50 }, { name: "Lamb Bhuna", price: 17.50 }, { name: "Vegi Lamb", price: 17.00 }, { name: "Lamb Palak", price: 17.50 }, { name: "Lamb Dhansik", price: 17.50 }, { name: "Lamb Madras", price: 17.50 }, { name: "Lamb Vindalo", price: 17.50 },
+    { name: "Prawn Curry", price: 18.50 }, { name: "Prawn Korma", price: 18.50 }, { name: "Prawn Tikka Masala", price: 18.50 }, { name: "Fish Curry", price: 18.50 }, { name: "Fish Tikka Masala", price: 18.50 },
+    { name: "Chicken Tikka", price: 17.50 }, { name: "Tandoori Chicken", price: 17.50 }, { name: "Malai Tikka", price: 17.50 }, { name: "Haryali Tikka", price: 17.50 }, { name: "Lamb Tikka", price: 18.50 }, { name: "Lamb Chops", price: 20.50 }, { name: "Seekh Kabab", price: 19.50 }, { name: "Prawn Tikka", price: 20.50 }, { name: "Paneer Tikka", price: 17.50 }, { name: "Fish Tawa Fry", price: 20.50 }, { name: "Zafrani Mix Grill", price: 24.00 },
+    { name: "Vegi Biryani", price: 14.50 }, { name: "Chicken Bombay Biryani", price: 16.50 }, { name: "Lamb Karachi Biryani", price: 17.50 }, { name: "Prawn Zafran Biryani", price: 20.50 },
+    { name: "Frisches Tandoori Brot", price: 3.50 }, { name: "Chapati Roti", price: 3.50 }, { name: "Naan", price: 3.00 }, { name: "Allo Naan", price: 4.50 }, { name: "Cheese Naan", price: 5.00 }, { name: "Butter Naan", price: 3.50 }, { name: "Garlic Naan", price: 4.50 }, { name: "Tandoori Parantha", price: 4.50 },
+    { name: "Mint Sauce", price: 3.00 }, { name: "Natur Joghurt", price: 2.50 }, { name: "Raita", price: 4.00 }, { name: "Mango Chutney", price: 3.00 }, { name: "Imli (Tamarind) Chutney", price: 3.00 }, { name: "Laal Chutney (scharfe...)", price: 3.50 }, { name: "Green Chutney", price: 3.50 }, { name: "Pickles", price: 3.50 }, { name: "Soße nach Wahl", price: 5.00 },
+    { name: "Gemüse-Frühlingsrollen", price: 5.00 }, { name: "Pommes frites", price: 3.50 }, { name: "Chicken Nuggets (6 Stk.)", price: 4.50 },
+    { name: "Basmati - Reis", price: 3.50 }, { name: "Zeera - Reis", price: 4.00 }, { name: "Zafrani - Reis", price: 5.50 },
+    { name: "Gemischter Salat", price: 6.00 }, { name: "Chicken Salat", price: 7.50 }, { name: "Zafrani Chicken Salat", price: 8.50 },
+    { name: "Mango Kulfi", price: 5.50 }, { name: "Almond Kulfi", price: 5.50 }, { name: "Pista Kulfi", price: 5.50 }, { name: "Gulab Jamun", price: 5.50 }, { name: "Ras Malai", price: 5.50 },
+    { name: "Lassi", price: 4.00 }, { name: "Mango Lassi", price: 4.50 }, { name: "Rosé Lassi", price: 4.50 }, { name: "Coca Cola", price: 3.50 }, { name: "Cola Zero", price: 3.50 }, { name: "Sprite", price: 3.50 }, { name: "Fanta", price: 3.50 }, { name: "Pinacolada", price: 5.50 }, { name: "Mint-Margarita", price: 5.50 }, { name: "Ipanema", price: 5.50 }
 ];
 
-// --- HELPER TO GET NUMBER ---
 function getDishNumber(name) {
     const index = MENU_ITEMS.findIndex(item => item.name === name);
     return index !== -1 ? ` - ${index + 1}` : ""; 
 }
 
 // --- 2. INIT FIREBASE ---
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
 // --- 3. DOM ELEMENTS ---
@@ -152,10 +51,11 @@ const kdsContentWrapper = document.getElementById('kds-content-wrapper');
 const dineInGrid = document.getElementById('dine-in-grid');
 const pickupGrid = document.getElementById('pickup-grid');
 
-// Popups
+// Popups & Controls
 const newOrderPopup = document.getElementById('new-order-popup-overlay');
 const popupOrderDetails = document.getElementById('popup-order-details');
 const acceptOrderBtn = document.getElementById('accept-order-btn');
+const masterClearBtn = document.getElementById('master-clear-btn');
 
 // Waiter Call
 const waiterCallOverlay = document.getElementById('waiter-call-overlay');
@@ -163,14 +63,14 @@ const waiterCallTableText = document.getElementById('waiter-call-table');
 const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
 let currentWaiterCallId = null;
 
-// New Master Clear Button
-const masterClearBtn = document.getElementById('master-clear-btn');
-
-// Audio
+// Audio (Uses notification.mp3 now)
 const alertAudio = document.getElementById('alertSound');
 const KITCHEN_PASSWORD = "zafran"; 
 const TOTAL_DINE_IN_TABLES = 12;
 let allOrders = {};
+
+// --- NEW QUEUE ARRAY ---
+let newOrderQueue = []; 
 
 // --- 4. LOGIN LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -179,11 +79,11 @@ document.addEventListener("DOMContentLoaded", () => {
             loginOverlay.classList.add('hidden');
             kdsContentWrapper.style.opacity = '1';
             
-            // Unlock Audio
+            // Unlock Audio (Browser Policy)
             alertAudio.play().then(() => {
                 alertAudio.pause();
                 alertAudio.currentTime = 0;
-            }).catch(e => console.log(e));
+            }).catch(e => console.log("Audio Init:", e));
 
             initializeKDS(); 
         } else {
@@ -193,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 });
 
-// --- 5. INITIALIZE KDS ---
+// --- 5. KDS LOGIC ---
 function initializeKDS() {
     createDineInTables();
 
@@ -211,54 +111,61 @@ function initializeKDS() {
     db.collection("orders")
       .where("status", "in", ["new", "seen", "ready", "cooked"]) 
       .onSnapshot((snapshot) => {
-            connectionIconEl.textContent = '✅'; 
-            let hasNewOrder = false;
-            let newestOrderData = null;
-            let changedTables = new Set();
+            if(connectionIconEl) connectionIconEl.textContent = '✅'; 
+            
+            dineInGrid.innerHTML = ''; // Re-render grid (or update dynamically)
+            createDineInTables(); // Re-create empty tables first
+            pickupGrid.innerHTML = '';
 
             snapshot.docChanges().forEach((change) => {
                 const orderData = change.doc.data();
-                const isOnline = orderData.orderType === 'pickup' || orderData.orderType === 'delivery';
-
-                // Waiter Call
+                
+                // Waiter Call Logic
                 if (orderData.orderType === 'assistance') {
                     if (change.type === "added") showWaiterCall(orderData.table, change.doc.id);
                     if (change.type === "removed" && currentWaiterCallId === change.doc.id) waiterCallOverlay.classList.add('hidden');
                     return;
                 }
 
-                // New Order Alert
+                // New Order Queue Logic
                 if (change.type === "added" && orderData.status === "new") {
-                    hasNewOrder = true;
-                    newestOrderData = orderData;
-                    // Mark as 'seen' locally to stop repeating
-                    db.collection("orders").doc(orderData.id).update({ status: "seen" }); 
-                }
-
-                // Tracking
-                if(!isOnline) changedTables.add(orderData.table);
-                if (change.type === "added" || change.type === "modified") {
-                    allOrders[orderData.id] = orderData;
-                }
-                if (change.type === "removed") {
-                    delete allOrders[orderData.id];
-                    if(!isOnline) changedTables.add(orderData.table);
+                    if (!newOrderQueue.find(o => o.id === orderData.id)) {
+                        newOrderQueue.push(orderData);
+                        // Sort: Oldest first
+                        newOrderQueue.sort((a, b) => a.createdAt - b.createdAt); 
+                        processNewOrderQueue(); 
+                    }
                 }
             });
 
-            // Refresh UI
+            // Process all docs for display
+            const allDocs = [];
+            snapshot.forEach(doc => allDocs.push({id: doc.id, ...doc.data()}));
+            
+            // Update Global State
+            allOrders = {}; // Reset for safety
+            allDocs.forEach(d => allOrders[d.id] = d);
+
+            // Re-render Tables
+            // Group by Table for Dine-In
+            const tablesWithOrders = new Set();
+            allDocs.forEach(order => {
+                if(order.orderType === 'assistance') return;
+                
+                if (order.orderType === 'pickup' || order.orderType === 'delivery') {
+                    // Handled by renderOnlineGrid logic (but we do it inline here for simplicity if prefered, or call separate)
+                } else {
+                    tablesWithOrders.add(order.table);
+                }
+            });
+
+            // Call your render functions
             renderOnlineGrid();
-            changedTables.forEach(tableIdentifier => {
-                if (!isNaN(parseInt(tableIdentifier))) renderDineInTable(tableIdentifier);
-            });
+            tablesWithOrders.forEach(t => renderDineInTable(t));
 
-            // Trigger Popup
-            if (hasNewOrder && newestOrderData) {
-                showNewOrderPopup(newestOrderData);
-            }
       }, (error) => {
           console.error("Firebase Error:", error);
-          connectionIconEl.textContent = '❌'; 
+          if(connectionIconEl) connectionIconEl.textContent = '❌'; 
       });
 }
 
@@ -278,33 +185,48 @@ function createDineInTables() {
     }
 }
 
-// --- POPUP LOGIC ---
-function showNewOrderPopup(order) {
-    let title = "";
-    if (order.orderType === 'pickup') title = `🛍️ Pickup: ${order.customerName}`;
-    else if (order.orderType === 'delivery') title = `🚚 Delivery: ${order.customerName}`;
-    else title = `🍽️ Table ${order.table}`;
+// --- QUEUE & POPUP LOGIC (LOOPING) ---
+function processNewOrderQueue() {
+    if (newOrderQueue.length === 0) {
+        newOrderPopup.classList.add('hidden');
+        alertAudio.loop = false;
+        alertAudio.pause();
+        alertAudio.currentTime = 0;
+        return;
+    }
 
-    // Item List with Numbers
-    let itemsHtml = order.items.map(item => 
+    const currentOrder = newOrderQueue[0];
+    
+    // Loop Sound ON
+    alertAudio.loop = true;
+    alertAudio.play().catch(e => console.log(e));
+
+    let title = "";
+    if (currentOrder.orderType === 'pickup') title = `🛍️ Pickup: ${currentOrder.customerName}`;
+    else if (currentOrder.orderType === 'delivery') title = `🚚 Delivery: ${currentOrder.customerName}`;
+    else title = `🍽️ Table ${currentOrder.table}`;
+
+    let itemsHtml = currentOrder.items.map(item => 
         `<li>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></li>`
     ).join('');
 
     popupOrderDetails.innerHTML = `
+        <div style="font-size: 1.5rem; color: #fff; margin-bottom: 20px;">PENDING ORDERS: ${newOrderQueue.length}</div>
         <h2>${title}</h2>
         <ul>${itemsHtml}</ul>
-        ${order.notes ? `<p style="color:#ff8888;">⚠️ ${order.notes}</p>` : ''}
+        ${currentOrder.notes ? `<p style="color:#ff8888;">⚠️ ${currentOrder.notes}</p>` : ''}
     `;
     
     newOrderPopup.classList.remove('hidden');
-    alertAudio.play().catch(e => console.log(e));
-
-    acceptOrderBtn.onclick = () => {
-        newOrderPopup.classList.add('hidden');
-        alertAudio.pause();
-        alertAudio.currentTime = 0;
-    };
 }
+
+acceptOrderBtn.onclick = () => {
+    if (newOrderQueue.length > 0) {
+        const orderToAccept = newOrderQueue.shift(); 
+        db.collection("orders").doc(orderToAccept.id).update({ status: "seen" });
+        processNewOrderQueue(); // Check for next one immediately
+    }
+};
 
 // --- RENDER DINE-IN ---
 function renderDineInTable(tableId) {
@@ -314,7 +236,7 @@ function renderDineInTable(tableId) {
     const emptyMsg = tableBox.querySelector('.order-list-empty');
     const clearBtn = tableBox.querySelector('.clear-table-btn'); 
 
-    const ordersForThisTable = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
+    const ordersForThisTable = Object.values(allOrders).filter(o => o.table == tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
     orderList.innerHTML = ""; 
 
     if (ordersForThisTable.length === 0) {
@@ -337,7 +259,6 @@ function renderDineInTable(tableId) {
                 `<li>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></li>`
             ).join('');
             
-            // If cooked/ready, dim it
             const isCooked = order.status === 'cooked' || order.status === 'ready';
             const dimStyle = isCooked ? 'opacity:0.5;' : '';
             const badge = isCooked ? '<span style="float:right;">✅</span>' : '';
@@ -394,7 +315,6 @@ function renderOnlineGrid() {
 // --- ACTIONS ---
 window.handleServe = function(orderId) {
     const order = allOrders[orderId];
-    // Toggle status
     const newStatus = (order.status === 'ready' || order.status === 'cooked') ? 'seen' : 'ready';
     db.collection("orders").doc(orderId).update({ status: newStatus });
 }
@@ -402,29 +322,27 @@ window.handleServe = function(orderId) {
 window.handleClearOrder = function(tableId) {
     if(!confirm(`Clear all orders for Table ${tableId}?`)) return;
     
-    const tableOrders = Object.values(allOrders).filter(o => o.table === tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
+    const tableOrders = Object.values(allOrders).filter(o => o.table == tableId && o.orderType !== 'pickup' && o.orderType !== 'delivery');
     const batch = db.batch();
     
     tableOrders.forEach(order => {
-        // Archive
         const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
         batch.set(archiveRef, { ...order, closedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        // Delete
         const docRef = db.collection("orders").doc(order.id);
         batch.delete(docRef);
     });
     batch.commit();
 }
 
-// --- MASTER CLEAR FUNCTION ---
+// --- MASTER CLEAR ---
 async function handleMasterClear() {
-    if(!confirm("⚠️ WARNING: This will DELETE ALL active orders from the screen.\n\nUse this to 'Reset the Day' or clear stuck orders.\n\nAre you sure?")) {
+    if(!confirm("⚠️ WARNING: This will DELETE ALL active orders.\n\nUse this to 'Reset the Day' or clear stuck orders.\n\nAre you sure?")) {
         return;
     }
 
-    const pwd = prompt("Please enter Kitchen Password to confirm deletion:");
+    const pwd = prompt("Enter Kitchen Password:");
     if (pwd !== KITCHEN_PASSWORD) {
-        alert("Wrong password. Action cancelled.");
+        alert("Wrong password.");
         return;
     }
 
@@ -441,24 +359,27 @@ async function handleMasterClear() {
         });
 
         await batch.commit();
-        alert("✅ Board Cleared! Ready for new day.");
-        // Reload to ensure clean state
+        alert("✅ Board Cleared!");
         location.reload(); 
 
     } catch (error) {
         console.error("Error clearing board:", error);
-        alert("Error clearing board. Check console.");
     }
 }
 
+// --- WAITER CALL ---
 function showWaiterCall(tableNum, docId) {
     currentWaiterCallId = docId;
     waiterCallTableText.innerText = `TABLE ${tableNum}`;
     waiterCallOverlay.classList.remove('hidden');
+    alertAudio.loop = true;
     alertAudio.play().catch(e => console.log(e));
 }
 
 dismissWaiterBtn.addEventListener('click', () => {
+    alertAudio.loop = false;
+    alertAudio.pause();
+    alertAudio.currentTime = 0;
     if(currentWaiterCallId) {
         db.collection("orders").doc(currentWaiterCallId).delete();
         waiterCallOverlay.classList.add('hidden');

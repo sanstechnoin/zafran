@@ -87,75 +87,93 @@
 
         /* --- FIXED DASHBOARD LAYOUT (Balanced Size & Alignment) --- */
 
-/* 1. Table Headers */
-.table-box .table-header h2,
-.pickup-box .table-header h2 {
-    font-size: 1.8rem !important; /* Keep headers big */
-    color: var(--gold) !important;
-    border-bottom: 1px solid #444;
-    padding-bottom: 10px !important;
-    margin-bottom: 10px !important;
-    white-space: nowrap; /* Prevent header wrapping */
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+        /* 1. Table Headers */
+        .table-box .table-header h2,
+        .pickup-box .table-header h2 {
+            font-size: 1.8rem !important; /* Keep headers big */
+            color: var(--gold) !important;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px !important;
+            margin-bottom: 10px !important;
+            white-space: nowrap; /* Prevent header wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-/* 2. Food Items - THE FIX */
-.waiter-item, 
-.order-list li,
-.pickup-box ul li {
-    font-size: 1.35rem !important; /* Adjusted to fit the column width */
-    line-height: 1.3 !important;
-    font-weight: 600 !important;
-    margin-bottom: 8px !important;
-    
-    /* Layout Fixes */
-    display: flex !important;
-    justify-content: space-between; /* Push number to right if space permits */
-    align-items: flex-start;
-    text-align: left;
-    border-bottom: 1px solid rgba(255,255,255,0.1); /* Subtle separator */
-    padding-bottom: 4px;
-}
+        /* 2. Food Items - THE FIX */
+        .waiter-item, 
+        .order-list li,
+        .pickup-box ul li {
+            font-size: 1.35rem !important; /* Adjusted to fit the column width */
+            line-height: 1.3 !important;
+            font-weight: 600 !important;
+            margin-bottom: 8px !important;
+            
+            /* Layout Fixes */
+            display: flex !important;
+            justify-content: space-between; /* Push number to right if space permits */
+            align-items: flex-start;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1); /* Subtle separator */
+            padding-bottom: 4px;
+        }
 
-/* 3. The Dish Number Highlight */
-.order-list li strong,
-.pickup-box ul li strong {
-    font-size: 1.5rem !important; /* Make the number slightly bigger/pop */
-    color: var(--gold) !important;
-    margin-left: 8px; /* Space between name and number */
-    white-space: nowrap; /* Don't wrap the number alone */
-}
+        /* 3. The Dish Number Highlight */
+        .order-list li strong,
+        .pickup-box ul li strong {
+            font-size: 1.5rem !important; /* Make the number slightly bigger/pop */
+            color: var(--gold) !important;
+            margin-left: 8px; /* Space between name and number */
+            white-space: nowrap; /* Don't wrap the number alone */
+        }
 
-/* 4. Remove List Indentation to gain width */
-.order-list, .pickup-box ul {
-    padding-left: 0 !important;
-    list-style: none !important;
-}
+        /* 4. Remove List Indentation to gain width */
+        .order-list, .pickup-box ul {
+            padding-left: 0 !important;
+            list-style: none !important;
+        }
 
-/* 5. Order Time */
-.order-group h4, 
-.pickup-box .order-time {
-    font-size: 1.1rem !important;
-    color: #ccc !important;
-    margin-bottom: 10px;
-}
+        /* 5. Order Time */
+        .order-group h4, 
+        .pickup-box .order-time {
+            font-size: 1.1rem !important;
+            color: #ccc !important;
+            margin-bottom: 10px;
+        }
 
-/* 6. Buttons */
-.btn-serve, 
-.clear-pickup-btn,
-.clear-table-btn {
-    font-size: 1.3rem !important;
-    padding: 10px !important;
-    width: 100% !important;
-    font-weight: bold;
-    text-transform: uppercase;
-}
+        /* 6. Buttons */
+        .btn-serve, 
+        .clear-pickup-btn,
+        .clear-table-btn {
+            font-size: 1.3rem !important;
+            padding: 10px !important;
+            width: 100% !important;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
 
-/* 7. Optimize Card Padding */
-.table-box, .pickup-box {
-    padding: 10px 15px !important; /* Less horizontal padding = more text room */
-}
+        /* 7. Optimize Card Padding */
+        .table-box, .pickup-box {
+            padding: 10px 15px !important; /* Less horizontal padding = more text room */
+        }
+
+        /* --- MASTER CLEAR BUTTON STYLE --- */
+        #master-clear-btn {
+            background-color: #ff9800; /* Orange */
+            color: black;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            border: 2px solid #e65100;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        #master-clear-btn:hover {
+            background-color: #ffb74d;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body class="kitchen-body">
@@ -165,6 +183,9 @@
             <img src="logo.png" alt="Zaffran Logo">
             <h1>Kitchen Display System</h1>
             <span id="connection-icon">...</span>
+        </div>
+        <div>
+            <button id="master-clear-btn">⚠️ MASTER CLEAR</button>
         </div>
     </header>
 
@@ -232,7 +253,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="kitchen-script.js?v=2"></script> 
+    <script src="kitchen-script.js?v=3"></script> 
 
 </body>
 </html>

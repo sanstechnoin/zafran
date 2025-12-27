@@ -63,13 +63,13 @@ const waiterCallTableText = document.getElementById('waiter-call-table');
 const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
 let currentWaiterCallId = null;
 
-// Audio (Uses notification.mp3 now)
+// Audio
 const alertAudio = document.getElementById('alertSound');
 const KITCHEN_PASSWORD = "zafran"; 
 const TOTAL_DINE_IN_TABLES = 12;
 let allOrders = {};
 
-// --- NEW QUEUE ARRAY ---
+// --- NEW QUEUE VARIABLES ---
 let newOrderQueue = []; 
 
 // --- 4. LOGIN LOGIC ---
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
             loginOverlay.classList.add('hidden');
             kdsContentWrapper.style.opacity = '1';
             
-            // Unlock Audio (Browser Policy)
+            // Unlock Audio
             alertAudio.play().then(() => {
                 alertAudio.pause();
                 alertAudio.currentTime = 0;
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 });
 
-// --- 5. KDS LOGIC ---
+// --- 5. INITIALIZE KDS ---
 function initializeKDS() {
     createDineInTables();
 
@@ -113,26 +113,27 @@ function initializeKDS() {
       .onSnapshot((snapshot) => {
             if(connectionIconEl) connectionIconEl.textContent = '✅'; 
             
-            dineInGrid.innerHTML = ''; // Re-render grid (or update dynamically)
-            createDineInTables(); // Re-create empty tables first
+            dineInGrid.innerHTML = ''; // Re-render
+            createDineInTables(); 
             pickupGrid.innerHTML = '';
 
             snapshot.docChanges().forEach((change) => {
                 const orderData = change.doc.data();
                 
-                // Waiter Call Logic
+                // Waiter Call
                 if (orderData.orderType === 'assistance') {
                     if (change.type === "added") showWaiterCall(orderData.table, change.doc.id);
                     if (change.type === "removed" && currentWaiterCallId === change.doc.id) waiterCallOverlay.classList.add('hidden');
                     return;
                 }
 
-                // New Order Queue Logic
+                // New Order -> Add to Queue
                 if (change.type === "added" && orderData.status === "new") {
+                    // Check if already in queue to prevent dupes
                     if (!newOrderQueue.find(o => o.id === orderData.id)) {
                         newOrderQueue.push(orderData);
-                        // Sort: Oldest first
-                        newOrderQueue.sort((a, b) => a.createdAt - b.createdAt); 
+                        // Sort by Time (Oldest First)
+                        newOrderQueue.sort((a, b) => a.createdAt - b.createdAt);
                         processNewOrderQueue(); 
                     }
                 }
@@ -142,24 +143,25 @@ function initializeKDS() {
             const allDocs = [];
             snapshot.forEach(doc => allDocs.push({id: doc.id, ...doc.data()}));
             
-            // Update Global State
-            allOrders = {}; // Reset for safety
+            // Sort by Time
+            allDocs.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+            // Populate global state
+            allOrders = {};
             allDocs.forEach(d => allOrders[d.id] = d);
 
-            // Re-render Tables
-            // Group by Table for Dine-In
+            // Render Grids
             const tablesWithOrders = new Set();
             allDocs.forEach(order => {
                 if(order.orderType === 'assistance') return;
                 
                 if (order.orderType === 'pickup' || order.orderType === 'delivery') {
-                    // Handled by renderOnlineGrid logic (but we do it inline here for simplicity if prefered, or call separate)
+                    // handled by renderOnlineGrid
                 } else {
                     tablesWithOrders.add(order.table);
                 }
             });
 
-            // Call your render functions
             renderOnlineGrid();
             tablesWithOrders.forEach(t => renderDineInTable(t));
 
@@ -185,8 +187,9 @@ function createDineInTables() {
     }
 }
 
-// --- QUEUE & POPUP LOGIC (LOOPING) ---
+// --- QUEUE & POPUP LOGIC ---
 function processNewOrderQueue() {
+    // If queue is empty, stop everything
     if (newOrderQueue.length === 0) {
         newOrderPopup.classList.add('hidden');
         alertAudio.loop = false;
@@ -195,12 +198,14 @@ function processNewOrderQueue() {
         return;
     }
 
+    // Get the first order (Oldest)
     const currentOrder = newOrderQueue[0];
     
-    // Loop Sound ON
+    // Play Sound Loop
     alertAudio.loop = true;
     alertAudio.play().catch(e => console.log(e));
 
+    // Render Popup
     let title = "";
     if (currentOrder.orderType === 'pickup') title = `🛍️ Pickup: ${currentOrder.customerName}`;
     else if (currentOrder.orderType === 'delivery') title = `🚚 Delivery: ${currentOrder.customerName}`;
@@ -210,8 +215,15 @@ function processNewOrderQueue() {
         `<li>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></li>`
     ).join('');
 
+    // --- THE VISIBILITY FIX ---
+    // Black Text + Gold Background = High Visibility
+    const pendingText = `
+        <div style="font-size: 1.5rem; color: black; background: #D4AF37; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; border: 2px solid white;">
+            PENDING ORDERS: ${newOrderQueue.length}
+        </div>`;
+
     popupOrderDetails.innerHTML = `
-        <div style="font-size: 1.5rem; color: #fff; margin-bottom: 20px;">PENDING ORDERS: ${newOrderQueue.length}</div>
+        ${pendingText}
         <h2>${title}</h2>
         <ul>${itemsHtml}</ul>
         ${currentOrder.notes ? `<p style="color:#ff8888;">⚠️ ${currentOrder.notes}</p>` : ''}
@@ -220,11 +232,16 @@ function processNewOrderQueue() {
     newOrderPopup.classList.remove('hidden');
 }
 
+// Accept Button Click Handler
 acceptOrderBtn.onclick = () => {
     if (newOrderQueue.length > 0) {
-        const orderToAccept = newOrderQueue.shift(); 
+        const orderToAccept = newOrderQueue.shift(); // Remove first from queue
+        
+        // Mark as 'seen' in DB so it doesn't pop up again
         db.collection("orders").doc(orderToAccept.id).update({ status: "seen" });
-        processNewOrderQueue(); // Check for next one immediately
+        
+        // Process next one immediately
+        processNewOrderQueue();
     }
 };
 
@@ -315,6 +332,7 @@ function renderOnlineGrid() {
 // --- ACTIONS ---
 window.handleServe = function(orderId) {
     const order = allOrders[orderId];
+    // Toggle status
     const newStatus = (order.status === 'ready' || order.status === 'cooked') ? 'seen' : 'ready';
     db.collection("orders").doc(orderId).update({ status: newStatus });
 }
@@ -326,23 +344,25 @@ window.handleClearOrder = function(tableId) {
     const batch = db.batch();
     
     tableOrders.forEach(order => {
+        // Archive
         const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
         batch.set(archiveRef, { ...order, closedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        // Delete
         const docRef = db.collection("orders").doc(order.id);
         batch.delete(docRef);
     });
     batch.commit();
 }
 
-// --- MASTER CLEAR ---
+// --- MASTER CLEAR FUNCTION ---
 async function handleMasterClear() {
-    if(!confirm("⚠️ WARNING: This will DELETE ALL active orders.\n\nUse this to 'Reset the Day' or clear stuck orders.\n\nAre you sure?")) {
+    if(!confirm("⚠️ WARNING: This will DELETE ALL active orders from the screen.\n\nUse this to 'Reset the Day' or clear stuck orders.\n\nAre you sure?")) {
         return;
     }
 
-    const pwd = prompt("Enter Kitchen Password:");
+    const pwd = prompt("Please enter Kitchen Password to confirm deletion:");
     if (pwd !== KITCHEN_PASSWORD) {
-        alert("Wrong password.");
+        alert("Wrong password. Action cancelled.");
         return;
     }
 
@@ -359,15 +379,15 @@ async function handleMasterClear() {
         });
 
         await batch.commit();
-        alert("✅ Board Cleared!");
+        alert("✅ Board Cleared! Ready for new day.");
         location.reload(); 
 
     } catch (error) {
         console.error("Error clearing board:", error);
+        alert("Error clearing board. Check console.");
     }
 }
 
-// --- WAITER CALL ---
 function showWaiterCall(tableNum, docId) {
     currentWaiterCallId = docId;
     waiterCallTableText.innerText = `TABLE ${tableNum}`;

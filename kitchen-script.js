@@ -9,7 +9,6 @@ const firebaseConfig = {
 };
 
 // --- MASTER MENU LIST (For Numbering) ---
-// This determines the number (Index 0 = #1, Index 1 = #2...)
 const MENU_ITEMS = [
     { name: "Tomatensuppe", price: 5.00 },        // 1
     { name: "Daal Linsensuppe", price: 5.00 },    // 2
@@ -136,7 +135,7 @@ const MENU_ITEMS = [
 // --- HELPER TO GET NUMBER ---
 function getDishNumber(name) {
     const index = MENU_ITEMS.findIndex(item => item.name === name);
-    return index !== -1 ? ` - ${index + 1}` : ""; // Returns " - 45"
+    return index !== -1 ? ` - ${index + 1}` : ""; 
 }
 
 // --- 2. INIT FIREBASE ---
@@ -163,6 +162,9 @@ const waiterCallOverlay = document.getElementById('waiter-call-overlay');
 const waiterCallTableText = document.getElementById('waiter-call-table');
 const dismissWaiterBtn = document.getElementById('dismiss-waiter-btn');
 let currentWaiterCallId = null;
+
+// New Master Clear Button
+const masterClearBtn = document.getElementById('master-clear-btn');
 
 // Audio
 const alertAudio = document.getElementById('alertSound');
@@ -195,10 +197,15 @@ document.addEventListener("DOMContentLoaded", () => {
 function initializeKDS() {
     createDineInTables();
 
-    // Listen for Clear Buttons
+    // Listen for Clear Buttons (Single Table)
     dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
         btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
     });
+
+    // Listen for MASTER CLEAR Button
+    if(masterClearBtn) {
+        masterClearBtn.addEventListener('click', handleMasterClear);
+    }
 
     // START LISTENER
     db.collection("orders")
@@ -407,6 +414,41 @@ window.handleClearOrder = function(tableId) {
         batch.delete(docRef);
     });
     batch.commit();
+}
+
+// --- MASTER CLEAR FUNCTION ---
+async function handleMasterClear() {
+    if(!confirm("⚠️ WARNING: This will DELETE ALL active orders from the screen.\n\nUse this to 'Reset the Day' or clear stuck orders.\n\nAre you sure?")) {
+        return;
+    }
+
+    const pwd = prompt("Please enter Kitchen Password to confirm deletion:");
+    if (pwd !== KITCHEN_PASSWORD) {
+        alert("Wrong password. Action cancelled.");
+        return;
+    }
+
+    try {
+        const snapshot = await db.collection("orders").get();
+        if (snapshot.empty) {
+            alert("Board is already empty.");
+            return;
+        }
+
+        const batch = db.batch();
+        snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        alert("✅ Board Cleared! Ready for new day.");
+        // Reload to ensure clean state
+        location.reload(); 
+
+    } catch (error) {
+        console.error("Error clearing board:", error);
+        alert("Error clearing board. Check console.");
+    }
 }
 
 function showWaiterCall(tableNum, docId) {

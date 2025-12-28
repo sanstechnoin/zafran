@@ -144,7 +144,7 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
-// --- 3. MAIN SCRIPT LOGIC (Inside Event Listener) ---
+// --- 3. MAIN SCRIPT LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
 
     // --- DOM Elements ---
@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function initializeWaiterStation() {
         createDineInTables();
 
-        // Button Listeners (Only if elements exist)
+        // Button Listeners
         if(dineInGrid) {
             dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
                 btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Firebase Listener - Handles Orders & Updates UI
+        // Firebase Listener
         db.collection("orders")
           .where("status", "in", ["new", "seen", "ready", "cooked"]) 
           .onSnapshot(
@@ -342,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
         closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
     }
 
-    // --- PAYMENT SUMMARY LOGIC (Fixed with Discount Support) ---
+    // --- PAYMENT SUMMARY LOGIC (With Discount Support) ---
     function showPaymentSummary(ordersList, title) {
         ordersToArchive = ordersList; 
         
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let couponUsed = null;
 
             ordersList.forEach(order => {
-                // Sum Items
+                // 1. Sum Items
                 order.items.forEach(item => {
                     let price = item.price;
                     if (!price) {
@@ -379,16 +379,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     paymentItemsList.appendChild(row);
                 });
 
-                // Capture Order Discount (from pickup.html script)
+                // 2. Capture Discount
+                // Look for 'coupon' (Client App saves it here) OR 'couponCode' (Legacy)
                 if (order.discount && !isNaN(order.discount)) {
                     totalDiscount += parseFloat(order.discount);
                 }
-                if (order.couponCode) {
+                
+                // Prioritize 'coupon' field (contains full info like "SPAR10 (10%)")
+                if (order.coupon && order.coupon !== "None") {
+                    couponUsed = order.coupon;
+                } else if (order.couponCode) {
                     couponUsed = order.couponCode;
                 }
             });
 
-            // --- Add Discount Section if applied ---
+            // 3. Add Discount Row
             if (totalDiscount > 0) {
                 const discountRow = document.createElement('div');
                 discountRow.style.display = "flex";
@@ -397,14 +402,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 discountRow.style.color = "#ff4444"; // Red for deduction
                 discountRow.style.fontWeight = "bold";
                 
+                // Show Name ("SPAR10 (10%)") or fallback
+                const nameDisplay = couponUsed ? couponUsed : 'Discount';
+                
                 discountRow.innerHTML = `
-                    <span>Rabatt (${couponUsed ? couponUsed : 'Coupon'}):</span>
+                    <span>Rabatt (${nameDisplay}):</span>
                     <span>- ${totalDiscount.toFixed(2)} €</span>
                 `;
                 paymentItemsList.appendChild(discountRow);
             }
             
-            // Calculate Final Total
+            // 4. Final Total
             const finalTotal = subTotal - totalDiscount;
             if(paymentTotalDisplay) paymentTotalDisplay.innerText = finalTotal.toFixed(2) + " €";
         }
@@ -430,19 +438,17 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const batch = db.batch();
             for (const order of ordersToArchive) {
-                // Get the final displayed amount
                 const finalAmountStr = document.getElementById('payment-total-display').innerText.replace(' €','').replace(',','.');
                 
                 const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
                 batch.set(archiveRef, {
                     ...order,
                     status: 'paid', 
-                    paidAmount: parseFloat(finalAmountStr), // Save exact final total
+                    paidAmount: parseFloat(finalAmountStr),
                     closedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     day: new Date().toISOString().split('T')[0] 
                 });
                 
-                // Delete from active 'orders'
                 const docRef = db.collection("orders").doc(order.id);
                 batch.delete(docRef);
             }

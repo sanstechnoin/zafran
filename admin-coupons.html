@@ -125,9 +125,6 @@
         .hours-row:last-child { border-bottom: none; }
         .day-label { font-weight: bold; color: var(--gold); }
         .service-card { background: #222; border: 1px solid #444; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        .service-status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .dot-green { background-color: var(--success-green); box-shadow: 0 0 5px var(--success-green); }
-        .dot-red { background-color: var(--danger-red); box-shadow: 0 0 5px var(--danger-red); }
         
         .holiday-list { margin-top: 15px; max-height: 200px; overflow-y: auto; }
         .holiday-item { background: #111; padding: 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
@@ -661,10 +658,9 @@
     }
 
     // ==========================================
-    // 3. COUPON LOGIC (Existing, stripped for brevity but functional)
+    // 3. COUPON LOGIC 
     // ==========================================
     const couponForm = document.getElementById('coupon-form');
-    // ... (Existing Coupon Logic remains mostly same, just add translations where needed)
     
     function loadCoupons() {
         const tableBody = document.getElementById('coupons-body');
@@ -676,7 +672,6 @@
                 const badge = isPercent ? 'badge-percent' : 'badge-fixed';
                 const val = isPercent ? `${d.discountValue}%` : `${d.discountValue}€`;
                 
-                // Simplified Row for display
                 const row = `<tr>
                     <td style="color:var(--gold); font-weight:bold;">${d.code}</td>
                     <td><span class="badge ${badge}">${val}</span></td>
@@ -711,15 +706,13 @@
         e.preventDefault();
         const code = document.getElementById('code').value.toUpperCase().trim();
         const mode = document.getElementById('validityMode').value;
-        // Basic Save Logic
         const data = {
             code, mode,
             discountType: document.querySelector('input[name="discountType"]:checked').value,
             discountValue: parseFloat(document.getElementById('discountValue').value),
             minOrder: parseFloat(document.getElementById('minOrder').value),
             createdAt: new Date().toISOString(),
-            // Handle Dates based on Mode...
-            validCategories: [] // Simplify for demo
+            validCategories: [] 
         };
 
         if(mode === 'range') {
@@ -734,7 +727,7 @@
         couponForm.reset();
         document.getElementById('startNow').checked = true;
         loadCoupons();
-        alert("Coupon Saved");
+        alert(currentLang === 'de' ? "Coupon Gespeichert!" : "Coupon Saved!");
     });
 
 </script>

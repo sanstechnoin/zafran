@@ -8,21 +8,62 @@ const firebaseConfig = {
   appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
 // --- 2. CONFIGURATION ---
-const RESTAURANT_CAPACITY = 40; // Max number of guests allowed at once
-const AVERAGE_DURATION_MINUTES = 120; // How long a table stays (2 hours)
+const RESTAURANT_CAPACITY = 40; 
+const AVERAGE_DURATION_MINUTES = 120; 
 
-document.addEventListener("DOMContentLoaded", () => {
+// Global Settings State
+let businessHours = {
+    weekly: {},
+    holidays: [],
+    pause: null
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
     
+    // Load Admin Settings First
+    await loadSettings();
+
     // Set Min Date to Today
     const dateInput = document.getElementById('res-date');
+    const timeInput = document.getElementById('res-time');
     const today = new Date().toISOString().split('T')[0];
     dateInput.min = today;
 
-    // Handle Form Submit
+    // --- REAL-TIME VALIDATION LISTENERS ---
+    
+    // 1. Validate Date (Holiday & Closed Days)
+    dateInput.addEventListener('change', function() {
+        const selectedDate = this.value;
+        if(!selectedDate) return;
+
+        const validation = checkDateValidity(selectedDate);
+        if(!validation.valid) {
+            alert(validation.msg);
+            this.value = ""; // Reset date
+        }
+    });
+
+    // 2. Validate Time (Opening Hours)
+    timeInput.addEventListener('change', function() {
+        const selectedDate = dateInput.value;
+        const selectedTime = this.value;
+        
+        if(!selectedDate) return; // Wait for date first
+
+        const validation = checkTimeValidity(selectedDate, selectedTime);
+        if(!validation.valid) {
+            alert(validation.msg);
+            this.value = ""; // Reset time
+        }
+    });
+
+    // --- FORM SUBMIT ---
     const form = document.getElementById('reservation-form');
     const submitBtn = document.getElementById('submit-btn');
     const modal = document.getElementById('success-modal');
@@ -38,22 +79,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const guests = parseInt(document.getElementById('res-guests').value);
         const notes = document.getElementById('res-notes').value;
 
-        // 1. Validation: Booking Times (12:00 to 20:00)
-        // Split time into hours and minutes
-        const [h, m] = time.split(':').map(Number);
-        
-        // Logic: Hour must be at least 12 AND (Hour less than 20 OR Hour is exactly 20 and Minutes is 0)
-        const isValidTime = h >= 12 && (h < 20 || (h === 20 && m === 0));
+        // FINAL VALIDATION ON SUBMIT
+        const dateCheck = checkDateValidity(date);
+        if(!dateCheck.valid) return alert(dateCheck.msg);
 
-        if (!isValidTime) {
-            alert("Reservierungen sind nur zwischen 12:00 und 20:00 Uhr möglich.");
-            return;
-        }
+        const timeCheck = checkTimeValidity(date, time);
+        if(!timeCheck.valid) return alert(timeCheck.msg);
 
+        // CHECK AVAILABILITY (Capacity)
         submitBtn.disabled = true;
         submitBtn.innerText = "Prüfe Verfügbarkeit...";
 
-        // 2. CHECK AVAILABILITY (The "Calendar" Logic)
         const isAvailable = await checkAvailability(date, time, guests);
 
         if (!isAvailable) {
@@ -63,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // 3. Save Reservation
+        // SAVE RESERVATION
         submitBtn.innerText = "Senden...";
 
         try {
@@ -75,13 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 time: time,
                 guests: guests,
                 notes: notes,
-                status: "confirmed", // Auto-confirm if space is available
+                status: "confirmed", 
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            // Show Success
             modal.style.display = 'flex';
             form.reset();
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Jetzt Reservieren";
 
         } catch (error) {
             console.error("Error booking table:", error);
@@ -92,24 +129,114 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-/**
- * Checks if there is enough space for the new reservation.
- * It downloads all reservations for that specific DATE and calculates overlaps.
- */
+// ==========================================
+// 3. LOGIC & RULES
+// ==========================================
+
+async function loadSettings() {
+    try {
+        const doc = await db.collection('settings').doc('hours').get();
+        if(doc.exists) {
+            businessHours = doc.data();
+        } else {
+            // Default Fallback
+            businessHours = {
+                weekly: {
+                    monday: {open:false}, 
+                    tuesday:{open:true, start:"12:00", end:"22:00"},
+                    wednesday:{open:true, start:"12:00", end:"22:00"}, 
+                    thursday:{open:true, start:"12:00", end:"22:00"},
+                    friday:{open:true, start:"12:00", end:"22:00"}, 
+                    saturday:{open:true, start:"12:00", end:"22:00"},
+                    sunday:{open:true, start:"12:00", end:"22:00"}
+                },
+                holidays: [],
+                pause: null
+            };
+        }
+    } catch(e) { console.error("Could not load settings", e); }
+}
+
+function checkDateValidity(dateStr) {
+    const selectedDate = new Date(dateStr);
+    selectedDate.setHours(0,0,0,0); // normalize
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // 1. Check Holidays (Scenario 3)
+    if(businessHours.holidays && businessHours.holidays.length > 0) {
+        for(let h of businessHours.holidays) {
+            const start = new Date(h.start); start.setHours(0,0,0,0);
+            const end = new Date(h.end); end.setHours(23,59,59,999);
+            
+            if(selectedDate >= start && selectedDate <= end) {
+                return { valid: false, msg: `An diesem Datum haben wir geschlossen: ${h.reason || 'Betriebsurlaub'}.` };
+            }
+        }
+    }
+
+    // 2. Check Weekly Schedule (Scenario 1)
+    const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayName = daysMap[selectedDate.getDay()];
+    const dayConfig = businessHours.weekly ? businessHours.weekly[dayName] : null;
+
+    if(!dayConfig || !dayConfig.open) {
+        return { valid: false, msg: `Am ${dayName} haben wir leider Ruhetag.` };
+    }
+
+    // 3. Check Emergency Pause (Scenario 4) - Only if booking for TODAY
+    if(selectedDate.getTime() === today.getTime()) {
+        if(businessHours.pause && businessHours.pause.active) {
+            // If Pause is active AND (Type is All OR Type is Pickup/Reservations)
+            // Note: Admin panel has "delivery", "pickup", "all". We treat "all" or specific logic.
+            // Assuming Table Reservations are blocked if "all" is selected.
+            if(businessHours.pause.type === 'all' && businessHours.pause.until > new Date().getTime()) {
+                 const resume = new Date(businessHours.pause.until);
+                 const timeStr = resume.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                 return { valid: false, msg: `Momentan nehmen wir keine Reservierungen an. Bitte versuchen Sie es ab ${timeStr} Uhr wieder.` };
+            }
+        }
+    }
+
+    return { valid: true };
+}
+
+function checkTimeValidity(dateStr, timeStr) {
+    const selectedDate = new Date(dateStr);
+    const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayName = daysMap[selectedDate.getDay()];
+    const dayConfig = businessHours.weekly ? businessHours.weekly[dayName] : null;
+
+    if (!dayConfig || !dayConfig.open) return { valid: false, msg: "Geschlossen." };
+
+    // Use Restaurant Hours (start/end)
+    const openTime = dayConfig.start; 
+    const closeTime = dayConfig.end; 
+
+    if (!openTime || !closeTime) return { valid: false, msg: "Keine Öffnungszeiten verfügbar." };
+
+    if (timeStr < openTime || timeStr > closeTime) {
+        return { valid: false, msg: `Reservierung nur zwischen ${openTime} und ${closeTime} Uhr möglich.` };
+    }
+
+    return { valid: true };
+}
+
+// ==========================================
+// 4. CAPACITY CHECK (Existing Logic)
+// ==========================================
+
 async function checkAvailability(date, time, newGuests) {
     try {
-        // Fetch all reservations for this Date
         const snapshot = await db.collection("reservations")
                                  .where("date", "==", date)
                                  .where("status", "==", "confirmed") 
                                  .get();
 
-        if (snapshot.empty) return true; // No bookings yet, totally free
+        if (snapshot.empty) return true; 
 
-        // Convert requested time to Minutes (e.g., 18:30 -> 1110 minutes)
         const newStart = timeToMinutes(time);
         const newEnd = newStart + AVERAGE_DURATION_MINUTES;
-
         let currentOccupancy = 0;
 
         snapshot.forEach(doc => {
@@ -117,19 +244,13 @@ async function checkAvailability(date, time, newGuests) {
             const bookingStart = timeToMinutes(booking.time);
             const bookingEnd = bookingStart + AVERAGE_DURATION_MINUTES;
 
-            // Check Overlap logic:
-            // (StartA < EndB) and (EndA > StartB)
             if (newStart < bookingEnd && newEnd > bookingStart) {
-                // Determine 'Guests' (handle "group" string if present)
                 let g = parseInt(booking.guests);
-                if (isNaN(g)) g = 10; // Assume 10 for "group" if mostly large
+                if (isNaN(g)) g = 2; 
                 currentOccupancy += g;
             }
         });
 
-        console.log(`Checking Slot: ${time} | Occupancy: ${currentOccupancy} + New: ${newGuests} | Max: ${RESTAURANT_CAPACITY}`);
-
-        // Check if adding new guests exceeds capacity
         if ((currentOccupancy + newGuests) > RESTAURANT_CAPACITY) {
             return false;
         }
@@ -137,11 +258,10 @@ async function checkAvailability(date, time, newGuests) {
 
     } catch (e) {
         console.error("Availability Check Failed:", e);
-        return true; // Fallback: allow booking if check fails
+        return true; 
     }
 }
 
-// Helper: Convert "18:30" to minutes from midnight
 function timeToMinutes(timeStr) {
     const [h, m] = timeStr.split(':').map(Number);
     return (h * 60) + m;

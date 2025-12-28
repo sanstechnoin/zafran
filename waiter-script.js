@@ -144,7 +144,7 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
-// --- 3. MAIN SCRIPT LOGIC ---
+// --- 3. MAIN SCRIPT LOGIC (Inside Event Listener) ---
 document.addEventListener("DOMContentLoaded", () => {
 
     // --- DOM Elements ---
@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function initializeWaiterStation() {
         createDineInTables();
 
-        // Button Listeners
+        // Button Listeners (Only if elements exist)
         if(dineInGrid) {
             dineInGrid.querySelectorAll('.clear-table-btn').forEach(btn => {
                 btn.addEventListener('click', () => handleClearOrder(btn.dataset.tableId, 'dine-in', btn));
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Firebase Listener
+        // Firebase Listener - Handles Orders & Updates UI
         db.collection("orders")
           .where("status", "in", ["new", "seen", "ready", "cooked"]) 
           .onSnapshot(
@@ -342,7 +342,7 @@ document.addEventListener("DOMContentLoaded", () => {
         closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
     }
 
-    // --- PAYMENT SUMMARY LOGIC (With Discount Support) ---
+    // --- PAYMENT SUMMARY LOGIC (Enhanced with Discount) ---
     function showPaymentSummary(ordersList, title) {
         ordersToArchive = ordersList; 
         
@@ -351,10 +351,10 @@ document.addEventListener("DOMContentLoaded", () => {
             paymentItemsList.innerHTML = "";
             let subTotal = 0;
             let totalDiscount = 0;
-            let couponUsed = null;
+            let couponName = null;
 
             ordersList.forEach(order => {
-                // 1. Sum Items
+                // 1. Calculate Items Total
                 order.items.forEach(item => {
                     let price = item.price;
                     if (!price) {
@@ -379,41 +379,50 @@ document.addEventListener("DOMContentLoaded", () => {
                     paymentItemsList.appendChild(row);
                 });
 
-                // 2. Capture Discount
-                // Look for 'coupon' (Client App saves it here) OR 'couponCode' (Legacy)
+                // 2. Extract Discount Info
                 if (order.discount && !isNaN(order.discount)) {
                     totalDiscount += parseFloat(order.discount);
                 }
                 
-                // Prioritize 'coupon' field (contains full info like "SPAR10 (10%)")
+                // Get Coupon Name
                 if (order.coupon && order.coupon !== "None") {
-                    couponUsed = order.coupon;
+                    couponName = order.coupon;
                 } else if (order.couponCode) {
-                    couponUsed = order.couponCode;
+                    couponName = order.couponCode; // Legacy support
                 }
             });
 
-            // 3. Add Discount Row
+            // 3. Show Breakdown if Discount exists
             if (totalDiscount > 0) {
+                // Subtotal Row
+                const subRow = document.createElement('div');
+                subRow.style.display = "flex";
+                subRow.style.justifyContent = "space-between";
+                subRow.style.padding = "10px 0 5px 0";
+                subRow.style.color = "#aaa";
+                subRow.innerHTML = `<span>Zwischensumme:</span><span>${subTotal.toFixed(2)} €</span>`;
+                paymentItemsList.appendChild(subRow);
+
+                // Discount Row
                 const discountRow = document.createElement('div');
                 discountRow.style.display = "flex";
                 discountRow.style.justifyContent = "space-between";
-                discountRow.style.padding = "10px 0";
-                discountRow.style.color = "#ff4444"; // Red for deduction
+                discountRow.style.padding = "0 0 10px 0";
+                discountRow.style.color = "#ff4444"; // Red
                 discountRow.style.fontWeight = "bold";
                 
-                // Show Name ("SPAR10 (10%)") or fallback
-                const nameDisplay = couponUsed ? couponUsed : 'Discount';
+                // Show "SPAR10 (10%)" or fallback
+                const discountText = couponName ? couponName : 'Discount';
                 
                 discountRow.innerHTML = `
-                    <span>Rabatt (${nameDisplay}):</span>
+                    <span>Rabatt (${discountText}):</span>
                     <span>- ${totalDiscount.toFixed(2)} €</span>
                 `;
                 paymentItemsList.appendChild(discountRow);
             }
             
             // 4. Final Total
-            const finalTotal = subTotal - totalDiscount;
+            const finalTotal = Math.max(0, subTotal - totalDiscount);
             if(paymentTotalDisplay) paymentTotalDisplay.innerText = finalTotal.toFixed(2) + " €";
         }
         
@@ -438,17 +447,19 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const batch = db.batch();
             for (const order of ordersToArchive) {
+                // Get the final displayed amount
                 const finalAmountStr = document.getElementById('payment-total-display').innerText.replace(' €','').replace(',','.');
                 
                 const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
                 batch.set(archiveRef, {
                     ...order,
                     status: 'paid', 
-                    paidAmount: parseFloat(finalAmountStr),
+                    paidAmount: parseFloat(finalAmountStr), // Save exact final total
                     closedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     day: new Date().toISOString().split('T')[0] 
                 });
                 
+                // Delete from active 'orders'
                 const docRef = db.collection("orders").doc(order.id);
                 batch.delete(docRef);
             }
@@ -634,6 +645,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 </li>
             `).join('');
 
+            // --- VISUAL FIX: Show Coupon on Card ---
+            let couponHtml = "";
+            if (order.coupon && order.coupon !== "None") {
+                 couponHtml = `<div style="color: #ff4444; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px;">🎟️ Coupon: ${order.coupon}</div>`;
+            }
+
             let notesHtml = order.notes ? `<div style="font-style:italic; color:#888; font-size:0.8rem; margin-bottom:5px;">📝 "${order.notes}"</div>` : '';
 
             let buttonHtml = isCooked 
@@ -650,6 +667,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">📞 ${order.customerPhone}</div>
                     ${addressHtml}
                     <div style="font-weight:bold; color:#D4AF37; margin-bottom:5px;">Target: ${order.timeSlot} Uhr</div>
+                    ${couponHtml} 
                     ${notesHtml}
                     <ul class="order-list" style="margin-top:5px;">${itemsHtml}</ul>
                     ${buttonHtml}

@@ -342,16 +342,19 @@ document.addEventListener("DOMContentLoaded", () => {
         closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
     }
 
-    // --- PAYMENT SUMMARY LOGIC (Integrated New Modal) ---
+    // --- PAYMENT SUMMARY LOGIC (Fixed with Discount Support) ---
     function showPaymentSummary(ordersList, title) {
         ordersToArchive = ordersList; 
         
         if(paymentTitle) paymentTitle.innerText = title;
         if(paymentItemsList) {
             paymentItemsList.innerHTML = "";
-            let grandTotal = 0;
+            let subTotal = 0;
+            let totalDiscount = 0;
+            let couponUsed = null;
 
             ordersList.forEach(order => {
+                // Sum Items
                 order.items.forEach(item => {
                     let price = item.price;
                     if (!price) {
@@ -359,11 +362,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         price = menuItem ? menuItem.price : 0;
                     }
                     const itemTotal = price * item.quantity;
-                    grandTotal += itemTotal;
+                    subTotal += itemTotal;
 
                     const row = document.createElement('div');
-                    row.className = 'pay-item-row'; // Use CSS class
-                    // Fallback Styles if CSS missing
+                    row.className = 'pay-item-row'; 
                     row.style.display = "flex";
                     row.style.justifyContent = "space-between";
                     row.style.borderBottom = "1px dashed #444";
@@ -376,9 +378,35 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                     paymentItemsList.appendChild(row);
                 });
+
+                // Capture Order Discount (from pickup.html script)
+                if (order.discount && !isNaN(order.discount)) {
+                    totalDiscount += parseFloat(order.discount);
+                }
+                if (order.couponCode) {
+                    couponUsed = order.couponCode;
+                }
             });
+
+            // --- Add Discount Section if applied ---
+            if (totalDiscount > 0) {
+                const discountRow = document.createElement('div');
+                discountRow.style.display = "flex";
+                discountRow.style.justifyContent = "space-between";
+                discountRow.style.padding = "10px 0";
+                discountRow.style.color = "#ff4444"; // Red for deduction
+                discountRow.style.fontWeight = "bold";
+                
+                discountRow.innerHTML = `
+                    <span>Rabatt (${couponUsed ? couponUsed : 'Coupon'}):</span>
+                    <span>- ${totalDiscount.toFixed(2)} €</span>
+                `;
+                paymentItemsList.appendChild(discountRow);
+            }
             
-            if(paymentTotalDisplay) paymentTotalDisplay.innerText = grandTotal.toFixed(2) + " €";
+            // Calculate Final Total
+            const finalTotal = subTotal - totalDiscount;
+            if(paymentTotalDisplay) paymentTotalDisplay.innerText = finalTotal.toFixed(2) + " €";
         }
         
         if(paymentModal) paymentModal.classList.remove('hidden');
@@ -402,14 +430,16 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const batch = db.batch();
             for (const order of ordersToArchive) {
-                // Save to 'archived_orders' (for Records Page)
+                // Get the final displayed amount
+                const finalAmountStr = document.getElementById('payment-total-display').innerText.replace(' €','').replace(',','.');
+                
                 const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
                 batch.set(archiveRef, {
                     ...order,
-                    status: 'paid', // Mark as paid
-                    paidAmount: parseFloat(document.getElementById('payment-total-display').innerText.replace(' €','')), // Capture total
+                    status: 'paid', 
+                    paidAmount: parseFloat(finalAmountStr), // Save exact final total
                     closedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    day: new Date().toISOString().split('T')[0] // For easy filtering
+                    day: new Date().toISOString().split('T')[0] 
                 });
                 
                 // Delete from active 'orders'

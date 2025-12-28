@@ -81,7 +81,7 @@
         input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); transform: scale(1.2); cursor: pointer; width: auto; }
         
         .checkbox-group { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
             gap: 10px; margin-top: 5px; 
             background: #111; padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); 
         }
@@ -303,11 +303,18 @@
                 <div class="form-group full-width">
                     <label data-i18n="categories">Kategorien (Leer = Alle)</label>
                     <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="suppen"> Suppen & Salate</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="vorspeisen"> Vorspeisen</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Vegetarisch</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="veganes"> Veganes</label>
                         <label class="checkbox-item"><input type="checkbox" name="cat" value="chicken"> Chicken</label>
                         <label class="checkbox-item"><input type="checkbox" name="cat" value="lamm"> Lamm</label>
-                        <label class="checkbox-item"><input type="checkbox" name="cat" value="vegetarisches"> Veggie</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="fisch-garnelen"> Fisch & Garnelen</label>
                         <label class="checkbox-item"><input type="checkbox" name="cat" value="tandoori"> Tandoori</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="biryani"> Biryani</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="brot"> Brot & Beilagen</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="dessert"> Dessert</label>
+                        <label class="checkbox-item"><input type="checkbox" name="cat" value="getraenke"> Getränke</label>
                     </div>
                 </div>
             </div>
@@ -658,7 +665,7 @@
     }
 
     // ==========================================
-    // 3. COUPON LOGIC 
+    // 3. COUPON LOGIC
     // ==========================================
     const couponForm = document.getElementById('coupon-form');
     
@@ -714,6 +721,12 @@
             createdAt: new Date().toISOString(),
             validCategories: [] 
         };
+
+        // Collect Categories
+        document.querySelectorAll('input[name="cat"]:checked').forEach(cb => {
+            data.validCategories.push(cb.value);
+        });
+        if(data.validCategories.length === 0) data.validCategories = 'all';
 
         if(mode === 'range') {
             if(document.getElementById('startNow').checked) data.validFrom = new Date().toISOString().split('T')[0];

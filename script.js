@@ -572,6 +572,7 @@ function checkBusinessStatus() {
     const now = new Date();
     const day = now.getDay(); 
     const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes(); 
 
     // 1. BLOCK MONDAYS
     if (day === 1) {
@@ -579,15 +580,16 @@ function checkBusinessStatus() {
         return; 
     }
 
-    // 2. BLOCK OUTSIDE ORDER WINDOW (12:00 - 20:00)
-    if (currentHour < 12 || currentHour >= 20) {
-        disableShop("Online-Bestellungen sind nur von 12:00 bis 20:00 Uhr möglich.");
+    // 2. BLOCK OUTSIDE ORDER WINDOW (12:00 - 20:15)
+    // Only accept if before 20:15
+    if (currentHour < 12 || (currentHour > 20) || (currentHour === 20 && currentMinutes >= 15)) {
+        disableShop("Online-Bestellungen sind nur von 12:00 bis 20:15 Uhr möglich.");
         return;
     }
 
     // 3. GENERATE SLOTS
-    // If delivery, buffer is 60 min. If pickup, 30 min.
-    const bufferMinutes = isDeliveryPage() ? 60 : 30;
+    // Delivery = 60 min buffer, Pickup = 45 min buffer
+    const bufferMinutes = isDeliveryPage() ? 60 : 45;
     generateTimeSlots(now, timeSelect, bufferMinutes);
 }
 

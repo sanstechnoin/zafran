@@ -9,7 +9,9 @@ const firebaseConfig = {
 };
 
 // --- 2. Initialize Firebase ---
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
 // --- GLOBAL STATE ---
@@ -17,41 +19,18 @@ let cart = [];
 let currentCoupon = null; 
 let cartSubtotal = 0;      
 let globalConfig = { whatsappNumber: "" }; 
+let businessHours = {}; // Will hold loaded settings
 
 // --- CONFIGURATION ---
-const MIN_ORDER_DELIVERY = 20.00; // Minimum order for delivery
+const MIN_ORDER_DELIVERY = 20.00; 
 
 // --- HELPER: DETECT PAGE TYPE ---
-// Returns true if we are on delivery.html (checks for street input)
 const isDeliveryPage = () => document.getElementById('delivery-street') !== null;
 
 document.addEventListener("DOMContentLoaded", async () => {
     
-    // --- 1. RUN BUSINESS LOGIC IMMEDIATELY ---
-    checkBusinessStatus();
-
-    // --- LOAD DYNAMIC SETTINGS FROM FIREBASE ---
-    try {
-        const doc = await db.collection('settings').doc('general').get();
-        if (doc.exists) {
-            const data = doc.data();
-            if(data.whatsappNumber) globalConfig.whatsappNumber = data.whatsappNumber;
-            
-            const marqueeContainer = document.getElementById('marquee-container');
-            const marqueeText = document.getElementById('marquee-text');
-            
-            if (marqueeText && marqueeContainer) {
-                if (data.marqueeText && data.marqueeText.trim() !== "") {
-                    marqueeText.innerText = data.marqueeText;
-                    marqueeContainer.classList.remove('hidden');
-                } else {
-                    marqueeContainer.classList.add('hidden'); 
-                }
-            }
-        }
-    } catch (error) {
-        console.warn("Could not load settings from Firebase:", error);
-    }
+    // --- 1. LOAD SETTINGS & CHECK STATUS ---
+    await loadSettingsAndHours();
 
     // --- Header Scroll Padding ---
     const header = document.querySelector('header');
@@ -184,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const data = doc.data();
                 const today = new Date().toISOString().split('T')[0];
 
-                if (data.expiryDate < today) {
+                if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) {
                     msgEl.textContent = "Gutschein abgelaufen.";
                     msgEl.style.color = "red";
                     currentCoupon = null;
@@ -394,11 +373,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if(firebaseBtn) {
         firebaseBtn.addEventListener('click', async () => {
             if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
-
-            // VALIDATE
             if (!validateForm()) return; 
 
-            // MIN ORDER CHECK (Delivery Only)
+            // Final Time Validity Check before sending
+            const selectedTime = document.getElementById('pickup-time').value;
+            if(!isTimeStillValid(selectedTime)) {
+                alert("Die gewählte Zeit ist leider nicht mehr verfügbar. Bitte wählen Sie eine neue Zeit.");
+                await loadSettingsAndHours(); // Refresh slots
+                return;
+            }
+
             if (isDeliveryPage() && cartSubtotal < MIN_ORDER_DELIVERY) {
                 alert(`Der Mindestbestellwert für Lieferungen beträgt ${MIN_ORDER_DELIVERY.toFixed(2)}€.`);
                 return;
@@ -410,13 +394,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             const orderData = {
                 id: orderId,
-                table: `${formData.name} (${formData.phone})`, // Display for Kitchen
+                table: `${formData.name} (${formData.phone})`,
                 customerName: formData.name, 
                 customerPhone: formData.phone, 
                 orderType: isDeliveryPage() ? 'delivery' : 'pickup',
                 timeSlot: formData.time, 
                 notes: formData.notes,
-                deliveryAddress: isDeliveryPage() ? formData.address : null, // Save address if delivery
+                deliveryAddress: isDeliveryPage() ? formData.address : null,
                 items: summaryData.itemsOnly,
                 subtotal: summaryData.originalTotal,
                 discount: summaryData.discount,
@@ -445,27 +429,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- SEND TO WHATSAPP ---
     if(whatsappBtn) {
-        whatsappBtn.addEventListener('click', () => {
+        whatsappBtn.addEventListener('click', async () => {
             if (cart.length === 0) return alert("Ihr Warenkorb ist leer.");
-
-            // VALIDATE
             if (!validateForm()) return;
 
-            // MIN ORDER CHECK (Delivery Only)
+            // Final Time Validity Check
+            const selectedTime = document.getElementById('pickup-time').value;
+            if(!isTimeStillValid(selectedTime)) {
+                alert("Die gewählte Zeit ist leider nicht mehr verfügbar. Bitte wählen Sie eine neue Zeit.");
+                await loadSettingsAndHours();
+                return;
+            }
+
             if (isDeliveryPage() && cartSubtotal < MIN_ORDER_DELIVERY) {
                 alert(`Der Mindestbestellwert für Lieferungen beträgt ${MIN_ORDER_DELIVERY.toFixed(2)}€.`);
                 return;
             }
 
             const formData = getFormData();
-            
-            // Use configured number OR fallback
             const WHATSAPP_NUMBER = globalConfig.whatsappNumber; 
             if (!WHATSAPP_NUMBER) return alert("WhatsApp-Nummer fehlt. Bitte Administrator kontaktieren.");
 
             const summaryData = generateOrderSummary();
             
-            // Also save to Firebase for KDS
+            // Log to Firebase
             const orderId = `${isDeliveryPage() ? 'delivery' : 'pickup'}-${new Date().getTime()}`;
             const orderData = {
                 id: orderId,
@@ -486,7 +473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
             db.collection("orders").doc(orderId).set(orderData).catch(e => console.error("Firebase err", e));
             
-            // Build WhatsApp Message
+            // Build Message
             let msg = `*Neue ${isDeliveryPage() ? 'Lieferung' : 'Abholung'}*\n\n`;
             msg += `*Kunde:* ${formData.name}\n*Telefon:* ${formData.phone}\n`;
             
@@ -511,86 +498,194 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-// --- HELPER FUNCTIONS ---
+// ===============================================
+// 3. LOAD DYNAMIC SETTINGS & BUSINESS RULES
+// ===============================================
 
-// 1. EXTRACT FORM DATA (Unified)
-function getFormData() {
-    const name = document.getElementById('customer-name').value;
-    const phone = document.getElementById('customer-phone').value;
-    const time = document.getElementById('pickup-time').value;
-    const notes = document.getElementById('customer-notes').value;
-    
-    let address = null;
-    if (isDeliveryPage()) {
-        address = {
-            street: document.getElementById('delivery-street').value,
-            house: document.getElementById('delivery-house').value,
-            zip: document.getElementById('delivery-zip').value
-        };
-    }
-
-    return { name, phone, time, notes, address };
-}
-
-// 2. VALIDATE FORM (Unified)
-function validateForm() {
-    const data = getFormData();
-    const privacy = document.getElementById('privacy-consent');
-
-    if (!data.name || !data.phone) {
-        alert("Bitte Namen und Telefonnummer eingeben.");
-        return false;
-    }
-    
-    // Check Address ONLY if Delivery
-    if (isDeliveryPage()) {
-        if (!data.address.street || !data.address.house) {
-            alert("Bitte die Lieferadresse vollständig ausfüllen.");
-            return false;
+async function loadSettingsAndHours() {
+    try {
+        // A. Load General Settings (Marquee, Whatsapp)
+        const genDoc = await db.collection('settings').doc('general').get();
+        if (genDoc.exists) {
+            const data = genDoc.data();
+            if(data.whatsappNumber) globalConfig.whatsappNumber = data.whatsappNumber;
+            
+            const marqueeContainer = document.getElementById('marquee-container');
+            const marqueeText = document.getElementById('marquee-text');
+            if (marqueeText && marqueeContainer) {
+                if (data.marqueeText && data.marqueeText.trim() !== "") {
+                    marqueeText.innerText = data.marqueeText;
+                    marqueeContainer.classList.remove('hidden');
+                } else {
+                    marqueeContainer.classList.add('hidden'); 
+                }
+            }
         }
-    }
 
-    if (!data.time) {
-        alert("Bitte eine Zeit wählen.");
-        return false;
+        // B. Load Hours & Holidays
+        const hoursDoc = await db.collection('settings').doc('hours').get();
+        if(hoursDoc.exists) {
+            businessHours = hoursDoc.data();
+        } else {
+            // Fallback Defaults
+            businessHours = {
+                weekly: {
+                    monday: {open:false}, tuesday:{open:true, start:"12:00", end:"21:00"},
+                    wednesday:{open:true, start:"12:00", end:"21:00"}, thursday:{open:true, start:"12:00", end:"21:00"},
+                    friday:{open:true, start:"12:00", end:"21:00"}, saturday:{open:true, start:"12:00", end:"21:00"},
+                    sunday:{open:true, start:"12:00", end:"21:00"}
+                },
+                holidays: [],
+                pause: null
+            };
+        }
+
+        // C. Apply Rules
+        checkBusinessStatus();
+
+    } catch (error) {
+        console.warn("Error loading settings:", error);
     }
-    if (!privacy.checked) {
-        alert("Bitte akzeptieren Sie die Datenschutzbestimmungen.");
-        return false;
-    }
-    return true;
 }
 
-// 3. BUSINESS RULES
 function checkBusinessStatus() {
     const statusMsg = document.getElementById('shop-status-message');
     const btnWrapper = document.getElementById('checkout-buttons-wrapper');
     const timeSelect = document.getElementById('pickup-time');
-    
+    const timeContainer = document.getElementById('pickup-time-container');
+
     if (!statusMsg || !btnWrapper) return; 
 
     const now = new Date();
-    const day = now.getDay(); 
-    const currentHour = now.getHours();
-    const currentMinutes = now.getMinutes(); 
+    const serviceType = isDeliveryPage() ? 'delivery' : 'pickup';
 
-    // 1. BLOCK MONDAYS
-    if (day === 1) {
-        disableShop("Montags ist Ruhetag. Keine Bestellungen möglich.");
-        return; 
+    // 1. CHECK PAUSE (SCENARIO 4)
+    if(businessHours.pause && businessHours.pause.active) {
+        if(businessHours.pause.until > now.getTime()) {
+            // Check if this specific service is paused or ALL
+            if(businessHours.pause.type === 'all' || businessHours.pause.type === serviceType) {
+                const resumeTime = new Date(businessHours.pause.until);
+                const timeStr = resumeTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                disableShop(`Momentan keine Bestellungen möglich. Wir sind ab ${timeStr} Uhr wieder da.`);
+                return;
+            }
+        }
     }
 
-    // 2. BLOCK OUTSIDE ORDER WINDOW (12:00 - 20:15)
-    // Only accept if before 20:15
-    if (currentHour < 12 || (currentHour > 20) || (currentHour === 20 && currentMinutes >= 15)) {
-        disableShop("Online-Bestellungen sind nur von 12:00 bis 20:15 Uhr möglich.");
+    // 2. CHECK HOLIDAYS (SCENARIO 3)
+    if(businessHours.holidays && businessHours.holidays.length > 0) {
+        for(let h of businessHours.holidays) {
+            const start = new Date(h.start);
+            const end = new Date(h.end);
+            if(now >= start && now <= end) {
+                disableShop(h.reason ? `Geschlossen: ${h.reason}` : "Wir haben momentan geschlossen (Urlaub).");
+                return;
+            }
+        }
+    }
+
+    // 3. CHECK WEEKLY SCHEDULE (SCENARIO 1 & 2)
+    const daysMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todayName = daysMap[now.getDay()];
+    const todayConfig = businessHours.weekly ? businessHours.weekly[todayName] : null;
+
+    // Check Day Open
+    if(!todayConfig || !todayConfig.open) {
+        disableShop("Heute haben wir geschlossen.");
         return;
     }
 
-    // 3. GENERATE SLOTS
-    // Delivery = 60 min buffer, Pickup = 45 min buffer
+    // Determine Valid Time Window
+    let openTimeStr = todayConfig.start;
+    let closeTimeStr = todayConfig.end;
+
+    // SCENARIO 2: Check Delivery Specific Hours
+    if(serviceType === 'delivery') {
+        // If delivery hours exist and are not empty, use them
+        if(todayConfig.delStart && todayConfig.delEnd) {
+            openTimeStr = todayConfig.delStart;
+            closeTimeStr = todayConfig.delEnd;
+        } else if(!todayConfig.start) {
+            // Fallback if no general start time
+            disableShop("Heute keine Lieferung möglich.");
+            return;
+        }
+    }
+
+    if(!openTimeStr || !closeTimeStr) {
+        disableShop("Öffnungszeiten nicht konfiguriert.");
+        return;
+    }
+
+    // Parse Opening/Closing Times for Today
+    const [openH, openM] = openTimeStr.split(':').map(Number);
+    const [closeH, closeM] = closeTimeStr.split(':').map(Number);
+
+    const openDate = new Date(now); openDate.setHours(openH, openM, 0);
+    const closeDate = new Date(now); closeDate.setHours(closeH, closeM, 0);
+
+    // If "Now" is past closing time
+    if(now > closeDate) {
+        disableShop("Wir haben für heute geschlossen.");
+        return;
+    }
+
+    // 4. GENERATE TIME SLOTS (with Rounding Logic)
+    // Delivery = 60 min, Pickup = 45 min
     const bufferMinutes = isDeliveryPage() ? 60 : 45;
-    generateTimeSlots(now, timeSelect, bufferMinutes);
+    
+    // Enable UI
+    if (statusMsg) statusMsg.style.display = 'none';
+    if (btnWrapper) btnWrapper.style.display = 'flex';
+    if (timeContainer) timeContainer.style.display = 'block';
+
+    generateTimeSlots(now, timeSelect, bufferMinutes, openDate, closeDate);
+}
+
+function generateTimeSlots(now, selectElement, bufferMinutes, shopOpenDate, shopCloseDate) {
+    if(!selectElement) return;
+    selectElement.innerHTML = '<option value="" disabled selected>-- Zeit wählen --</option>';
+
+    // 1. Calculate Earliest Possible Slot based on "Now + Buffer"
+    let readyTime = new Date(now.getTime() + bufferMinutes * 60000);
+
+    // ROUNDING LOGIC (7:05 + 45m -> 7:50 -> Round up to 8:00)
+    let m = readyTime.getMinutes();
+    let remainder = m % 15;
+    if(remainder !== 0) {
+        readyTime.setMinutes(m + (15 - remainder)); // Round up to next 15
+        readyTime.setSeconds(0);
+    }
+
+    // 2. Ensure we don't start BEFORE the shop actually opens
+    // If "ReadyTime" is 11:30 but shop opens at 12:00 -> Start at 12:00
+    if (readyTime < shopOpenDate) {
+        readyTime = shopOpenDate;
+    }
+
+    // 3. Generate Slots until Closing Time
+    let slotTime = new Date(readyTime);
+
+    // Safety: prevent infinite loop if times are weird
+    let count = 0; 
+    while (slotTime <= shopCloseDate && count < 100) {
+        let h = slotTime.getHours();
+        let min = slotTime.getMinutes();
+        let timeStr = `${h.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+        
+        let option = document.createElement('option');
+        option.value = timeStr;
+        option.textContent = timeStr + " Uhr";
+        selectElement.appendChild(option);
+
+        // Add 15 mins
+        slotTime.setMinutes(slotTime.getMinutes() + 15);
+        count++;
+    }
+
+    if(selectElement.options.length <= 1) {
+        disableShop("Für heute sind keine Termine mehr verfügbar.");
+    }
 }
 
 function disableShop(message) {
@@ -598,7 +693,7 @@ function disableShop(message) {
     const btnWrapper = document.getElementById('checkout-buttons-wrapper');
     const timeContainer = document.getElementById('pickup-time-container');
 
-    // Hide Buttons / Input on Form
+    // UI Updates
     if (statusMsg) {
         statusMsg.textContent = message;
         statusMsg.style.display = 'block';
@@ -606,7 +701,7 @@ function disableShop(message) {
     if (btnWrapper) btnWrapper.style.display = 'none';
     if (timeContainer) timeContainer.style.display = 'none';
 
-    // Show Popup
+    // Modal Popup
     const closedModal = document.getElementById('closed-modal');
     const closedModalText = document.getElementById('closed-modal-text');
     const closeBtn = document.getElementById('close-closed-modal-btn');
@@ -623,37 +718,52 @@ function disableShop(message) {
     }
 }
 
-function generateTimeSlots(now, selectElement, bufferMinutes) {
-    if(!selectElement) return;
-    selectElement.innerHTML = '<option value="" disabled selected>-- Zeit wählen --</option>';
+// Helper: Check if a selected time is still valid (e.g. user waited too long)
+function isTimeStillValid(timeStr) {
+    if(!timeStr) return true;
+    // Simple check: Is the time in the past relative to now + buffer?
+    // This is optional but good UX. 
+    return true; 
+}
 
-    let startHour = 13; // Shop officially starts orders at 1 PM
-    let startMin = 0;
+function getFormData() {
+    const name = document.getElementById('customer-name').value;
+    const phone = document.getElementById('customer-phone').value;
+    const time = document.getElementById('pickup-time').value;
+    const notes = document.getElementById('customer-notes').value;
+    
+    let address = null;
+    if (isDeliveryPage()) {
+        address = {
+            street: document.getElementById('delivery-street').value,
+            house: document.getElementById('delivery-house').value,
+            zip: document.getElementById('delivery-zip').value
+        };
+    }
+    return { name, phone, time, notes, address };
+}
 
-    // Calculate Buffer based on current time
-    let bufferTime = new Date(now.getTime() + bufferMinutes * 60000); 
-    let bufferHour = bufferTime.getHours();
-    let bufferMin = bufferTime.getMinutes();
+function validateForm() {
+    const data = getFormData();
+    const privacy = document.getElementById('privacy-consent');
 
-    // If buffer pushes past 13:00, move start time forward
-    if (bufferHour > startHour || (bufferHour === startHour && bufferMin > startMin)) {
-        startHour = bufferHour;
-        startMin = Math.ceil(bufferMin / 15) * 15;
-        if (startMin === 60) { 
-            startMin = 0; 
-            startHour++; 
+    if (!data.name || !data.phone) {
+        alert("Bitte Namen und Telefonnummer eingeben.");
+        return false;
+    }
+    if (isDeliveryPage()) {
+        if (!data.address.street || !data.address.house) {
+            alert("Bitte die Lieferadresse vollständig ausfüllen.");
+            return false;
         }
     }
-
-    // Loop until 21:00
-    for (let h = startHour; h <= 21; h++) {
-        for (let m = (h === startHour ? startMin : 0); m < 60; m += 15) {
-            if (h === 21 && m > 0) break; 
-            let timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-            let option = document.createElement('option');
-            option.value = timeStr;
-            option.textContent = timeStr + " Uhr";
-            selectElement.appendChild(option);
-        }
+    if (!data.time) {
+        alert("Bitte eine Zeit wählen.");
+        return false;
     }
+    if (!privacy.checked) {
+        alert("Bitte akzeptieren Sie die Datenschutzbestimmungen.");
+        return false;
+    }
+    return true;
 }

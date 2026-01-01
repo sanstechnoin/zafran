@@ -72,37 +72,49 @@ let allOrders = {};
 // --- NEW QUEUE VARIABLES ---
 let newOrderQueue = []; 
 
-// --- 4. NEW SECURE LOGIN LOGIC ---
-loginButton.addEventListener('click', () => {
-    // 1. Check if the staff typed the correct simple PIN ("zafran")
-    if (passwordInput.value === RECORDS_PASSWORD) {
-        
-        // 2. If correct, secretly log them in with the real account
-        const hiddenEmail = "webmaster@zafraneuskirchen.de";
-        const hiddenPass  = "!Zafran2025";
+// --- 4. SECURE LOGIN LOGIC ---
+document.addEventListener("DOMContentLoaded", () => {
+    loginButton.addEventListener('click', () => {
+        // 1. Check if staff typed "zafran"
+        if (passwordInput.value === KITCHEN_PASSWORD) {
+            
+            // 2. Secretly Log in to Firebase
+            const hiddenEmail = "webmaster@zafraneuskirchen.de";
+            const hiddenPass  = "!Zafran2025";
 
-        loginButton.innerText = "Verbinden..."; // Optional: Show loading text
-        
-        firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
-        .then((userCredential) => {
-            // Success! The system is now logged in securely.
-            loginOverlay.style.display = 'none';
-            contentWrapper.style.opacity = '1';
-            initializeRecordsPage(); 
-        })
-        .catch((error) => {
-            console.error("Login Error:", error);
-            loginError.innerText = "Systemfehler: Login nicht möglich.";
+            const originalText = loginButton.innerText;
+            loginButton.innerText = "Verbinden...";
+            loginButton.disabled = true;
+
+            firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
+            .then(() => {
+                // Success! Unlock screen
+                loginOverlay.classList.add('hidden');
+                kdsContentWrapper.style.opacity = '1';
+                
+                // Unlock Audio for Alerts
+                alertAudio.play().then(() => {
+                    alertAudio.pause();
+                    alertAudio.currentTime = 0;
+                }).catch(e => console.log("Audio Init:", e));
+
+                // Start the App
+                initializeKDS(); 
+            })
+            .catch((error) => {
+                console.error("Login Error:", error);
+                loginError.innerText = "Verbindungsfehler (Auth)";
+                loginError.style.display = 'block';
+                loginButton.innerText = originalText;
+                loginButton.disabled = false;
+            });
+
+        } else {
+            loginError.innerText = "Falsches Passwort";
             loginError.style.display = 'block';
-            loginButton.innerText = "UNLOCK DASHBOARD";
-        });
+        }
+    });
 
-    } else {
-        // Wrong PIN entered
-        loginError.innerText = "Falsches Passwort";
-        loginError.style.display = 'block';
-    }
-});
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 });
 

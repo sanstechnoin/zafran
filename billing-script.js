@@ -164,16 +164,37 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentSelectedTable = null; 
     const BILLING_PASSWORD = "zafran"; // <-- NEW PASSWORD
 
-    // --- 4. Login Logic ---
-    loginButton.addEventListener('click', () => {
-        if (passwordInput.value === BILLING_PASSWORD) {
-            loginOverlay.classList.add('hidden');
-            contentWrapper.style.opacity = '1'; 
-            initializeBilling(); 
-        } else {
+    // --- 4. NEW SECURE LOGIN LOGIC ---
+loginButton.addEventListener('click', () => {
+    // 1. Check if the staff typed the correct simple PIN ("zafran")
+    if (passwordInput.value === RECORDS_PASSWORD) {
+        
+        // 2. If correct, secretly log them in with the real account
+        const hiddenEmail = "webmaster@zafraneuskirchen.de";
+        const hiddenPass  = "!Zafran2025";
+
+        loginButton.innerText = "Verbinden..."; // Optional: Show loading text
+        
+        firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
+        .then((userCredential) => {
+            // Success! The system is now logged in securely.
+            loginOverlay.style.display = 'none';
+            contentWrapper.style.opacity = '1';
+            initializeRecordsPage(); 
+        })
+        .catch((error) => {
+            console.error("Login Error:", error);
+            loginError.innerText = "Systemfehler: Login nicht möglich.";
             loginError.style.display = 'block';
-        }
-    });
+            loginButton.innerText = "UNLOCK DASHBOARD";
+        });
+
+    } else {
+        // Wrong PIN entered
+        loginError.innerText = "Falsches Passwort";
+        loginError.style.display = 'block';
+    }
+});
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 
 

@@ -198,29 +198,59 @@ document.addEventListener("DOMContentLoaded", () => {
     const KITCHEN_PASSWORD = "zafran"; 
     const TOTAL_DINE_IN_TABLES = 12;
 
-    // --- 4. Login Logic ---
-    if(loginButton) {
-        loginButton.addEventListener('click', () => {
-            if (passwordInput.value === KITCHEN_PASSWORD) {
+   // --- 4. NEW SECURE LOGIN LOGIC ---
+if (loginButton) {
+    loginButton.addEventListener('click', () => {
+        // 1. Check if the staff typed the correct PIN ("zafran")
+        if (passwordInput.value === KITCHEN_PASSWORD) {
+
+            // 2. If correct, secretly log them in with the real account
+            const hiddenEmail = "webmaster@zafraneuskirchen.de";
+            const hiddenPass  = "!Zafran2025";
+
+            // Optional: Show loading state
+            const originalBtnText = loginButton.innerText;
+            loginButton.innerText = "Verbinden...";
+            loginButton.disabled = true;
+
+            firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
+            .then((userCredential) => {
+                // Success!
                 loginOverlay.classList.add('hidden');
                 kdsContentWrapper.style.opacity = '1';
-                
-                // Enable audio on interaction
+
+                // --- IMPORTANT: AUDIO UNLOCK (Preserved) ---
+                // This allows sounds to play on mobile devices
                 serviceBell.play().then(() => {
                     serviceBell.pause();
                     serviceBell.currentTime = 0;
                 }).catch(e => console.log("Audio unlock failed:", e));
 
-                initializeWaiterStation(); 
-            } else {
+                initializeWaiterStation();
+            })
+            .catch((error) => {
+                console.error("Login Error:", error);
+                loginError.innerText = "Systemfehler: Login nicht möglich.";
                 loginError.style.display = 'block';
-            }
-        });
-        passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
-    } else {
-        // If no login button (records page), just init
-        initializeWaiterStation();
-    }
+                
+                // Reset button so they can try again
+                loginButton.innerText = originalBtnText;
+                loginButton.disabled = false;
+            });
+
+        } else {
+            // Wrong PIN entered
+            loginError.innerText = "Falsches Passwort";
+            loginError.style.display = 'block';
+        }
+    });
+
+    passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
+
+} else {
+    // Fallback if no login button is present
+    initializeWaiterStation();
+}
 
     // --- 5. Main Waiter Station Functions ---
 

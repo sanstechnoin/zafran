@@ -25,7 +25,6 @@
             gap: 50px;
         }
 
-        /* --- CARD PHYSICAL SPECS --- */
         .card {
             width: 540px; 
             height: 340px;
@@ -38,7 +37,6 @@
             background-color: var(--card-black);
         }
 
-        /* Plastic Gloss Effect */
         .card::after {
             content: "";
             position: absolute;
@@ -132,15 +130,15 @@
             justify-content: flex-end;
             gap: 6px;
         }
-        .icon { color: var(--gold); width: 12px; text-align: center;}
+        .icon { color: var(--gold); }
 
         /* --- BACK SIDE --- */
         .back {
             background-color: var(--card-black);
-            padding: 20px 0 0 0; /* Removed side/bottom padding for edge-to-edge */
+            padding: 15px 0 0 0;
             color: white;
             align-items: center;
-            justify-content: flex-start; /* Align content to top */
+            justify-content: flex-start;
         }
 
         .back-content-wrapper {
@@ -152,28 +150,20 @@
             box-sizing: border-box;
         }
 
-        /* SMALLER LOGO */
         .back-logo {
-            width: 70px; /* Reduced size */
+            width: 65px;
             height: auto;
-            margin-bottom: 5px;
-            object-fit: contain;
-        }
-
-        .back-email {
-            color: var(--text-silver);
-            font-size: 10px;
-            letter-spacing: 0.5px;
-            font-weight: 500;
             margin-bottom: 15px;
+            object-fit: contain;
         }
 
         .qr-container {
             display: flex;
-            gap: 25px;
+            gap: 30px;
             justify-content: center;
             align-items: center;
             width: 100%;
+            margin-bottom: 15px;
         }
 
         .qr-card {
@@ -212,13 +202,12 @@
 
         /* FULL WIDTH FOOTER SECTION */
         .footer-container {
-            margin-top: auto; /* Pushes to bottom */
+            margin-top: auto;
             width: 100%;
             display: flex;
             flex-direction: column;
         }
 
-        /* Text List of Events */
         .events-list {
             text-align: center;
             color: var(--gold);
@@ -226,20 +215,17 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 5px 10px;
+            padding: 6px 10px;
             background: rgba(0,0,0,0.5);
             width: 100%;
             box-sizing: border-box;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        /* Edge to Edge Image Strip */
         .image-strip {
             display: flex;
             width: 100%;
-            height: 60px;
+            height: 65px;
         }
 
         .strip-img {
@@ -247,7 +233,6 @@
             height: 100%;
             object-fit: cover;
             border-right: 1px solid #111;
-            filter: brightness(0.9);
         }
         .strip-img:last-child { border-right: none; }
 
@@ -286,13 +271,11 @@
         </div>
     </div>
 
-    <div class="label">Back Side (Edge-to-Edge Images)</div>
+    <div class="label">Back Side (6 Images Edge-to-Edge)</div>
     <div class="card back">
         <div class="back-content-wrapper">
             <img src="logo.png" class="back-logo" alt="Zafran Logo">
             
-            <div class="back-email">hussainzaidi1969@gmail.com</div>
-
             <div class="qr-container">
                 <div class="qr-card">
                     <div class="qr-bg">
@@ -314,15 +297,16 @@
 
         <div class="footer-container">
             <div class="events-list">
-                Wedding • Diwali • Holi • Milaad • Iftaar • Majalis • Birthday • Eid Celebrations
+                Wedding • Engagement • Birthday Party • Diwali • Holi • Milaad • Iftaar • Majalis • Eid
             </div>
             
             <div class="image-strip">
-                <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Wedding">
-                <img src="https://images.unsplash.com/photo-1582716401301-b2407dc7563d?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Diwali/Holi">
+                <img src="https://images.unsplash.com/photo-1519225468316-744044132a1b?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Marriage">
+                <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Engagement">
+                <img src="https://images.unsplash.com/photo-1582716401301-b2407dc7563d?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Diwali">
+                <img src="https://images.unsplash.com/photo-1590071210519-1aa73b6f4aa3?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Holi">
                 <img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Religious">
                 <img src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Catering">
-                <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Party">
             </div>
         </div>
     </div>

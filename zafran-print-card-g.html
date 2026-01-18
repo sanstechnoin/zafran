@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zafran Delight - Final Print Card</title>
+    <link rel="icon" type="image/png" href="favlogo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+        :root {
+            --gold: #D4AF37;
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --card-black: #111111;
+            --text-white: #ffffff;
+            --text-silver: #c0c0c0;
+        }
+
+        body {
+            background-color: #333;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            gap: 50px;
+        }
+
+        /* Print Button Style */
+        .print-btn {
+            padding: 12px 25px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .print-btn:hover { background: #fff; }
+
+        .card {
+            width: 540px; 
+            height: 340px;
+            position: relative;
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--card-black);
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(125deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 40%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* --- FRONT SIDE --- */
+        .front { background-color: var(--card-black); }
+
+        .hero-section {
+            height: 55%; 
+            width: 100%;
+            position: relative;
+        }
+
+        .hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to bottom, transparent 0%, var(--card-black) 100%);
+        }
+
+        .front-content {
+            flex: 1;
+            padding: 0 30px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            z-index: 2;
+        }
+
+        .info-left { text-align: left; flex: 1; }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 30px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            margin: 0 0 2px 0;
+        }
+
+        .tagline {
+            color: var(--text-silver);
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .chef-info { display: flex; align-items: center; }
+        
+        .chef-hat-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
+        }
+
+        .chef-name { color: #fff; font-size: 13px; font-weight: 600; line-height: 1.2; }
+        .chef-role { color: var(--gold); font-size: 9px; }
+
+        .contact-pill {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(5px);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: right;
+        }
+
+        .contact-row {
+            font-size: 10px;
+            color: var(--text-white);
+            margin: 2px 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        /* --- BACK SIDE --- */
+        .back {
+            background-color: var(--card-black);
+            padding: 0;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .back-main {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            padding: 20px 30px;
+        }
+
+        /* 1/3 QR SECTION */
+        .qr-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid rgba(212, 175, 55, 0.2);
+            padding-right: 20px;
+        }
+
+        .back-logo { width: 50px; margin-bottom: 10px; }
+
+        .qr-bg {
+            background: #fff;
+            padding: 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .qr-img { width: 110px; height: 110px; display: block; }
+
+        .qr-label {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 12px;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* 2/3 TEXT SECTION */
+        .catering-info {
+            flex: 2.8;
+            padding-left: 30px;
+            text-align: left;
+        }
+
+        .catering-title {
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .catering-text {
+            color: var(--text-silver);
+            font-size: 11.5px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* FOOTER STRIP */
+        .footer-container {
+            margin-top: auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .events-list {
+            text-align: center;
+            color: var(--gold);
+            font-size: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 10px;
+            background: rgba(0,0,0,0.5);
+            width: 100%;
+        }
+
+        .image-strip {
+            display: flex;
+            width: 100%;
+            height: 65px;
+        }
+
+        .strip-img {
+            flex: 1;
+            width: 16.66%;
+            height: 100%;
+            object-fit: cover;
+            border-right: 1px solid #111;
+        }
+        .strip-img:last-child { border-right: none; }
+
+        /* --- PRINT OPTIMIZATION --- */
+        @media print {
+            body { background-color: transparent; padding: 0; margin: 0; }
+            .print-btn { display: none !important; }
+            .card { 
+                box-shadow: none !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn" onclick="window.print()">Export High-Quality PDF</button>
+
+    <div class="card front">
+        <div class="hero-section">
+            <img src="hero-bg.png" class="hero-img" alt="Hero Background">
+            <div class="hero-overlay"></div>
+        </div>
+
+        <div class="front-content">
+            <div class="info-left">
+                <h1 class="brand-name">Zafran Delight</h1>
+                <div class="tagline">Indian & Pakistani Catering Cooking Expert</div>
+                <div class="chef-info">
+                    <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
+                    <div class="chef-details">
+                        <div class="chef-name">Syed Hussain Haider Zaidi</div>
+                        <div class="chef-role">Owner & Chef (35 Years Exp.)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-pill">
+                <div class="contact-row">Kessenicher Str. 9, Euskirchen <span style="color:var(--gold)">📍</span></div>
+                <div class="contact-row">+49 152 25475880 <span style="color:var(--gold)">📞</span></div>
+                <div class="contact-row">hussainzaidi1969@gmail.com <span style="color:var(--gold)">✉️</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="height: 30px;"></div>
+
+    <div class="card back">
+        <div class="back-main">
+            <div class="qr-section">
+                <img src="logo.png" class="back-logo" alt="Zafran Logo">
+                <div class="qr-bg">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://zafraneuskirchen.de/digicard.html" class="qr-img">
+                </div>
+                <span class="qr-label">DigiCard</span>
+            </div>
+
+            <div class="catering-info">
+                <div class="catering-title">🎉 Exclusive Catering Service</div>
+                <p class="catering-text">
+                    Planning a wedding, corporate party, or big event? Chef Zaidi cooks for you! Our Catering Service brings the taste of the Orient to your guests – whether 50 or 500 people.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-container">
+            <div class="events-list">
+                Wedding • Engagement • Birthday Party • Diwali • Holi • Milaad • Iftaar • Majalis • Eid
+            </div>
+            <div class="image-strip">
+                <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Wedding">
+                <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Engagement">
+                <img src="https://images.unsplash.com/photo-1530103862676-de3c9da59af7?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Birthday">
+                <img src="https://images.unsplash.com/photo-1540324155974-7523202daa3f?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Festival">
+                <img src="https://images.unsplash.com/photo-1563214430-671c50009405?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Religious">
+                <img src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Catering">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

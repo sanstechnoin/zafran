@@ -15,18 +15,21 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const driverContainer = document.getElementById('driver-orders');
 
-// Global variable to hold the GPS watcher ID
 let watchId = null; 
 
-// --- 3. LOGIN & STARTUP LOGIC ---
+// --- 3. LOGIN & PIN LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
-    // A. Silent Auth (Required for Database Access)
-    firebase.auth().signInAnonymously().catch(e => console.error("Auth Error:", e));
+    
+    // A. Start Silent Login immediately (Background)
+    firebase.auth().signInAnonymously().catch(e => console.error("Background Auth Error:", e));
 
-    // B. Check if already authorized (PIN entered previously)
-    if (sessionStorage.getItem('driver_authorized') === 'true') {
-        showDriverApp();
-    }
+    // B. Check if already authorized from previous session
+    // We wait for Auth to be ready before auto-showing the app
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user && sessionStorage.getItem('driver_authorized') === 'true') {
+            showDriverApp();
+        }
+    });
 
     // C. Handle PIN Submission
     document.getElementById('pin-form').addEventListener('submit', (e) => {
@@ -35,27 +38,52 @@ document.addEventListener("DOMContentLoaded", () => {
         const btn = document.querySelector('#pin-form button');
         const err = document.getElementById('login-error');
 
-        btn.innerText = "...";
+        btn.innerText = "Checking...";
         btn.disabled = true;
+        err.textContent = "";
 
-        // Fetch PIN from Admin Settings
+        // 1. Verify PIN from Database (Public Read)
         db.collection('settings').doc('driver_auth').get()
             .then((doc) => {
                 if (doc.exists && doc.data().pin === inputPin) {
+                    // PIN IS CORRECT!
                     sessionStorage.setItem('driver_authorized', 'true');
-                    showDriverApp();
+                    btn.innerText = "Connecting...";
+
+                    // 2. Ensure we are Logged In
+                    if (firebase.auth().currentUser) {
+                        showDriverApp();
+                    } else {
+                        // Force Login if background attempt failed/stalled
+                        console.log("Auth missing, forcing login...");
+                        return firebase.auth().signInAnonymously();
+                    }
                 } else {
-                    err.textContent = "Wrong PIN!";
-                    btn.innerText = "ENTER";
-                    btn.disabled = false;
-                    document.getElementById('driver-pin').value = "";
+                    throw new Error("Wrong PIN!");
+                }
+            })
+            .then((userCredential) => {
+                // If we had to force login, this runs after it succeeds
+                if (userCredential) {
+                    showDriverApp();
                 }
             })
             .catch((error) => {
-                console.error("Error checking PIN:", error);
-                err.textContent = "Connection Error.";
+                console.error("Login/PIN Error:", error);
+                
+                // Show friendly error message
+                if (error.message === "Wrong PIN!") {
+                    err.textContent = "Falscher PIN!";
+                } else {
+                    err.textContent = "Fehler: " + error.message;
+                }
+                
+                // Reset Button
                 btn.innerText = "ENTER";
                 btn.disabled = false;
+                if(error.message === "Wrong PIN!") {
+                    document.getElementById('driver-pin').value = "";
+                }
             });
     });
 });
@@ -63,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function showDriverApp() {
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('driver-app').style.display = 'block';
-    initOrderListener(); // Start listening for orders ONLY after login
+    initOrderListener(); // Start listening for orders
 }
 
 window.logout = function() {
@@ -74,7 +102,9 @@ window.logout = function() {
 
 // --- 4. MAIN LISTENER (Real-Time Updates) ---
 function initOrderListener() {
-    // We listen for orders in: PREPARING, READY, COOKED (Waiter), or OUT_FOR_DELIVERY
+    console.log("Starting Order Listener...");
+    
+    // Listen for orders: Preparing, Ready, Cooked (Waiter), or Out
     db.collection("orders")
         .where("orderType", "==", "delivery")
         .where("status", "in", ["preparing", "ready", "cooked", "out_for_delivery"]) 
@@ -86,7 +116,7 @@ function initOrderListener() {
                 driverContainer.innerHTML = `
                     <div class="empty-state">
                         <span class="material-icons" style="font-size: 64px; opacity:0.3;">check_circle</span>
-                        <p>No active deliveries.</p>
+                        <p>Keine offenen Lieferungen.</p>
                     </div>`;
                 return;
             }
@@ -99,8 +129,19 @@ function initOrderListener() {
             });
         }, (error) => {
             console.error("Firebase Error:", error);
-            if(error.message.includes("index")) {
-                driverContainer.innerHTML = `<p style="color:red; text-align:center; padding:20px; border:1px solid red;">⚠️ SYSTEM ALERT: Index Missing.<br>Open Console (F12) & click the Firebase link to fix.</p>`;
+            
+            if(error.code === 'permission-denied') {
+                driverContainer.innerHTML = `<p style="color:red; text-align:center; padding:20px;">⛔ Zugriff verweigert.<br>Bitte Seite neu laden.</p>`;
+            }
+            
+            if(error.message && error.message.includes("index")) {
+                const link = error.message.match(/https:\/\/[^\s]+/)[0];
+                driverContainer.innerHTML = `
+                    <div style="background:rgba(255,0,0,0.2); padding:15px; border:1px solid red; text-align:center;">
+                        <h3>⚠️ System Setup Required</h3>
+                        <p>Klick diesen Link um die Datenbank zu reparieren:</p>
+                        <a href="${link}" target="_blank" style="color:#4285F4; background:white; padding:10px; display:block; border-radius:5px; text-decoration:none; font-weight:bold;">FIX DATABASE</a>
+                    </div>`;
             }
         });
 }
@@ -108,16 +149,15 @@ function initOrderListener() {
 
 // --- 5. RENDER CARD FUNCTION ---
 function renderDriverCard(id, order, now) {
-    // A. Address Setup
     const addr = order.deliveryAddress || {};
     const fullAddress = `${addr.street} ${addr.house}, ${addr.zip} Euskirchen`;
     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
     
-    // B. Generate the Unique Tracking Link
+    // Tracking Link
     const domain = window.location.origin; 
     const trackerUrl = `${domain}/tracker.html?id=${id}`;
 
-    // C. Overdue Logic
+    // Overdue Logic
     let isOverdue = false;
     const timeSlot = order.timeSlot || "";
     if (timeSlot.includes(':')) {
@@ -127,18 +167,17 @@ function renderDriverCard(id, order, now) {
         if (now > deadline) isOverdue = true;
     }
 
-    // D. Status & Button States
+    // Status Logic
     let statusClass = 'status-preparing';
-    let isDisabled = true; // Buttons disabled by default (while cooking)
+    let isDisabled = true; 
 
-    // Waiter (cooked) or Kitchen (ready) or Driver (out) -> ENABLE
+    // Enable buttons if Ready, Cooked, or Out
     if (order.status === 'ready' || order.status === 'cooked' || order.status === 'out_for_delivery') {
         statusClass = 'status-ready';
-        isDisabled = false; // Enable buttons
+        isDisabled = false; 
     }
     if (isOverdue) statusClass = 'status-overdue';
 
-    // E. Build HTML
     const html = `
     <div class="order-card ${statusClass}" id="card-${id}">
         
@@ -155,7 +194,6 @@ function renderDriverCard(id, order, now) {
         <div id="in-app-map-${id}" class="in-app-map-container"></div>
 
         <div style="background:#222; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #333;">
-            
             <button onclick="startInAppNav('${id}', '${fullAddress}')" class="btn-action" style="width:100%; background:#4285F4; margin-bottom:15px;">
                 <span class="material-icons" style="margin-right:8px;">near_me</span> START GPS & TRACKING
             </button>
@@ -182,10 +220,10 @@ function renderDriverCard(id, order, now) {
             </div>
         </div>
 
-        <div class="payment-info">💰 To Collect: ${order.total.toFixed(2)} €</div>
+        <div class="payment-info">💰 Zu Kassieren: ${order.total.toFixed(2)} €</div>
 
         <button onclick="completeDelivery('${id}')" class="complete-btn" ${isDisabled ? 'disabled style="opacity:0.5"' : ''}>
-            DELIVERED
+            DELIVERED / ABGESCHLOSSEN
         </button>
     </div>
     `;
@@ -194,11 +232,10 @@ function renderDriverCard(id, order, now) {
 }
 
 
-// --- 6. NAVIGATION & TRACKING LOGIC ---
+// --- 6. NAVIGATION ---
 window.startInAppNav = function(orderId, addressText) {
     const mapDiv = document.getElementById(`in-app-map-${orderId}`);
     
-    // Accordion Logic
     if (mapDiv.classList.contains('active')) {
         mapDiv.classList.remove('active');
         return; 
@@ -236,11 +273,10 @@ window.startInAppNav = function(orderId, addressText) {
                     L.marker([driverLat, driverLng]).addTo(map).bindPopup("You").openPopup();
                     L.marker([custLat, custLon]).addTo(map).bindPopup("Customer");
 
-                    // Start Tracking
                     startLiveTracking(orderId);
 
                 } else {
-                    alert("Address not found on internal map. Use Google Maps button.");
+                    alert("Address not found on internal map. Use Google Maps.");
                 }
             });
 
@@ -266,37 +302,41 @@ function startLiveTracking(orderId) {
 }
 
 
-// --- 7. NATIVE SHARE ---
+// --- 7. SHARE & COMPLETE ---
 window.nativeShare = function(phone, url) {
     if (navigator.share) {
         navigator.share({
             title: 'Zafran Delivery',
-            text: 'Your order is on the way! Track here:',
+            text: 'Ihre Bestellung ist unterwegs! Live Tracking:',
             url: url
         }).catch((err) => console.log('Share canceled', err));
     } 
     else {
         const cleanPhone = phone.replace(/[^0-9]/g, '');
-        const text = `Hi! 🚗 Your Zafran delivery is on the way. Track live here: ${url}`;
+        const text = `Hi! 🚗 Ihre Zafran Bestellung ist unterwegs. Live Tracking: ${url}`;
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
     }
 }
 
-
-// --- 8. COMPLETE DELIVERY ---
+// --- 8. COMPLETE DELIVERY (Modified for Cash Control) ---
 window.completeDelivery = function(orderId) {
     if(navigator.vibrate) navigator.vibrate(50);
 
-    if(!confirm("💰 Confirm: Food delivered & Money collected?")) return;
+    // 1. Ask Driver for confirmation
+    if(!confirm("💰 Hast du das Geld erhalten und das Essen übergeben?")) return;
 
+    // 2. Update Status to 'delivered' (NOT 'completed')
+    // This tells the Waiter: "Driver is back, check the cash."
     db.collection("orders").doc(orderId).update({
-        status: "completed",
-        deliveredAt: firebase.firestore.FieldValue.serverTimestamp()
+        status: "delivered", 
+        driverDeliveredAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
+        // 3. Stop GPS Tracking to save battery
         if(watchId !== null) {
             navigator.geolocation.clearWatch(watchId);
             watchId = null;
         }
+        alert("Status: Geliefert! Bitte Abrechnung beim Kellner machen.");
     }).catch((error) => {
         alert("Error: " + error.message);
     });

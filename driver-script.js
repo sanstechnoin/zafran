@@ -23,7 +23,7 @@ let watchId = null;
 // We listen for 'delivery' orders that are NOT completed yet.
 db.collection("orders")
     .where("orderType", "==", "delivery")
-    .where("status", "in", ["preparing", "ready", "out_for_delivery"]) 
+    .where("status", "in", ["preparing", "ready", "cooked", "out_for_delivery"])
     .orderBy("createdAt", "asc")
     .onSnapshot((snapshot) => {
         driverContainer.innerHTML = "";

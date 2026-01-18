@@ -32,6 +32,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     // --- 1. LOAD SETTINGS & CHECK STATUS ---
     await loadSettingsAndHours();
 
+    // --- NEW: LOAD CART MEMORY ---
+    const savedCart = sessionStorage.getItem('zafran_cart');
+    if (savedCart) {
+        try {
+            cart = JSON.parse(savedCart);
+            if(cart.length > 0) {
+                // Update UI immediately if cart exists
+                const countEl = document.getElementById('cart-item-count');
+                const toggleBtn = document.getElementById('cart-toggle-btn');
+                if(countEl) countEl.innerText = cart.reduce((sum, i) => sum + i.quantity, 0);
+                if(toggleBtn) toggleBtn.classList.remove('hidden');
+                // Note: We don't call updateCart() here because the cart overlay isn't open yet
+            }
+        } catch (e) { console.error(e); }
+    }
+    
     // --- Header Scroll Padding ---
     const header = document.querySelector('header');
     function updateScrollPadding() {
@@ -289,6 +305,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         cartItemCountEl.innerText = itemCount;
         cartToggleBtn.classList.toggle('hidden', itemCount === 0);
         addCartItemControls();
+
+        // ADD THIS: Save to Session Storage
+        sessionStorage.setItem('zafran_cart', JSON.stringify(cart)); 
     }
 
     function addCartItemControls() {
@@ -361,6 +380,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         successModal.classList.add('flex'); 
         
         cart = [];
+        sessionStorage.removeItem('zafran_cart');
         currentCoupon = null; 
         if(document.getElementById('coupon-input')) document.getElementById('coupon-input').value = "";
         if(document.getElementById('coupon-message')) document.getElementById('coupon-message').textContent = "";
@@ -392,6 +412,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             const summaryData = generateOrderSummary();
             const orderId = `${isDeliveryPage() ? 'delivery' : 'pickup'}-${new Date().getTime()}`;
             
+            // 1. Generate 4-Digit Order Number (This is your "PIN")
+            const orderPin = Math.floor(1000 + Math.random() * 9000).toString();
+
             const orderData = {
                 id: orderId,
                 table: `${formData.name} (${formData.phone})`,
@@ -407,22 +430,78 @@ document.addEventListener("DOMContentLoaded", async () => {
                 coupon: summaryData.couponInfo || "None",
                 total: summaryData.finalTotal,
                 status: "new",
-                createdAt: new Date()
+                createdAt: new Date(),
+                
+                // NEW FIELDS
+                whatsappAllowed: formData.whatsappAllowed, 
+                orderPin: orderPin 
             };
 
             firebaseBtn.innerText = "Senden...";
             firebaseBtn.disabled = true;
 
             try {
+                // 2. Save to Firebase
                 await db.collection("orders").doc(orderId).set(orderData);
-                showConfirmationScreen(formData, summaryData); 
+                
+                // 3. POPULATE THE MODAL (Old List + New Number)
+                
+                // A. Build the Old List HTML (Items, Address, Total)
+                let html = `<strong style="color:var(--gold)">Kunde:</strong> ${formData.name}<br>`;
+                if (isDeliveryPage()) {
+                    html += `<strong style="color:var(--gold)">Lieferung an:</strong> ${formData.address.street} ${formData.address.house}, ${formData.address.zip}<br>`;
+                }
+                html += `<strong style="color:var(--gold)">Zeit:</strong> ${formData.time} Uhr<br>`;
+                html += `<strong style="color:var(--gold)">Bestellung:</strong><br>${summaryData.summaryText.replace(/\n/g, '<br>')}`;
+                
+                if (summaryData.discount > 0) {
+                   html += `<br>Zwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
+                   html += `<br><span style="color:#28a745">Gutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €</span>`;
+                }
+
+                html += `<br><br><strong style="font-size:1.1rem; color:#fff;">Total: ${summaryData.finalTotal.toFixed(2)} €</strong>`;
+                
+                if (formData.notes) {
+                    html += `<br><br><strong style="color:var(--gold)">Anmerkungen:</strong><br>${formData.notes.replace(/\n/g, '<br>')}`;
+                }
+
+                // B. Inject Data into Modal Elements
+                // Ensure your HTML has these IDs in the Success Modal
+                const summaryEl = document.getElementById('success-summary-content');
+                const pinEl = document.getElementById('modal-order-pin');
+                const trackLinkEl = document.getElementById('modal-track-link');
+
+                if (summaryEl) summaryEl.innerHTML = html;
+                if (pinEl) pinEl.innerText = orderPin;
+                if (trackLinkEl) trackLinkEl.href = `tracker.html?id=${orderId}`;
+                
+                // C. Show Modal & Hide Cart
+                closeCart(); 
+                const successModal = document.getElementById('success-modal');
+                if (successModal) successModal.classList.add('flex');
+                
+                // D. Clear Data
+                cart = [];
+                sessionStorage.removeItem('zafran_cart');
+                orderForm.reset();
+                if(currentCoupon) {
+                    currentCoupon = null;
+                    const cInput = document.getElementById('coupon-input');
+                    const cMsg = document.getElementById('coupon-message');
+                    if(cInput) cInput.value = "";
+                    if(cMsg) cMsg.textContent = "";
+                }
+                updateCart();
+                
+                // Reset Button
+                firebaseBtn.innerText = "Kostenpflichtig Bestellen";
+                firebaseBtn.disabled = false;
+
             } catch (error) {
                 console.error("Error sending order: ", error);
                 alert("Fehler beim Senden. Bitte erneut versuchen.");
-            } finally {
                 firebaseBtn.innerText = "Kostenpflichtig Bestellen";
                 firebaseBtn.disabled = false;
-                toggleCheckoutButtons();
             }
         });
     }
@@ -732,6 +811,10 @@ function getFormData() {
     const time = document.getElementById('pickup-time').value;
     const notes = document.getElementById('customer-notes').value;
     
+    // NEW: Get WhatsApp Consent (Default false if element missing)
+    const whatsappConsentEl = document.getElementById('whatsapp-consent');
+    const whatsappAllowed = whatsappConsentEl ? whatsappConsentEl.checked : false;
+
     let address = null;
     if (isDeliveryPage()) {
         address = {
@@ -740,7 +823,8 @@ function getFormData() {
             zip: document.getElementById('delivery-zip').value
         };
     }
-    return { name, phone, time, notes, address };
+    // Return the new field 'whatsappAllowed'
+    return { name, phone, time, notes, address, whatsappAllowed };
 }
 
 function validateForm() {

@@ -242,6 +242,69 @@ select#pickup-time:focus {
             background: #fff;
             color: #000;
         }
+
+
+/* 1. Unified Style for WhatsApp & Privacy Boxes */
+.consent-box {
+    background: rgba(255,255,255,0.05); 
+    padding: 12px; 
+    border-radius: 5px; 
+    border: 1px solid #333; 
+    margin-top: 15px; 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 10px;
+}
+.consent-box input {
+    width: 20px; 
+    height: 20px; 
+    accent-color: #D4AF37; /* Gold Checkbox */
+    margin-top: 2px;
+}
+.consent-box label {
+    font-size: 0.9rem; 
+    color: #ccc; 
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+/* 2. Checkout Button Area (Cleaned Up) */
+#checkout-buttons-wrapper {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    text-align: center;
+    /* Removed the outer border and "Abschließen" text to clean the mess */
+}
+
+/* 3. The Button Itself (Highlighted with Border) */
+#firebase-btn {
+    background-color: #1a1a1a;      /* Dark Background */
+    color: #D4AF37;                 /* Gold Text */
+    border: 2px solid #D4AF37;      /* GOLD BORDER ADDED HERE */
+    padding: 18px 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+    transition: all 0.3s ease;
+}
+
+#firebase-btn:hover:not(:disabled) {
+    background-color: #D4AF37;
+    color: #000;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+#firebase-btn:disabled {
+    border-color: #444;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
     </style>
 </head>
 <body>
@@ -1754,65 +1817,37 @@ select#pickup-time:focus {
             
             <div id="cart-content">
                 <h2>Ihre Bestellung</h2>
-                <p>Zahlung im Restaurant (Bar oder Karte).</p>
-                
+                <p>Zahlung im Restaurant (Bar oder Karte).</p>  
                 <div id="cart-items-container">
                     </div>
-                
                 <div id="cart-summary">
-
                     <div class="summary-line">
-
                         <span>Zwischensumme:</span>
-
                         <span id="subtotal-amount">0,00 €</span>
-
                     </div>
-
                     <div class="coupon-section">
-
                         <div class="coupon-row">
-
                             <input type="text" id="coupon-input" placeholder="Gutscheincode eingeben">
-
                             <button type="button" id="apply-coupon-btn">OK</button>
-
                         </div>
-
                         <p id="coupon-message"></p>
-
                     </div>
-
-
-
                     <div class="summary-line" style="font-size: 1.2rem; font-weight: bold; color: var(--gold); border-top: 1px solid #ddd; padding-top: 10px; margin-top: 5px;">
-
                         <span>Gesamt:</span>
-
                         <span id="total-amount">0,00 €</span>
-
                     </div>
-
                 </div>
-                
                 <hr>
-                
                 <h3>Ihre Details</h3>
                 
 <form id="order-form">
-    
     <div id="shop-status-message" style="display:none; padding:15px; background:#8B0000; color:white; text-align:center; border-radius:4px; margin-bottom:15px; font-weight:bold;"></div>
-
-    <h3 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px;">Ihre Kontaktdaten</h3>
-    
+    <h3 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px;">Ihre Kontaktdaten</h3>  
     <label for="customer-name">Name *</label>
-    <input type="text" id="customer-name" name="name" required placeholder="Ihr Vor- und Nachname">
-    
+    <input type="text" id="customer-name" name="name" required placeholder="Ihr Vor- und Nachname">   
     <label for="customer-phone">Telefon (für Rückfragen) *</label>
     <input type="tel" id="customer-phone" name="phone" required placeholder="Mobilnummer">
-
     <h3 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:10px; margin-top:20px; margin-bottom:15px;">Lieferadresse</h3>
-
     <div style="display:flex; gap:15px;">
         <div style="flex: 2;">
             <label for="delivery-street">Straße *</label>
@@ -1847,47 +1882,61 @@ select#pickup-time:focus {
     
     <label for="customer-notes" style="margin-top:15px; display:block;">Anmerkungen (Etage, Allergien etc.):</label>
     <textarea id="customer-notes" name="notes" rows="2"></textarea>
-    
-    <div class="consent-checkbox">
-        <input type="checkbox" id="privacy-consent" name="privacy-consent" required>
-        <label for="privacy-consent">
-            Ich stimme der <a href="privacy.html" target="_blank">Datenschutzerklärung</a> zu.
-        </label>
-    </div>
-
-    <div id="checkout-buttons-wrapper">
-        <div class="checkout-buttons">
-            <button type="button" id="firebase-btn" class="checkout-kitchen">
-                Kostenpflichtig Bestellen (Barzahlung)
-            </button>
+    <div class="form-group" style="margin-top:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:5px; border:1px solid #333;">
+        <div style="display:flex; align-items:start; gap:10px;">
+            <input type="checkbox" id="whatsapp-consent" checked style="width:20px; height:20px; accent-color:#25D366; margin-top:2px;">
+            <label for="whatsapp-consent" style="font-size:0.9rem; color:#ccc; line-height:1.4;">
+                Ich stimme zu, dass der Fahrer mich per <strong>WhatsApp</strong> über den Lieferstatus informieren darf.
+                <br><small style="color:#888;">(Andernfalls rufen wir Sie nur im Notfall an.)</small>
+            </label>
         </div>
     </div>
+    <div class="form-group" style="margin-top:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:5px; border:1px solid #333;">
+    <div style="display:flex; align-items:start; gap:10px;">
+        <input type="checkbox" id="privacy-consent" name="privacy-consent" required checked style="width:20px; height:20px; accent-color:#25D366; margin-top:2px;">
+        <label for="privacy-consent" style="font-size:0.9rem; color:#ccc; line-height:1.4;">
+            Ich habe die <a href="privacy.html" target="_blank" style="color:#D4AF37; text-decoration:underline;">Datenschutzerklärung</a> gelesen und stimme zu.
+        </label>
+    </div>
+    </div>
+    <div id="checkout-buttons-wrapper">
+        <button type="button" id="firebase-btn" class="checkout-kitchen" disabled>
+            Kostenpflichtig Bestellen (Barzahlung)
+        </button>
+    </div>
 </form>
-            </div>
+</div>
            </div>
 </div>
 
-
     <div id="success-modal">
-        <div class="success-box">
-            <div class="success-icon">✓</div>
-           <h2 class="success-title">Bestellung Erfolgreich!</h2>
-            <p style="color:#aaa; margin-top:5px;">Vielen Dank für Ihre Bestellung.</p>
-            <div id="success-summary-content">
-                </div>
-
-              <p style="color: #bbb; font-size: 0.85rem; margin-top: 10px; margin-bottom: 20px; line-height: 1.4; border-top: 1px solid #444; padding-top: 15px;">
-                <i class="fa fa-clock-o" style="color:var(--gold); margin-right:5px;"></i>
-                Die durchschnittliche Zubereitungszeit beträgt ca. <strong>30–60 Minuten</strong>.<br>
-                Für eine genaue Abholzeit bitten wir um telefonische Rücksprache:+49 2251 1290950.
-            </p>
-
-              <button onclick="closeSuccessModal()" class="btn-success-close">Schließen</button>
-
+    <div class="success-box">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">Bestellung Erfolgreich!</h2>
+        
+        <div style="background:#111; padding:10px; border:2px solid #D4AF37; margin:15px 0; border-radius:5px;">
+            <p style="color:#888; font-size:0.8rem; text-transform:uppercase; margin:0 0 5px 0; letter-spacing:1px;">Ihre Bestellnummer</p>
+            <div id="modal-order-pin" style="font-size:3rem; font-weight:bold; color:white; letter-spacing:5px; font-family:monospace; line-height:1;">----</div>
         </div>
 
-    </div>
+        <p style="color:#aaa; margin-top:5px;">Vielen Dank für Ihre Bestellung.</p>
+        
+        <div id="success-summary-content" style="text-align: left; background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border: 1px solid #444; border-radius: 4px; max-height: 300px; overflow-y: auto; color:#ddd; font-size:0.9rem;">
+            </div>
 
+        <div style="background:rgba(212, 175, 55, 0.1); border-left:3px solid #D4AF37; padding:10px; text-align:left; margin-bottom:15px; font-size:0.85rem; color:#ccc; line-height:1.4;">
+            <strong style="color:#D4AF37;">Gäste-Login-Infos:</strong><br>
+            Speichern Sie die oben angezeigte <strong>Bestellnummer</strong> zur Live-Verfolgung.<br>
+            Oder nutzen Sie direkt den Link unten:
+        </div>
+
+        <a href="#" id="modal-track-link" target="_blank" style="background:#D4AF37; color:black; padding:12px 0; text-decoration:none; font-weight:bold; display:block; width:100%; border-radius:4px; text-transform:uppercase; margin-bottom:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+            LIVE TRACKER ÖFFNEN 🚀
+        </a>
+
+        <button onclick="closeSuccessModal()" class="btn-success-close" style="width:100%; background:#333; color:white; border:1px solid #555; margin-top:5px;">Schließen</button>
+    </div>
+</div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script> 
@@ -1901,7 +1950,7 @@ select#pickup-time:focus {
         <h2 style="color:#D4AF37; margin-top:0; margin-bottom:15px; text-transform:uppercase;">Derzeit Geschlossen</h2>
         
         <p id="closed-modal-text" style="color:#eee; line-height:1.5; font-size:1.1rem; margin-bottom:25px;">
-            Bestellungen sind nur von 12:00 bis 20:00 Uhr möglich.
+            Bestellungen sind nur von 16:00 bis 20:30 Uhr möglich.
         </p>
         
         <button id="close-closed-modal-btn" style="background:#D4AF37; color:black; border:none; padding:12px 25px; font-weight:bold; border-radius:4px; cursor:pointer; font-size:1rem;">

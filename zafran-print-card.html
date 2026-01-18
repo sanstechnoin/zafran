@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Premium PVC Card Design</title>
+    <title>Zafran Delight - Final Print Design</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
@@ -16,7 +16,7 @@
         }
 
         body {
-            background-color: #222;
+            background-color: #333;
             font-family: 'Montserrat', sans-serif;
             display: flex;
             flex-direction: column;
@@ -26,7 +26,7 @@
         }
 
         /* --- CARD PHYSICAL SPECS (CR80 Standard ATM Card) --- */
-        /* 85.6mm x 53.98mm */
+        /* 85.6mm x 53.98mm - Scaled for screen */
         .card {
             width: 540px; 
             height: 340px;
@@ -48,7 +48,7 @@
             z-index: 10;
         }
 
-        /* --- FRONT DESIGN (The "Alive" Food Look) --- */
+        /* --- FRONT DESIGN --- */
         .front {
             background-color: var(--card-black);
         }
@@ -58,21 +58,20 @@
             height: 62%;
             width: 100%;
             position: relative;
+            background-color: #222; /* Fallback color */
         }
 
         .hero-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* Vibrant, Rich Curry Image */
-            content: url('https://source.unsplash.com/featured/?indian,curry,dark');
         }
 
         /* Gradient fade from image to black body */
         .hero-overlay {
             position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 80%;
-            background: linear-gradient(to bottom, transparent 0%, var(--card-black) 90%);
+            bottom: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to bottom, transparent 0%, var(--card-black) 100%);
         }
 
         .front-content {
@@ -119,7 +118,7 @@
             font-size: 10px;
         }
 
-        /* Contact Pill (Like a Credit Card Number strip) */
+        /* Contact Pill */
         .contact-pill {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(5px);
@@ -139,10 +138,10 @@
             gap: 8px;
         }
         
-        .icon { color: var(--gold); }
+        .icon { color: var(--gold); width: 14px; text-align: center; }
 
 
-        /* --- BACK DESIGN (Functional & Tech) --- */
+        /* --- BACK DESIGN --- */
         .back {
             background-color: var(--card-black);
             padding: 30px;
@@ -182,7 +181,6 @@
             border-radius: 15px;
             text-align: center;
             width: 140px;
-            /* Subtle "lift" shadow */
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
@@ -190,7 +188,7 @@
             width: 90px;
             height: 90px;
             border-radius: 4px;
-            border: 2px solid #fff; /* White border for scanning contrast */
+            border: 2px solid #fff;
             background: #fff;
         }
 
@@ -209,7 +207,7 @@
             display: block;
         }
 
-        /* Bottom "Magnetic Stripe" style footer */
+        /* Footer Strip */
         .footer-strip {
             margin-top: auto;
             border-top: 1px solid #333;
@@ -229,20 +227,21 @@
         }
 
         .label {
-            color: #888;
+            color: #ccc;
             font-weight: bold;
             margin-bottom: 10px;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="label">Front (Matte Black + Glossy Image)</div>
+    <div class="label">Front Side (Matte Black + Glossy Image)</div>
     <div class="card front">
         <div class="hero-section">
-            <img class="hero-img">
+            <img src="hero-bg.png" class="hero-img" alt="Food Image">
             <div class="hero-overlay"></div>
         </div>
 
@@ -260,16 +259,16 @@
                     Kessenicher Str. 9 <span class="icon">📍</span>
                 </div>
                 <div class="contact-row">
-                    02251 1290950 <span class="icon">📞</span>
+                    +49 152 25475880 <span class="icon">📞</span>
                 </div>
                 <div class="contact-row">
-                    +49 2251 9599741 <span class="icon">📱</span>
+                    +49 2251 1290950 <span class="icon">📱</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="label">Back (Tech/Access Style)</div>
+    <div class="label">Back Side (Tech/Access Style)</div>
     <div class="card back">
         <div class="back-header">
             <div class="back-title">Services & Booking</div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final Print Design</title>
+    <title>Zafran Delight - Final Print Card</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
@@ -26,19 +26,20 @@
         }
 
         /* --- CARD PHYSICAL SPECS (CR80 Standard ATM Card) --- */
-        /* 85.6mm x 53.98mm - Scaled for screen */
+        /* Scale: 85.6mm x 53.98mm */
         .card {
             width: 540px; 
             height: 340px;
             position: relative;
-            border-radius: 25px; /* CR80 Standard Rounded Corners */
+            border-radius: 25px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            background-color: var(--card-black);
         }
 
-        /* Plastic Gloss Reflection Effect */
+        /* Plastic Gloss Effect */
         .card::after {
             content: "";
             position: absolute;
@@ -48,26 +49,23 @@
             z-index: 10;
         }
 
-        /* --- FRONT DESIGN --- */
-        .front {
-            background-color: var(--card-black);
-        }
+        /* --- FRONT SIDE --- */
+        .front { background-color: var(--card-black); }
 
-        /* Top 60% is the Hero Image */
         .hero-section {
             height: 62%;
             width: 100%;
             position: relative;
-            background-color: #222; /* Fallback color */
+            background-color: #222;
         }
 
+        /* PLACEHOLDER FOR FOOD IMAGE */
         .hero-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        /* Gradient fade from image to black body */
         .hero-overlay {
             position: absolute;
             bottom: 0; left: 0; width: 100%; height: 60%;
@@ -84,20 +82,16 @@
             z-index: 2;
         }
 
-        .info-left {
-            text-align: left;
-        }
+        .info-left { text-align: left; }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
             font-size: 32px;
-            /* Gold Gradient Text */
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 700;
             margin: 0 0 5px 0;
-            letter-spacing: -0.5px;
         }
 
         .tagline {
@@ -108,17 +102,9 @@
             margin-bottom: 15px;
         }
 
-        .chef-name {
-            color: #fff;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .chef-role {
-            color: var(--gold);
-            font-size: 10px;
-        }
+        .chef-name { color: #fff; font-size: 14px; font-weight: 600; }
+        .chef-role { color: var(--gold); font-size: 10px; }
 
-        /* Contact Pill */
         .contact-pill {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(5px);
@@ -137,33 +123,38 @@
             justify-content: flex-end;
             gap: 8px;
         }
-        
-        .icon { color: var(--gold); width: 14px; text-align: center; }
+        .icon { color: var(--gold); }
 
-
-        /* --- BACK DESIGN --- */
+        /* --- BACK SIDE --- */
         .back {
             background-color: var(--card-black);
-            padding: 30px;
+            padding: 25px 30px;
             color: white;
-            justify-content: center;
+            justify-content: flex-start;
+            align-items: center;
         }
 
-        .back-header {
-            text-align: center;
-            margin-bottom: 25px;
+        /* BACK LOGO */
+        .back-logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+            /* Using Zafran Logo URL or Placeholder */
+            content: url('https://zafraneuskirchen.de/assets/img/logo.png'); 
         }
+
+        .back-header { text-align: center; margin-bottom: 20px; }
         .back-title {
             color: var(--gold);
             font-family: 'Playfair Display', serif;
-            font-size: 22px;
+            font-size: 18px;
+            margin: 0 0 5px 0;
         }
-        .back-sub {
-            color: #666;
-            font-size: 10px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-top: 5px;
+        .back-email {
+            color: var(--text-silver);
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            font-weight: 500;
         }
 
         .qr-container {
@@ -171,32 +162,34 @@
             gap: 30px;
             justify-content: center;
             align-items: center;
+            margin-bottom: 20px;
         }
 
-        /* Card-like QR Frames */
         .qr-card {
             background: #1a1a1a;
             border: 1px solid #333;
-            padding: 15px;
-            border-radius: 15px;
+            padding: 10px;
+            border-radius: 12px;
             text-align: center;
-            width: 140px;
+            width: 120px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        .qr-img {
-            width: 90px;
-            height: 90px;
-            border-radius: 4px;
-            border: 2px solid #fff;
+        /* IMPORTANT: White background for QR code scanning reliability */
+        .qr-bg {
             background: #fff;
+            padding: 4px;
+            border-radius: 4px;
+            display: inline-block;
         }
+
+        .qr-img { width: 80px; height: 80px; display: block; }
 
         .qr-label {
             color: #fff;
             font-weight: 600;
-            font-size: 12px;
-            margin-top: 10px;
+            font-size: 11px;
+            margin-top: 8px;
             display: block;
         }
 
@@ -207,41 +200,54 @@
             display: block;
         }
 
-        /* Footer Strip */
-        .footer-strip {
+        /* FOOTER IMAGES */
+        .image-footer {
             margin-top: auto;
             border-top: 1px solid #333;
             padding-top: 15px;
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
+            width: 100%;
         }
 
-        .feature-tag {
-            background: #222;
-            color: #aaa;
-            font-size: 9px;
-            padding: 5px 10px;
-            border-radius: 20px;
+        .footer-img-box {
+            width: 70px;
+            height: 50px;
+            border-radius: 6px;
+            overflow: hidden;
             border: 1px solid #333;
+            position: relative;
         }
 
-        .label {
-            color: #ccc;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .footer-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
         }
+        
+        .footer-label {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.7);
+            color: var(--gold);
+            font-size: 7px;
+            text-align: center;
+            padding: 2px 0;
+            text-transform: uppercase;
+        }
+
+        .label { color: #ccc; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
 
     </style>
 </head>
 <body>
 
-    <div class="label">Front Side (Matte Black + Glossy Image)</div>
+    <div class="label">Front Side</div>
     <div class="card front">
         <div class="hero-section">
-            <img src="hero-bg.png" class="hero-img" alt="Food Image">
+            <img src="hero-bg.png" class="hero-img">
             <div class="hero-overlay"></div>
         </div>
 
@@ -249,51 +255,62 @@
             <div class="info-left">
                 <h1 class="brand-name">Zafran Delight</h1>
                 <div class="tagline">Authentic Indian & Pakistani Cuisine</div>
-                
                 <div class="chef-name">Syed Hussain Haider Zaidi</div>
                 <div class="chef-role">Owner & Chef (35 Years Exp.)</div>
             </div>
 
             <div class="contact-pill">
-                <div class="contact-row">
-                    Kessenicher Str. 9 <span class="icon">📍</span>
-                </div>
-                <div class="contact-row">
-                    +49 152 25475880 <span class="icon">📞</span>
-                </div>
-                <div class="contact-row">
-                    +49 2251 1290950 <span class="icon">📱</span>
-                </div>
+                <div class="contact-row">Kessenicher Str. 9, Euskirchen <span class="icon">📍</span></div>
+                <div class="contact-row">+49 152 25475880 <span class="icon">📞</span></div>
+                <div class="contact-row">+49 2251 1290950 <span class="icon">📱</span></div>
             </div>
         </div>
     </div>
 
-    <div class="label">Back Side (Tech/Access Style)</div>
+    <div class="label">Back Side</div>
     <div class="card back">
+        <img class="back-logo" alt="Zafran Logo">
+        
         <div class="back-header">
             <div class="back-title">Services & Booking</div>
-            <div class="back-sub">Your Access to Premium Catering</div>
+            <div class="back-email">hussainzaidi1969@gmail.com</div>
         </div>
 
         <div class="qr-container">
             <div class="qr-card">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VCARD" class="qr-img">
+                <div class="qr-bg">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de/contact" class="qr-img">
+                </div>
                 <span class="qr-label">Save Contact</span>
                 <span class="qr-action">Scan to Connect</span>
             </div>
 
             <div class="qr-card">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
+                <div class="qr-bg">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
+                </div>
                 <span class="qr-label">Book Event</span>
                 <span class="qr-action">Scan to Plan</span>
             </div>
         </div>
 
-        <div class="footer-strip">
-            <span class="feature-tag">Weddings</span>
-            <span class="feature-tag">Corporate</span>
-            <span class="feature-tag">Live Tandoor</span>
-            <span class="feature-tag">Parties</span>
+        <div class="image-footer">
+            <div class="footer-img-box">
+                <img src="https://images.unsplash.com/photo-1519225468316-744044132a1b?auto=format&fit=crop&w=100&q=80" class="footer-img">
+                <div class="footer-label">Wedding</div>
+            </div>
+            <div class="footer-img-box">
+                <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=100&q=80" class="footer-img">
+                <div class="footer-label">Corporate</div>
+            </div>
+            <div class="footer-img-box">
+                <img src="https://images.unsplash.com/photo-1530103862676-de3c9da59af7?auto=format&fit=crop&w=100&q=80" class="footer-img">
+                <div class="footer-label">Party</div>
+            </div>
+            <div class="footer-img-box">
+                <img src="https://images.unsplash.com/photo-1596443686812-2f45229eeb36?auto=format&fit=crop&w=100&q=80" class="footer-img">
+                <div class="footer-label">Festival</div>
+            </div>
         </div>
     </div>
 

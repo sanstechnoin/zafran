@@ -25,6 +25,20 @@
             gap: 50px;
         }
 
+        /* Print Button Style */
+        .print-btn {
+            padding: 12px 25px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: 0.3s;
+        }
+        .print-btn:hover { background: #fff; }
+
         .card {
             width: 540px; 
             height: 340px;
@@ -200,7 +214,7 @@
             display: block;
         }
 
-        /* FULL WIDTH FOOTER SECTION */
+        /* FOOTER SECTION */
         .footer-container {
             margin-top: auto;
             width: 100%;
@@ -225,22 +239,34 @@
         .image-strip {
             display: flex;
             width: 100%;
-            height: 65px;
+            height: 70px; /* Uniform height */
         }
 
         .strip-img {
             flex: 1;
-            height: 100%;
-            object-fit: cover;
+            width: 16.66%; /* Ensure 6 images divide equally */
+            height: 70px;
+            object-fit: cover; /* Crops uniformly without distortion */
             border-right: 1px solid #111;
         }
         .strip-img:last-child { border-right: none; }
 
-        .label { color: #ccc; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+        /* --- PRINT OPTIMIZATION --- */
+        @media print {
+            body { background-color: transparent; padding: 0; margin: 0; }
+            .print-btn, .label { display: none !important; }
+            .card { 
+                box-shadow: none !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+            }
+        }
 
     </style>
 </head>
 <body>
+
+    <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
     <div class="label">Front Side</div>
     <div class="card front">
@@ -253,7 +279,6 @@
             <div class="info-left">
                 <h1 class="brand-name">Zafran Delight</h1>
                 <div class="tagline">Indian & Pakistani Catering Cooking Expert</div>
-                
                 <div class="chef-info">
                     <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
                     <div class="chef-details">
@@ -271,11 +296,10 @@
         </div>
     </div>
 
-    <div class="label">Back Side (6 Images Edge-to-Edge)</div>
+    <div class="label">Back Side</div>
     <div class="card back">
         <div class="back-content-wrapper">
             <img src="logo.png" class="back-logo" alt="Zafran Logo">
-            
             <div class="qr-container">
                 <div class="qr-card">
                     <div class="qr-bg">
@@ -284,7 +308,6 @@
                     <span class="qr-label">Save Contact</span>
                     <span class="qr-action">Scan to Connect</span>
                 </div>
-
                 <div class="qr-card">
                     <div class="qr-bg">
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
@@ -297,9 +320,8 @@
 
         <div class="footer-container">
             <div class="events-list">
-                Wedding • Engagement • Birthday Party • Diwali • Holi • Milaad • Iftaar • Majalis • Eid
+                Wedding • Engagement • Birthday Party • Diwali • Holi • Milaad • Iftaar • Majalis • Eid Celebrations
             </div>
-            
             <div class="image-strip">
                 <img src="https://images.unsplash.com/photo-1739047598160-b7004af1595e?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Marriage">
                 <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Engagement">

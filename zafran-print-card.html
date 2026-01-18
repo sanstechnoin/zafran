@@ -25,8 +25,7 @@
             gap: 50px;
         }
 
-        /* --- CARD PHYSICAL SPECS (CR80 Standard ATM Card) --- */
-        /* Scale: 85.6mm x 53.98mm */
+        /* --- CARD PHYSICAL SPECS --- */
         .card {
             width: 540px; 
             height: 340px;
@@ -53,13 +52,13 @@
         .front { background-color: var(--card-black); }
 
         .hero-section {
-            height: 62%;
+            height: 55%; /* Slightly reduced to fit contact info */
             width: 100%;
             position: relative;
             background-color: #222;
         }
 
-        /* PLACEHOLDER FOR FOOD IMAGE */
+        /* UPDATED HERO IMAGE */
         .hero-img {
             width: 100%;
             height: 100%;
@@ -74,7 +73,7 @@
 
         .front-content {
             flex: 1;
-            padding: 0 35px 25px;
+            padding: 0 30px 20px;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
@@ -86,21 +85,21 @@
 
         .brand-name {
             font-family: 'Playfair Display', serif;
-            font-size: 32px;
+            font-size: 30px;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 700;
-            margin: 0 0 5px 0;
+            margin: 0 0 2px 0;
         }
 
         .tagline {
             color: var(--text-silver);
-            font-size: 11px;
-            letter-spacing: 1px;
+            font-size: 10px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            margin-bottom: 15px;
-            white-space: nowrap; /* Ensure one line */
+            margin-bottom: 12px;
+            white-space: nowrap;
         }
 
         .chef-info {
@@ -109,40 +108,36 @@
         }
         
         .chef-hat-icon {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             margin-right: 8px;
             filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
         }
 
-        .chef-details {
-            display: flex;
-            flex-direction: column;
-        }
+        .chef-details { display: flex; flex-direction: column; }
+        .chef-name { color: #fff; font-size: 13px; font-weight: 600; line-height: 1.2; }
+        .chef-role { color: var(--gold); font-size: 9px; }
 
-        .chef-name { color: #fff; font-size: 14px; font-weight: 600; line-height: 1.2; }
-        .chef-role { color: var(--gold); font-size: 10px; }
-
+        /* Updated Contact Section */
         .contact-pill {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
             backdrop-filter: blur(5px);
-            padding: 10px 15px;
-            border-radius: 12px;
+            padding: 8px 12px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
             text-align: right;
-            white-space: nowrap; /* Ensure address on one line */
         }
 
         .contact-row {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-white);
-            margin: 0;
+            margin: 2px 0;
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 8px;
+            gap: 6px;
         }
-        .icon { color: var(--gold); }
+        .icon { color: var(--gold); width: 12px; text-align: center;}
 
         /* --- BACK SIDE --- */
         .back {
@@ -153,13 +148,12 @@
             align-items: center;
         }
 
-        /* BACK LOGO */
+        /* UPDATED BACK LOGO */
         .back-logo {
             width: 100px;
             height: auto;
-            margin-bottom: 10px;
-            /* Using Zafran Logo URL or Placeholder */
-            content: url('https://zafraneuskirchen.de/assets/img/logo.png'); 
+            margin-bottom: 15px;
+            object-fit: contain;
         }
 
         .back-header { text-align: center; margin-bottom: 20px; }
@@ -167,13 +161,7 @@
             color: var(--gold);
             font-family: 'Playfair Display', serif;
             font-size: 18px;
-            margin: 0 0 5px 0;
-        }
-        .back-email {
-            color: var(--text-silver);
-            font-size: 11px;
-            letter-spacing: 0.5px;
-            font-weight: 500;
+            margin: 0;
         }
 
         .qr-container {
@@ -194,7 +182,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        /* IMPORTANT: White background for QR code scanning reliability */
         .qr-bg {
             background: #fff;
             padding: 4px;
@@ -219,7 +206,7 @@
             display: block;
         }
 
-        /* FOOTER IMAGES */
+        /* Footer Images */
         .image-footer {
             margin-top: auto;
             border-top: 1px solid #333;
@@ -266,7 +253,7 @@
     <div class="label">Front Side</div>
     <div class="card front">
         <div class="hero-section">
-            <img src="hero-bg.png" class="hero-img">
+            <img src="hero-bg.png" class="hero-img" alt="Hero Background">
             <div class="hero-overlay"></div>
         </div>
 
@@ -286,17 +273,18 @@
 
             <div class="contact-pill">
                 <div class="contact-row">Kessenicher Str. 9, Euskirchen <span class="icon">📍</span></div>
+                <div class="contact-row">+49 152 25475880 <span class="icon">📞</span></div>
+                <div class="contact-row">hussainzaidi1969@gmail.com <span class="icon">✉️</span></div>
             </div>
         </div>
     </div>
 
     <div class="label">Back Side</div>
     <div class="card back">
-        <img class="back-logo" alt="Zafran Logo">
+        <img src="logo.png" class="back-logo" alt="Zafran Logo">
         
         <div class="back-header">
             <div class="back-title">Services & Booking</div>
-            <div class="back-email">hussainzaidi1969@gmail.com</div>
         </div>
 
         <div class="qr-container">

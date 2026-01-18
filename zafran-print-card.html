@@ -52,13 +52,12 @@
         .front { background-color: var(--card-black); }
 
         .hero-section {
-            height: 55%; /* Slightly reduced to fit contact info */
+            height: 55%; 
             width: 100%;
             position: relative;
             background-color: #222;
         }
 
-        /* UPDATED HERO IMAGE */
         .hero-img {
             width: 100%;
             height: 100%;
@@ -102,10 +101,7 @@
             white-space: nowrap;
         }
 
-        .chef-info {
-            display: flex;
-            align-items: center;
-        }
+        .chef-info { display: flex; align-items: center; }
         
         .chef-hat-icon {
             width: 18px;
@@ -118,7 +114,6 @@
         .chef-name { color: #fff; font-size: 13px; font-weight: 600; line-height: 1.2; }
         .chef-role { color: var(--gold); font-size: 9px; }
 
-        /* Updated Contact Section */
         .contact-pill {
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(5px);
@@ -142,107 +137,119 @@
         /* --- BACK SIDE --- */
         .back {
             background-color: var(--card-black);
-            padding: 25px 30px;
+            padding: 20px 0 0 0; /* Removed side/bottom padding for edge-to-edge */
             color: white;
-            justify-content: flex-start;
             align-items: center;
+            justify-content: flex-start; /* Align content to top */
         }
 
-        /* UPDATED BACK LOGO */
+        .back-content-wrapper {
+            padding: 0 30px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        /* SMALLER LOGO */
         .back-logo {
-            width: 100px;
+            width: 70px; /* Reduced size */
             height: auto;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             object-fit: contain;
         }
 
-        .back-header { text-align: center; margin-bottom: 20px; }
-        .back-title {
-            color: var(--gold);
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            margin: 0;
+        .back-email {
+            color: var(--text-silver);
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            margin-bottom: 15px;
         }
 
         .qr-container {
             display: flex;
-            gap: 30px;
+            gap: 25px;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
+            width: 100%;
         }
 
         .qr-card {
             background: #1a1a1a;
             border: 1px solid #333;
-            padding: 10px;
-            border-radius: 12px;
+            padding: 8px;
+            border-radius: 10px;
             text-align: center;
-            width: 120px;
+            width: 110px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         .qr-bg {
             background: #fff;
-            padding: 4px;
+            padding: 3px;
             border-radius: 4px;
             display: inline-block;
         }
 
-        .qr-img { width: 80px; height: 80px; display: block; }
+        .qr-img { width: 75px; height: 75px; display: block; }
 
         .qr-label {
             color: #fff;
             font-weight: 600;
-            font-size: 11px;
-            margin-top: 8px;
+            font-size: 10px;
+            margin-top: 6px;
             display: block;
         }
 
         .qr-action {
             color: var(--gold);
-            font-size: 9px;
-            margin-top: 4px;
+            font-size: 8px;
+            margin-top: 2px;
             display: block;
         }
 
-        /* Footer Images */
-        .image-footer {
-            margin-top: auto;
-            border-top: 1px solid #333;
-            padding-top: 15px;
+        /* FULL WIDTH FOOTER SECTION */
+        .footer-container {
+            margin-top: auto; /* Pushes to bottom */
+            width: 100%;
             display: flex;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
+            flex-direction: column;
         }
 
-        .footer-img-box {
-            width: 70px;
-            height: 50px;
-            border-radius: 6px;
+        /* Text List of Events */
+        .events-list {
+            text-align: center;
+            color: var(--gold);
+            font-size: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 5px 10px;
+            background: rgba(0,0,0,0.5);
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap;
             overflow: hidden;
-            border: 1px solid #333;
-            position: relative;
+            text-overflow: ellipsis;
         }
 
-        .footer-img {
+        /* Edge to Edge Image Strip */
+        .image-strip {
+            display: flex;
             width: 100%;
+            height: 60px;
+        }
+
+        .strip-img {
+            flex: 1;
             height: 100%;
             object-fit: cover;
-            opacity: 0.8;
+            border-right: 1px solid #111;
+            filter: brightness(0.9);
         }
-        
-        .footer-label {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            background: rgba(0,0,0,0.7);
-            color: var(--gold);
-            font-size: 7px;
-            text-align: center;
-            padding: 2px 0;
-            text-transform: uppercase;
-        }
+        .strip-img:last-child { border-right: none; }
 
         .label { color: #ccc; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
 
@@ -279,48 +286,43 @@
         </div>
     </div>
 
-    <div class="label">Back Side</div>
+    <div class="label">Back Side (Edge-to-Edge Images)</div>
     <div class="card back">
-        <img src="logo.png" class="back-logo" alt="Zafran Logo">
-        
-        <div class="back-header">
-            <div class="back-title">Services & Booking</div>
+        <div class="back-content-wrapper">
+            <img src="logo.png" class="back-logo" alt="Zafran Logo">
+            
+            <div class="back-email">hussainzaidi1969@gmail.com</div>
+
+            <div class="qr-container">
+                <div class="qr-card">
+                    <div class="qr-bg">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de/contact" class="qr-img">
+                    </div>
+                    <span class="qr-label">Save Contact</span>
+                    <span class="qr-action">Scan to Connect</span>
+                </div>
+
+                <div class="qr-card">
+                    <div class="qr-bg">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
+                    </div>
+                    <span class="qr-label">Book Event</span>
+                    <span class="qr-action">Scan to Plan</span>
+                </div>
+            </div>
         </div>
 
-        <div class="qr-container">
-            <div class="qr-card">
-                <div class="qr-bg">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de/contact" class="qr-img">
-                </div>
-                <span class="qr-label">Save Contact</span>
-                <span class="qr-action">Scan to Connect</span>
+        <div class="footer-container">
+            <div class="events-list">
+                Wedding • Diwali • Holi • Milaad • Iftaar • Majalis • Birthday • Eid Celebrations
             </div>
-
-            <div class="qr-card">
-                <div class="qr-bg">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
-                </div>
-                <span class="qr-label">Book Event</span>
-                <span class="qr-action">Scan to Plan</span>
-            </div>
-        </div>
-
-        <div class="image-footer">
-            <div class="footer-img-box">
-                <img src="https://images.unsplash.com/photo-1519225468316-744044132a1b?auto=format&fit=crop&w=150&q=80" class="footer-img">
-                <div class="footer-label">Wedding</div>
-            </div>
-            <div class="footer-img-box">
-                <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=150&q=80" class="footer-img">
-                <div class="footer-label">Corporate</div>
-            </div>
-            <div class="footer-img-box">
-                <img src="https://images.unsplash.com/photo-1530103862676-de3c9da59af7?auto=format&fit=crop&w=150&q=80" class="footer-img">
-                <div class="footer-label">Party</div>
-            </div>
-            <div class="footer-img-box">
-                <img src="https://images.unsplash.com/photo-1596443686812-2f45229eeb36?auto=format&fit=crop&w=150&q=80" class="footer-img">
-                <div class="footer-label">Festival</div>
+            
+            <div class="image-strip">
+                <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Wedding">
+                <img src="https://images.unsplash.com/photo-1582716401301-b2407dc7563d?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Diwali/Holi">
+                <img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Religious">
+                <img src="https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Catering">
+                <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=150&q=80" class="strip-img" alt="Party">
             </div>
         </div>
     </div>

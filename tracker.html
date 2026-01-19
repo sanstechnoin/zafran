@@ -30,9 +30,12 @@
             font-family: 'Poppins', sans-serif; 
             background: var(--bg-dark); 
             color: var(--text-main); 
+            /* LOCK BACKGROUND SCROLL */
+            position: fixed; 
+            inset: 0;
+            height: 100%;
+            width: 100%;
             overflow: hidden; 
-            height: 100dvh; 
-            width: 100vw;
         }
 
         /* MAP */
@@ -60,8 +63,11 @@
             z-index: 1000;
             transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             border-top: 1px solid rgba(255,255,255,0.1);
+            
+            /* SCROLL FIXES */
             max-height: 85vh; 
             overflow-y: auto;
+            overscroll-behavior: contain; /* Prevents background scroll chaining */
         }
 
         /* HEADER */
@@ -128,6 +134,12 @@
             font-weight: 600; text-transform: uppercase; letter-spacing: 1px; 
             border-bottom: 1px dashed #444; padding-bottom: 10px;
         }
+        /* SCROLLABLE LIST TO KEEP MAP VISIBLE */
+        #receipt-items-list {
+            max-height: 25vh; /* Restricts height so card doesn't cover map */
+            overflow-y: auto;
+            padding-right: 5px;
+        }
         .receipt-item { 
             display: flex; justify-content: space-between; 
             margin-bottom: 8px; font-size: 0.95rem; color: #eee; 
@@ -151,14 +163,7 @@
         .driver-details h4 { margin: 0; font-size: 1.05rem; color: #fff; font-weight: 600; }
         .driver-details p { margin: 2px 0 0; font-size: 0.85rem; color: #999; }
         
-        .call-btn {
-            background: var(--green); color: white;
-            width: 48px; height: 48px; border-radius: 50%; border: none;
-            display: flex; align-items: center; justify-content: center; text-decoration: none;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-            transition: transform 0.1s;
-        }
-        .call-btn:active { transform: scale(0.95); }
+        /* REMOVED CALL BUTTON CSS */
 
         /* LOADER */
         .loader-screen {
@@ -247,10 +252,7 @@
                 <h4>Ihr Fahrer</h4>
                 <p>Ist auf dem Weg zu Ihnen</p>
             </div>
-            <a href="tel:+491623757839" class="call-btn">
-                <span class="material-icons">phone</span>
-            </a>
-        </div>
+            </div>
 
     </div>
 
@@ -315,22 +317,21 @@
                         if(archivedId) {
                             initTracker(archivedId, "archived_orders");
                         } else {
+                            // Not found in either
                             document.getElementById('loader').style.display = 'none';
-                            setStatusMessage("Nicht gefunden", "Bitte prüfen Sie PIN oder ID.");
+                            setStatusMessage("Nicht gefunden", "Bitte prüfen Sie Ihre PIN.");
                         }
                     });
                 }
             });
         }
 
-        // Helper to search ID or PIN in a specific collection
+        // Helper to search ID or PIN
         function searchCollection(collectionName, input, callback) {
-            // 1. Try Doc ID
             db.collection(collectionName).doc(input).get().then((doc) => {
                 if (doc.exists) {
                     callback(input, doc.data());
                 } else {
-                    // 2. Try PIN
                     db.collection(collectionName).where("orderPin", "==", input).limit(1).get()
                     .then((querySnapshot) => {
                         if (!querySnapshot.empty) {
@@ -338,32 +339,31 @@
                         } else {
                             callback(null, null);
                         }
-                    }).catch(err => {
-                        console.error(err);
-                        callback(null, null);
-                    });
+                    }).catch(err => { console.error(err); callback(null, null); });
                 }
-            }).catch(err => {
-                console.error(err);
-                callback(null, null);
-            });
+            }).catch(err => { console.error(err); callback(null, null); });
         }
 
+        // --- FIXED: CLEARS RED ICONS WHEN NOT FOUND ---
         function setStatusMessage(title, sub) {
             document.getElementById('status-title').innerText = title;
             document.getElementById('status-sub').innerText = sub;
-            // Clear UI
+            
+            // Clear Data
             document.getElementById('receipt-area').style.display = 'none';
             document.getElementById('display-id').innerText = "---";
             document.getElementById('order-time').innerText = "";
             document.getElementById('eta-badge').innerText = "---";
-            document.getElementById('eta-badge').style.background = "#333";
+            document.getElementById('eta-badge').className = "eta-badge";
             
-            // RESET VISUALS (Fixes the red line issue)
-            document.getElementById('progress-fill').style.width = '0%';
+            // RESET VISUALS (Removes Red/Green colors)
+            const fill = document.getElementById('progress-fill');
+            fill.style.width = '0%';
+            fill.style.background = '#D4AF37'; // Reset to Gold
+
             ['new', 'preparing', 'delivery', 'completed'].forEach(step => {
                 const el = document.getElementById(`step-${step}`);
-                el.className = 'step';
+                el.className = 'step'; // Remove 'active', 'completed', 'cancelled'
                 el.querySelector('.step-icon').innerHTML = getStepIcon(step); 
             });
         }
@@ -375,20 +375,20 @@
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + id;
             window.history.pushState({path:newUrl},'',newUrl);
 
-            // If it's active order, use onSnapshot (Live Updates)
+            // Active orders = Live Updates
             if(collection === "orders") {
                 unsubscribe = db.collection("orders").doc(id).onSnapshot((doc) => {
                     handleDocUpdate(doc, id, true);
                 });
             } else {
-                // If it's archived, just get() once (Archived orders don't move)
+                // Archived orders = One-time Fetch
                 db.collection("archived_orders").doc(id).get().then((doc) => {
                     handleDocUpdate(doc, id, false);
                 });
             }
         }
 
-        function handleDocUpdate(doc, id, isLive) {
+         function handleDocUpdate(doc, id, isLive) {
             document.getElementById('loader').style.display = 'none';
 
             if (!doc.exists) {
@@ -445,27 +445,21 @@
                 document.getElementById('order-time').innerText = `Zeit: ${time}`;
             }
 
-            // --- BUILD RECEIPT ---
+            // Receipt
             const receiptArea = document.getElementById('receipt-area');
             const receiptList = document.getElementById('receipt-items-list');
-            
             if(data.items && data.items.length > 0) {
                 receiptList.innerHTML = "";
                 data.items.forEach(item => {
                     const row = document.createElement('div');
                     row.className = 'receipt-item';
-                    row.innerHTML = `
-                        <span>${item.quantity}x ${item.name}</span>
-                        <span>${(item.price * item.quantity).toFixed(2)}€</span>
-                    `;
+                    row.innerHTML = `<span>${item.quantity}x ${item.name}</span><span>${(item.price * item.quantity).toFixed(2)}€</span>`;
                     receiptList.appendChild(row);
                 });
                 receiptArea.style.display = 'block';
-            } else {
-                receiptArea.style.display = 'none';
-            }
+            } else { receiptArea.style.display = 'none'; }
 
-            // --- STATUS ---
+            // --- STATUS LOGIC ---
             const status = data.status; 
             let progress = 0;
             let title = "Empfangen";
@@ -474,7 +468,7 @@
             let badgeClass = "";
             let barColor = "#D4AF37"; 
 
-            // 1. Reset
+            // Reset Steps
             ['new', 'preparing', 'delivery', 'completed'].forEach(step => {
                 const el = document.getElementById(`step-${step}`);
                 el.className = 'step';
@@ -482,10 +476,12 @@
             });
             document.getElementById('driver-card').style.display = 'none';
 
-            // 2. Logic
+            // --- APPLY STATES ---
             if (status === 'cancelled') {
+                // CANCELLED STATE - Polite Message
                 progress = 100;
                 title = "Storniert";
+                // UPDATED POLITE MESSAGE:
                 sub = "Aufgrund eines hohen Bestellaufkommens haben wir die Bestellung leider abgelehnt.\nFür weitere Informationen rufen Sie uns bitte an: +49 2251 1290950.\nVielen Dank.";
                 badgeText = "Storniert";
                 badgeClass = "cancelled";
@@ -495,6 +491,7 @@
                 document.querySelectorAll('.step-icon span').forEach(icon => icon.innerText = 'block');
                 document.body.classList.remove('map-active');
             } 
+            // ADDED 'delivered' to success state
             else if (status === 'completed' || status === 'archived' || status === 'paid' || status === 'delivered') {
                 progress = 100;
                 title = "Zugestellt";
@@ -502,7 +499,6 @@
                 badgeText = "Fertig";
                 document.getElementById('eta-badge').style.background = '#4CAF50';
                 document.getElementById('eta-badge').style.color = '#fff';
-                
                 document.querySelectorAll('.step').forEach(el => el.classList.add('completed'));
                 document.getElementById('step-completed').classList.add('active');
             }
@@ -512,7 +508,6 @@
                 sub = "Verfolgen Sie den Fahrer auf der Karte.";
                 badgeText = "LIVE";
                 badgeClass = "live";
-                
                 document.getElementById('step-new').classList.add('completed');
                 document.getElementById('step-preparing').classList.add('completed');
                 document.getElementById('step-delivery').classList.add('active');
@@ -539,11 +534,11 @@
                 document.getElementById('step-new').classList.add('active');
             }
 
-            // 3. Update DOM
             document.getElementById('progress-fill').style.width = `${progress}%`;
             document.getElementById('progress-fill').style.background = barColor;
             document.getElementById('status-title').innerText = title;
             document.getElementById('status-sub').innerText = sub;
+            
             const badge = document.getElementById('eta-badge');
             badge.innerText = badgeText;
             badge.className = `eta-badge ${badgeClass}`;
@@ -569,7 +564,6 @@
             if(step === 'completed') return '<span class="material-icons" style="font-size:16px">check_circle</span>';
         }
     </script>
-
     <div id="cookie-banner" style="position:fixed; bottom:0; left:0; width:100%; background:#111; color:white; padding:20px; border-top:2px solid #D4AF37; z-index:10000; display:none; box-shadow: 0 -5px 20px rgba(0,0,0,0.8);">
         <div style="max-width: 1200px; margin: 0 auto; display:flex; flex-direction:column; gap:15px; align-items:center; text-align:center;">
             <h3 style="margin:0; color:#D4AF37;">🍪 Datenschutzeinstellungen</h3>

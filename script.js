@@ -578,15 +578,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ===============================================
-// 3. LOAD DYNAMIC SETTINGS & BUSINESS RULES
+// 3. LOAD DYNAMIC SETTINGS & BUSINESS RULES (REAL-TIME)
 // ===============================================
 
-async function loadSettingsAndHours() {
-    try {
-        // A. Load General Settings (Marquee, Whatsapp)
-        const genDoc = await db.collection('settings').doc('general').get();
-        if (genDoc.exists) {
-            const data = genDoc.data();
+function loadSettingsAndHours() {
+    // A. Listen to General Settings (Marquee, Whatsapp) - Updates instantly
+    db.collection('settings').doc('general').onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
             if(data.whatsappNumber) globalConfig.whatsappNumber = data.whatsappNumber;
             
             const marqueeContainer = document.getElementById('marquee-container');
@@ -600,11 +599,12 @@ async function loadSettingsAndHours() {
                 }
             }
         }
+    });
 
-        // B. Load Hours & Holidays
-        const hoursDoc = await db.collection('settings').doc('hours').get();
-        if(hoursDoc.exists) {
-            businessHours = hoursDoc.data();
+    // B. Listen to Hours & Holidays (Real-Time Updates) - Updates instantly
+    db.collection('settings').doc('hours').onSnapshot((doc) => {
+        if(doc.exists) {
+            businessHours = doc.data();
         } else {
             // Fallback Defaults
             businessHours = {
@@ -618,13 +618,9 @@ async function loadSettingsAndHours() {
                 pause: null
             };
         }
-
-        // C. Apply Rules
+        // Immediately re-calculate open/close status and time slots
         checkBusinessStatus();
-
-    } catch (error) {
-        console.warn("Error loading settings:", error);
-    }
+    });
 }
 
 function checkBusinessStatus() {
@@ -851,3 +847,4 @@ function validateForm() {
     }
     return true;
 }
+

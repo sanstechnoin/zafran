@@ -495,7 +495,7 @@
                 document.querySelectorAll('.step-icon span').forEach(icon => icon.innerText = 'block');
                 document.body.classList.remove('map-active');
             } 
-            else if (status === 'completed' || status === 'archived' || status === 'paid') {
+            else if (status === 'completed' || status === 'archived' || status === 'paid' || status === 'delivered') {
                 progress = 100;
                 title = "Zugestellt";
                 sub = "Guten Appetit! 🍕";
@@ -548,7 +548,7 @@
             badge.innerText = badgeText;
             badge.className = `eta-badge ${badgeClass}`;
 
-            if(status !== 'completed' && status !== 'archived' && status !== 'paid') {
+            if(status !== 'completed' && status !== 'archived' && status !== 'paid' && status !== 'delivered') {
                  if(badgeClass === 'cancelled') {
                      badge.style.background = '#f44336';
                      badge.style.color = 'white';

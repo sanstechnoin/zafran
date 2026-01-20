@@ -53,7 +53,7 @@
         .front { background-color: var(--card-brown); }
 
         .hero-section {
-            height: 50%; /* Strictly 50% */
+            height: 50%;
             width: 100%;
             position: relative;
         }
@@ -71,12 +71,13 @@
             background: linear-gradient(to bottom, transparent 0%, var(--card-brown) 98%);
         }
 
+        /* FIXED: Changed layout to a vertical column */
         .front-content {
-            height: 50%; /* Strictly the other 50% */
-            padding: 10px 30px 20px; /* Reduced top padding */
+            height: 50%;
+            padding: 20px 30px; /* Balanced padding */
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            flex-direction: column; /* Stack items vertically */
+            justify-content: space-between; /* Push items to top and bottom edges */
             position: relative;
             z-index: 2;
             box-sizing: border-box;
@@ -84,16 +85,14 @@
 
         .info-left { 
             text-align: left; 
-            flex: 1; 
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centers text vertically in the 50% space */
-            height: 100%;
+            /* Removed fixed height and centering */
         }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
-            font-size: 44px; /* Increased Size */
+            font-size: 44px;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -104,16 +103,16 @@
 
         .tagline {
             color: var(--text-silver);
-            font-size: 13px; /* Increased Size */
+            font-size: 13px;
             font-weight: 500;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            margin-bottom: 12px;
-            margin-top: 5px;
+            margin-bottom: 15px; /* Added space below tagline */
+            margin-top: 8px;
             white-space: nowrap;
         }
 
-        .chef-info { display: flex; align-items: center; margin-bottom: 5px; }
+        .chef-info { display: flex; align-items: center; }
         
         .chef-hat-icon {
             width: 24px;
@@ -127,17 +126,16 @@
         .chef-name { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.1; }
         .chef-role { color: var(--gold); font-size: 11px; margin-top: 2px; }
 
+        /* FIXED: Removed absolute positioning, added alignment */
         .contact-pill {
-            /* Positioned absolute to ensure left text uses full height */
-            position: absolute;
-            bottom: 20px;
-            right: 30px;
+            align-self: flex-end; /* Align to the right side */
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(5px);
             padding: 10px 15px;
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
             text-align: right;
+            margin-top: auto; /* Pushes it to the bottom if needed */
         }
 
         .contact-row {
@@ -160,15 +158,13 @@
             flex-direction: column;
         }
 
-        /* Container for everything except footer strip */
         .back-main {
             display: flex;
             flex: 1;
-            padding: 25px 30px 10px; /* Top/Side padding */
+            padding: 25px 30px 10px;
             align-items: flex-start;
         }
 
-        /* LEFT: QR Code (Fixed Width) */
         .qr-section {
             width: 140px;
             flex-shrink: 0;
@@ -190,7 +186,6 @@
             margin-top: 8px; letter-spacing: 2px; text-transform: uppercase;
         }
 
-        /* RIGHT: Content Column */
         .right-column {
             flex: 1;
             display: flex;
@@ -199,7 +194,6 @@
             height: 100%;
         }
 
-        /* Top Right: Text */
         .catering-title {
             color: var(--gold);
             font-family: 'Playfair Display', serif;
@@ -216,7 +210,6 @@
             margin: 0 0 15px 0;
         }
 
-        /* Bottom Right: Events Box */
         .events-box {
             border: 1px solid var(--gold);
             background: rgba(212, 175, 55, 0.1);
@@ -242,7 +235,6 @@
             line-height: 1.6;
         }
 
-        /* FOOTER: Image Strip */
         .footer-container {
             margin-top: auto;
             width: 100%;
@@ -261,7 +253,7 @@
             height: 60px;
             object-fit: cover;
             border-right: 1px solid var(--card-brown);
-            filter: sepia(20%); /* Slight vintage blend */
+            filter: sepia(20%);
         }
         .strip-img:last-child { border-right: none; }
 
@@ -281,7 +273,7 @@
 
     <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
-    <div class="label">Front Side (Maximized Text)</div>
+    <div class="label">Front Side (Fixed Overlap)</div>
     <div class="card front">
         <div class="hero-section">
             <img src="hero-bg.png" class="hero-img" alt="Hero Background">
@@ -311,7 +303,7 @@
         </div>
     </div>
 
-    <div class="label">Back Side (Structured Layout)</div>
+    <div class="label">Back Side</div>
     <div class="card back">
         <div class="back-main">
             <div class="qr-section">

@@ -173,14 +173,14 @@ function renderDriverCard(id, order, now) {
 
     // Check the value sent from delivery.html
     if (order.whatsappAllowed === true) {
-        // PERMISSION GRANTED: Show Green Share Button
+        // PERMISSION GRANTED
         whatsappBtnHtml = `
             <button onclick="nativeShare('${order.customerPhone}', '${trackerUrl}')" class="btn-action" style="width:100%; background:#25D366; color:white;" ${isDisabled ? 'disabled style="opacity:0.5"' : ''}>
                 <span class="material-icons" style="margin-right:8px;">share</span> SHARE LINK
             </button>
         `;
     } else {
-        // PERMISSION DENIED: Show Grey "Blocked" Button
+        // PERMISSION DENIED
         whatsappBtnHtml = `
             <button disabled class="btn-action" style="width:100%; background:#333; color:#777; border:1px solid #444; cursor:not-allowed;">
                 <span class="material-icons" style="margin-right:8px;">block</span> NO WHATSAPP

@@ -147,8 +147,9 @@ function initOrderListener() {
 }
 
 
-// --- 5. RENDER CARD FUNCTION ---
+// --- 5. RENDER CARD FUNCTION (In driver-script.js) ---
 function renderDriverCard(id, order, now) {
+    // ... existing address/time logic ...
     const addr = order.deliveryAddress || {};
     const fullAddress = `${addr.street} ${addr.house}, ${addr.zip} Euskirchen`;
     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
@@ -157,37 +158,46 @@ function renderDriverCard(id, order, now) {
     const domain = window.location.origin; 
     const trackerUrl = `${domain}/tracker.html?id=${id}`;
 
-    // Overdue Logic
+    // Status/Overdue Logic (Keep existing)
     let isOverdue = false;
-    const timeSlot = order.timeSlot || "";
-    if (timeSlot.includes(':')) {
-        const [hours, minutes] = timeSlot.split(':').map(Number);
-        const deadline = new Date();
-        deadline.setHours(hours, minutes, 0, 0);
-        if (now > deadline) isOverdue = true;
-    }
+    // ... (your existing time calc code) ...
 
-    // Status Logic
     let statusClass = 'status-preparing';
     let isDisabled = true; 
-
-    // Enable buttons if Ready, Cooked, or Out
     if (order.status === 'ready' || order.status === 'cooked' || order.status === 'out_for_delivery') {
         statusClass = 'status-ready';
         isDisabled = false; 
     }
-    if (isOverdue) statusClass = 'status-overdue';
+  
+    let whatsappBtnHtml = '';
+
+    // Check the value sent from delivery.html
+    if (order.whatsappAllowed === true) {
+        // PERMISSION GRANTED: Show Green Share Button
+        whatsappBtnHtml = `
+            <button onclick="nativeShare('${order.customerPhone}', '${trackerUrl}')" class="btn-action" style="width:100%; background:#25D366; color:white;" ${isDisabled ? 'disabled style="opacity:0.5"' : ''}>
+                <span class="material-icons" style="margin-right:8px;">share</span> SHARE LINK
+            </button>
+        `;
+    } else {
+        // PERMISSION DENIED: Show Grey "Blocked" Button
+        whatsappBtnHtml = `
+            <button disabled class="btn-action" style="width:100%; background:#333; color:#777; border:1px solid #444; cursor:not-allowed;">
+                <span class="material-icons" style="margin-right:8px;">block</span> NO WHATSAPP
+            </button>
+        `;
+    }
 
     const html = `
     <div class="order-card ${statusClass}" id="card-${id}">
         
         <div class="order-header">
             <div>
-                <span class="order-id">#${id.slice(-4).toUpperCase()}</span>
+                <span class="order-id">#${order.orderPin || id.slice(-4).toUpperCase()}</span>
                 ${isOverdue ? `<span class="overdue-badge">⚠️ LATE</span>` : ''}
             </div>
             <span class="order-time" style="${isOverdue ? 'color:#D44437' : ''}">
-                🕒 ${timeSlot || 'ASAP'}
+                🕒 ${order.timeSlot || 'ASAP'}
             </span>
         </div>
 
@@ -198,9 +208,7 @@ function renderDriverCard(id, order, now) {
                 <span class="material-icons" style="margin-right:8px;">near_me</span> START GPS & TRACKING
             </button>
             
-            <button onclick="nativeShare('${order.customerPhone}', '${trackerUrl}')" class="btn-action" style="width:100%; background:#25D366; color:white;" ${isDisabled ? 'disabled style="opacity:0.5"' : ''}>
-                <span class="material-icons" style="margin-right:8px;">share</span> SHARE LINK (WHATSAPP)
-            </button>
+            ${whatsappBtnHtml}
         </div>
 
         <div class="customer-section">
@@ -313,7 +321,7 @@ window.nativeShare = function(phone, url) {
     } 
     else {
         const cleanPhone = phone.replace(/[^0-9]/g, '');
-        const text = `Hi! 🚗 Ihre Zafran Bestellung ist unterwegs. Live Tracking: ${url}`;
+        const text = `Hi! 🚴🏼 Ihre Zafran Bestellung ist unterwegs. Live Tracking: ${url}`;
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
     }
 }

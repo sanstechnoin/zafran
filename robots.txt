@@ -1,0 +1,27 @@
+User-agent: *
+# Allow indexing of the main site
+Allow: /
+
+# Block internal system pages (HTML)
+Disallow: /kitchen.html
+Disallow: /waiter.html
+Disallow: /driver.html
+Disallow: /admin-reservations.html
+Disallow: /billing.html
+Disallow: /records.html
+Disallow: /admin-coupons.html
+
+# Block internal system scripts (JS)
+Disallow: /kitchen-script.js
+Disallow: /waiter-script.js
+Disallow: /dine-in-script.js
+Disallow: /driver-script.js
+Disallow: /records-script.js
+Disallow: /billing-script.js
+Disallow: /reservation-script.js
+
+# Block sensitive config files
+Disallow: /config.json
+
+# Tell Google where the sitemap is
+Sitemap: https://zafraneuskirchen.de/sitemap.xml

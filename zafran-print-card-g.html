@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final Print Card (Brown Edition)</title>
+    <title>Zafran Delight - Print Card (Text + Buttons)</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
@@ -10,7 +10,10 @@
         :root {
             --gold: #D4AF37;
             --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --card-brown: #4A2C20; 
+            
+            /* Lighter Warm Brown */
+            --card-brown: #5D4037; 
+            
             --text-white: #ffffff;
             --text-silver: #e0e0e0;
         }
@@ -67,87 +70,80 @@
         .hero-overlay {
             position: absolute;
             bottom: 0; left: 0; width: 100%; 
-            height: 60%;
-            background: linear-gradient(to bottom, transparent 0%, var(--card-brown) 98%);
+            height: 80%; 
+            background: linear-gradient(to bottom, transparent 0%, var(--card-brown) 99%);
         }
 
-        /* FIXED: Changed layout to a vertical column */
         .front-content {
             height: 50%;
-            padding: 20px 30px; /* Balanced padding */
-            display: flex;
-            flex-direction: column; /* Stack items vertically */
-            justify-content: space-between; /* Push items to top and bottom edges */
-            position: relative;
-            z-index: 2;
-            box-sizing: border-box;
-        }
-
-        .info-left { 
-            text-align: left; 
+            padding: 10px 35px 25px 35px;
             display: flex;
             flex-direction: column;
-            /* Removed fixed height and centering */
+            justify-content: space-between; 
+            position: relative;
+            z-index: 2;
         }
+
+        .brand-group { margin-top: -10px; }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
-            font-size: 44px;
+            font-size: 42px;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
             margin: 0;
             line-height: 1;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));
         }
 
         .tagline {
             color: var(--text-silver);
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            margin-bottom: 15px; /* Added space below tagline */
-            margin-top: 8px;
-            white-space: nowrap;
+            margin-top: 5px;
         }
 
-        .chef-info { display: flex; align-items: center; }
+        .chef-group {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
         
         .chef-hat-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
+            width: 28px;
+            height: 28px;
+            margin-right: 12px;
             filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
         }
 
         .chef-details { display: flex; flex-direction: column; }
-        
-        .chef-name { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.1; }
-        .chef-role { color: var(--gold); font-size: 11px; margin-top: 2px; }
+        .chef-name { color: #fff; font-size: 17px; font-weight: 700; line-height: 1.1; }
+        .chef-role { color: var(--gold); font-size: 11px; margin-top: 2px; font-weight: 500; }
 
-        /* FIXED: Removed absolute positioning, added alignment */
-        .contact-pill {
-            align-self: flex-end; /* Align to the right side */
-            background: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(5px);
-            padding: 10px 15px;
-            border-radius: 12px;
+        .contact-container {
+            align-self: flex-end; 
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
-            text-align: right;
-            margin-top: auto; /* Pushes it to the bottom if needed */
+            margin-top: 5px;
         }
 
         .contact-row {
             font-size: 10px;
             color: var(--text-white);
-            margin: 3px 0;
+            margin: 2px 0;
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 6px;
+            gap: 8px;
+            font-weight: 500;
         }
-        .icon { color: var(--gold); }
+        .icon { color: var(--gold); font-size: 12px; }
 
         /* --- BACK SIDE --- */
         .back {
@@ -163,78 +159,92 @@
             flex: 1;
             padding: 25px 30px 10px;
             align-items: flex-start;
+            gap: 20px;
         }
 
+        /* LEFT: QR Code */
         .qr-section {
-            width: 140px;
+            width: 130px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-right: 1px solid rgba(212, 175, 55, 0.3);
             padding-right: 20px;
-            margin-right: 20px;
-            height: 100%;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            height: 85%;
+            margin-top: auto; margin-bottom: auto;
         }
 
-        .back-logo { width: 60px; margin-bottom: 12px; }
-        .qr-bg { background: #fff; padding: 6px; border-radius: 8px; display: inline-block; }
-        .qr-img { width: 100px; height: 100px; display: block; }
+        .back-logo { width: 55px; margin-bottom: 10px; }
+        .qr-bg { background: #fff; padding: 5px; border-radius: 8px; }
+        .qr-img { width: 90px; height: 90px; display: block; }
         .qr-label {
-            color: var(--gold); font-weight: 700; font-size: 11px;
+            color: var(--gold); font-weight: 700; font-size: 10px;
             margin-top: 8px; letter-spacing: 2px; text-transform: uppercase;
         }
 
+        /* RIGHT: Text & Buttons */
         .right-column {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             height: 100%;
+            justify-content: center;
+        }
+
+        /* Text Section */
+        .text-group {
+            margin-bottom: 15px;
         }
 
         .catering-title {
             color: var(--gold);
             font-family: 'Playfair Display', serif;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            margin: 0 0 8px 0;
+            margin-bottom: 6px;
             line-height: 1;
         }
 
         .catering-text {
             color: var(--text-silver);
-            font-size: 12px;
+            font-size: 10.5px;
             line-height: 1.5;
-            margin: 0 0 15px 0;
+            margin: 0;
         }
 
-        .events-box {
-            border: 1px solid var(--gold);
-            background: rgba(212, 175, 55, 0.1);
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .events-title {
+        /* Buttons Section */
+        .events-label {
             font-size: 9px;
-            color: var(--gold);
             text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 5px;
+            font-weight: 600;
             letter-spacing: 1px;
-            margin-bottom: 4px;
-            display: block;
-            font-weight: 700;
         }
 
-        .events-list {
+        .buttons-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .event-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--gold);
             color: #fff;
-            font-size: 10px;
-            font-weight: 500;
-            line-height: 1.6;
+            padding: 5px 10px;
+            border-radius: 4px; /* Slightly rounded square look */
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
+        /* Footer Strip */
         .footer-container {
             margin-top: auto;
             width: 100%;
@@ -253,7 +263,7 @@
             height: 60px;
             object-fit: cover;
             border-right: 1px solid var(--card-brown);
-            filter: sepia(20%);
+            filter: sepia(10%) contrast(110%);
         }
         .strip-img:last-child { border-right: none; }
 
@@ -273,7 +283,7 @@
 
     <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
-    <div class="label">Front Side (Fixed Overlap)</div>
+    <div class="label">Front Side (Lighter Brown)</div>
     <div class="card front">
         <div class="hero-section">
             <img src="hero-bg.png" class="hero-img" alt="Hero Background">
@@ -281,20 +291,20 @@
         </div>
 
         <div class="front-content">
-            <div class="info-left">
+            <div class="brand-group">
                 <h1 class="brand-name">Zafran Delight</h1>
                 <div class="tagline">Indian & Pakistani Catering Cooking Expert</div>
-                
-                <div class="chef-info">
-                    <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
-                    <div class="chef-details">
-                        <div class="chef-name">Syed Hussain Haider Zaidi</div>
-                        <div class="chef-role">Owner & Chef</div>
-                    </div>
+            </div>
+
+            <div class="chef-group">
+                <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
+                <div class="chef-details">
+                    <div class="chef-name">Syed Hussain Haider Zaidi</div>
+                    <div class="chef-role">Owner & Chef</div>
                 </div>
             </div>
 
-            <div class="contact-pill">
+            <div class="contact-container">
                 <div class="contact-row">Kessenicher Str. 9, Euskirchen <span class="icon">📍</span></div>
                 <div class="contact-row">+49 152 25475880 <span class="icon">📞</span></div>
                 <div class="contact-row">hussainzaidi1969@gmail.com <span class="icon">✉️</span></div>
@@ -303,7 +313,7 @@
         </div>
     </div>
 
-    <div class="label">Back Side</div>
+    <div class="label">Back Side (Text + Buttons)</div>
     <div class="card back">
         <div class="back-main">
             <div class="qr-section">
@@ -315,19 +325,25 @@
             </div>
 
             <div class="right-column">
-                <div class="text-wrapper">
+                
+                <div class="text-group">
                     <div class="catering-title">35+ Years of Tradition</div>
                     <p class="catering-text">
-                        For over three decades, Chef Syed Zaidi has mastered traditional tastes across Holland, Germany, and the UK. We preserve the authentic flavors of the Sub-continent, bringing premium service to your events.
+                        For over three decades, Chef Syed Zaidi has mastered traditional tastes across Holland, Germany, and the UK. We preserve the authentic flavors of the Sub-continent, brought directly to your events.
                     </p>
                 </div>
 
-                <div class="events-box">
-                    <span class="events-title">We Cater For All Occasions</span>
-                    <div class="events-list">
-                        Wedding • Engagement • Birthday • Diwali • Holi <br>
-                        Milaad • Iftaar • Majalis • Eid Parties
-                    </div>
+                <div class="events-label">We Cater For All Occasions:</div>
+                <div class="buttons-grid">
+                    <div class="event-btn">Wedding</div>
+                    <div class="event-btn">Engagement</div>
+                    <div class="event-btn">Birthday</div>
+                    <div class="event-btn">Diwali</div>
+                    <div class="event-btn">Holi</div>
+                    <div class="event-btn">Milaad</div>
+                    <div class="event-btn">Iftaar</div>
+                    <div class="event-btn">Majalis</div>
+                    <div class="event-btn">Eid Parties</div>
                 </div>
             </div>
         </div>

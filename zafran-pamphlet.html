@@ -2,20 +2,21 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Delivery Pamphlet</title>
+    <title>Zafran Delight - Premium Delivery Pamphlet</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #D4AF37;
             --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --bg-dark: #2c2c2c;
-            --coffee-gradient: linear-gradient(135deg, #4E342E 0%, #261815 100%);
-            --red-accent: #C62828; /* For the "10%" badge like your sample */
+            --rich-red: #800000; /* Deep, rich red for the header background */
+            --rich-red-gradient: linear-gradient(180deg, #A52A2A 0%, #800000 100%); /* Gradient for header */
+            --coffee-brown: #4E342E; /* Deep coffee brown for the main body */
+            --coffee-gradient: linear-gradient(180deg, #5D4037 0%, #3E2723 100%); /* Gradient for body */
             --white: #ffffff;
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: #2c2c2c;
             font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
@@ -26,203 +27,195 @@
         /* A5 Size Ratio (148mm x 210mm) scaled up for screen */
         .pamphlet {
             width: 500px;
-            height: 707px; /* A5 Ratio */
+            height: 707px;
             background: var(--coffee-gradient);
             position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             color: var(--white);
+            border-radius: 15px; /* Rounded corners for the whole pamphlet */
         }
 
-        /* --- 1. HEADER SECTION (Image & Tradition) --- */
+        /* --- 1. HEADER SECTION (Rich Red & Gold Ornate) --- */
         .header-section {
-            height: 45%;
-            position: relative;
-        }
-
-        .food-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Fade image at bottom */
-            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-        }
-
-        .tradition-badge {
-            position: absolute;
-            top: 30px;
-            left: 0;
-            width: 100%;
+            background: var(--rich-red-gradient);
+            padding: 25px 20px 40px; /* Extra padding at bottom for overlap */
             text-align: center;
-            z-index: 10;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.8);
-        }
-
-        .tradition-text {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-            font-size: 38px;
-            line-height: 0.9;
-            text-transform: uppercase;
-            color: var(--white);
-            letter-spacing: -1px;
-        }
-
-        .tradition-year {
-            font-family: 'Playfair Display', serif;
-            color: var(--gold);
-            font-size: 42px;
-            display: block;
-            margin-top: 5px;
-        }
-
-        /* --- 2. LOGO STRIP --- */
-        .logo-strip {
-            text-align: center;
-            margin-top: -30px; /* Pull up into image fade */
-            z-index: 5;
             position: relative;
+            border-bottom: 3px solid var(--gold);
+            border-radius: 15px 15px 0 0; /* Rounded top corners */
         }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
-            font-size: 48px;
+            font-size: 56px;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 900;
             margin: 0;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
         }
 
-        .sub-brand {
-            color: #ccc;
-            font-size: 10px;
+        .tagline {
+            font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 3px;
             margin-top: 5px;
-        }
-
-        /* --- 3. OFFER SECTION (Red Box Style) --- */
-        .offer-container {
-            margin: 20px 30px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--gold);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            /* Glow effect */
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
-        }
-
-        .offer-left {
-            flex: 1;
-        }
-
-        .offer-title {
-            font-size: 24px;
-            font-weight: 800;
-            line-height: 1;
-            text-transform: uppercase;
-        }
-
-        .offer-code-box {
-            background: var(--gold);
-            color: #000;
-            display: inline-block;
-            padding: 5px 10px;
-            font-weight: 800;
-            font-size: 14px;
-            margin-top: 8px;
-            border-radius: 4px;
-        }
-
-        .offer-right {
-            text-align: right;
-        }
-
-        .big-percent {
-            font-size: 80px;
-            font-weight: 900;
             color: var(--gold);
-            line-height: 0.8;
-            font-family: 'Montserrat', sans-serif;
-            text-shadow: 2px 2px 0px #000;
         }
 
-        .percent-sub {
-            font-size: 12px;
-            color: #ddd;
+        .ornate-divider {
+            font-size: 32px; /* Larger ornate divider */
+            color: var(--gold);
+            margin: 10px auto 0;
+            opacity: 0.8;
+        }
+
+        /* --- 2. FOOD IMAGE & ORDER SECTION --- */
+        .food-display {
+            position: relative;
+            margin-top: -30px; /* Overlap the header */
+            z-index: 10;
+            padding: 0 15px;
+        }
+
+        .food-img-container {
+            border-radius: 50% 50% 15px 15px; /* Unique rounded shape */
+            overflow: hidden;
+            border: 4px solid var(--gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #000; /* Fallback color */
+        }
+
+        .food-img {
+            width: 100%;
             display: block;
-            margin-top: 5px;
+            /* Ensure image fills container */
         }
 
-        /* --- 4. SERVICES & INFO --- */
-        .services-grid {
+        .order-cta {
+            text-align: center;
+            margin: 20px 0 15px;
+        }
+
+        .cta-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 32px;
+            text-transform: uppercase;
+            color: var(--white);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 5px;
+        }
+
+        .cta-subtext {
+            font-size: 16px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .qr-container {
             display: flex;
-            justify-content: space-between;
-            padding: 0 35px;
+            justify-content: center;
             margin-bottom: 20px;
         }
 
-        .service-item {
-            text-align: center;
-            width: 30%;
-        }
-
-        .s-icon { font-size: 24px; margin-bottom: 5px; display: block; }
-        .s-title { color: var(--gold); font-weight: 700; font-size: 12px; text-transform: uppercase; }
-        .s-desc { font-size: 10px; color: #ccc; line-height: 1.2; margin-top: 3px; }
-
-        /* --- 5. FOOTER (Black Bar) --- */
-        .footer {
-            margin-top: auto;
-            background: #111;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--gold);
-        }
-
-        .footer-info {
-            text-align: left;
-        }
-
-        .f-row {
-            font-size: 12px;
-            color: #fff;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .f-gold { color: var(--gold); }
-
         .qr-box {
-            background: white;
-            padding: 5px;
-            border-radius: 5px;
+            background: var(--white);
+            padding: 10px;
+            border-radius: 15px;
+            border: 3px solid var(--gold);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-        .qr-img { width: 70px; height: 70px; display: block; }
+        
+        .qr-img {
+            width: 110px;
+            height: 110px;
+            display: block;
+        }
+
+        /* --- 3. OFFER & FOOTER SECTION --- */
+        .footer-section {
+            margin-top: auto;
+            padding: 20px;
+            background: linear-gradient(180deg, rgba(78,52,46,0.8) 0%, rgba(38,24,21,1) 100%);
+            text-align: center;
+            border-top: 2px solid var(--gold);
+            border-radius: 0 0 15px 15px; /* Rounded bottom corners */
+        }
+
+        .offer-badge {
+            background: var(--gold-gradient);
+            color: var(--coffee-brown);
+            padding: 15px 25px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            border: 2px solid var(--white);
+        }
+
+        .offer-code {
+            font-weight: 900;
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .offer-desc {
+            font-weight: 700;
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+        
+        .offer-note {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .contact-info {
+            margin-top: 15px;
+        }
+        
+        .chef-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .contact-details {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .website-link {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 10px;
+            display: inline-block;
+        }
 
         /* --- PRINT BUTTON --- */
         .print-btn {
             position: fixed; top: 20px; right: 20px;
             padding: 12px 25px; background: var(--gold); color: #000;
             border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         @media print {
             body { background: none; padding: 0; }
             .print-btn { display: none; }
-            .pamphlet { box-shadow: none; width: 100%; height: 100%; }
+            .pamphlet { box-shadow: none; width: 100%; height: 100%; border-radius: 0; }
         }
     </style>
 </head>
@@ -233,58 +226,42 @@
     <div class="pamphlet">
         
         <div class="header-section">
-            <img src="image_121387.png" class="food-img" alt="Indian Food">
-            
-            <div class="tradition-badge">
-                <div class="tradition-text">GENUSS HAT<br>TRADITION</div>
-                <div class="tradition-year">Seit über 35 Jahren</div>
-            </div>
+            <h1 class="brand-name">Zafran Delight</h1>
+            <div class="tagline">Indian & Pakistani Catering Expert</div>
+            <div class="ornate-divider">⚜ ⚜ ⚜</div>
         </div>
 
-        <div class="logo-strip">
-            <div class="brand-name">Zafran Delight</div>
-            <div class="sub-brand">Indian & Pakistani Catering Expert</div>
-        </div>
-
-        <div class="offer-container">
-            <div class="offer-left">
-                <div class="offer-title">Online<br>Bestellen<br>& Sparen</div>
-                <div class="offer-code-box">CODE: SPAR10</div>
-                <div style="font-size:10px; margin-top:5px; color:#aaa;">*Ab 40€ Bestellwert</div>
-            </div>
-            <div class="offer-right">
-                <div class="big-percent">10%</div>
-                <span class="percent-sub">RABATT AUF ALLES</span>
-            </div>
-        </div>
-
-        <div class="services-grid">
-            <div class="service-item">
-                <span class="s-icon">🚚</span>
-                <div class="s-title">Lieferung</div>
-                <div class="s-desc">Schnell & Heiß zu<br>Ihnen nach Hause</div>
-            </div>
-            <div class="service-item">
-                <span class="s-icon">🍲</span>
-                <div class="s-title">Catering</div>
-                <div class="s-desc">Für Events ab<br>50 bis 500 Personen</div>
-            </div>
-            <div class="service-item">
-                <span class="s-icon">🛍️</span>
-                <div class="s-title">Abholung</div>
-                <div class="s-desc">Bestellen und<br>selbst abholen</div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <div class="footer-info">
-                <div class="f-row"><span class="f-gold">📍</span> Kessenicher Str. 9, 53879 Euskirchen</div>
-                <div class="f-row"><span class="f-gold">📞</span> +49 152 25475880</div>
-                <div class="f-row"><span class="f-gold">🌐</span> zafraneuskirchen.de</div>
+        <div class="food-display">
+            <div class="food-img-container">
+                <img src="image_121387.png" class="food-img" alt="Delicious Indian Food Feast">
             </div>
             
-            <div class="qr-box">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
+            <div class="order-cta">
+                <div class="cta-text">HIER BESTELLEN</div>
+                <div class="cta-subtext">SCAN TO ORDER</div>
+            </div>
+
+            <div class="qr-container">
+                <div class="qr-box">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img" alt="QR Code">
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <div class="offer-badge">
+                <div class="offer-code">SPAR10</div>
+                <div class="offer-desc">10% RABATT</div>
+                <div class="offer-note">*Ab 40€ Bestellwert. Code online eingeben.</div>
+            </div>
+
+            <div class="contact-info">
+                <div class="chef-name">Syed Hussain Haider Zaidi</div>
+                <div class="contact-details">
+                    Kessenicher Str. 9, 53879 Euskirchen<br>
+                    +49 152 25475880 | hussainzaidi1969@gmail.com
+                </div>
+                <a href="https://zafraneuskirchen.de" class="website-link">zafraneuskirchen.de</a>
             </div>
         </div>
 

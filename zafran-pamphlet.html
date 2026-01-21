@@ -2,19 +2,20 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Premium A5 Pamphlet</title>
+    <title>Zafran Delight - Glossy Premium A5</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Richer, shinier gold */
+            /* High Contrast Gold for Glossy Paper */
             --gold: #D4AF37;
             --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
-            --gold-text: linear-gradient(to right, #bf953f, #fcf6ba, #b38728);
+            --gold-text: #FFD700; 
             
-            /* Deep, luxurious backgrounds */
-            --rich-red: linear-gradient(to bottom, #5a0000, #3d0000);
-            --deep-coffee-bg: linear-gradient(180deg, #2d1b15 0%, #1a0f0b 100%);
-            --overlay-pattern: url('https://www.transparenttextures.com/patterns/arabesque.png'); /* Subtle pattern hosting */
+            /* Deep Backgrounds to make White/Gold pop */
+            --rich-red: linear-gradient(to bottom, #4a0404, #2b0000);
+            --deep-coffee: #1a0f0b;
+            --coffee-gradient: linear-gradient(180deg, #2d1b15 0%, #000000 100%);
+            
             --white: #ffffff;
         }
 
@@ -33,73 +34,49 @@
         .pamphlet-a5 {
             width: 148mm;
             height: 210mm;
-            background: var(--deep-coffee-bg);
+            background: var(--coffee-gradient);
             position: relative;
             box-shadow: 0 30px 60px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             color: var(--white);
-            border: 3px solid var(--gold);
-            outline: 2px solid #9e7e33; /* Double border effect */
+            border: 4px solid var(--gold);
             box-sizing: border-box;
         }
 
-        /* Subtle Pattern Overlay for Premium feel */
-        .pamphlet-a5::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: var(--overlay-pattern);
-            opacity: 0.05;
-            pointer-events: none;
-        }
-
-        /* --- 1. NEW SMALLER HEADER WITH LOGO --- */
+        /* --- 1. HEADER (Larger Logo, Rich Red) --- */
         .header-section {
             background: var(--rich-red);
-            padding: 10px;
+            padding: 15px 10px 5px;
             text-align: center;
-            border-bottom: 2px solid var(--gold);
-            height: 12%; /* Reduced height */
+            border-bottom: 3px solid var(--gold);
+            height: 14%; 
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: relative;
             z-index: 2;
         }
 
         .top-logo {
-            width: 40px;
+            width: 85px; /* Bigger Logo */
             height: auto;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-            margin-bottom: 2px;
-        }
-
-        .brand-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            background: var(--gold-foil);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            margin: 0;
-            line-height: 1;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+            margin-bottom: 5px;
         }
 
         .tagline {
             font-size: 8px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: #e0c080;
-            margin-top: 2px;
+            color: var(--gold-text);
         }
 
-        /* --- 2. HERO IMAGE (Premium Frame) --- */
+        /* --- 2. HERO IMAGE (Golden Frame) --- */
         .hero-container {
-            height: 22%;
+            height: 20%;
             position: relative;
             padding: 10px 15px 0;
             z-index: 1;
@@ -108,11 +85,11 @@
         .hero-frame {
             width: 100%;
             height: 100%;
-            /* Fancy double gold border */
-            border: 3px solid;
-            border-image: var(--gold-foil) 1;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.7);
-            position: relative;
+            border: 2px solid var(--gold);
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
         .hero-img {
@@ -125,142 +102,123 @@
         /* --- 3. CONTENT BODY --- */
         .content-body {
             flex-grow: 1;
-            padding: 12px 15px;
+            padding: 10px 15px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             position: relative;
             z-index: 2;
         }
 
-        /* Common Box Style */
+        /* Premium Box Styles */
         .premium-box {
-            background: rgba(40, 20, 15, 0.8); /* Dark transparent brown */
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--gold);
-            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.1);
-            border-radius: 8px;
-            padding: 10px;
-            backdrop-filter: blur(5px);
+            border-radius: 6px;
+            padding: 8px;
         }
 
-        .box-title {
+        .section-title {
             color: var(--gold);
             font-family: 'Playfair Display', serif;
             font-size: 16px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             padding-bottom: 2px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* --- LUNCH & BUFFET ROW --- */
-        .offer-row { display: flex; gap: 10px; }
+        /* LUNCH & BUFFET ROW */
+        .offer-row { display: flex; gap: 8px; }
         .offer-flex { flex: 1; }
 
-        /* Specific Lunch Styling */
-        .lunch-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            margin-bottom: 4px;
-            color: #ddd;
-            border-bottom: 1px dotted rgba(255,255,255,0.1);
-            padding-bottom: 2px;
+        /* Lunch Items */
+        .lunch-row {
+            display: flex; justify-content: space-between;
+            font-size: 9px; margin-bottom: 3px; color: #eee;
+            border-bottom: 1px dotted rgba(255,255,255,0.2);
         }
-        .lunch-price {
-            font-weight: 700;
-            font-size: 12px;
-            background: var(--gold-text);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .price-highlight { font-weight: 800; color: var(--gold-text); }
 
-        /* Buffet Styling */
+        /* Buffet Items */
         .buffet-grid {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            font-size: 9px;
-            row-gap: 3px;
-            color: #ccc;
+            display: grid; grid-template-columns: 1fr auto;
+            font-size: 8.5px; row-gap: 2px; color: #eee;
         }
-        .b-price { color: var(--gold); font-weight: 700; text-align: right; }
 
-        /* --- DELIVERY COUPONS --- */
-        .delivery-section {
+        /* COUPON GRID (Online & Physical) */
+        .coupons-wrapper {
+            background: rgba(80, 0, 0, 0.3); /* Subtle Red Tint */
+            border: 1px solid var(--gold);
+            border-radius: 6px;
+            padding: 6px;
+        }
+        
+        .coupon-header {
+            text-align: center; font-size: 10px; font-weight: 800; color: #fff;
+            text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px;
+        }
+
+        .coupon-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+
+        .coupon {
+            background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+            color: #000;
+            padding: 4px;
+            border-radius: 4px;
             text-align: center;
-            background: linear-gradient(to bottom, rgba(100,0,0,0.2), rgba(50,0,0,0.4));
             border: 1px solid var(--gold);
         }
 
-        .del-title {
-            font-size: 11px; font-weight: 800; text-transform: uppercase;
-            color: #fff; margin-bottom: 6px; letter-spacing: 1px;
-        }
+        /* Coupon Types */
+        .coupon.online { background: var(--gold-foil); border: 1px solid #fff; }
+        .coupon.physical { background: #fff; border: 1px dashed #000; }
 
-        .coupon-container { display: flex; gap: 8px; justify-content: center; }
+        .c-title { font-weight: 900; font-size: 11px; display: block; line-height: 1; }
+        .c-desc { font-size: 7px; display: block; font-weight: 700; margin-top: 1px; }
+        .c-small { font-size: 5px; display: block; margin-top: 1px; }
 
-        .coupon {
-            /* Foil look background */
-            background: var(--gold-foil);
-            color: #2d1b15;
-            padding: 6px 4px;
-            border-radius: 4px;
-            flex: 1;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-            border: 1px solid #fff;
-            position: relative;
-            overflow: hidden;
-        }
-        /* Shiny sheen effect on coupons */
-        .coupon::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(to bottom right, transparent, rgba(255,255,255,0.4), transparent);
-            transform: rotate(45deg); animation: shine 3s infinite;
-        }
-
-        .c-code { font-weight: 900; font-size: 13px; display: block; border: 2px dashed #2d1b15; margin-bottom: 2px; padding: 2px; }
-        .c-desc { font-weight: 800; font-size: 9px; display: block; line-height: 1; }
-        .c-cond { font-size: 7px; display: block; margin-top: 2px; font-weight: 700; }
-        .c-date { font-size: 6px; display: block; opacity: 0.9; margin-top: 1px; font-weight: 600; }
-
-        /* --- 4. FOOTER --- */
+        /* --- 4. FOOTER (Clean, No Icons) --- */
         .footer {
-            background: linear-gradient(to top, #000 0%, #26140f 100%);
-            padding: 10px 15px;
+            background: #000;
+            padding: 12px 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-top: 2px solid var(--gold);
-            height: 18%;
-            position: relative;
-            z-index: 2;
+            border-top: 3px solid var(--gold);
+            height: 16%;
         }
 
-        .qr-wrapper { display: flex; align-items: center; gap: 12px; }
-
+        .qr-section {
+            display: flex; align-items: center; gap: 10px;
+        }
         .qr-box {
-            background: white; padding: 4px; border-radius: 6px;
-            height: 65px; width: 65px;
-            border: 2px solid var(--gold);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            background: white; padding: 3px; border-radius: 4px;
+            width: 60px; height: 60px;
         }
         .qr-img { width: 100%; height: 100%; }
 
-        .cta-group { text-align: left; }
-        .cta-main {
-            font-family: 'Playfair Display', serif;
-            font-size: 16px; font-weight: 800;
-            background: var(--gold-foil); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-transform: uppercase; line-height: 1; margin-bottom: 2px;
+        .cta-text {
+            color: var(--gold); font-family: 'Playfair Display', serif;
+            font-size: 16px; font-weight: 800; line-height: 1.1; text-transform: uppercase;
         }
-        .cta-sub { font-size: 9px; color: #ccc; }
 
-        .address-group { text-align: right; font-size: 9px; color: #bbb; line-height: 1.5; }
-        .add-icon { color: var(--gold); margin-left: 3px; }
+        .address-block {
+            text-align: right;
+            color: #fff;
+            font-size: 9px;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+        .address-highlight { color: var(--gold); font-weight: 700; font-size: 10px;}
 
-        /* PRINT BUTTON */
+        /* Print Button */
         .print-btn {
             position: fixed; top: 20px; right: 20px;
             padding: 10px 20px; background: var(--gold); font-weight: bold;
@@ -270,73 +228,83 @@
         @media print {
             body { background: none; padding: 0; display: block; }
             .print-btn { display: none; }
-            .pamphlet-a5 { width: 100%; height: 100%; box-shadow: none; margin: 0; border: none; page-break-after: always; }
+            .pamphlet-a5 { width: 100%; height: 100%; box-shadow: none; margin: 0; border: none; }
             @page { size: A5; margin: 0; }
         }
     </style>
 </head>
 <body>
 
-    <button class="print-btn" onclick="window.print()">Print Premium A5</button>
+    <button class="print-btn" onclick="window.print()">Print A5 Pamphlet</button>
 
     <div class="pamphlet-a5">
         
         <div class="header-section">
-            <img src="logo.png" class="top-logo" alt="Zafran Logo">
-            <h1 class="brand-name">Zafran Delight</h1>
-            <div class="tagline">Authentic Indian & Pakistani Cuisine</div>
+            <img src="logo.png" class="top-logo" alt="Zafran Delight">
+            <div class="tagline">Authentische Indische & Pakistanische Küche</div>
         </div>
 
         <div class="hero-container">
             <div class="hero-frame">
-                <img src="image_121387.png" class="hero-img" alt="Indian Feast">
+                <img src="image_121387.png" class="hero-img" alt="Delicious Food">
             </div>
         </div>
 
         <div class="content-body">
             
             <div class="offer-row">
+                
                 <div class="premium-box offer-flex">
-                    <div class="box-title">Mittagstisch</div>
-                    <div style="font-size:8px; color:#aaa; margin-bottom:5px;">Di – Fr | 12:00 – 15:00</div>
+                    <div class="section-title">Mittagstisch</div>
+                    <div style="font-size:7px; color:#ccc; margin-bottom:4px;">Di – Fr | 12:00 – 15:00 Uhr</div>
                     
-                    <div class="lunch-item">
-                        <span>Veg of the Day</span>
-                        <span class="lunch-price">8,00 €</span>
+                    <div class="lunch-row">
+                        <span>Tagesgericht Vegetarisch</span>
+                        <span class="price-highlight">8,00 €</span>
                     </div>
-                    <div class="lunch-item" style="border-bottom:none;">
-                        <span>Chicken of the Day</span>
-                        <span class="lunch-price">10,00 €</span>
+                    <div class="lunch-row" style="border:none;">
+                        <span>Tagesgericht Hähnchen</span>
+                        <span class="price-highlight">10,00 €</span>
                     </div>
                 </div>
 
-                <div class="premium-box offer-flex" style="flex: 1.4;">
-                    <div class="box-title">Sonntagsbuffet</div>
-                    <div style="font-size:8px; color:#aaa; margin-bottom:5px;">Jeden Sonntag | 12:00 – 16:00</div>
+                <div class="premium-box offer-flex" style="flex: 1.3;">
+                    <div class="section-title">Sonntagsbuffet</div>
+                    <div style="font-size:7px; color:#ccc; margin-bottom:4px;">Jeden Sonntag | 12:00 – 16:00 Uhr</div>
                     <div class="buffet-grid">
-                        <span>Erwachsene</span> <span class="b-price">20,00€</span>
-                        <span>Kinder (6-14 J.)</span> <span class="b-price">15,00€</span>
-                        <span>Kinder (< 6 J.)</span> <span class="b-price" style="color:#fff">Gratis</span>
+                        <span>Erwachsene</span> <span class="price-highlight" style="text-align:right;">20,00 €</span>
+                        <span>Kinder (6-14 J.)</span> <span class="price-highlight" style="text-align:right;">15,00 €</span>
+                        <span>Kinder (< 6 J.)</span> <span style="text-align:right; color:#fff;">Gratis</span>
                     </div>
                 </div>
             </div>
 
-            <div class="premium-box delivery-section">
-                <div class="del-title">Abholung & Lieferung • Online Offer</div>
-                <div class="coupon-container">
+            <div class="coupons-wrapper">
+                <div class="coupon-header">Exklusive Angebote & Gutscheine</div>
+                <div class="coupon-grid">
                     
-                    <div class="coupon">
-                        <span class="c-code">SPAR10</span>
-                        <span class="c-desc">10% RABATT</span>
-                        <span class="c-cond">Ab 40€ Bestellwert</span>
-                        <span class="c-date">Bis 30.04.2026</span>
+                    <div class="coupon online">
+                        <span class="c-title">SPAR10</span>
+                        <span class="c-desc">10% ONLINE RABATT</span>
+                        <span class="c-small">Ab 40€ | Bis 30.04.26</span>
                     </div>
 
-                    <div class="coupon">
-                        <span class="c-code">WELCOME26</span>
-                        <span class="c-desc">SPECIAL OFFER</span>
-                        <span class="c-cond">Ab 55€ Bestellwert</span>
-                        <span class="c-date">Bis 28.02.2026</span>
+                    <div class="coupon online">
+                        <span class="c-title">WELCOME26</span>
+                        <span class="c-desc">ONLINE SPECIAL</span>
+                        <span class="c-small">Ab 55€ | Bis 28.02.26</span>
+                    </div>
+
+                    <div class="coupon physical">
+                        <span class="c-title" style="color:#C62828;">5% DINE-IN</span>
+                        <span class="c-desc">Vorzeigen im Restaurant</span>
+                        <span class="c-small">*Nicht für Mittagstisch</span>
+                    </div>
+
+                    <div class="coupon physical">
+                        <span class="c-title" style="color:#C62828;">10% STUDI</span>
+                        <span class="c-desc">Gegen Studentenausweis</span>
+                        <span class="c-small">*Nicht für Mittagstisch</span>
                     </div>
 
                 </div>
@@ -345,21 +313,21 @@
         </div>
 
         <div class="footer">
-            <div class="qr-wrapper">
+            <div class="qr-section">
                 <div class="qr-box">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
                 </div>
-                <div class="cta-group">
-                    <div class="cta-main">Order Online<br>& See Menu</div>
-                    <div class="cta-sub">Scan to visit Website</div>
+                <div class="cta-text">
+                    Hier Scannen<br>
+                    <span style="font-size:10px; color:#fff; font-family:'Montserrat'; font-weight:500;">Speisekarte & Bestellung</span>
                 </div>
             </div>
 
-            <div class="address-group">
-                Kessenicher Str. 9 <span class="add-icon">📍</span><br>
+            <div class="address-block">
+                <span class="address-highlight">Kessenicher Str. 9</span><br>
                 53879 Euskirchen<br>
-                02251 1290950 <span class="add-icon">📞</span><br>
-                zafraneuskirchen.de <span class="add-icon">🌐</span>
+                Tel: 02251 1290950<br>
+                www.zafraneuskirchen.de
             </div>
         </div>
 

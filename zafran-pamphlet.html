@@ -2,20 +2,24 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - A5 Premium Flyer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <title>Zafran Delight - Premium A5 Pamphlet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Richer, shinier gold */
             --gold: #D4AF37;
-            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --rich-red: #750000;
-            --deep-coffee: #2d1b15;
-            --coffee-gradient: linear-gradient(180deg, #3E2723 0%, #1a0f0b 100%);
+            --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
+            --gold-text: linear-gradient(to right, #bf953f, #fcf6ba, #b38728);
+            
+            /* Deep, luxurious backgrounds */
+            --rich-red: linear-gradient(to bottom, #5a0000, #3d0000);
+            --deep-coffee-bg: linear-gradient(180deg, #2d1b15 0%, #1a0f0b 100%);
+            --overlay-pattern: url('https://www.transparenttextures.com/patterns/arabesque.png'); /* Subtle pattern hosting */
             --white: #ffffff;
         }
 
         body {
-            background-color: #222;
+            background-color: #111;
             font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
@@ -29,64 +33,86 @@
         .pamphlet-a5 {
             width: 148mm;
             height: 210mm;
-            background: var(--coffee-gradient);
+            background: var(--deep-coffee-bg);
             position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             color: var(--white);
-            border: 4px solid var(--gold);
-            box-sizing: border-box; /* Ensures border is included in size */
+            border: 3px solid var(--gold);
+            outline: 2px solid #9e7e33; /* Double border effect */
+            box-sizing: border-box;
         }
 
-        /* --- 1. HEADER --- */
+        /* Subtle Pattern Overlay for Premium feel */
+        .pamphlet-a5::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--overlay-pattern);
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        /* --- 1. NEW SMALLER HEADER WITH LOGO --- */
         .header-section {
             background: var(--rich-red);
-            padding: 15px 10px 10px;
+            padding: 10px;
             text-align: center;
             border-bottom: 2px solid var(--gold);
-            height: 15%;
+            height: 12%; /* Reduced height */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .top-logo {
+            width: 40px;
+            height: auto;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+            margin-bottom: 2px;
         }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
-            font-size: 38px; /* Adjusted for A5 */
-            background: var(--gold-gradient);
+            font-size: 28px;
+            background: var(--gold-foil);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 900;
             margin: 0;
             line-height: 1;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
         }
 
         .tagline {
-            font-size: 9px;
+            font-size: 8px;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: var(--gold);
-            margin-top: 4px;
+            color: #e0c080;
+            margin-top: 2px;
         }
 
-        /* --- 2. IMAGE (Optimized Size) --- */
+        /* --- 2. HERO IMAGE (Premium Frame) --- */
         .hero-container {
-            height: 20%; /* Reduced height to fit text */
+            height: 22%;
             position: relative;
             padding: 10px 15px 0;
+            z-index: 1;
         }
 
         .hero-frame {
             width: 100%;
             height: 100%;
-            border: 3px solid var(--gold);
-            border-radius: 15px 15px 0 0; /* Rounded top only */
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            /* Fancy double gold border */
+            border: 3px solid;
+            border-image: var(--gold-foil) 1;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+            position: relative;
         }
 
         .hero-img {
@@ -96,27 +122,25 @@
             object-position: center;
         }
 
-        /* --- 3. OFFERS CONTAINER --- */
+        /* --- 3. CONTENT BODY --- */
         .content-body {
             flex-grow: 1;
-            padding: 10px 15px;
+            padding: 12px 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
         }
 
-        /* --- SECTION: BUFFET & LUNCH --- */
-        .offer-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        .offer-box {
-            background: rgba(255, 255, 255, 0.05);
+        /* Common Box Style */
+        .premium-box {
+            background: rgba(40, 20, 15, 0.8); /* Dark transparent brown */
             border: 1px solid var(--gold);
+            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.1);
             border-radius: 8px;
-            padding: 8px;
-            flex: 1;
+            padding: 10px;
+            backdrop-filter: blur(5px);
         }
 
         .box-title {
@@ -125,127 +149,140 @@
             font-size: 16px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             padding-bottom: 2px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
-        .lunch-text { font-size: 9px; line-height: 1.3; color: #ddd; }
-        .price-big { color: var(--gold); font-weight: 700; font-size: 14px; }
+        /* --- LUNCH & BUFFET ROW --- */
+        .offer-row { display: flex; gap: 10px; }
+        .offer-flex { flex: 1; }
 
-        /* Buffet Specifics */
+        /* Specific Lunch Styling */
+        .lunch-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin-bottom: 4px;
+            color: #ddd;
+            border-bottom: 1px dotted rgba(255,255,255,0.1);
+            padding-bottom: 2px;
+        }
+        .lunch-price {
+            font-weight: 700;
+            font-size: 12px;
+            background: var(--gold-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Buffet Styling */
         .buffet-grid {
             display: grid;
             grid-template-columns: 1fr auto;
             font-size: 9px;
-            row-gap: 2px;
+            row-gap: 3px;
             color: #ccc;
         }
         .b-price { color: var(--gold); font-weight: 700; text-align: right; }
 
-        /* --- SECTION: DELIVERY COUPONS --- */
+        /* --- DELIVERY COUPONS --- */
         .delivery-section {
-            background: rgba(117, 0, 0, 0.3); /* Red tint */
-            border: 1px solid var(--gold);
-            border-radius: 8px;
-            padding: 8px;
             text-align: center;
+            background: linear-gradient(to bottom, rgba(100,0,0,0.2), rgba(50,0,0,0.4));
+            border: 1px solid var(--gold);
         }
 
         .del-title {
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: var(--white);
-            margin-bottom: 5px;
-            letter-spacing: 1px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase;
+            color: #fff; margin-bottom: 6px; letter-spacing: 1px;
         }
 
-        .coupon-container {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-        }
+        .coupon-container { display: flex; gap: 8px; justify-content: center; }
 
         .coupon {
-            background: var(--gold-gradient);
+            /* Foil look background */
+            background: var(--gold-foil);
             color: #2d1b15;
-            padding: 6px;
-            border-radius: 6px;
+            padding: 6px 4px;
+            border-radius: 4px;
             flex: 1;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            border: 1px solid #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Shiny sheen effect on coupons */
+        .coupon::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(to bottom right, transparent, rgba(255,255,255,0.4), transparent);
+            transform: rotate(45deg); animation: shine 3s infinite;
         }
 
-        .c-code { font-weight: 900; font-size: 14px; display: block; border: 1px dashed #2d1b15; margin-bottom: 2px; }
-        .c-desc { font-weight: 700; font-size: 10px; display: block; line-height: 1; }
-        .c-cond { font-size: 7px; display: block; margin-top: 2px; font-weight: 600; }
-        .c-date { font-size: 6px; display: block; opacity: 0.8; margin-top: 1px; }
+        .c-code { font-weight: 900; font-size: 13px; display: block; border: 2px dashed #2d1b15; margin-bottom: 2px; padding: 2px; }
+        .c-desc { font-weight: 800; font-size: 9px; display: block; line-height: 1; }
+        .c-cond { font-size: 7px; display: block; margin-top: 2px; font-weight: 700; }
+        .c-date { font-size: 6px; display: block; opacity: 0.9; margin-top: 1px; font-weight: 600; }
 
         /* --- 4. FOOTER --- */
         .footer {
-            background: linear-gradient(to top, #000 0%, #1a0f0b 100%);
+            background: linear-gradient(to top, #000 0%, #26140f 100%);
             padding: 10px 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-top: 2px solid var(--gold);
-            height: 18%; /* Fixed height for balance */
+            height: 18%;
+            position: relative;
+            z-index: 2;
         }
 
-        .qr-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .qr-wrapper { display: flex; align-items: center; gap: 12px; }
 
         .qr-box {
-            background: white;
-            padding: 4px;
-            border-radius: 6px;
-            height: 65px;
-            width: 65px;
+            background: white; padding: 4px; border-radius: 6px;
+            height: 65px; width: 65px;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
         .qr-img { width: 100%; height: 100%; }
 
         .cta-group { text-align: left; }
-        .cta-main { font-size: 14px; font-weight: 800; color: var(--gold); text-transform: uppercase; line-height: 1.1; }
-        .cta-sub { font-size: 9px; color: #fff; }
-
-        .address-group {
-            text-align: right;
-            font-size: 9px;
-            color: #ccc;
-            line-height: 1.4;
+        .cta-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px; font-weight: 800;
+            background: var(--gold-foil); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-transform: uppercase; line-height: 1; margin-bottom: 2px;
         }
-        .add-icon { color: var(--gold); }
+        .cta-sub { font-size: 9px; color: #ccc; }
+
+        .address-group { text-align: right; font-size: 9px; color: #bbb; line-height: 1.5; }
+        .add-icon { color: var(--gold); margin-left: 3px; }
 
         /* PRINT BUTTON */
         .print-btn {
             position: fixed; top: 20px; right: 20px;
             padding: 10px 20px; background: var(--gold); font-weight: bold;
-            border: none; border-radius: 5px; cursor: pointer;
-            z-index: 9999;
+            border: none; border-radius: 5px; cursor: pointer; z-index: 9999;
         }
 
         @media print {
             body { background: none; padding: 0; display: block; }
             .print-btn { display: none; }
-            .pamphlet-a5 { 
-                width: 100%; height: 100%; 
-                box-shadow: none; border: none;
-                page-break-after: always;
-            }
+            .pamphlet-a5 { width: 100%; height: 100%; box-shadow: none; margin: 0; border: none; page-break-after: always; }
             @page { size: A5; margin: 0; }
         }
     </style>
 </head>
 <body>
 
-    <button class="print-btn" onclick="window.print()">Print A5</button>
+    <button class="print-btn" onclick="window.print()">Print Premium A5</button>
 
     <div class="pamphlet-a5">
         
         <div class="header-section">
+            <img src="logo.png" class="top-logo" alt="Zafran Logo">
             <h1 class="brand-name">Zafran Delight</h1>
             <div class="tagline">Authentic Indian & Pakistani Cuisine</div>
         </div>
@@ -259,27 +296,32 @@
         <div class="content-body">
             
             <div class="offer-row">
-                <div class="offer-box">
+                <div class="premium-box offer-flex">
                     <div class="box-title">Mittagstisch</div>
-                    <div class="lunch-text">
-                        Di – Fr | 12:00 – 15:00<br>
-                        Wöchentlich wechselnde Gerichte.<br>
-                        <span style="margin-top:4px; display:block;">Ab <span class="price-big">9,90€</span></span>
+                    <div style="font-size:8px; color:#aaa; margin-bottom:5px;">Di – Fr | 12:00 – 15:00</div>
+                    
+                    <div class="lunch-item">
+                        <span>Veg of the Day</span>
+                        <span class="lunch-price">8,00 €</span>
+                    </div>
+                    <div class="lunch-item" style="border-bottom:none;">
+                        <span>Chicken of the Day</span>
+                        <span class="lunch-price">10,00 €</span>
                     </div>
                 </div>
 
-                <div class="offer-box" style="flex: 1.4;">
+                <div class="premium-box offer-flex" style="flex: 1.4;">
                     <div class="box-title">Sonntagsbuffet</div>
-                    <div style="font-size:9px; color:#fff; margin-bottom:3px;">Jeden Sonntag | 12:00 – 16:00</div>
+                    <div style="font-size:8px; color:#aaa; margin-bottom:5px;">Jeden Sonntag | 12:00 – 16:00</div>
                     <div class="buffet-grid">
                         <span>Erwachsene</span> <span class="b-price">20,00€</span>
                         <span>Kinder (6-14 J.)</span> <span class="b-price">15,00€</span>
-                        <span>Kinder (< 6 J.)</span> <span class="b-price">Gratis</span>
+                        <span>Kinder (< 6 J.)</span> <span class="b-price" style="color:#fff">Gratis</span>
                     </div>
                 </div>
             </div>
 
-            <div class="delivery-section">
+            <div class="premium-box delivery-section">
                 <div class="del-title">Abholung & Lieferung • Online Offer</div>
                 <div class="coupon-container">
                     
@@ -287,14 +329,14 @@
                         <span class="c-code">SPAR10</span>
                         <span class="c-desc">10% RABATT</span>
                         <span class="c-cond">Ab 40€ Bestellwert</span>
-                        <span class="c-date">Gültig bis 30.04.2026</span>
+                        <span class="c-date">Bis 30.04.2026</span>
                     </div>
 
                     <div class="coupon">
                         <span class="c-code">WELCOME26</span>
                         <span class="c-desc">SPECIAL OFFER</span>
                         <span class="c-cond">Ab 55€ Bestellwert</span>
-                        <span class="c-date">Gültig bis 28.02.2026</span>
+                        <span class="c-date">Bis 28.02.2026</span>
                     </div>
 
                 </div>
@@ -308,15 +350,16 @@
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
                 </div>
                 <div class="cta-group">
-                    <div class="cta-main">Order Here<br>& See Menu</div>
+                    <div class="cta-main">Order Online<br>& See Menu</div>
                     <div class="cta-sub">Scan to visit Website</div>
                 </div>
             </div>
 
             <div class="address-group">
-                <span class="add-icon">📍</span> Kessenicher Str. 9<br>53879 Euskirchen<br>
-                <span class="add-icon">📞</span> 02251 1290950<br>
-                <span class="add-icon">🌐</span> zafraneuskirchen.de
+                Kessenicher Str. 9 <span class="add-icon">📍</span><br>
+                53879 Euskirchen<br>
+                02251 1290950 <span class="add-icon">📞</span><br>
+                zafraneuskirchen.de <span class="add-icon">🌐</span>
             </div>
         </div>
 

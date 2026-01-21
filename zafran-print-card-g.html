@@ -11,7 +11,7 @@
             --gold: #D4AF37;
             --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
             
-            /* CHANGED: Lighter Gradient Brown (Bronze/Coffee style) */
+            /* Premium Bronze/Coffee Gradient Background */
             --card-bg: linear-gradient(135deg, #7a5847 0%, #4e342e 100%);
             
             --text-white: #ffffff;
@@ -49,8 +49,6 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            
-            /* CHANGED: Applied Gradient Background */
             background: var(--card-bg);
         }
 
@@ -58,9 +56,12 @@
         .front { background: var(--card-bg); }
 
         .hero-section {
-            height: 45%;
+            height: 50%;
             width: 100%;
             position: relative;
+            /* MAGIC FIX: This fades the image transparency, removing the "square box" look */
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
         }
 
         .hero-img {
@@ -69,26 +70,19 @@
             object-fit: cover;
         }
 
-        .hero-overlay {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%; 
-            height: 100%; 
-            /* Gradient overlay to blend image into the brown card */
-            background: linear-gradient(to bottom, transparent 0%, #5d3f36 100%);
-        }
-
         .front-content {
-            height: 55%;
+            height: 50%;
             padding: 0 35px 25px 35px;
             display: flex;
             flex-direction: column;
             justify-content: space-between; 
             position: relative;
             z-index: 2;
+            margin-top: -10px; /* Pull text up slightly into the faded image area */
         }
 
         /* Header Group */
-        .header-group { margin-top: 5px; }
+        .header-group { text-align: left; }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
@@ -98,11 +92,8 @@
             -webkit-text-fill-color: transparent;
             font-weight: 800;
             margin: 0;
-            
-            /* CHANGED: Fix for "Cut in Letter" (Descenders getting clipped) */
             line-height: 1.2; 
             padding-bottom: 5px; 
-            
             filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));
         }
 
@@ -113,31 +104,41 @@
             letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 2px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: block;
         }
 
-        /* Chef Group (Icon Removed) */
+        /* Chef Group */
         .chef-group {
             display: flex;
-            flex-direction: column;
-            margin-bottom: 5px;
+            align-items: flex-start; /* Align icon with top of text line */
+            gap: 12px;
+            margin-bottom: 15px;
         }
+        
+        .chef-hat-icon {
+            width: 26px;
+            height: 26px;
+            filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
+            margin-top: -2px; /* Visual alignment fix */
+        }
+
+        .chef-details { display: flex; flex-direction: column; }
         
         .chef-name { 
             color: #fff; 
             font-size: 18px; 
             font-weight: 700; 
-            line-height: 1.2; 
+            line-height: 1; 
         }
         
         .chef-role { 
             color: var(--gold); 
             font-size: 10px; 
-            font-weight: 500; 
+            font-weight: 600; 
             text-transform: uppercase; 
             letter-spacing: 1px; 
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
         /* Contact Footer (Clean Layout) */
@@ -168,12 +169,9 @@
             font-weight: 500;
         }
 
-        .contact-column.right .contact-line { flex-direction: row-reverse; }
-
         .c-icon { color: var(--gold); font-size: 11px; }
 
         /* --- BACK SIDE --- */
-        /* Changed to use Gradient Background */
         .back {
             background: var(--card-bg);
             padding: 0;
@@ -255,7 +253,7 @@
         }
 
         .event-btn {
-            background: rgba(255, 255, 255, 0.05); /* Slight box BG */
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--gold);
             color: #fff;
             padding: 5px 10px;
@@ -305,12 +303,11 @@
 
     <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
-    <div class="label">Front Side (Gradient + No Icon + Fixed Text)</div>
+    <div class="label">Front Side (Smooth Merge + Chef Icon)</div>
     <div class="card front">
         <div class="hero-section">
             <img src="hero-bg.png" class="hero-img" alt="Hero Background">
-            <div class="hero-overlay"></div>
-        </div>
+            </div>
 
         <div class="front-content">
             <div class="header-group">
@@ -318,8 +315,11 @@
                 <span class="tagline">Indian & Pakistani Catering Cooking Expert</span>
                 
                 <div class="chef-group">
-                    <div class="chef-name">Syed Hussain Haider Zaidi</div>
-                    <div class="chef-role">Owner & Chef</div>
+                    <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
+                    <div class="chef-details">
+                        <div class="chef-name">Syed Hussain Haider Zaidi</div>
+                        <div class="chef-role">Owner & Chef</div>
+                    </div>
                 </div>
             </div>
 
@@ -331,15 +331,15 @@
                 </div>
 
                 <div class="contact-column right">
-                    <div class="contact-line">Kessenicher Str. 9, 53879 Euskirchen <span class="c-icon">📍</span></div>
-                    <div class="contact-line">zafraneuskirchen.de <span class="c-icon">🌐</span></div>
+                    <div class="contact-line">Kessenicher Str. 9, 53879 Euskirchen</div>
+                    <div class="contact-line">zafraneuskirchen.de</div>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <div class="label">Back Side (Gradient)</div>
+    <div class="label">Back Side</div>
     <div class="card back">
         <div class="back-main">
             <div class="qr-section">

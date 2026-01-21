@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final Gradient A5 (No Image Border)</title>
+    <title>Zafran Delight - Final Full Width Image</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -37,7 +37,7 @@
             overflow: hidden;
             color: var(--white);
             
-            /* 3PX GOLD FRAME for the whole page */
+            /* 3PX GOLD FRAME */
             border: 3px solid var(--gold);
             
             box-sizing: border-box;
@@ -46,7 +46,7 @@
         /* --- 1. HEADER --- */
         .header-section {
             background: transparent;
-            padding: 15px 10px 5px;
+            padding: 12px 10px 2px;
             text-align: center;
             height: 12%; 
             display: flex;
@@ -72,24 +72,35 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* --- 2. HERO IMAGE (CSS Border Removed) --- */
+        /* --- 2. HERO IMAGE (Full Width) --- */
         .hero-container {
-            height: 20%;
+            height: 24%; /* Increased height slightly */
             position: relative;
-            padding: 0 12px;
+            /* REMOVED PADDING so image touches the border */
+            padding: 0; 
+            width: 100%;
             z-index: 1;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Aligns image to bottom of container */
         }
 
         .hero-frame {
             width: 100%;
             height: 100%;
-            /* CSS Border removed here to let the image's own frame show */
             overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            /* Optional: Add a subtle shadow if needed, otherwise clean */
+            /* box-shadow: 0 10px 30px rgba(0,0,0,0.5); */
         }
 
-        .hero-img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+        /* Object-fit: cover ensures it fills the width without whitespace */
+        .hero-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            object-position: center bottom; 
+        }
 
         /* --- 3. MAIN CONTENT --- */
         .content-body {
@@ -179,7 +190,6 @@
             box-shadow: 0 3px 6px rgba(0,0,0,0.3);
         }
 
-        /* Online Coupons */
         .coupon.online {
             background: var(--gold-foil); 
             border: 1px solid #fff;
@@ -187,7 +197,6 @@
             color: #222;
         }
         
-        /* Physical Coupons */
         .coupon.physical {
             background: #fff; 
             border: 2px dashed #000; 
@@ -203,7 +212,7 @@
         .c-desc { font-size: 8.5px; display: block; font-weight: 700; }
         .c-small { font-size: 7px; display: block; margin-top: 2px; font-weight: 600; }
 
-        /* --- 4. FOOTER (Updated Text & Icons) --- */
+        /* --- 4. FOOTER --- */
         .footer {
             background: transparent;
             padding: 5px 15px 15px; 
@@ -227,18 +236,16 @@
             text-shadow: 0 2px 5px #000;
         }
         
-        /* New styles for footer subtext and icons */
         .cta-subtext {
              font-size: 8.5px; color: #fff; font-family: 'Montserrat'; font-weight: 500;
              line-height: 1.3; display: block; margin-top: 2px;
         }
 
-        /* SVG Icon styling */
         .f-icon {
             width: 11px; height: 11px;
             vertical-align: middle;
             margin: 0 1px;
-            color: var(--gold); /* Makes SVGs gold */
+            color: var(--gold); 
             display: inline-block;
             position: relative; top: -1px;
         }

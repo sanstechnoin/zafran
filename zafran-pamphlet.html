@@ -2,15 +2,15 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final German A5</title>
+    <title>Zafran Delight - Final Unified Gradient A5</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #D4AF37;
             --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
             --gold-text: #FFD700; 
-            /* Premium Red-to-Black Gradient */
-            --seamless-gradient: linear-gradient(180deg, #5a0000 0%, #2d1b15 35%, #000000 100%);
+            /* Premium Single Top-to-Bottom Gradient */
+            --seamless-gradient: linear-gradient(180deg, #5a0000 0%, #2d1b15 40%, #000000 100%);
             --white: #ffffff;
         }
 
@@ -29,17 +29,14 @@
         .pamphlet-a5 {
             width: 148mm;
             height: 210mm;
-            background: var(--seamless-gradient);
+            background: var(--seamless-gradient); /* Single gradient for the whole page */
             position: relative;
             box-shadow: 0 30px 60px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             color: var(--white);
-            
-            /* 3PX GOLD FRAME for the whole page */
             border: 3px solid var(--gold);
-            
             box-sizing: border-box;
         }
 
@@ -63,7 +60,7 @@
             margin-bottom: 2px;
         }
 
-        /* --- 2. HERO IMAGE (Full Width, No Border) --- */
+        /* --- 2. HERO IMAGE (Fill to Fit) --- */
         .hero-container {
             height: 24%;
             position: relative;
@@ -71,9 +68,6 @@
             width: 100%;
             z-index: 1;
             margin-bottom: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end; 
         }
 
         .hero-frame {
@@ -86,7 +80,7 @@
         .hero-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; 
+            object-fit: cover; /* Changed to COVER to fill the space */
             object-position: center bottom; 
         }
 
@@ -121,7 +115,7 @@
 
         .food-box {
             flex: 1;
-            background: rgba(0, 0, 0, 0.2);
+            /* Removed background color for seamless gradient look */
             border: 1px solid var(--gold);
             border-radius: 6px;
             padding: 8px;
@@ -200,39 +194,49 @@
         .c-desc { font-size: 8.5px; display: block; font-weight: 700; }
         .c-small { font-size: 7px; display: block; margin-top: 2px; font-weight: 600; }
 
-        /* --- 4. FOOTER --- */
+        /* --- 4. FOOTER (Restructured) --- */
         .footer {
             background: transparent;
-            padding: 5px 15px 15px; 
+            padding: 5px 15px 8px; /* Adjusted padding */
             display: flex;
-            align-items: center;
+            flex-direction: column; /* Stack items vertically */
+            justify-content: flex-end;
+            height: 16%; 
+            gap: 8px;
+        }
+
+        /* New wrapper for the top part of footer (QR and Address) */
+        .footer-top-content {
+            display: flex;
             justify-content: space-between;
-            height: 15%; 
+            align-items: center;
+            width: 100%;
         }
 
         .qr-section { display: flex; align-items: center; gap: 10px; }
         .f-qr-box {
             background: white; padding: 3px; border-radius: 4px;
-            width: 65px; height: 65px;
+            width: 60px; height: 60px;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
         .qr-img { width: 100%; height: 100%; }
 
         .cta-text {
             color: var(--gold); font-family: 'Playfair Display', serif;
-            font-size: 14px; font-weight: 800; line-height: 1.1; text-transform: uppercase;
+            font-size: 13px; font-weight: 800; line-height: 1.1; text-transform: uppercase;
             text-shadow: 0 2px 5px #000;
         }
         
         .cta-subtext {
-             font-size: 8.5px; color: #fff; font-family: 'Montserrat'; font-weight: 500;
+             font-size: 8px; color: #fff; font-family: 'Montserrat'; font-weight: 500;
              line-height: 1.3; display: block; margin-top: 2px;
+             white-space: nowrap; /* Helps keep text on one line */
         }
 
         .f-icon {
-            width: 11px; height: 11px;
+            width: 10px; height: 10px;
             vertical-align: middle;
-            margin: 0 1px;
+            margin: 0; /* Removed margin to tighten up */
             color: var(--gold); 
             display: inline-block;
             position: relative; top: -1px;
@@ -249,15 +253,18 @@
             margin-bottom: 2px; text-transform: uppercase;
         }
 
+        /* Tagline moved to bottom and centered */
         .tagline-footer {
             font-size: 8.5px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px; /* Increased spacing for bottom line */
             color: var(--gold-text);
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            margin-bottom: 4px;
-            display: block;
+            text-align: center; /* Centered */
+            width: 100%;
+            padding-top: 5px;
+            border-top: 1px solid rgba(212, 175, 55, 0.3); /* Optional separator */
         }
 
         .address-block { color: #ddd; font-size: 9.5px; line-height: 1.4; font-weight: 500; }
@@ -372,32 +379,31 @@
         </div>
 
         <div class="footer">
-            <div class="qr-section">
-                <div class="f-qr-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
+            <div class="footer-top-content">
+                <div class="qr-section">
+                    <div class="f-qr-box">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
+                    </div>
+                    <div class="cta-text">
+                        HIER SCANNEN:<br>
+                        <span class="cta-subtext">
+                            SPEISEKARTE, ONLINE BESTELLUNG<br>
+                            (ABHOLUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 13C10.34 13 9 11.66 9 10H7C7 12.76 9.24 15 12 15C14.76 15 17 12.76 17 10H15C15 11.66 13.66 13 12 13ZM7 4V2H17V4H22V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V4H7ZM9 4H15V2H9V4ZM4 6V20H20V6H4Z"/></svg>& LIEFERUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5,6C19.3,6 20,5.3 20,4.5C20,3.7 19.3,3 18.5,3C17.7,3 17,3.7 17,4.5C17,5.3 17.7,6 18.5,6M13,22C15.2,22 17,20.2 17,18C17,15.8 15.2,14 13,14C10.8,14 9,15.8 9,18C9,20.2 10.8,22 13,22M13,20C11.9,20 11,19.1 11,18C11,16.9 11.9,16 13,16C14.1,16 15,16.9 15,18C15,19.1 14.1,20 13,20M22,22C24.2,22 26,20.2 26,18C26,15.8 24.2,14 22,14C19.8,14 18,15.8 18,18C18,20.2 19.8,22 22,22M22,20C20.9,20 20,19.1 20,18C20,16.9 20.9,16 22,16C23.1,16 24,16.9 24,18C24,19.1 23.1,20 22,20M13,13H24V11H22V7H16V11H13C11.9,11 11,10.1 11,9V4H7V7C7,10.3 9.7,13 13,13M5,11H9V9H5V11Z" transform="translate(-3,0)"/></svg>)
+                        </span>
+                    </div>
                 </div>
-                <div class="cta-text">
-                    HIER SCANNEN:<br>
-                    <span class="cta-subtext">
-                        SPEISEKARTE, ONLINE BESTELLUNG<br>
-                        (ABHOLUNG 
-                        <svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 13C10.34 13 9 11.66 9 10H7C7 12.76 9.24 15 12 15C14.76 15 17 12.76 17 10H15C15 11.66 13.66 13 12 13ZM7 4V2H17V4H22V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V4H7ZM9 4H15V2H9V4ZM4 6V20H20V6H4Z"/></svg>
-                        & LIEFERUNG
-                        <svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5,6C19.3,6 20,5.3 20,4.5C20,3.7 19.3,3 18.5,3C17.7,3 17,3.7 17,4.5C17,5.3 17.7,6 18.5,6M13,22C15.2,22 17,20.2 17,18C17,15.8 15.2,14 13,14C10.8,14 9,15.8 9,18C9,20.2 10.8,22 13,22M13,20C11.9,20 11,19.1 11,18C11,16.9 11.9,16 13,16C14.1,16 15,16.9 15,18C15,19.1 14.1,20 13,20M22,22C24.2,22 26,20.2 26,18C26,15.8 24.2,14 22,14C19.8,14 18,15.8 18,18C18,20.2 19.8,22 22,22M22,20C20.9,20 20,19.1 20,18C20,16.9 20.9,16 22,16C23.1,16 24,16.9 24,18C24,19.1 23.1,20 22,20M13,13H24V11H22V7H16V11H13C11.9,11 11,10.1 11,9V4H7V7C7,10.3 9.7,13 13,13M5,11H9V9H5V11Z" transform="translate(-3,0)"/></svg>
-                        )
-                    </span>
+
+                <div class="address-container">
+                    <div class="footer-brand">Zafran Delight</div>
+                    <div class="address-block">
+                        Kessenicher Str. 9, 53879 Euskirchen<br>
+                        Tel: 02251 1290950<br>
+                        www.zafraneuskirchen.de
+                    </div>
                 </div>
             </div>
 
-            <div class="address-container">
-                <div class="tagline-footer">Authentische Indische & Pakistanische Küche</div>
-                <div class="footer-brand">Zafran Delight</div>
-                <div class="address-block">
-                    Kessenicher Str. 9, 53879 Euskirchen<br>
-                    Tel: 02251 1290950<br>
-                    www.zafraneuskirchen.de
-                </div>
-            </div>
+            <div class="tagline-footer">Authentische Indische & Pakistanische Küche</div>
         </div>
 
     </div>

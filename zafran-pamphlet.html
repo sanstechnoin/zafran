@@ -2,20 +2,20 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final Bold A5</title>
+    <title>Zafran Delight - Final A5</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #D4AF37;
             --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
+            /* BRIGHT YELLOW for Prices & Headers */
             --gold-text: #FFD700; 
-            /* Premium Single Top-to-Bottom Gradient */
             --seamless-gradient: linear-gradient(180deg, #5a0000 0%, #2d1b15 40%, #000000 100%);
             --white: #ffffff;
         }
 
         body {
-            background-color: #222; /* Dark background for screen view */
+            background-color: #222;
             font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
@@ -25,7 +25,7 @@
             min-height: 100vh;
         }
 
-        /* EXACT A5 DIMENSIONS (148mm x 210mm) */
+        /* A5 DIMENSIONS */
         .pamphlet-a5 {
             width: 148mm;
             height: 210mm;
@@ -40,15 +40,15 @@
             box-sizing: border-box;
         }
 
-        /* --- 1. HERO IMAGE (REDUCED SIZE) --- */
+        /* --- 1. HERO IMAGE --- */
         .hero-container {
-            height: 18%; /* Reduced from previous versions to fit more text */
+            height: 18%; 
             position: relative;
             padding: 0; 
             width: 100%;
             z-index: 1;
             margin-bottom: 8px;
-            border-bottom: 2px solid var(--gold); /* Added separator */
+            border-bottom: 2px solid var(--gold);
         }
 
         .hero-img { 
@@ -59,25 +59,25 @@
             display: block;
         }
 
-        /* --- 2. MAIN CONTENT (ADJUSTED FOR LARGER FONTS) --- */
+        /* --- 2. MAIN CONTENT --- */
         .content-body {
             flex-grow: 1;
             padding: 5px 12px;
             display: flex;
             flex-direction: column;
-            gap: 12px; /* Increased gap between main sections */
-            justify-content: flex-start; /* Align to top to utilize space */
+            gap: 12px;
+            justify-content: flex-start; 
         }
 
-        /* Headers made much bigger and bolder */
+        /* CHANGED: Color matches the Price (#FFD700) */
         .section-header {
-            color: var(--gold);
+            color: var(--gold-text); /* Bright Yellow */
             font-family: 'Playfair Display', serif;
-            font-size: 19px; /* Increased Size */
-            font-weight: 900; /* Maximum Boldness */
+            font-size: 19px;
+            font-weight: 900;
             text-transform: uppercase;
             margin-bottom: 6px;
-            border-bottom: 2px solid rgba(212, 175, 55, 0.5); /* Thicker underline */
+            border-bottom: 2px solid rgba(212, 175, 55, 0.5);
             padding-bottom: 2px;
             text-shadow: 0 2px 4px #000;
         }
@@ -97,25 +97,23 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            background: rgba(0,0,0,0.1); /* Slight dark tint for readability */
+            background: rgba(0,0,0,0.1); 
         }
 
-        /* Lunch Items - Larger Fonts */
+        /* Lunch Items */
         .lunch-row {
             display: flex; justify-content: space-between; align-items: center;
-            font-size: 10.5px; /* Increased font size */
-            margin-bottom: 6px; color: #fff; font-weight: 600;
+            font-size: 10.5px; margin-bottom: 6px; color: #fff; font-weight: 600;
             border-bottom: 1px dotted rgba(255,255,255,0.3); padding-bottom: 3px;
         }
-        .price { font-weight: 900; color: var(--gold-text); font-size: 14px; } /* Bigger, Bolder Price */
+        .price { font-weight: 900; color: var(--gold-text); font-size: 14px; }
 
-        /* Buffet Items - Larger Fonts */
+        /* Buffet Items */
         .buffet-inner { display: flex; gap: 8px; height: 100%; align-items: center;}
         .buffet-text { flex: 1; }
         .buffet-grid { 
             display: grid; grid-template-columns: 1fr auto; 
-            font-size: 10.5px; /* Increased font size */
-            row-gap: 4px; color: #fff; font-weight: 500;
+            font-size: 10.5px; row-gap: 4px; color: #fff; font-weight: 500;
         }
 
         /* QR in Buffet */
@@ -129,7 +127,6 @@
 
 
         /* --- COUPON SECTION --- */
-        /* Bigger, bolder header */
         .coupon-section-title {
             text-align: center; font-size: 15px; font-weight: 900; color: #fff;
             text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px;
@@ -167,20 +164,20 @@
             border: 2px dashed #000; 
             color: #000;
             justify-content: space-between;
-            padding: 0 6px;
+            padding: 0 4px; /* Reduced padding to give logos space */
         }
 
-        .side-logo { width: 24px; height: auto; opacity: 1; }
-        .c-center { flex: 1; text-align: center; display:flex; flex-direction:column; justify-content:center; }
+        /* CHANGED: Bigger logos for coupons */
+        .side-logo { width: 35px; height: auto; opacity: 1; }
         
-        /* Larger Coupon Text */
+        .c-center { flex: 1; text-align: center; display:flex; flex-direction:column; justify-content:center; }
         .c-title { font-weight: 900; font-size: 16px; display: block; line-height: 1; margin-bottom: 2px;}
         .c-desc { font-size: 10px; display: block; font-weight: 800; }
         .c-small { font-size: 8px; display: block; margin-top: 3px; font-weight: 700; }
 
-        /* --- 4. FOOTER (RESTYLED & REORGANIZED) --- */
+        /* --- 4. FOOTER (NEW LAYOUT: Left-Middle-Right) --- */
         .footer {
-            background: rgba(0,0,0,0.2); /* Slight darkening for footer area */
+            background: rgba(0,0,0,0.2);
             padding: 10px 15px 8px; 
             display: flex;
             flex-direction: column; 
@@ -189,34 +186,33 @@
             border-top: 2px solid var(--gold); 
         }
 
-        .footer-top-content {
+        .footer-content-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             width: 100%;
         }
 
-        /* New left container for Brand + QR */
-        .footer-left-stack {
+        /* LEFT: Brand Name (White) + QR */
+        .f-col-left {
             display: flex;
             flex-direction: column;
             gap: 5px;
+            flex: 1;
         }
 
-        /* NEW: Brand name on the left above QR */
-        .footer-brand-left {
+        /* CHANGED: Pure White Text */
+        .footer-brand-white {
             font-family: 'Playfair Display', serif;
             font-size: 20px;
             font-weight: 900;
-            background: var(--gold-foil);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #ffffff; /* WHITE */
             text-transform: uppercase;
             line-height: 1;
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        .qr-section { display: flex; align-items: center; gap: 10px; }
+        .qr-section { display: flex; align-items: center; gap: 8px; }
         .f-qr-box {
             background: white; padding: 3px; border-radius: 4px;
             width: 55px; height: 55px;
@@ -226,40 +222,50 @@
 
         .cta-text {
             color: var(--gold); font-family: 'Playfair Display', serif;
-            font-size: 13px; font-weight: 900; line-height: 1.1; text-transform: uppercase;
+            font-size: 11px; font-weight: 900; line-height: 1.1; text-transform: uppercase;
             text-shadow: 0 2px 5px #000;
         }
         
         .cta-subtext {
-             font-size: 8.5px; color: #fff; font-family: 'Montserrat'; font-weight: 600;
-             line-height: 1.3; display: block; margin-top: 3px;
+             font-size: 7.5px; color: #fff; font-family: 'Montserrat'; font-weight: 600;
+             line-height: 1.3; display: block; margin-top: 2px;
              white-space: nowrap; 
         }
 
         .f-icon {
-            width: 11px; height: 11px; vertical-align: middle;
+            width: 10px; height: 10px; vertical-align: middle;
             color: var(--gold); display: inline-block; position: relative; top: -1px;
         }
 
-        .address-container { 
+        /* MIDDLE: Logo Only */
+        .f-col-center {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 5px;
+            flex: 0.8;
+        }
+
+        .footer-logo-main {
+            width: 80px; /* Nice big logo in middle */
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+        }
+
+        /* RIGHT: Address Only */
+        .f-col-right { 
             text-align: right;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             justify-content: flex-end;
+            flex: 1;
+            padding-bottom: 5px; /* Align with text */
         }
         
-        /* Logo in footer (Right side) */
-        .footer-logo-img {
-            width: 65px;
-            height: auto;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-            margin-bottom: 5px;
-        }
+        .address-block { color: #fff; font-size: 10.5px; line-height: 1.5; font-weight: 700; }
 
-        .address-block { color: #eee; font-size: 10px; line-height: 1.4; font-weight: 600; }
-
-        /* Tagline footer - bigger and bolder */
+        /* Tagline footer */
         .tagline-footer {
             font-size: 10px;
             font-weight: 800;
@@ -381,10 +387,10 @@
         </div>
 
         <div class="footer">
-            <div class="footer-top-content">
+            <div class="footer-content-row">
                 
-                <div class="footer-left-stack">
-                    <div class="footer-brand-left">ZAFRAN Delight</div>
+                <div class="f-col-left">
+                    <div class="footer-brand-white">ZAFRAN Delight</div>
                     <div class="qr-section">
                         <div class="f-qr-box">
                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
@@ -392,15 +398,18 @@
                         <div class="cta-text">
                             HIER SCANNEN:<br>
                             <span class="cta-subtext">
-                                SPEISEKARTE, ONLINE BESTELLUNG<br>
+                                SPEISEKARTE & BESTELLUNG<br>
                                 (ABHOLUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 13C10.34 13 9 11.66 9 10H7C7 12.76 9.24 15 12 15C14.76 15 17 12.76 17 10H15C15 11.66 13.66 13 12 13ZM7 4V2H17V4H22V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V4H7ZM9 4H15V2H9V4ZM4 6V20H20V6H4Z"/></svg>& LIEFERUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5,6C19.3,6 20,5.3 20,4.5C20,3.7 19.3,3 18.5,3C17.7,3 17,3.7 17,4.5C17,5.3 17.7,6 18.5,6M13,22C15.2,22 17,20.2 17,18C17,15.8 15.2,14 13,14C10.8,14 9,15.8 9,18C9,20.2 10.8,22 13,22M13,20C11.9,20 11,19.1 11,18C11,16.9 11.9,16 13,16C14.1,16 15,16.9 15,18C15,19.1 14.1,20 13,20M22,22C24.2,22 26,20.2 26,18C26,15.8 24.2,14 22,14C19.8,14 18,15.8 18,18C18,20.2 19.8,22 22,22M22,20C20.9,20 20,19.1 20,18C20,16.9 20.9,16 22,16C23.1,16 24,16.9 24,18C24,19.1 23.1,20 22,20M13,13H24V11H22V7H16V11H13C11.9,11 11,10.1 11,9V4H7V7C7,10.3 9.7,13 13,13M5,11H9V9H5V11Z" transform="translate(-3,0)"/></svg>)
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="address-container">
-                    <img src="logo.png" class="footer-logo-img" alt="Zafran Logo">
+                <div class="f-col-center">
+                    <img src="logo.png" class="footer-logo-main" alt="Zafran Logo">
+                </div>
+
+                <div class="f-col-right">
                     <div class="address-block">
                         Kessenicher Str. 9, 53879 Euskirchen<br>
                         Tel: 02251 1290950<br>

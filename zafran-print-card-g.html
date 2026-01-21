@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final Print Card (Footer Layout)</title>
+    <title>Zafran Delight - Professional Print Card</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
@@ -11,7 +11,7 @@
             --gold: #D4AF37;
             --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
             
-            /* Lighter Warm Brown */
+            /* Warm Coffee Brown Background */
             --card-brown: #5D4037; 
             
             --text-white: #ffffff;
@@ -56,7 +56,7 @@
         .front { background-color: var(--card-brown); }
 
         .hero-section {
-            height: 50%;
+            height: 45%; /* Slightly reduced to give text breathing room */
             width: 100%;
             position: relative;
         }
@@ -70,28 +70,28 @@
         .hero-overlay {
             position: absolute;
             bottom: 0; left: 0; width: 100%; 
-            height: 80%; 
-            background: linear-gradient(to bottom, transparent 0%, var(--card-brown) 99%);
+            height: 100%; 
+            background: linear-gradient(to bottom, transparent 0%, var(--card-brown) 100%);
         }
 
         .front-content {
-            height: 50%;
-            padding: 10px 30px 20px 30px;
+            height: 55%;
+            padding: 0 35px 25px 35px;
             display: flex;
             flex-direction: column;
-            /* Distribute space: Logo top, Chef middle, Contact bottom */
             justify-content: space-between; 
             position: relative;
             z-index: 2;
-            box-sizing: border-box;
         }
 
-        /* 1. Brand */
-        .brand-group { margin-top: -15px; }
+        /* Brand & Chef Group */
+        .header-group {
+            margin-top: 5px;
+        }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
-            font-size: 44px;
+            font-size: 42px;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -103,71 +103,65 @@
 
         .tagline {
             color: var(--text-silver);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            margin-top: 5px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            display: block;
         }
 
-        /* 2. Chef */
         .chef-group {
             display: flex;
             align-items: center;
-            /* Added margin to separate from brand */
-            margin-bottom: 10px; 
         }
         
         .chef-hat-icon {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             margin-right: 12px;
             filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
         }
 
         .chef-details { display: flex; flex-direction: column; }
-        .chef-name { color: #fff; font-size: 17px; font-weight: 700; line-height: 1.1; }
-        .chef-role { color: var(--gold); font-size: 11px; margin-top: 2px; font-weight: 500; }
+        .chef-name { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.2; }
+        .chef-role { color: var(--gold); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* 3. Contact Footer (New 2-Column Layout) */
-        .contact-footer {
-            background: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 8px 15px;
+        /* Clean Contact Layout (No Box) */
+        .contact-clean {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
             width: 100%;
-            box-sizing: border-box;
+            border-top: 1px solid rgba(212, 175, 55, 0.3); /* Subtle Gold Line */
+            padding-top: 12px;
         }
 
-        .contact-col {
+        .contact-column {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
         }
 
-        .contact-col.left { text-align: left; }
-        .contact-col.right { text-align: right; }
+        .contact-column.left { text-align: left; }
+        .contact-column.right { text-align: right; }
 
-        .contact-row {
+        .contact-line {
             font-size: 10px;
             color: var(--text-white);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             font-weight: 500;
-            white-space: nowrap; /* Prevent line breaks */
         }
 
-        /* Reverse row for right alignment so icon is on outside */
-        .contact-col.right .contact-row {
+        /* Right column aligns icons to the right */
+        .contact-column.right .contact-line {
             flex-direction: row-reverse;
         }
 
-        .icon { color: var(--gold); font-size: 11px; }
+        .c-icon { color: var(--gold); font-size: 11px; }
 
         /* --- BACK SIDE --- */
         .back {
@@ -195,7 +189,7 @@
             align-items: center;
             justify-content: center;
             padding-right: 20px;
-            border-right: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(212, 175, 55, 0.2);
             height: 85%;
             margin-top: auto; margin-bottom: auto;
         }
@@ -239,7 +233,7 @@
             font-size: 9px;
             text-transform: uppercase;
             color: var(--gold);
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 600;
             letter-spacing: 1px;
         }
@@ -251,7 +245,7 @@
         }
 
         .event-btn {
-            background: rgba(255, 255, 255, 0.08);
+            background: transparent;
             border: 1px solid var(--gold);
             color: #fff;
             padding: 5px 10px;
@@ -261,7 +255,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .footer-container {
@@ -302,7 +295,7 @@
 
     <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
-    <div class="label">Front Side (Footer Contact Layout)</div>
+    <div class="label">Front Side (Professional / No Box)</div>
     <div class="card front">
         <div class="hero-section">
             <img src="hero-bg.png" class="hero-img" alt="Hero Background">
@@ -310,36 +303,36 @@
         </div>
 
         <div class="front-content">
-            <div class="brand-group">
+            <div class="header-group">
                 <h1 class="brand-name">Zafran Delight</h1>
-                <div class="tagline">Indian & Pakistani Catering Cooking Expert</div>
-            </div>
-
-            <div class="chef-group">
-                <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
-                <div class="chef-details">
-                    <div class="chef-name">Syed Hussain Haider Zaidi</div>
-                    <div class="chef-role">Owner & Chef</div>
-                </div>
-            </div>
-
-            <div class="contact-footer">
+                <span class="tagline">Indian & Pakistani Catering Cooking Expert</span>
                 
-                <div class="contact-col left">
-                    <div class="contact-row"><span class="icon">📞</span> +49 152 25475880</div>
-                    <div class="contact-row"><span class="icon">✉️</span> hussainzaidi1969@gmail.com</div>
+                <div class="chef-group">
+                    <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
+                    <div class="chef-details">
+                        <div class="chef-name">Syed Hussain Haider Zaidi</div>
+                        <div class="chef-role">Owner & Chef</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-clean">
+                
+                <div class="contact-column left">
+                    <div class="contact-line"><span class="c-icon">📞</span> +49 152 25475880</div>
+                    <div class="contact-line"><span class="c-icon">✉️</span> hussainzaidi1969@gmail.com</div>
                 </div>
 
-                <div class="contact-col right">
-                    <div class="contact-row">Kessenicher Str. 9 <span class="icon">📍</span></div>
-                    <div class="contact-row">zafraneuskirchen.de <span class="icon">🌐</span></div>
+                <div class="contact-column right">
+                    <div class="contact-line">Kessenicher Str. 9, 53879 Euskirchen <span class="c-icon">📍</span></div>
+                    <div class="contact-line">zafraneuskirchen.de <span class="c-icon">🌐</span></div>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <div class="label">Back Side (Text + Buttons)</div>
+    <div class="label">Back Side</div>
     <div class="card back">
         <div class="back-main">
             <div class="qr-section">

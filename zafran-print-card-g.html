@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Premium Gradient Card</title>
+    <title>Zafran Delight - Premium Print Card</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
@@ -59,7 +59,7 @@
             height: 50%;
             width: 100%;
             position: relative;
-            /* MAGIC FIX: This fades the image transparency, removing the "square box" look */
+            /* Smooth blend mask */
             -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
             mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
         }
@@ -78,7 +78,7 @@
             justify-content: space-between; 
             position: relative;
             z-index: 2;
-            margin-top: -10px; /* Pull text up slightly into the faded image area */
+            margin-top: -10px; 
         }
 
         /* Header Group */
@@ -104,23 +104,23 @@
             letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 2px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: block;
         }
 
-        /* Chef Group */
+        /* Chef Group (Updated) */
         .chef-group {
             display: flex;
-            align-items: flex-start; /* Align icon with top of text line */
-            gap: 12px;
-            margin-bottom: 15px;
+            align-items: center; /* Center vertically since it's one line now */
+            gap: 10px;
+            margin-bottom: 10px;
         }
         
         .chef-hat-icon {
-            width: 26px;
-            height: 26px;
+            /* CHANGED: Made smaller */
+            width: 20px;
+            height: 20px;
             filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
-            margin-top: -2px; /* Visual alignment fix */
         }
 
         .chef-details { display: flex; flex-direction: column; }
@@ -132,16 +132,7 @@
             line-height: 1; 
         }
         
-        .chef-role { 
-            color: var(--gold); 
-            font-size: 10px; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            margin-top: 4px;
-        }
-
-        /* Contact Footer (Clean Layout) */
+        /* Contact Footer */
         .contact-clean {
             display: flex;
             justify-content: space-between;
@@ -303,11 +294,11 @@
 
     <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
-    <div class="label">Front Side (Smooth Merge + Chef Icon)</div>
+    <div class="label">Front Side</div>
     <div class="card front">
         <div class="hero-section">
             <img src="hero-bg.png" class="hero-img" alt="Hero Background">
-            </div>
+        </div>
 
         <div class="front-content">
             <div class="header-group">
@@ -318,7 +309,7 @@
                     <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
                     <div class="chef-details">
                         <div class="chef-name">Syed Hussain Haider Zaidi</div>
-                    </div>
+                        </div>
                 </div>
             </div>
 

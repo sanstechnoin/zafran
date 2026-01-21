@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final Full Width Image</title>
+    <title>Zafran Delight - Final German A5</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -37,7 +37,7 @@
             overflow: hidden;
             color: var(--white);
             
-            /* 3PX GOLD FRAME */
+            /* 3PX GOLD FRAME for the whole page */
             border: 3px solid var(--gold);
             
             box-sizing: border-box;
@@ -48,7 +48,7 @@
             background: transparent;
             padding: 12px 10px 2px;
             text-align: center;
-            height: 12%; 
+            height: 10%; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -57,48 +57,36 @@
         }
 
         .top-logo {
-            width: 100px;
+            width: 70px;
             height: auto;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
             margin-bottom: 2px;
         }
 
-        .tagline {
-            font-size: 8.5px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--gold-text);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-
-        /* --- 2. HERO IMAGE (Full Width) --- */
+        /* --- 2. HERO IMAGE (Full Width, No Border) --- */
         .hero-container {
-            height: 24%; /* Increased height slightly */
+            height: 24%;
             position: relative;
-            /* REMOVED PADDING so image touches the border */
             padding: 0; 
             width: 100%;
             z-index: 1;
             margin-bottom: 5px;
             display: flex;
             justify-content: center;
-            align-items: flex-end; /* Aligns image to bottom of container */
+            align-items: flex-end; 
         }
 
         .hero-frame {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            /* Optional: Add a subtle shadow if needed, otherwise clean */
-            /* box-shadow: 0 10px 30px rgba(0,0,0,0.5); */
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
         }
 
-        /* Object-fit: cover ensures it fills the width without whitespace */
         .hero-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; 
+            object-fit: contain; 
             object-position: center bottom; 
         }
 
@@ -219,7 +207,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 14%;
+            height: 15%; 
         }
 
         .qr-section { display: flex; align-items: center; gap: 10px; }
@@ -261,6 +249,17 @@
             margin-bottom: 2px; text-transform: uppercase;
         }
 
+        .tagline-footer {
+            font-size: 8.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-text);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 4px;
+            display: block;
+        }
+
         .address-block { color: #ddd; font-size: 9.5px; line-height: 1.4; font-weight: 500; }
 
         .print-btn {
@@ -285,7 +284,6 @@
         
         <div class="header-section">
             <img src="logo.png" class="top-logo" alt="Zafran Delight">
-            <div class="tagline">Authentische Indische & Pakistanische Küche</div>
         </div>
 
         <div class="hero-container">
@@ -302,11 +300,11 @@
                     <div style="font-size:8.5px; color:#ccc; margin-bottom:5px;">Di – Fr | 12:00 – 15:00 Uhr</div>
                     
                     <div class="lunch-row">
-                        <span>Veg of the Day</span>
+                        <span>Tagesgericht Vegetarisch</span>
                         <span class="price">8,00 €</span>
                     </div>
                     <div class="lunch-row" style="border:none;">
-                        <span>Chicken of the Day</span>
+                        <span>Tagesgericht Hähnchen</span>
                         <span class="price">10,00 €</span>
                     </div>
                 </div>
@@ -346,7 +344,7 @@
                 <div class="coupon online">
                     <span class="c-title">WELCOME26</span>
                     <span class="c-desc">15% ONLINE RABATT</span>
-                    <span class="c-small">Ab 55€ | Bis 28.02.26</span>
+                    <span class="c-small">Ab 55€ | Gültig bis auf Widerruf</span>
                 </div>
 
                 <div class="coupon physical">
@@ -392,6 +390,7 @@
             </div>
 
             <div class="address-container">
+                <div class="tagline-footer">Authentische Indische & Pakistanische Küche</div>
                 <div class="footer-brand">Zafran Delight</div>
                 <div class="address-block">
                     Kessenicher Str. 9, 53879 Euskirchen<br>

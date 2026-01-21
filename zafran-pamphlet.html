@@ -40,16 +40,34 @@
             box-sizing: border-box;
         }
 
-        /* Header section removed */
+        /* --- 1. HEADER --- */
+        .header-section {
+            background: transparent;
+            padding: 12px 10px 2px;
+            text-align: center;
+            height: 10%; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
 
-        /* --- 1. HERO IMAGE (Fill to Fit) --- */
+        .top-logo {
+            width: 70px;
+            height: auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+            margin-bottom: 2px;
+        }
+
+        /* --- 2. HERO IMAGE (Fill to Fit) --- */
         .hero-container {
-            height: 28%; /* Increased height to fill space */
+            height: 24%;
             position: relative;
             padding: 0; 
             width: 100%;
             z-index: 1;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .hero-frame {
@@ -66,7 +84,7 @@
             object-position: center bottom; 
         }
 
-        /* --- 2. MAIN CONTENT --- */
+        /* --- 3. MAIN CONTENT --- */
         .content-body {
             flex-grow: 1;
             padding: 5px 12px;
@@ -176,7 +194,7 @@
         .c-desc { font-size: 8.5px; display: block; font-weight: 700; }
         .c-small { font-size: 7px; display: block; margin-top: 2px; font-weight: 600; }
 
-        /* --- 3. FOOTER (Restructured) --- */
+        /* --- 4. FOOTER (Restructured) --- */
         .footer {
             background: transparent;
             padding: 5px 15px 8px; /* Adjusted padding */
@@ -224,19 +242,15 @@
             position: relative; top: -1px;
         }
 
-        .address-container { 
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end; /* Align logo and text to right */
-        }
+        .address-container { text-align: right; }
         
-        /* New class for the logo in the footer */
-        .footer-logo-img {
-            width: 80px;
-            height: auto;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-            margin-bottom: 5px;
+        .footer-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px; font-weight: 800;
+            background: var(--gold-foil);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px; text-transform: uppercase;
         }
 
         /* Tagline moved to bottom and centered */
@@ -275,6 +289,10 @@
 
     <div class="pamphlet-a5">
         
+        <div class="header-section">
+            <img src="logo.png" class="top-logo" alt="Zafran Delight">
+        </div>
+
         <div class="hero-container">
             <div class="hero-frame">
                 <img src="image_121387.png" class="hero-img" alt="Delicious Food">
@@ -376,7 +394,7 @@
                 </div>
 
                 <div class="address-container">
-                    <img src="logo.png" class="footer-logo-img" alt="Zafran Delight Logo">
+                    <div class="footer-brand">Zafran Delight</div>
                     <div class="address-block">
                         Kessenicher Str. 9, 53879 Euskirchen<br>
                         Tel: 02251 1290950<br>

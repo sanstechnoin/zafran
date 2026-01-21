@@ -2,18 +2,15 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Red to Black Gradient A5</title>
+    <title>Zafran Delight - Final Gradient A5</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #D4AF37;
             --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
             --gold-text: #FFD700; 
-            
-            /* PREMIUM RED TO BLACK GRADIENT */
-            /* Starts Red (Top), transitions to Coffee, ends Black (Bottom) */
-            --flow-gradient: linear-gradient(180deg, #5a0000 0%, #2d1b15 35%, #000000 100%);
-            
+            /* Premium Red-to-Black Gradient */
+            --seamless-gradient: linear-gradient(180deg, #5a0000 0%, #2d1b15 35%, #000000 100%);
             --white: #ffffff;
         }
 
@@ -28,11 +25,11 @@
             min-height: 100vh;
         }
 
-        /* A5 DIMENSIONS */
+        /* EXACT A5 DIMENSIONS (148mm x 210mm) */
         .pamphlet-a5 {
             width: 148mm;
             height: 210mm;
-            background: var(--flow-gradient); /* Seamless Gradient */
+            background: var(--seamless-gradient);
             position: relative;
             box-shadow: 0 30px 60px rgba(0,0,0,0.8);
             display: flex;
@@ -57,7 +54,7 @@
         }
 
         .top-logo {
-            width: 95px;
+            width: 100px;
             height: auto;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
             margin-bottom: 2px;
@@ -99,12 +96,13 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            justify-content: space-evenly;
         }
 
-        /* Content Box - Subtle background to separate from gradient */
+        /* Standard Box Style */
         .content-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(212, 175, 55, 0.5); /* Subtle gold border */
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--gold);
             border-radius: 8px;
             padding: 8px;
             display: flex;
@@ -125,20 +123,36 @@
             text-shadow: 0 2px 4px #000;
         }
 
-        /* --- BOX 1: FOOD OFFERS --- */
-        .food-row { display: flex; gap: 8px; flex: 1; }
-        .food-col { flex: 1; }
-        
-        .lunch-item {
+        /* --- FOOD SECTION (Two Separate Boxes) --- */
+        .food-row {
+            display: flex;
+            gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .food-box {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--gold);
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Lunch Items */
+        .lunch-row {
             display: flex; justify-content: space-between;
-            font-size: 10px; margin-bottom: 4px; color: #eee; font-weight: 500;
+            font-size: 9.5px; margin-bottom: 5px; color: #eee; font-weight: 500;
             border-bottom: 1px dotted rgba(255,255,255,0.2); padding-bottom: 2px;
         }
         .price { font-weight: 800; color: var(--gold-text); font-size: 12px; }
 
-        .buffet-inner { display: flex; gap: 5px; }
-        .buffet-grid { display: grid; grid-template-columns: 1fr auto; font-size: 9.5px; row-gap: 3px; color: #eee; width: 100%; }
-        
+        /* Buffet Items */
+        .buffet-inner { display: flex; gap: 5px; height: 100%; align-items: center;}
+        .buffet-text { flex: 1; }
+        .buffet-grid { display: grid; grid-template-columns: 1fr auto; font-size: 9.5px; row-gap: 3px; color: #eee; }
+
         /* QR in Buffet */
         .b-qr-area {
             display: flex; flex-direction: column; align-items: center;
@@ -148,49 +162,57 @@
         .b-qr-img { width: 100%; height: 100%; }
         .b-qr-label { font-size: 5px; color: var(--gold); font-weight: 700; margin-top: 2px; text-align: center; text-transform:uppercase; line-height:1; }
 
-        /* --- BOX 2: COUPONS --- */
-        .coupon-box {
-            flex: 1.2; 
-            background: rgba(80, 0, 0, 0.15); /* Slight Red Tint to blend with gradient */
-        }
-        
-        .c-header {
-            text-align: center; font-size: 11px; font-weight: 800; color: #fff;
-            text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px;
+
+        /* --- COUPON SECTION (Grid of 4) --- */
+        .coupon-section-title {
+            text-align: center; font-size: 12px; font-weight: 800; color: #fff;
+            text-transform: uppercase; margin-bottom: 2px; letter-spacing: 1px;
             text-shadow: 0 2px 4px #000;
         }
 
-        .c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; height: 100%; }
+        .coupon-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px; /* Clearly separated */
+            flex: 1;
+        }
 
-        /* Physical Coupon Layout (Logo - Text - Logo) */
         .coupon {
             border-radius: 5px;
             text-align: center;
             border: 1px solid var(--gold);
             display: flex;
             align-items: center;
-            height: 100%;
-            padding: 4px;
+            justify-content: center;
+            padding: 5px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
         }
 
+        /* Online Coupons */
         .coupon.online {
-            background: var(--gold-foil); border: 1px solid #fff;
-            flex-direction: column; color: #000; justify-content: center;
+            background: var(--gold-foil); 
+            border: 1px solid #fff;
+            flex-direction: column; 
+            color: #222;
         }
         
+        /* Physical Coupons */
         .coupon.physical {
-            background: #fff; border: 2px dashed #000; color: #000;
-            justify-content: space-between; /* Pushes logos to sides */
+            background: #fff; 
+            border: 2px dashed #000; 
+            color: #000;
+            justify-content: space-between;
+            padding: 0 5px;
         }
 
         .side-logo { width: 22px; height: auto; opacity: 1; }
-        
         .c-center { flex: 1; text-align: center; display:flex; flex-direction:column; justify-content:center; }
         
-        /* Typography Boost */
-        .c-title { font-weight: 900; font-size: 13px; display: block; line-height: 1; }
-        .c-desc { font-size: 8px; display: block; font-weight: 700; margin-top: 2px; }
-        .c-small { font-size: 6px; display: block; margin-top: 1px; font-weight: 600; }
+        /* Typography */
+        .c-title { font-weight: 900; font-size: 14px; display: block; line-height: 1; margin-bottom: 2px;}
+        .c-desc { font-size: 8.5px; display: block; font-weight: 700; }
+        .c-small { font-size: 7px; display: block; margin-top: 2px; font-weight: 600; }
 
         /* --- 4. FOOTER (Transparent) --- */
         .footer {
@@ -262,83 +284,79 @@
 
         <div class="content-body">
             
-            <div class="content-box">
-                <div class="food-row">
-                    <div class="food-col">
-                        <div class="section-header">Mittagstisch</div>
-                        <div style="font-size:8.5px; color:#ccc; margin-bottom:5px;">Di – Fr | 12:00 – 15:00 Uhr</div>
-                        
-                        <div class="lunch-item">
-                            <span>Veg of the Day</span>
-                            <span class="price">8,00 €</span>
-                        </div>
-                        <div class="lunch-item" style="border:none;">
-                            <span>Chicken of the Day</span>
-                            <span class="price">10,00 €</span>
-                        </div>
+            <div class="food-row">
+                <div class="food-box">
+                    <div class="section-header">Mittagstisch</div>
+                    <div style="font-size:8.5px; color:#ccc; margin-bottom:5px;">Di – Fr | 12:00 – 15:00 Uhr</div>
+                    
+                    <div class="lunch-row">
+                        <span>Veg of the Day</span>
+                        <span class="price">8,00 €</span>
                     </div>
+                    <div class="lunch-row" style="border:none;">
+                        <span>Chicken of the Day</span>
+                        <span class="price">10,00 €</span>
+                    </div>
+                </div>
 
-                    <div class="food-col" style="flex:1.4; border-left:1px solid rgba(212,175,55,0.3); padding-left:8px;">
-                        <div class="buffet-inner">
-                            <div class="buffet-text">
-                                <div class="section-header">Sonntagsbuffet</div>
-                                <div style="font-size:8.5px; color:#ccc; margin-bottom:5px;">
-                                    Jeden letzten Sonntag im Monat<br>12:00 – 16:00 Uhr
-                                </div>
-                                <div class="buffet-grid">
-                                    <span>Erwachsene</span> <span class="price">20,00 €</span>
-                                    <span>Kinder (6-14)</span> <span class="price">15,00 €</span>
-                                    <span>Kinder (< 6)</span> <span style="text-align:right; color:#fff;">Gratis</span>
-                                </div>
+                <div class="food-box" style="flex:1.4;">
+                    <div class="buffet-inner">
+                        <div class="buffet-text">
+                            <div class="section-header">Sonntagsbuffet</div>
+                            <div style="font-size:8.5px; color:#ccc; margin-bottom:5px;">
+                                Jeden letzten Sonntag im Monat<br>12:00 – 16:00 Uhr
                             </div>
-                            <div class="b-qr-area">
-                                <div class="b-qr-box">
-                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de/#offers" class="b-qr-img">
-                                </div>
-                                <div class="b-qr-label">Vorab-<br>buchen</div>
+                            <div class="buffet-grid">
+                                <span>Erwachsene</span> <span class="price">20,00 €</span>
+                                <span>Kinder (6-14)</span> <span class="price">15,00 €</span>
+                                <span>Kinder (< 6)</span> <span style="text-align:right; color:#fff;">Gratis</span>
                             </div>
+                        </div>
+                        <div class="b-qr-area">
+                            <div class="b-qr-box">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de/#offers" class="b-qr-img">
+                            </div>
+                            <div class="b-qr-label">Vorab-<br>buchen</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="content-box coupon-box">
-                <div class="c-header">Exklusive Angebote & Gutscheine</div>
-                <div class="c-grid">
-                    
-                    <div class="coupon online">
-                        <span class="c-title">SPAR10</span>
-                        <span class="c-desc">10% ONLINE RABATT</span>
-                        <span class="c-small">Ab 40€ | Bis 30.04.26</span>
-                    </div>
-
-                    <div class="coupon online">
-                        <span class="c-title">WELCOME26</span>
-                        <span class="c-desc">15% ONLINE RABATT</span>
-                        <span class="c-small">Ab 55€ | Bis 28.02.26</span>
-                    </div>
-
-                    <div class="coupon physical">
-                        <img src="logo.png" class="side-logo" alt="logo">
-                        <div class="c-center">
-                            <span class="c-title" style="color:#C62828;">5% DINE-IN</span>
-                            <span class="c-desc">Vorzeigen im Restaurant</span>
-                            <span class="c-small">*Nicht für Mittagstisch</span>
-                        </div>
-                        <img src="logo.png" class="side-logo" alt="logo">
-                    </div>
-
-                    <div class="coupon physical">
-                        <img src="logo.png" class="side-logo" alt="logo">
-                        <div class="c-center">
-                            <span class="c-title" style="color:#C62828;">10% STUDI</span>
-                            <span class="c-desc">Gegen Studentenausweis</span>
-                            <span class="c-small">*Nicht für Mittagstisch</span>
-                        </div>
-                        <img src="logo.png" class="side-logo" alt="logo">
-                    </div>
-
+            <div class="coupon-section-title">Exklusive Angebote & Gutscheine</div>
+            <div class="coupon-grid">
+                
+                <div class="coupon online">
+                    <span class="c-title">SPAR10</span>
+                    <span class="c-desc">10% ONLINE RABATT</span>
+                    <span class="c-small">Ab 40€ | Bis 30.04.26</span>
                 </div>
+
+                <div class="coupon online">
+                    <span class="c-title">WELCOME26</span>
+                    <span class="c-desc">15% ONLINE RABATT</span>
+                    <span class="c-small">Ab 55€ | Bis 28.02.26</span>
+                </div>
+
+                <div class="coupon physical">
+                    <img src="logo.png" class="side-logo" alt="logo">
+                    <div class="c-center">
+                        <span class="c-title" style="color:#C62828;">5% DINE-IN</span>
+                        <span class="c-desc">Vorzeigen im Restaurant</span>
+                        <span class="c-small">*Nicht für Mittagstisch</span>
+                    </div>
+                    <img src="logo.png" class="side-logo" alt="logo">
+                </div>
+
+                <div class="coupon physical">
+                    <img src="logo.png" class="side-logo" alt="logo">
+                    <div class="c-center">
+                        <span class="c-title" style="color:#C62828;">10% STUDI</span>
+                        <span class="c-desc">Gegen Studentenausweis</span>
+                        <span class="c-small">*Nicht für Mittagstisch</span>
+                    </div>
+                    <img src="logo.png" class="side-logo" alt="logo">
+                </div>
+
             </div>
 
         </div>

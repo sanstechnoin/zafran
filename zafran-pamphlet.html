@@ -2,20 +2,15 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Glossy Premium A5</title>
+    <title>Zafran Delight - Glossy A5 Final</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* High Contrast Gold for Glossy Paper */
             --gold: #D4AF37;
             --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
             --gold-text: #FFD700; 
-            
-            /* Deep Backgrounds to make White/Gold pop */
             --rich-red: linear-gradient(to bottom, #4a0404, #2b0000);
-            --deep-coffee: #1a0f0b;
-            --coffee-gradient: linear-gradient(180deg, #2d1b15 0%, #000000 100%);
-            
+            --coffee-gradient: linear-gradient(180deg, #2d1b15 0%, #080403 100%);
             --white: #ffffff;
         }
 
@@ -45,13 +40,13 @@
             box-sizing: border-box;
         }
 
-        /* --- 1. HEADER (Larger Logo, Rich Red) --- */
+        /* --- 1. HEADER --- */
         .header-section {
             background: var(--rich-red);
-            padding: 15px 10px 5px;
+            padding: 10px;
             text-align: center;
             border-bottom: 3px solid var(--gold);
-            height: 14%; 
+            height: 13%; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -60,10 +55,10 @@
         }
 
         .top-logo {
-            width: 85px; /* Bigger Logo */
+            width: 90px;
             height: auto;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .tagline {
@@ -74,11 +69,11 @@
             color: var(--gold-text);
         }
 
-        /* --- 2. HERO IMAGE (Golden Frame) --- */
+        /* --- 2. HERO IMAGE --- */
         .hero-container {
-            height: 20%;
+            height: 22%;
             position: relative;
-            padding: 10px 15px 0;
+            padding: 8px 12px 0;
             z-index: 1;
         }
 
@@ -86,8 +81,8 @@
             width: 100%;
             height: 100%;
             border: 2px solid var(--gold);
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
@@ -99,15 +94,14 @@
             object-position: center;
         }
 
-        /* --- 3. CONTENT BODY --- */
+        /* --- 3. CONTENT BODY (Expanded to fill space) --- */
         .content-body {
             flex-grow: 1;
-            padding: 10px 15px;
+            padding: 8px 12px;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            position: relative;
-            z-index: 2;
+            justify-content: space-between; /* Pushes content to fill vertical space */
         }
 
         /* Premium Box Styles */
@@ -115,7 +109,10 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--gold);
             border-radius: 6px;
-            padding: 8px;
+            padding: 10px; /* Increased padding */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .section-title {
@@ -124,70 +121,77 @@
             font-size: 16px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             padding-bottom: 2px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         /* LUNCH & BUFFET ROW */
-        .offer-row { display: flex; gap: 8px; }
+        .offer-row { display: flex; gap: 8px; flex: 1; /* Makes this row take up space */ }
         .offer-flex { flex: 1; }
 
         /* Lunch Items */
         .lunch-row {
             display: flex; justify-content: space-between;
-            font-size: 9px; margin-bottom: 3px; color: #eee;
+            font-size: 9.5px; margin-bottom: 5px; color: #eee;
             border-bottom: 1px dotted rgba(255,255,255,0.2);
+            padding-bottom: 2px;
         }
-        .price-highlight { font-weight: 800; color: var(--gold-text); }
+        .price-highlight { font-weight: 800; color: var(--gold-text); font-size: 11px; }
 
         /* Buffet Items */
         .buffet-grid {
             display: grid; grid-template-columns: 1fr auto;
-            font-size: 8.5px; row-gap: 2px; color: #eee;
+            font-size: 9px; row-gap: 4px; color: #eee;
         }
 
-        /* COUPON GRID (Online & Physical) */
+        /* COUPON GRID (Expanded) */
         .coupons-wrapper {
-            background: rgba(80, 0, 0, 0.3); /* Subtle Red Tint */
+            background: rgba(80, 0, 0, 0.2); 
             border: 1px solid var(--gold);
             border-radius: 6px;
-            padding: 6px;
+            padding: 8px;
+            flex: 1.2; /* Takes up slightly more space than top row */
+            display: flex;
+            flex-direction: column;
         }
         
         .coupon-header {
-            text-align: center; font-size: 10px; font-weight: 800; color: #fff;
-            text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px;
+            text-align: center; font-size: 11px; font-weight: 800; color: #fff;
+            text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px;
         }
 
         .coupon-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 5px;
+            gap: 6px;
+            flex-grow: 1;
         }
 
         .coupon {
             background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
             color: #000;
-            padding: 4px;
+            padding: 6px;
             border-radius: 4px;
             text-align: center;
             border: 1px solid var(--gold);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        /* Coupon Types */
         .coupon.online { background: var(--gold-foil); border: 1px solid #fff; }
-        .coupon.physical { background: #fff; border: 1px dashed #000; }
+        .coupon.physical { background: #fff; border: 2px dashed #000; }
 
-        .c-title { font-weight: 900; font-size: 11px; display: block; line-height: 1; }
-        .c-desc { font-size: 7px; display: block; font-weight: 700; margin-top: 1px; }
-        .c-small { font-size: 5px; display: block; margin-top: 1px; }
+        .c-title { font-weight: 900; font-size: 13px; display: block; line-height: 1; margin-bottom: 2px;}
+        .c-desc { font-size: 8px; display: block; font-weight: 700; }
+        .c-small { font-size: 6px; display: block; margin-top: 2px; }
 
-        /* --- 4. FOOTER (Clean, No Icons) --- */
+        /* --- 4. FOOTER --- */
         .footer {
             background: #000;
-            padding: 12px 15px;
+            padding: 10px 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -200,7 +204,7 @@
         }
         .qr-box {
             background: white; padding: 3px; border-radius: 4px;
-            width: 60px; height: 60px;
+            width: 65px; height: 65px;
         }
         .qr-img { width: 100%; height: 100%; }
 
@@ -209,14 +213,30 @@
             font-size: 16px; font-weight: 800; line-height: 1.1; text-transform: uppercase;
         }
 
-        .address-block {
+        .address-container {
             text-align: right;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .footer-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 800;
+            background: var(--gold-foil);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+
+        .address-block {
             color: #fff;
             font-size: 9px;
-            line-height: 1.5;
-            font-weight: 600;
+            line-height: 1.4;
+            font-weight: 500;
         }
-        .address-highlight { color: var(--gold); font-weight: 700; font-size: 10px;}
 
         /* Print Button */
         .print-btn {
@@ -256,7 +276,7 @@
                 
                 <div class="premium-box offer-flex">
                     <div class="section-title">Mittagstisch</div>
-                    <div style="font-size:7px; color:#ccc; margin-bottom:4px;">Di – Fr | 12:00 – 15:00 Uhr</div>
+                    <div style="font-size:8px; color:#ccc; margin-bottom:5px;">Di – Fr | 12:00 – 15:00 Uhr</div>
                     
                     <div class="lunch-row">
                         <span>Tagesgericht Vegetarisch</span>
@@ -270,7 +290,7 @@
 
                 <div class="premium-box offer-flex" style="flex: 1.3;">
                     <div class="section-title">Sonntagsbuffet</div>
-                    <div style="font-size:7px; color:#ccc; margin-bottom:4px;">Jeden Sonntag | 12:00 – 16:00 Uhr</div>
+                    <div style="font-size:8px; color:#ccc; margin-bottom:5px;">Jeden Sonntag | 12:00 – 16:00 Uhr</div>
                     <div class="buffet-grid">
                         <span>Erwachsene</span> <span class="price-highlight" style="text-align:right;">20,00 €</span>
                         <span>Kinder (6-14 J.)</span> <span class="price-highlight" style="text-align:right;">15,00 €</span>
@@ -323,11 +343,13 @@
                 </div>
             </div>
 
-            <div class="address-block">
-                <span class="address-highlight">Kessenicher Str. 9</span><br>
-                53879 Euskirchen<br>
-                Tel: 02251 1290950<br>
-                www.zafraneuskirchen.de
+            <div class="address-container">
+                <div class="footer-brand">Zafran Delight</div>
+                <div class="address-block">
+                    Kessenicher Str. 9, 53879 Euskirchen<br>
+                    Tel: 02251 1290950<br>
+                    www.zafraneuskirchen.de
+                </div>
             </div>
         </div>
 

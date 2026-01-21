@@ -2,19 +2,16 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final A5 Glossy</title>
+    <title>Zafran Delight - Seamless Gradient A5</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* High Contrast Gold for Glossy Paper */
             --gold: #D4AF37;
             --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
             --gold-text: #FFD700; 
             
-            /* Deep Backgrounds */
-            --rich-red: linear-gradient(to bottom, #4a0404, #2b0000);
-            --deep-coffee: #1a0f0b;
-            --coffee-gradient: linear-gradient(180deg, #2d1b15 0%, #000000 100%);
+            /* Continuous Gradient: Rich Red (Top) -> Deep Coffee (Middle) -> Black (Bottom) */
+            --seamless-gradient: linear-gradient(180deg, #5a0000 0%, #2d1b15 40%, #000000 100%);
             
             --white: #ffffff;
         }
@@ -34,24 +31,25 @@
         .pamphlet-a5 {
             width: 148mm;
             height: 210mm;
-            background: var(--coffee-gradient);
+            background: var(--seamless-gradient);
             position: relative;
             box-shadow: 0 30px 60px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             color: var(--white);
-            border: 4px solid var(--gold);
+            /* NO OUTSIDE BORDER */
+            border: none; 
             box-sizing: border-box;
         }
 
-        /* --- 1. HEADER --- */
+        /* --- 1. HEADER (Transparent Background) --- */
         .header-section {
-            background: var(--rich-red);
-            padding: 10px;
+            background: transparent;
+            padding: 15px 10px 5px;
             text-align: center;
-            border-bottom: 3px solid var(--gold);
-            height: 13%; 
+            /* Removed Box Border */
+            height: 14%; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -60,10 +58,10 @@
         }
 
         .top-logo {
-            width: 90px;
+            width: 95px; /* Slightly Bigger */
             height: auto;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
-            margin-bottom: 2px;
+            margin-bottom: 5px;
         }
 
         .tagline {
@@ -72,24 +70,25 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--gold-text);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* --- 2. HERO IMAGE --- */
+        /* --- 2. HERO IMAGE (Floating Frame) --- */
         .hero-container {
-            height: 22%;
+            height: 20%;
             position: relative;
-            padding: 8px 12px 0;
+            padding: 0 15px; /* Side padding */
             z-index: 1;
+            margin-bottom: 10px;
         }
 
         .hero-frame {
             width: 100%;
             height: 100%;
             border: 2px solid var(--gold);
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            border-radius: 12px; /* Fully rounded */
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
         }
 
         .hero-img {
@@ -102,18 +101,19 @@
         /* --- 3. CONTENT BODY --- */
         .content-body {
             flex-grow: 1;
-            padding: 8px 12px;
+            padding: 5px 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            justify-content: space-between; 
+            gap: 12px;
+            justify-content: flex-start; 
         }
 
         .premium-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--gold);
-            border-radius: 6px;
-            padding: 10px; 
+            background: rgba(255, 255, 255, 0.07); /* Very subtle glass effect */
+            border-top: 1px solid var(--gold);
+            border-bottom: 1px solid var(--gold);
+            /* No side borders for cleaner look */
+            padding: 8px 5px; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -122,22 +122,20 @@
         .section-title {
             color: var(--gold);
             font-family: 'Playfair Display', serif;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 5px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-            padding-bottom: 2px;
+            margin-bottom: 4px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         /* LUNCH & BUFFET ROW */
-        .offer-row { display: flex; gap: 8px; flex: 1; }
+        .offer-row { display: flex; gap: 10px; }
         .offer-flex { flex: 1; }
 
         .lunch-row {
             display: flex; justify-content: space-between;
-            font-size: 9.5px; margin-bottom: 5px; color: #eee;
+            font-size: 9px; margin-bottom: 4px; color: #eee;
             border-bottom: 1px dotted rgba(255,255,255,0.2);
             padding-bottom: 2px;
         }
@@ -149,104 +147,94 @@
             align-items: center;
             gap: 5px;
         }
-        
         .buffet-text { flex: 1; }
-        
         .buffet-grid {
             display: grid; grid-template-columns: 1fr auto;
-            font-size: 9px; row-gap: 4px; color: #eee;
+            font-size: 8.5px; row-gap: 3px; color: #eee;
         }
+        .b-qr-area {
+            display: flex; flex-direction: column; align-items: center;
+            margin-left: 5px; padding-left: 5px;
+            border-left: 1px solid rgba(212, 175, 55, 0.4);
+        }
+        .b-qr-box { background: white; padding: 2px; border-radius: 3px; width: 40px; height: 40px; }
+        .b-qr-label { font-size: 5px; color: var(--gold); text-transform: uppercase; font-weight: 700; margin-top: 2px; text-align: center; }
 
-        .buffet-qr-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-left: 5px;
-            padding-left: 8px;
-            border-left: 1px dotted rgba(212, 175, 55, 0.3);
-        }
-        .b-qr-box {
-            background: white; padding: 2px; border-radius: 3px;
-            width: 42px; height: 42px;
-        }
-        .b-qr-label {
-            font-size: 6px; color: var(--gold); text-transform: uppercase;
-            font-weight: 700; margin-top: 3px; text-align: center; line-height: 1.1;
-        }
 
         /* COUPON GRID */
         .coupons-wrapper {
-            background: rgba(80, 0, 0, 0.2); 
-            border: 1px solid var(--gold);
-            border-radius: 6px;
-            padding: 8px;
-            flex: 1.2; 
-            display: flex;
-            flex-direction: column;
+            /* Transparent background, just gold dividers */
+            border-top: 2px solid var(--gold);
+            padding-top: 10px;
         }
         
         .coupon-header {
-            text-align: center; font-size: 11px; font-weight: 800; color: #fff;
-            text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px;
+            text-align: center; font-size: 12px; font-weight: 800; color: #fff;
+            text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;
+            text-shadow: 0 2px 4px #000;
         }
 
         .coupon-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            flex-grow: 1;
+            gap: 8px;
         }
 
         .coupon {
-            background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+            background: linear-gradient(135deg, #fff 0%, #ddd 100%);
             color: #000;
-            padding: 6px;
+            padding: 5px;
             border-radius: 4px;
-            text-align: center;
             border: 1px solid var(--gold);
+            display: flex;
+            flex-direction: row; /* Horizontal layout for logos */
+            align-items: center;
+            justify-content: space-between;
+            height: 45px;
+        }
+
+        .coupon.online { 
+            background: var(--gold-foil); 
+            border: 1px solid #fff; 
+            flex-direction: column; /* Vertical for text-only online codes */
+            justify-content: center;
+            text-align: center;
+        }
+
+        .coupon.physical {
+            background: #fff;
+            border: 2px dashed #000; /* Cut-out look */
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        /* Logo inside coupon */
+        .c-logo-img {
+            width: 25px;
+            height: auto;
+            opacity: 1; /* Fully visible */
+        }
+        
+        .c-content {
+            flex: 1;
+            text-align: right;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            position: relative; /* Needed for watermark positioning */
-            overflow: hidden;
         }
 
-        .coupon.online { background: var(--gold-foil); border: 1px solid #fff; }
-        .coupon.physical { background: #fff; border: 2px dashed #000; }
+        .c-title { font-weight: 900; font-size: 13px; display: block; line-height: 1; margin-bottom: 1px;}
+        .c-desc { font-size: 7px; display: block; font-weight: 700; }
+        .c-small { font-size: 6px; display: block; margin-top: 1px; }
 
-        /* Watermark style for physical coupons */
-        .coupon-watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60%;
-            opacity: 0.15; /* Subtle opacity */
-            z-index: 0;
-            pointer-events: none;
-            filter: grayscale(100%); /* Ensure it doesn't clash with text color */
-        }
-        /* Ensure text sits above the watermark */
-        .coupon span {
-            position: relative;
-            z-index: 1;
-        }
-
-
-        .c-title { font-weight: 900; font-size: 13px; display: block; line-height: 1; margin-bottom: 2px;}
-        .c-desc { font-size: 8px; display: block; font-weight: 700; }
-        .c-small { font-size: 6px; display: block; margin-top: 2px; }
-
-        /* --- 4. FOOTER --- */
+        /* --- 4. FOOTER (Transparent) --- */
         .footer {
-            background: #000;
-            padding: 10px 15px;
+            background: transparent;
+            padding: 5px 15px 15px; /* Bottom padding */
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-top: 3px solid var(--gold);
-            height: 16%;
+            height: 14%;
         }
 
         .qr-section {
@@ -255,24 +243,23 @@
         .qr-box {
             background: white; padding: 3px; border-radius: 4px;
             width: 65px; height: 65px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
         }
         .qr-img { width: 100%; height: 100%; }
 
         .cta-text {
             color: var(--gold); font-family: 'Playfair Display', serif;
             font-size: 14px; font-weight: 800; line-height: 1.2; text-transform: uppercase;
+            text-shadow: 0 2px 5px #000;
         }
 
         .address-container {
             text-align: right;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
         
         .footer-brand {
             font-family: 'Playfair Display', serif;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             background: var(--gold-foil);
             -webkit-background-clip: text;
@@ -282,7 +269,7 @@
         }
 
         .address-block {
-            color: #fff;
+            color: #ddd;
             font-size: 9px;
             line-height: 1.4;
             font-weight: 500;
@@ -373,22 +360,26 @@
 
                     <div class="coupon online">
                         <span class="c-title">WELCOME26</span>
-                        <span class="c-desc">ONLINE SPECIAL</span>
+                        <span class="c-desc">15% ONLINE RABATT</span>
                         <span class="c-small">Ab 55€ | Bis 28.02.26</span>
                     </div>
 
                     <div class="coupon physical">
-                        <img src="logo.png" class="coupon-watermark" alt="Zafran Logo">
-                        <span class="c-title" style="color:#C62828;">5% DINE-IN</span>
-                        <span class="c-desc">Vorzeigen im Restaurant</span>
-                        <span class="c-small">*Nicht für Mittagstisch</span>
+                        <img src="logo.png" class="c-logo-img" alt="Logo">
+                        <div class="c-content">
+                            <span class="c-title" style="color:#C62828;">5% DINE-IN</span>
+                            <span class="c-desc">Vorzeigen im Restaurant</span>
+                            <span class="c-small">*Nicht für Mittagstisch</span>
+                        </div>
                     </div>
 
                     <div class="coupon physical">
-                        <img src="logo.png" class="coupon-watermark" alt="Zafran Logo">
-                        <span class="c-title" style="color:#C62828;">10% STUDI</span>
-                        <span class="c-desc">Gegen Studentenausweis</span>
-                        <span class="c-small">*Nicht für Mittagstisch</span>
+                        <img src="logo.png" class="c-logo-img" alt="Logo">
+                        <div class="c-content">
+                            <span class="c-title" style="color:#C62828;">10% STUDI</span>
+                            <span class="c-desc">Gegen Studentenausweis</span>
+                            <span class="c-small">*Nicht für Mittagstisch</span>
+                        </div>
                     </div>
 
                 </div>

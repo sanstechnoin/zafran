@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Print Card (Text + Buttons)</title>
+    <title>Zafran Delight - Final Print Card (Footer Layout)</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
@@ -76,19 +76,22 @@
 
         .front-content {
             height: 50%;
-            padding: 10px 35px 25px 35px;
+            padding: 10px 30px 20px 30px;
             display: flex;
             flex-direction: column;
+            /* Distribute space: Logo top, Chef middle, Contact bottom */
             justify-content: space-between; 
             position: relative;
             z-index: 2;
+            box-sizing: border-box;
         }
 
-        .brand-group { margin-top: -10px; }
+        /* 1. Brand */
+        .brand-group { margin-top: -15px; }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
-            font-size: 42px;
+            font-size: 44px;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -107,10 +110,12 @@
             margin-top: 5px;
         }
 
+        /* 2. Chef */
         .chef-group {
             display: flex;
             align-items: center;
-            margin-top: 5px;
+            /* Added margin to separate from brand */
+            margin-bottom: 10px; 
         }
         
         .chef-hat-icon {
@@ -124,26 +129,45 @@
         .chef-name { color: #fff; font-size: 17px; font-weight: 700; line-height: 1.1; }
         .chef-role { color: var(--gold); font-size: 11px; margin-top: 2px; font-weight: 500; }
 
-        .contact-container {
-            align-self: flex-end; 
-            background: rgba(0, 0, 0, 0.2);
-            padding: 8px 15px;
-            border-radius: 10px;
+        /* 3. Contact Footer (New 2-Column Layout) */
+        .contact-footer {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
-            margin-top: 5px;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
         }
+
+        .contact-col {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .contact-col.left { text-align: left; }
+        .contact-col.right { text-align: right; }
 
         .contact-row {
             font-size: 10px;
             color: var(--text-white);
-            margin: 2px 0;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
+            gap: 6px;
             font-weight: 500;
+            white-space: nowrap; /* Prevent line breaks */
         }
-        .icon { color: var(--gold); font-size: 12px; }
+
+        /* Reverse row for right alignment so icon is on outside */
+        .contact-col.right .contact-row {
+            flex-direction: row-reverse;
+        }
+
+        .icon { color: var(--gold); font-size: 11px; }
 
         /* --- BACK SIDE --- */
         .back {
@@ -193,10 +217,7 @@
             justify-content: center;
         }
 
-        /* Text Section */
-        .text-group {
-            margin-bottom: 15px;
-        }
+        .text-group { margin-bottom: 15px; }
 
         .catering-title {
             color: var(--gold);
@@ -214,7 +235,6 @@
             margin: 0;
         }
 
-        /* Buttons Section */
         .events-label {
             font-size: 9px;
             text-transform: uppercase;
@@ -235,7 +255,7 @@
             border: 1px solid var(--gold);
             color: #fff;
             padding: 5px 10px;
-            border-radius: 4px; /* Slightly rounded square look */
+            border-radius: 4px;
             font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
@@ -244,7 +264,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* Footer Strip */
         .footer-container {
             margin-top: auto;
             width: 100%;
@@ -283,7 +302,7 @@
 
     <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
-    <div class="label">Front Side (Lighter Brown)</div>
+    <div class="label">Front Side (Footer Contact Layout)</div>
     <div class="card front">
         <div class="hero-section">
             <img src="hero-bg.png" class="hero-img" alt="Hero Background">
@@ -304,11 +323,18 @@
                 </div>
             </div>
 
-            <div class="contact-container">
-                <div class="contact-row">Kessenicher Str. 9, Euskirchen <span class="icon">📍</span></div>
-                <div class="contact-row">+49 152 25475880 <span class="icon">📞</span></div>
-                <div class="contact-row">hussainzaidi1969@gmail.com <span class="icon">✉️</span></div>
-                <div class="contact-row">https://zafraneuskirchen.de <span class="icon">🌐</span></div>
+            <div class="contact-footer">
+                
+                <div class="contact-col left">
+                    <div class="contact-row"><span class="icon">📞</span> +49 152 25475880</div>
+                    <div class="contact-row"><span class="icon">✉️</span> hussainzaidi1969@gmail.com</div>
+                </div>
+
+                <div class="contact-col right">
+                    <div class="contact-row">Kessenicher Str. 9 <span class="icon">📍</span></div>
+                    <div class="contact-row">zafraneuskirchen.de <span class="icon">🌐</span></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -329,7 +355,7 @@
                 <div class="text-group">
                     <div class="catering-title">35+ Years of Tradition</div>
                     <p class="catering-text">
-                        For over three decades, Chef Syed Zaidi has mastered traditional tastes across Holland, Germany, and the UK. We preserve the authentic flavors of the Sub-continent, brought directly to your events.
+                        For over three decades, Chef Syed Zaidi has mastered traditional tastes across Holland, Germany, and the UK. We preserve the authentic flavors of the Sub-continent, bringing premium service to your events.
                     </p>
                 </div>
 

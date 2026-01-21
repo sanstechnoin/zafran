@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Premium Print Card</title>
+    <title>Zafran Delight - Final 3x3 Grid</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
@@ -108,16 +108,14 @@
             display: block;
         }
 
-        /* Chef Group (Updated) */
         .chef-group {
             display: flex;
-            align-items: center; /* Center vertically since it's one line now */
+            align-items: center; 
             gap: 10px;
             margin-bottom: 10px;
         }
         
         .chef-hat-icon {
-            /* CHANGED: Made smaller */
             width: 20px;
             height: 20px;
             filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
@@ -226,6 +224,9 @@
             font-size: 10.5px;
             line-height: 1.5;
             margin: 0;
+            /* CHANGED: Justified Text */
+            text-align: justify;
+            text-justify: inter-word;
         }
 
         .events-label {
@@ -237,23 +238,31 @@
             letter-spacing: 1px;
         }
 
+        /* CHANGED: 3x3 Grid Layout */
         .buttons-grid {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 Equal Columns */
             gap: 6px;
+            width: 100%;
         }
 
         .event-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--gold);
             color: #fff;
-            padding: 5px 10px;
+            padding: 7px 2px; /* Balanced padding */
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 8.5px; /* Slightly smaller to fit long words */
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             white-space: nowrap;
+            
+            /* Center Content */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
         .footer-container {
@@ -307,9 +316,7 @@
                 
                 <div class="chef-group">
                     <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
-                    <div class="chef-details">
-                        <div class="chef-name">Syed Hussain Haider Zaidi</div>
-                        </div>
+                    <div class="chef-name">Syed Hussain Haider Zaidi</div>
                 </div>
             </div>
 
@@ -350,17 +357,21 @@
                 </div>
 
                 <div class="events-label">We Cater For All Occasions:</div>
+                
                 <div class="buttons-grid">
                     <div class="event-btn">Wedding</div>
                     <div class="event-btn">Engagement</div>
                     <div class="event-btn">Birthday</div>
+                    
                     <div class="event-btn">Diwali</div>
                     <div class="event-btn">Holi</div>
                     <div class="event-btn">Milaad</div>
+                    
                     <div class="event-btn">Iftaar</div>
                     <div class="event-btn">Majalis</div>
                     <div class="event-btn">Eid Parties</div>
                 </div>
+
             </div>
         </div>
 

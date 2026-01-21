@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Professional Print Card</title>
+    <title>Zafran Delight - Premium Gradient Card</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
@@ -11,8 +11,8 @@
             --gold: #D4AF37;
             --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
             
-            /* Warm Coffee Brown Background */
-            --card-brown: #5D4037; 
+            /* CHANGED: Lighter Gradient Brown (Bronze/Coffee style) */
+            --card-bg: linear-gradient(135deg, #7a5847 0%, #4e342e 100%);
             
             --text-white: #ffffff;
             --text-silver: #e0e0e0;
@@ -49,14 +49,16 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            background-color: var(--card-brown);
+            
+            /* CHANGED: Applied Gradient Background */
+            background: var(--card-bg);
         }
 
         /* --- FRONT SIDE --- */
-        .front { background-color: var(--card-brown); }
+        .front { background: var(--card-bg); }
 
         .hero-section {
-            height: 45%; /* Slightly reduced to give text breathing room */
+            height: 45%;
             width: 100%;
             position: relative;
         }
@@ -71,7 +73,8 @@
             position: absolute;
             bottom: 0; left: 0; width: 100%; 
             height: 100%; 
-            background: linear-gradient(to bottom, transparent 0%, var(--card-brown) 100%);
+            /* Gradient overlay to blend image into the brown card */
+            background: linear-gradient(to bottom, transparent 0%, #5d3f36 100%);
         }
 
         .front-content {
@@ -84,10 +87,8 @@
             z-index: 2;
         }
 
-        /* Brand & Chef Group */
-        .header-group {
-            margin-top: 5px;
-        }
+        /* Header Group */
+        .header-group { margin-top: 5px; }
 
         .brand-name {
             font-family: 'Playfair Display', serif;
@@ -97,7 +98,11 @@
             -webkit-text-fill-color: transparent;
             font-weight: 800;
             margin: 0;
-            line-height: 1;
+            
+            /* CHANGED: Fix for "Cut in Letter" (Descenders getting clipped) */
+            line-height: 1.2; 
+            padding-bottom: 5px; 
+            
             filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));
         }
 
@@ -107,34 +112,41 @@
             font-weight: 600;
             letter-spacing: 2px;
             text-transform: uppercase;
-            margin-top: 8px;
+            margin-top: 2px;
             margin-bottom: 15px;
             display: block;
         }
 
+        /* Chef Group (Icon Removed) */
         .chef-group {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            margin-bottom: 5px;
         }
         
-        .chef-hat-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
+        .chef-name { 
+            color: #fff; 
+            font-size: 18px; 
+            font-weight: 700; 
+            line-height: 1.2; 
+        }
+        
+        .chef-role { 
+            color: var(--gold); 
+            font-size: 10px; 
+            font-weight: 500; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            margin-top: 2px;
         }
 
-        .chef-details { display: flex; flex-direction: column; }
-        .chef-name { color: #fff; font-size: 16px; font-weight: 700; line-height: 1.2; }
-        .chef-role { color: var(--gold); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Clean Contact Layout (No Box) */
+        /* Contact Footer (Clean Layout) */
         .contact-clean {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             width: 100%;
-            border-top: 1px solid rgba(212, 175, 55, 0.3); /* Subtle Gold Line */
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
             padding-top: 12px;
         }
 
@@ -156,16 +168,14 @@
             font-weight: 500;
         }
 
-        /* Right column aligns icons to the right */
-        .contact-column.right .contact-line {
-            flex-direction: row-reverse;
-        }
+        .contact-column.right .contact-line { flex-direction: row-reverse; }
 
         .c-icon { color: var(--gold); font-size: 11px; }
 
         /* --- BACK SIDE --- */
+        /* Changed to use Gradient Background */
         .back {
-            background-color: var(--card-brown);
+            background: var(--card-bg);
             padding: 0;
             color: white;
             display: flex;
@@ -245,7 +255,7 @@
         }
 
         .event-btn {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.05); /* Slight box BG */
             border: 1px solid var(--gold);
             color: #fff;
             padding: 5px 10px;
@@ -274,7 +284,7 @@
             width: 16.66%;
             height: 60px;
             object-fit: cover;
-            border-right: 1px solid var(--card-brown);
+            border-right: 1px solid rgba(255,255,255,0.1);
             filter: sepia(10%) contrast(110%);
         }
         .strip-img:last-child { border-right: none; }
@@ -295,7 +305,7 @@
 
     <button class="print-btn" onclick="window.print()">Export as PDF / Print</button>
 
-    <div class="label">Front Side (Professional / No Box)</div>
+    <div class="label">Front Side (Gradient + No Icon + Fixed Text)</div>
     <div class="card front">
         <div class="hero-section">
             <img src="hero-bg.png" class="hero-img" alt="Hero Background">
@@ -308,11 +318,8 @@
                 <span class="tagline">Indian & Pakistani Catering Cooking Expert</span>
                 
                 <div class="chef-group">
-                    <img src="https://img.icons8.com/ios-filled/50/D4AF37/chef-hat.png" class="chef-hat-icon" alt="Chef Hat">
-                    <div class="chef-details">
-                        <div class="chef-name">Syed Hussain Haider Zaidi</div>
-                        <div class="chef-role">Owner & Chef</div>
-                    </div>
+                    <div class="chef-name">Syed Hussain Haider Zaidi</div>
+                    <div class="chef-role">Owner & Chef</div>
                 </div>
             </div>
 
@@ -332,7 +339,7 @@
         </div>
     </div>
 
-    <div class="label">Back Side</div>
+    <div class="label">Back Side (Gradient)</div>
     <div class="card back">
         <div class="back-main">
             <div class="qr-section">

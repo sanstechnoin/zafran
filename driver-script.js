@@ -187,19 +187,35 @@ function renderDriverCard(id, order, now) {
             </button>
         `;
     }
+    // --- NEW: Calculate Time for Priority ---
+    let elapsedHtml = '';
+    if (order.createdAt) {
+        const d = order.createdAt.toDate();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        // Calculate difference in minutes
+        const diff = Math.floor((now - d) / 60000);
+        
+        // Priority Colors: Yellow > 30min, Red > 50min
+        let timeColor = '#888'; 
+        if(diff > 30) timeColor = '#FFC107'; 
+        if(diff > 50) timeColor = '#D44437'; 
 
+        elapsedHtml = `<div class="elapsed-time" style="color:${timeColor}">⏱️ ${diff} min (${hh}:${mm})</div>`;
+    }
     const html = `
     <div class="order-card ${statusClass}" id="card-${id}">
         
         <div class="order-header">
-            <div>
-                <span class="order-id">#${order.orderPin || id.slice(-4).toUpperCase()}</span>
-                ${isOverdue ? `<span class="overdue-badge">⚠️ LATE</span>` : ''}
-            </div>
-            <span class="order-time" style="${isOverdue ? 'color:#D44437' : ''}">
-                🕒 ${order.timeSlot || 'ASAP'}
-            </span>
-        </div>
+        <div>
+            <span class="order-id">#${order.orderPin || id.slice(-4).toUpperCase()}</span>
+            ${isOverdue ? `<span class="overdue-badge">⚠️ LATE</span>` : ''}
+            
+            ${elapsedHtml}  </div>
+        <span class="order-time" style="${isOverdue ? 'color:#D44437' : ''}">
+            🕒 ${order.timeSlot || 'ASAP'}
+        </span>
+    </div>
 
         <div id="in-app-map-${id}" class="in-app-map-container"></div>
 

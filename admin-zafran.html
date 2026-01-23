@@ -293,8 +293,6 @@
     let isSoundOn = true;
     let isInitialLoad = true;
 
-    
-
     // --- 2. LOGIN & INIT ---
     document.addEventListener("DOMContentLoaded", () => {
         setTodayDate();
@@ -424,8 +422,9 @@
 
                 let actions = `<button class="btn-action btn-delete" onclick="deleteRes('${res.id}', '${res.name}')">✕</button>`;
                 if(res.status === 'pending') {
+                    // Check if email exists to decide icon/functionality
                     let email = res.email || '';
-                    actions = `<button class="btn-action btn-accept" onclick="confirmRes('${res.id}', '${email}', '${res.name.replace(/'/g, "")}')">✔</button> ` + actions;
+                    actions = `<button class="btn-action btn-accept" onclick="confirmRes('${res.id}', '${email}', '${res.name.replace(/'/g, "")}', '${res.date}', '${res.time}', '${res.guests}')">✔</button> ` + actions;
                 }
 
                 tbody.innerHTML += `
@@ -450,31 +449,18 @@
 
     // --- TRIGGER NOTIFICATION ---
     function triggerNotification(name, guests, time) {
-        // 1. Play Sound
         if(isSoundOn) {
             const audio = document.getElementById('alert-sound');
             audio.currentTime = 0;
             audio.play().catch(e => console.log("Audio play failed (interaction needed)", e));
         }
-        
-        // 2. Show Visual Banner
         const banner = document.getElementById('notification-banner');
         document.getElementById('notif-message').innerHTML = `${name}<br><span style="font-weight:normal; font-size:0.9rem;">${guests} Personen um ${time} Uhr</span>`;
-        
         banner.classList.add('show');
-        
-        // 3. Vibrate Phone
         if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-
-        // Hide after 6 seconds
         setTimeout(() => {
             banner.classList.remove('show');
         }, 6000);
-    }
-
-    function resetAndLoadToday() {
-        setTodayDate();
-        startRealtimeListener();
     }
 
     // --- 4. DRIVER PIN ---
@@ -500,9 +486,9 @@
         });
     };
 
-    // --- 5. ACTIONS (UPDATED FOR AUTO-EMAIL) ---
+    // --- 5. ACTIONS (UPDATED) ---
     
-    // Function to send email in the background
+    // Function to send email
     function sendAutoEmail(email, name, date, time, guests) {
         if (!email || !email.includes("@")) return;
 
@@ -525,31 +511,26 @@
         
         db.collection("reservations").doc(id).update({ status: "confirmed" })
         .then(() => {
-            // 1. Refresh Table
-            loadReservations(); // This relies on your existing function being available in scope
+            // REMOVED: loadReservations(); (Listener updates automatically)
             
-            // 2. Send Auto-Email
+            // Send Auto-Email
             sendAutoEmail(email, name, date, time, guests);
             
-            // 3. Show Success
-            alert("Bestätigt! Email wird im Hintergrund gesendet.");
+            alert("Bestätigt! Email wird gesendet.");
         })
         .catch(e => alert("Fehler: " + e.message));
     };
 
     // Reject/Delete Reservation
     window.deleteRes = function(id, name) {
-        if(!confirm(`${name} wirklich löschen / stornieren?`)) return;
+        if(!confirm(`${name} wirklich löschen?`)) return;
         
-        db.collection("reservations").doc(id).delete() // Or .update({status: 'cancelled'})
+        db.collection("reservations").doc(id).delete()
         .then(() => {
-            // Refresh logic (copied from your existing code)
-            if(document.getElementById('filter-date').value === "") loadAllReservations();
-            else loadReservations();
+            // REMOVED: loadReservations(); (Listener updates automatically)
         })
         .catch(e => alert("Fehler: " + e.message));
     };
 </script>
-
 </body>
 </html>

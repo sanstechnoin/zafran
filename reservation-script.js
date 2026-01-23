@@ -1,4 +1,4 @@
-// --- 1. FIREBASE CONFIG ---
+// --- 1. FIREBASE CONFIGURATION ---
 const firebaseConfig = {
   apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
   authDomain: "zaffran-delight.firebaseapp.com",
@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         submitBtn.innerText = "Senden...";
 
         try {
+            // 1. Save to Firebase (Status: 'pending')
             await db.collection("reservations").add({
                 name: name,
                 phone: phone,
@@ -111,9 +112,29 @@ document.addEventListener("DOMContentLoaded", async () => {
                 time: time,
                 guests: guests,
                 notes: notes,
-                status: "confirmed", 
+                status: "pending", // IMPORTANT: Changed from 'confirmed' to 'pending'
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+
+            // 2. Send "Request Received" Email via FormSubmit
+            if(email) {
+                fetch("https://formsubmit.co/ajax/delightzafran@gmail.com", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: "Neue Reservierungsanfrage: " + name,
+                        // This message goes to YOU and the CUSTOMER (if auto-reply enabled)
+                        message: `Dear ${name},\n\nWe have received your booking request for ${date} at ${time}.\n\nWe will check availability and send you a final confirmation shortly.\n\nThank you,\nZafran Delight Team`,
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        guests: guests,
+                        date: date,
+                        time: time,
+                        notes: notes
+                    })
+                }).catch(err => console.log("Email error (silent):", err));
+            }
 
             modal.style.display = 'flex';
             form.reset();
@@ -130,7 +151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ==========================================
-// 3. LOGIC & RULES
+// 3. LOGIC & RULES (Unchanged)
 // ==========================================
 
 async function loadSettings() {

@@ -149,9 +149,10 @@ function initOrderListener() {
 
 // --- 5. RENDER CARD FUNCTION (In driver-script.js) ---
 function renderDriverCard(id, order, now) {
-    // ... existing address/time logic ...
     const addr = order.deliveryAddress || {};
-    const fullAddress = `${addr.street} ${addr.house}, ${addr.zip}`;
+    const rawZip = addr.zip || "";
+    const cleanZip = rawZip.substring(0, 5) + " Euskirchen";
+    const fullAddress = `${addr.street} ${addr.house}, ${cleanZip}`;
     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
     
     // Tracking Link

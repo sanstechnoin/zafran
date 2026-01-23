@@ -256,7 +256,7 @@
         <button class="btn-refresh" onclick="resetAndLoadToday()">Heute anzeigen (Refresh)</button>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script> 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -273,6 +273,16 @@
       messagingSenderId: "1022960860126",
       appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
     };
+
+    // --- EMAILJS CONFIG ---
+    const EMAIL_PUBLIC_KEY = "Yfpg7eAy2ugtnzqoqU"; 
+    const EMAIL_SERVICE_ID = "service_p890pdo"; 
+    const EMAIL_TEMPLATE_ID = "zafran-res";
+
+    // Init Email Service
+    (function(){
+        emailjs.init(EMAIL_PUBLIC_KEY);
+    })();
     
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -281,7 +291,9 @@
 
     let reservationUnsubscribe = null;
     let isSoundOn = true;
-    let isInitialLoad = true; 
+    let isInitialLoad = true;
+
+    
 
     // --- 2. LOGIN & INIT ---
     document.addEventListener("DOMContentLoaded", () => {
@@ -488,23 +500,54 @@
         });
     };
 
-    // --- 5. ACTIONS ---
-    window.confirmRes = function(id, email, name) {
-        if(!confirm(`Bestätigen: ${name}?`)) return;
+    // --- 5. ACTIONS (UPDATED FOR AUTO-EMAIL) ---
+    
+    // Function to send email in the background
+    function sendAutoEmail(email, name, date, time, guests) {
+        if (!email || !email.includes("@")) return;
+
+        const params = {
+            to_email: email,
+            to_name: name,
+            res_date: date,
+            res_time: time,
+            res_guests: guests
+        };
+
+        emailjs.send(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, params)
+            .then(() => console.log("Email sent successfully!"))
+            .catch((err) => alert("Warnung: Email konnte nicht gesendet werden.\n" + JSON.stringify(err)));
+    }
+
+    // Confirm Reservation
+    window.confirmRes = function(id, email, name, date, time, guests) {
+        if(!confirm(`Reservierung für ${name} bestätigen und Email senden?`)) return;
         
         db.collection("reservations").doc(id).update({ status: "confirmed" })
         .then(() => {
-            if(email && email.length > 3) {
-                const subject = "Reservierung Bestätigt - Zafran Delight";
-                const body = `Hallo ${name},\n\nWir bestätigen Ihre Reservierung.\nWir freuen uns auf Sie!\n\nIhr Zafran Team`;
-                window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            }
-        });
+            // 1. Refresh Table
+            loadReservations(); // This relies on your existing function being available in scope
+            
+            // 2. Send Auto-Email
+            sendAutoEmail(email, name, date, time, guests);
+            
+            // 3. Show Success
+            alert("Bestätigt! Email wird im Hintergrund gesendet.");
+        })
+        .catch(e => alert("Fehler: " + e.message));
     };
 
+    // Reject/Delete Reservation
     window.deleteRes = function(id, name) {
-        if(!confirm(`Löschen: ${name}?`)) return;
-        db.collection("reservations").doc(id).delete();
+        if(!confirm(`${name} wirklich löschen / stornieren?`)) return;
+        
+        db.collection("reservations").doc(id).delete() // Or .update({status: 'cancelled'})
+        .then(() => {
+            // Refresh logic (copied from your existing code)
+            if(document.getElementById('filter-date').value === "") loadAllReservations();
+            else loadReservations();
+        })
+        .catch(e => alert("Fehler: " + e.message));
     };
 </script>
 

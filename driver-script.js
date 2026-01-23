@@ -151,7 +151,7 @@ function initOrderListener() {
 function renderDriverCard(id, order, now) {
     // ... existing address/time logic ...
     const addr = order.deliveryAddress || {};
-    const fullAddress = `${addr.street} ${addr.house}, ${addr.zip} Euskirchen`;
+    const fullAddress = `${addr.street} ${addr.house}, ${addr.zip}`;
     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
     
     // Tracking Link

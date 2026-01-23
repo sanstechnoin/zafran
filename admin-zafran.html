@@ -278,6 +278,7 @@
     const EMAIL_PUBLIC_KEY = "fpg7eAy2ugtnzqoqU"; 
     const EMAIL_SERVICE_ID = "service_p890pdo"; 
     const EMAIL_TEMPLATE_ID = "zafran-res";
+    const EMAIL_REJECT_ID = "zafran-rej";
 
     // Init Email Service
     (function(){
@@ -420,7 +421,7 @@
                 if(res.status === 'cancelled') { sClass = 'status-cancelled'; sText = 'Storno'; }
                 if(res.status === 'pending') { sText = 'NEU'; }
 
-                let actions = `<button class="btn-action btn-delete" onclick="deleteRes('${res.id}', '${res.name}')">✕</button>`;
+                let actions = `<button class="btn-action btn-delete" onclick="deleteRes('${res.id}', '${res.name.replace(/'/g, "")}', '${res.email || ""}')">✕</button>`;
                 if(res.status === 'pending') {
                     // Check if email exists to decide icon/functionality
                     let email = res.email || '';
@@ -521,13 +522,35 @@
         .catch(e => alert("Fehler: " + e.message));
     };
 
-    // Reject/Delete Reservation
-    window.deleteRes = function(id, name) {
-        if(!confirm(`${name} wirklich löschen?`)) return;
+    // Reject/Delete Reservation with Email Option
+    window.deleteRes = function(id, name, email) { // Note: 'email' is now passed here
+        if(!confirm(`Möchten Sie die Reservierung von ${name} wirklich stornieren?`)) return;
         
-        db.collection("reservations").doc(id).delete()
+        // 1. Ask if you want to send the Rejection Email
+        let sendRejection = false;
+        if(email && email.includes("@")) {
+            sendRejection = confirm("Soll eine höfliche Absage-Email (Deutsch) gesendet werden?");
+        }
+
+        // 2. Update Database to 'cancelled'
+        db.collection("reservations").doc(id).update({ status: "cancelled" })
         .then(() => {
-            // REMOVED: loadReservations(); (Listener updates automatically)
+            // 3. Send Email if "Yes" was clicked
+            if(sendRejection) {
+                const params = {
+                    to_email: email,
+                    to_name: name,
+                    res_date: "Requested Date", // Optional: Pass real date if available
+                    res_time: "Requested Time"
+                };
+                
+                // Uses your new ID: "zafran-rej"
+                emailjs.send(EMAIL_SERVICE_ID, EMAIL_REJECT_ID, params)
+                .then(() => alert("Storniert & Absage-Email gesendet."))
+                .catch((err) => alert("Storniert, aber Email fehlgeschlagen: " + JSON.stringify(err)));
+            } else {
+                console.log("Storniert ohne Email.");
+            }
         })
         .catch(e => alert("Fehler: " + e.message));
     };

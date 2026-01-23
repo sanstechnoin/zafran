@@ -425,7 +425,9 @@
                 if(res.status === 'pending') {
                     // Check if email exists to decide icon/functionality
                     let email = res.email || '';
-                    actions = `<button class="btn-action btn-accept" onclick="confirmRes('${res.id}', '${email}', '${res.name.replace(/'/g, "")}', '${res.date}', '${res.time}', '${res.guests}')">✔</button> ` + actions;
+                    // We now pass date ('${res.date}') and time ('${res.time}') to the function
+                    actions = `<button class="btn-action btn-accept" onclick="confirmRes('${res.id}', '${email}', '${res.name.replace(/'/g, "")}', '${res.date}', '${res.time}', '${res.guests}')">✔</button> 
+                               <button class="btn-action btn-delete" onclick="deleteRes('${res.id}', '${res.name.replace(/'/g, "")}', '${email}', '${res.date}', '${res.time}')">✕</button>`;
                 }
 
                 tbody.innerHTML += `
@@ -522,38 +524,36 @@
         .catch(e => alert("Fehler: " + e.message));
     };
 
-    // Reject/Delete Reservation with Email Option
-    window.deleteRes = function(id, name, email) { // Note: 'email' is now passed here
-        if(!confirm(`Möchten Sie die Reservierung von ${name} wirklich stornieren?`)) return;
-        
-        // 1. Ask if you want to send the Rejection Email
-        let sendRejection = false;
-        if(email && email.includes("@")) {
-            sendRejection = confirm("Soll eine höfliche Absage-Email (Deutsch) gesendet werden?");
-        }
+   // REPLACE YOUR deleteRes FUNCTION WITH THIS
+window.deleteRes = function(id, name, email, date, time) { // Now accepts date & time
+    if(!confirm(`Möchten Sie die Reservierung von ${name} wirklich stornieren?`)) return;
+    
+    let sendRejection = false;
+    if(email && email.includes("@")) {
+        sendRejection = confirm("Soll eine höfliche Absage-Email (Deutsch) gesendet werden?");
+    }
 
-        // 2. Update Database to 'cancelled'
-        db.collection("reservations").doc(id).update({ status: "cancelled" })
-        .then(() => {
-            // 3. Send Email if "Yes" was clicked
-            if(sendRejection) {
-                const params = {
-                    to_email: email,
-                    to_name: name,
-                    res_date: "Requested Date", // Optional: Pass real date if available
-                    res_time: "Requested Time"
-                };
-                
-                // Uses your new ID: "zafran-rej"
-                emailjs.send(EMAIL_SERVICE_ID, EMAIL_REJECT_ID, params)
-                .then(() => alert("Storniert & Absage-Email gesendet."))
-                .catch((err) => alert("Storniert, aber Email fehlgeschlagen: " + JSON.stringify(err)));
-            } else {
-                console.log("Storniert ohne Email.");
-            }
-        })
-        .catch(e => alert("Fehler: " + e.message));
-    };
+    db.collection("reservations").doc(id).update({ status: "cancelled" })
+    .then(() => {
+        if(sendRejection) {
+            // Format Date from YYYY-MM-DD to DD.MM.YYYY for the email
+            const dateObj = new Date(date);
+            const dateFormatted = dateObj.toLocaleDateString('de-DE'); // e.g. 23.01.2026
+
+            const params = {
+                to_email: email,
+                to_name: name,
+                res_date: dateFormatted, // Use the nice German date
+                res_time: time
+            };
+            
+            emailjs.send(EMAIL_SERVICE_ID, EMAIL_REJECT_ID, params)
+            .then(() => alert("Storniert & Absage-Email gesendet."))
+            .catch((err) => alert("Storniert, aber Email fehlgeschlagen: " + JSON.stringify(err)));
+        }
+    })
+    .catch(e => alert("Fehler: " + e.message));
+};
 </script>
 </body>
 </html>

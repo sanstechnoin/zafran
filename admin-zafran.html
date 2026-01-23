@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zafran Res">
+    <link rel="apple-touch-icon" href="favlogo.png">
+    
+    <title>Reservation Manager - Zafran</title>
+    <link rel="icon" type="image/png" href="favlogo.png">
+    <style>
+        /* --- KDS THEME VARIABLES --- */
+        :root {
+            --bg-dark: #1a1a1a;        
+            --card-bg: #2a2a2a;       
+            --gold: #D4AF37;
+            --text-main: #f0f0f0;
+            --border-color: #444;
+            --danger-red: #dc3545;
+            --success-green: #28a745;
+        }
+
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            padding: 10px; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex; flex-direction: column; min-height: 100vh; margin: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .admin-container { 
+            max-width: 1100px; width: 100%; margin: 0 auto 30px auto; 
+            background: var(--card-bg); padding: 20px; border-radius: 8px; 
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        .header-logo { display: block; height: 50px; margin: 0 auto 10px auto; }
+        
+        h2 { 
+            border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 20px; 
+            color: var(--gold); text-align: center; text-transform: uppercase; font-size: 1.2rem;
+        }
+
+        /* PIN MANAGER STYLES */
+        .pin-section {
+            background: #111; padding: 15px; border-radius: 8px; 
+            border: 1px solid #444; margin-bottom: 20px; text-align: center;
+        }
+        .pin-box {
+            display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 10px; flex-wrap: wrap;
+        }
+        .pin-input {
+            background: transparent; border: none; color: white; 
+            font-size: 1.5rem; letter-spacing: 3px; width: 100px; text-align: center;
+            border-bottom: 2px solid var(--gold);
+        }
+        .btn-save-pin {
+            background: var(--success-green); color: white; border: none; 
+            padding: 10px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;
+        }
+
+        /* FILTERS */
+        .filter-bar {
+            display: flex; gap: 10px; margin-bottom: 20px; align-items: center; 
+            background: #111; padding: 10px; border-radius: 6px; flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .filter-group { display: flex; align-items: center; gap: 5px; }
+        .filter-bar label { font-weight: bold; color: var(--gold); font-size: 0.9rem; }
+        .filter-bar input, .filter-bar select {
+            padding: 8px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;
+        }
+        
+        .btn-refresh {
+            padding: 8px 15px; background: var(--gold); color: black; border: none; 
+            border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px;
+        }
+
+        /* TABLE */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #222; }
+        th { background: #111; color: var(--gold); padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color); white-space: nowrap;}
+        td { padding: 12px; border-bottom: 1px solid #333; vertical-align: middle; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; white-space: nowrap; }
+        .status-confirmed { color: #2ecc71; border: 1px solid #2ecc71; background: rgba(46, 204, 113, 0.1); }
+        .status-pending { color: #ffc107; border: 1px solid #ffc107; background: rgba(255, 193, 7, 0.1); animation: pulse 2s infinite; }
+        .status-cancelled { color: #ff6b6b; border: 1px solid #ff6b6b; opacity: 0.7; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .btn-action {
+            border: none; width: 36px; height: 36px; border-radius: 4px; 
+            cursor: pointer; font-weight: bold; margin-left: 5px; font-size: 1.2rem;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .btn-accept { background: var(--success-green); color: white; }
+        .btn-delete { background: var(--danger-red); color: white; }
+
+        /* LOGIN OVERLAY */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark); z-index: 10000;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .login-box {
+            background: var(--card-bg); padding: 30px; border-radius: 8px;
+            border: 2px solid var(--gold); text-align: center; width: 85%; max-width: 350px;
+        }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: #111; color: white; border: 1px solid #444; text-align: center; box-sizing: border-box; }
+        .login-box button { width: 100%; padding: 12px; background: var(--gold); border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        
+        .message-box { margin-top: 10px; font-weight: bold; font-size: 0.9rem; min-height: 20px;}
+        .success-msg { color: var(--success-green); }
+        .error-msg { color: var(--danger-red); }
+
+        /* --- IOS STYLE NOTIFICATION BANNER --- */
+        #notification-banner {
+            position: fixed;
+            top: -120px; /* Hidden above screen */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            
+            /* Glassmorphism Effect */
+            background: rgba(40, 40, 40, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            
+            color: white;
+            padding: 15px;
+            border-radius: 16px;
+            
+            /* Shadow & Border */
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            
+            /* Bouncy Animation */
+            transition: top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #notification-banner.show {
+            top: 20px; /* Drop position */
+        }
+
+        .notif-icon {
+            width: 40px; height: 40px;
+            background: var(--gold);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: black;
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .notif-content { flex: 1; }
+        .notif-title { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .notif-msg { font-size: 1rem; font-weight: bold; margin-top: 2px; color: white; }
+        .notif-time { font-size: 0.75rem; color: #888; }
+
+    </style>
+</head>
+<body>
+
+<audio id="alert-sound" src="notification.mp3" preload="auto"></audio>
+
+<div id="notification-banner">
+    <div class="notif-icon">🔔</div>
+    <div class="notif-content">
+        <div style="display:flex; justify-content:space-between;">
+            <div class="notif-title">ZAFRAN ADMIN</div>
+            <div class="notif-time">Jetzt</div>
+        </div>
+        <div class="notif-msg" id="notif-message">Neue Reservierung!</div>
+    </div>
+</div>
+
+<div id="login-overlay">
+    <div class="login-box">
+        <img src="logo.png" alt="Zafran" style="height:70px; margin-bottom:20px;">
+        <h3 style="color:var(--gold); margin-bottom:20px;">RESERVATION APP</h3>
+        <form id="login-form">
+            <input type="password" id="admin-password" placeholder="Passwort" required>
+            <button type="submit">Login</button>
+            <p id="login-error" style="color:red; margin-top:10px; font-size:0.9rem;"></p>
+        </form>
+    </div>
+</div>
+
+<div id="admin-content" style="display:none;">
+    <div class="admin-container">
+        <img src="logo.png" alt="Zafran Logo" class="header-logo">
+        
+        <div class="pin-section">
+            <h3 style="color:var(--gold); margin:0; font-size:1rem;">🚗 Fahrer PIN Manager</h3>
+            <div class="pin-box">
+                <input type="text" id="driver-pin-input" class="pin-input" maxlength="6" placeholder="Loading...">
+                <button class="btn-save-pin" onclick="saveDriverPin()">SAVE</button>
+            </div>
+            <div id="pin-status" class="message-box"></div>
+        </div>
+
+        <h2>Reservierungen</h2>
+        
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>Datum:</label>
+                <input type="date" id="filter-date">
+            </div>
+            <div class="filter-group">
+                <label>Status:</label>
+                <select id="filter-status">
+                    <option value="all">Alle</option>
+                    <option value="pending" selected>Ausstehend</option>
+                    <option value="confirmed">Bestätigt</option>
+                    <option value="cancelled">Storniert</option>
+                </select>
+            </div>
+            <button id="sound-btn" onclick="toggleSound()" style="background:#333; color:#fff; border:1px solid #555; padding:8px; border-radius:4px; margin-left:auto;">
+                🔊 An
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="res-table">
+                <thead>
+                    <tr>
+                        <th>Zeit</th>
+                        <th>Name</th>
+                        <th>Pers.</th>
+                        <th>Info</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="res-body">
+                    <tr><td colspan="6" style="text-align:center; padding:20px;">Warte auf Daten...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 15px; text-align: center; color: #888; font-size:0.9rem;">
+            Total Gäste: <span id="total-guests-count" style="color: var(--gold); font-weight: bold;">0</span>
+        </div>
+        
+        <button class="btn-refresh" onclick="resetAndLoadToday()">Heute anzeigen (Refresh)</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<script>
+    // --- 1. CONFIG ---
+    const ADMIN_PASSWORD = "zafran2025"; 
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
+      authDomain: "zaffran-delight.firebaseapp.com",
+      projectId: "zaffran-delight",
+      storageBucket: "zaffran-delight.firebasestorage.app",
+      messagingSenderId: "1022960860126",
+      appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
+    };
+    
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    let reservationUnsubscribe = null;
+    let isSoundOn = true;
+    let isInitialLoad = true; 
+
+    // --- 2. LOGIN & INIT ---
+    document.addEventListener("DOMContentLoaded", () => {
+        setTodayDate();
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                startRealtimeListener();
+                loadDriverPin();
+            } else {
+                document.getElementById('login-overlay').style.display = 'flex';
+                document.getElementById('admin-content').style.display = 'none';
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('admin-password').value;
+            const btn = document.querySelector('#login-form button');
+            const err = document.getElementById('login-error');
+
+            if (pass === ADMIN_PASSWORD) {
+                btn.innerText = "Lade App...";
+                btn.disabled = true;
+                const email = "webmaster@zafraneuskirchen.de"; 
+                const secret = "!Zafran2025"; 
+
+                firebase.auth().signInWithEmailAndPassword(email, secret)
+                .catch((error) => {
+                    if (error.code === 'auth/user-not-found') {
+                        return firebase.auth().createUserWithEmailAndPassword(email, secret);
+                    }
+                    throw error;
+                })
+                .catch((error) => {
+                    err.innerHTML = `Fehler: ${error.message}`;
+                    btn.innerText = "Login";
+                    btn.disabled = false;
+                });
+            } else {
+                err.textContent = "Falsches Passwort!";
+            }
+        });
+
+        document.getElementById('filter-date').addEventListener('change', startRealtimeListener);
+        document.getElementById('filter-status').addEventListener('change', startRealtimeListener);
+    });
+
+    function setTodayDate() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        document.getElementById('filter-date').value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    function toggleSound() {
+        isSoundOn = !isSoundOn;
+        const btn = document.getElementById('sound-btn');
+        if(isSoundOn) {
+            btn.innerHTML = "🔊 An";
+            btn.style.opacity = "1";
+            document.getElementById('alert-sound').play().catch(()=>{});
+        } else {
+            btn.innerHTML = "🔇 Aus";
+            btn.style.opacity = "0.5";
+        }
+    }
+
+    // --- 3. REAL-TIME DATA ---
+    function startRealtimeListener() {
+        if(reservationUnsubscribe) {
+            reservationUnsubscribe();
+        }
+
+        const dateVal = document.getElementById('filter-date').value;
+        const statusVal = document.getElementById('filter-status').value;
+        const tbody = document.getElementById('res-body');
+        
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Verbinde Live-Daten...</td></tr>';
+
+        let query = db.collection("reservations").where("date", "==", dateVal);
+        
+        if (statusVal !== 'all') {
+            query = query.where("status", "==", statusVal);
+        }
+
+        reservationUnsubscribe = query.onSnapshot((snapshot) => {
+            const list = [];
+            let totalGuests = 0;
+
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added" && !isInitialLoad) {
+                    const data = change.doc.data();
+                    // ONLY NOTIFY IF STATUS IS PENDING
+                    if(data.status === 'pending') {
+                        triggerNotification(data.name, data.guests, data.time);
+                    }
+                }
+            });
+
+            if (snapshot.empty) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#666;">Keine Reservierungen für ${dateVal}</td></tr>`;
+                document.getElementById('total-guests-count').innerText = "0";
+                isInitialLoad = false;
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                list.push({ id: doc.id, ...doc.data() });
+            });
+
+            list.sort((a, b) => a.time.localeCompare(b.time));
+
+            tbody.innerHTML = "";
+            
+            list.forEach(res => {
+                let g = parseInt(res.guests) || 0;
+                if(res.status === 'confirmed') totalGuests += g;
+
+                let sClass = 'status-pending';
+                let sText = res.status;
+                if(res.status === 'confirmed') { sClass = 'status-confirmed'; sText = 'OK'; }
+                if(res.status === 'cancelled') { sClass = 'status-cancelled'; sText = 'Storno'; }
+                if(res.status === 'pending') { sText = 'NEU'; }
+
+                let actions = `<button class="btn-action btn-delete" onclick="deleteRes('${res.id}', '${res.name}')">✕</button>`;
+                if(res.status === 'pending') {
+                    let email = res.email || '';
+                    actions = `<button class="btn-action btn-accept" onclick="confirmRes('${res.id}', '${email}', '${res.name.replace(/'/g, "")}')">✔</button> ` + actions;
+                }
+
+                tbody.innerHTML += `
+                    <tr style="${res.status==='cancelled'?'opacity:0.5':''}">
+                        <td style="color:var(--gold); font-weight:bold; font-size:1.1rem;">${res.time}</td>
+                        <td>
+                            <div style="font-weight:bold;">${res.name}</div>
+                            <div style="font-size:0.8rem; color:#aaa;"><a href="tel:${res.phone}" style="color:#aaa;text-decoration:none;">${res.phone}</a></div>
+                        </td>
+                        <td style="text-align:center; font-weight:bold; font-size:1.1rem;">${res.guests}</td>
+                        <td style="font-size:0.8rem; font-style:italic; color:#aaa; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${res.notes || '-'}</td>
+                        <td><span class="status-badge ${sClass}">${sText}</span></td>
+                        <td style="text-align:right;">${actions}</td>
+                    </tr>
+                `;
+            });
+            
+            document.getElementById('total-guests-count').innerText = totalGuests;
+            isInitialLoad = false; 
+        });
+    }
+
+    // --- TRIGGER NOTIFICATION ---
+    function triggerNotification(name, guests, time) {
+        // 1. Play Sound
+        if(isSoundOn) {
+            const audio = document.getElementById('alert-sound');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Audio play failed (interaction needed)", e));
+        }
+        
+        // 2. Show Visual Banner
+        const banner = document.getElementById('notification-banner');
+        document.getElementById('notif-message').innerHTML = `${name}<br><span style="font-weight:normal; font-size:0.9rem;">${guests} Personen um ${time} Uhr</span>`;
+        
+        banner.classList.add('show');
+        
+        // 3. Vibrate Phone
+        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+        // Hide after 6 seconds
+        setTimeout(() => {
+            banner.classList.remove('show');
+        }, 6000);
+    }
+
+    function resetAndLoadToday() {
+        setTodayDate();
+        startRealtimeListener();
+    }
+
+    // --- 4. DRIVER PIN ---
+    function loadDriverPin() {
+        db.collection('settings').doc('driver_auth').get().then(doc => {
+            document.getElementById('driver-pin-input').value = doc.exists ? (doc.data().pin || "") : "";
+        });
+    }
+
+    window.saveDriverPin = function() {
+        const newPin = document.getElementById('driver-pin-input').value.trim();
+        const statusEl = document.getElementById('pin-status');
+        if(newPin.length < 4) {
+            statusEl.innerText = "Min 4 Zeichen";
+            statusEl.className = "message-box error-msg";
+            return;
+        }
+        db.collection('settings').doc('driver_auth').set({ pin: newPin })
+        .then(() => {
+            statusEl.innerText = "Gespeichert!";
+            statusEl.className = "message-box success-msg";
+            setTimeout(() => statusEl.innerText = "", 3000);
+        });
+    };
+
+    // --- 5. ACTIONS ---
+    window.confirmRes = function(id, email, name) {
+        if(!confirm(`Bestätigen: ${name}?`)) return;
+        
+        db.collection("reservations").doc(id).update({ status: "confirmed" })
+        .then(() => {
+            if(email && email.length > 3) {
+                const subject = "Reservierung Bestätigt - Zafran Delight";
+                const body = `Hallo ${name},\n\nWir bestätigen Ihre Reservierung.\nWir freuen uns auf Sie!\n\nIhr Zafran Team`;
+                window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            }
+        });
+    };
+
+    window.deleteRes = function(id, name) {
+        if(!confirm(`Löschen: ${name}?`)) return;
+        db.collection("reservations").doc(id).delete();
+    };
+</script>
+
+</body>
+</html>

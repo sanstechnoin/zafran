@@ -2,20 +2,24 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Zafran Delight - Final A5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <title>Zafran Delight - Final Offers A5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold: #D4AF37;
-            --gold-foil: linear-gradient(135deg, #bf953f 0%, #fcf6ba 40%, #b38728 60%, #fbf5b7 100%);
-            /* BRIGHT YELLOW for Prices & Headers */
-            --gold-text: #FFD700; 
-            --seamless-gradient: linear-gradient(180deg, #5a0000 0%, #2d1b15 40%, #000000 100%);
+            /* Vibrant Gold */
+            --gold: #F4C430; 
+            /* Shiny Gold Foil Effect for backgrounds */
+            --gold-foil: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #FFD700 100%);
+            --gold-text: #FFFF00;
+            
+            /* UNIFORM BACKGROUND: Deep Burgundy to Black */
+            --seamless-gradient: linear-gradient(180deg, #1a0505 0%, #0d0000 40%, #000000 100%);
             --white: #ffffff;
+            --black: #000000;
         }
 
         body {
-            background-color: #222;
+            background-color: #333;
             font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
@@ -25,7 +29,7 @@
             min-height: 100vh;
         }
 
-        /* A5 DIMENSIONS */
+        /* EXACT A5 DIMENSIONS */
         .pamphlet-a5 {
             width: 148mm;
             height: 210mm;
@@ -40,182 +44,216 @@
             box-sizing: border-box;
         }
 
-        /* --- 1. HERO IMAGE --- */
+        /* GLOBAL TEXT SETTINGS */
+        div, span, p {
+            font-weight: 700; /* Bold for readability */
+        }
+
+        /* --- 1. HEADER --- */
+        .header-section {
+            background: transparent;
+            padding: 10px 10px 0px;
+            text-align: center;
+            height: 9%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .top-logo {
+            width: 65px;
+            height: auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+        }
+
+        /* --- 2. HERO IMAGE --- */
         .hero-container {
-            height: 18%; 
+            height: 21%;
             position: relative;
             padding: 0; 
             width: 100%;
             z-index: 1;
-            margin-bottom: 8px;
-            border-bottom: 2px solid var(--gold);
+            margin-bottom: 2px;
+        }
+
+        .hero-frame {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
         }
 
         .hero-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: cover; 
-            object-position: center bottom;
-            display: block;
+            object-fit: cover;
+            object-position: center bottom; 
         }
 
-        /* --- 2. MAIN CONTENT --- */
+        /* --- 3. MAIN CONTENT --- */
         .content-body {
             flex-grow: 1;
-            padding: 5px 12px;
+            padding: 2px 12px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            justify-content: flex-start; 
+            gap: 8px;
+            justify-content: space-evenly;
         }
 
-        /* CHANGED: Color matches the Price (#FFD700) */
         .section-header {
-            color: var(--gold-text); /* Bright Yellow */
+            color: var(--gold);
             font-family: 'Playfair Display', serif;
-            font-size: 19px;
+            font-size: 16px;
             font-weight: 900;
             text-transform: uppercase;
-            margin-bottom: 6px;
-            border-bottom: 2px solid rgba(212, 175, 55, 0.5);
+            margin-bottom: 3px;
+            border-bottom: 1px solid rgba(255, 235, 59, 0.4);
             padding-bottom: 2px;
             text-shadow: 0 2px 4px #000;
+            text-align: center;
         }
 
-        /* --- FOOD SECTION --- */
+        /* --- FOOD SECTION (Buffet) --- */
         .food-row {
             display: flex;
-            gap: 10px;
+            width: 100%;
             flex: 0 0 auto;
         }
 
         .food-box {
-            flex: 1;
+            width: 100%;
             border: 1px solid var(--gold);
-            border-radius: 8px;
-            padding: 8px 10px;
+            border-radius: 6px;
+            padding: 6px 8px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            background: rgba(0,0,0,0.1); 
+            background: rgba(255,255,255,0.03);
         }
 
-        /* Lunch Items */
-        .lunch-row {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 10.5px; margin-bottom: 6px; color: #fff; font-weight: 600;
-            border-bottom: 1px dotted rgba(255,255,255,0.3); padding-bottom: 3px;
-        }
-        .price { font-weight: 900; color: var(--gold-text); font-size: 14px; }
-
-        /* Buffet Items */
-        .buffet-inner { display: flex; gap: 8px; height: 100%; align-items: center;}
+        .buffet-inner { display: flex; gap: 10px; height: 100%; align-items: center; }
         .buffet-text { flex: 1; }
-        .buffet-grid { 
-            display: grid; grid-template-columns: 1fr auto; 
-            font-size: 10.5px; row-gap: 4px; color: #fff; font-weight: 500;
+
+        .buffet-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            font-size: 10.5px; 
+            row-gap: 4px;
+            color: #fff;
+            margin-top: 3px;
         }
 
-        /* QR in Buffet */
+        .buffet-sub {
+            font-size: 8.5px;
+            color: #ddd;
+            font-weight: 700;
+            margin-bottom: 3px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .price {
+            font-weight: 900;
+            color: var(--gold-text);
+            font-size: 12px;
+            text-align: right;
+            padding-left: 10px;
+        }
+
         .b-qr-area {
             display: flex; flex-direction: column; align-items: center;
-            border-left: 2px solid rgba(212, 175, 55, 0.5); padding-left: 8px;
+            border-left: 1px solid rgba(255, 215, 0, 0.4); padding-left: 8px;
         }
-        .b-qr-box { background: white; padding: 3px; border-radius: 4px; width: 48px; height: 48px; }
+        .b-qr-box { background: white; padding: 2px; border-radius: 3px; width: 40px; height: 40px; }
         .b-qr-img { width: 100%; height: 100%; }
-        .b-qr-label { font-size: 7px; color: var(--gold); font-weight: 800; margin-top: 3px; text-align: center; text-transform:uppercase; line-height:1.1; }
+        .b-qr-label {
+            font-size: 5px; color: var(--gold); font-weight: 800;
+            margin-top: 2px; text-align: center; text-transform: uppercase; line-height: 1;
+        }
 
-
-        /* --- COUPON SECTION --- */
+        /* --- COUPON SECTION (CHECKERBOARD) --- */
         .coupon-section-title {
-            text-align: center; font-size: 15px; font-weight: 900; color: #fff;
-            text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
             text-shadow: 0 2px 4px #000;
-            padding-top: 5px; border-top: 1px solid rgba(212, 175, 55, 0.3);
         }
 
         .coupon-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: 1fr 1fr; /* Equal columns */
+            grid-template-rows: 1fr 1fr;    /* Equal rows */
+            gap: 8px;
             flex: 1;
         }
 
         .coupon {
-            border-radius: 6px;
+            border-radius: 5px;
             text-align: center;
-            border: 1px solid var(--gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-        }
-
-        .coupon.online {
-            background: var(--gold-foil); 
-            border: 2px solid #fff;
-            flex-direction: column; 
-            color: #000;
-        }
-        
-        .coupon.physical {
-            background: #fff; 
-            border: 2px dashed #000; 
-            color: #000;
-            justify-content: space-between;
-            padding: 0 4px; /* Reduced padding to give logos space */
-        }
-
-        /* CHANGED: Bigger logos for coupons */
-        .side-logo { width: 35px; height: auto; opacity: 1; }
-        
-        .c-center { flex: 1; text-align: center; display:flex; flex-direction:column; justify-content:center; }
-        .c-title { font-weight: 900; font-size: 16px; display: block; line-height: 1; margin-bottom: 2px;}
-        .c-desc { font-size: 10px; display: block; font-weight: 800; }
-        .c-small { font-size: 8px; display: block; margin-top: 3px; font-weight: 700; }
-
-        /* --- 4. FOOTER (NEW LAYOUT: Left-Middle-Right) --- */
-        .footer {
-            background: rgba(0,0,0,0.2);
-            padding: 10px 15px 8px; 
-            display: flex;
-            flex-direction: column; 
-            justify-content: flex-end;
-            gap: 10px;
-            border-top: 2px solid var(--gold); 
-        }
-
-        .footer-content-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            width: 100%;
-        }
-
-        /* LEFT: Brand Name (White) + QR */
-        .f-col-left {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            flex: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        /* CHANGED: Pure White Text */
-        .footer-brand-white {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            font-weight: 900;
-            color: #ffffff; /* WHITE */
-            text-transform: uppercase;
-            line-height: 1;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        /* STYLE 1: GOLD BACKGROUND (For Online/Special) */
+        .coupon.gold-style {
+            background: var(--gold-foil);
+            border: 1px solid #fff;
+            color: #000;
+        }
+        .coupon.gold-style .c-title { color: #000; text-shadow: none; }
+        .coupon.gold-style .c-desc { color: #222; }
+        .coupon.gold-style .c-small { color: #333; }
+
+        /* STYLE 2: WHITE BACKGROUND (For Physical/Dine-In) */
+        .coupon.white-style {
+            background: #fff;
+            border: 2px dashed #000;
+            color: #000;
+        }
+        .coupon.white-style .c-title { color: #C62828; } /* Red title for urgency */
+        .coupon.white-style .c-desc { color: #000; }
+        .coupon.white-style .c-small { color: #444; }
+
+        /* Typography for Coupons */
+        .c-title { font-weight: 900; font-size: 13px; display: block; line-height: 1; margin-bottom: 2px; text-transform: uppercase;}
+        .c-desc { font-size: 8px; display: block; font-weight: 800; text-transform: uppercase; line-height: 1.1; margin-bottom: 2px;}
+        .c-small { font-size: 6.5px; display: block; font-weight: 700; line-height: 1.1; }
+
+        /* Scissor icon for physical coupons (optional visual flair) */
+        .cut-icon { position: absolute; top: 2px; right: 2px; width: 8px; opacity: 0.5; }
+
+        /* --- 4. FOOTER --- */
+        .footer {
+            background: transparent;
+            padding: 2px 15px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 15%;
+            gap: 5px;
+        }
+
+        .footer-top-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
         }
 
         .qr-section { display: flex; align-items: center; gap: 8px; }
         .f-qr-box {
-            background: white; padding: 3px; border-radius: 4px;
-            width: 55px; height: 55px;
+            background: white; padding: 2px; border-radius: 4px;
+            width: 50px; height: 50px;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
         .qr-img { width: 100%; height: 100%; }
@@ -227,73 +265,43 @@
         }
         
         .cta-subtext {
-             font-size: 7.5px; color: #fff; font-family: 'Montserrat'; font-weight: 600;
-             line-height: 1.3; display: block; margin-top: 2px;
-             white-space: nowrap; 
+             font-size: 7px; color: #fff; font-family: 'Montserrat'; font-weight: 700;
+             line-height: 1.2; display: block; margin-top: 2px; white-space: nowrap; 
         }
 
-        .f-icon {
-            width: 10px; height: 10px; vertical-align: middle;
-            color: var(--gold); display: inline-block; position: relative; top: -1px;
-        }
+        .f-icon { width: 9px; height: 9px; vertical-align: middle; color: var(--gold); display: inline-block; position: relative; top: -1px; }
 
-        /* MIDDLE: Logo Only */
-        .f-col-center {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 5px;
-            flex: 0.8;
-        }
-
-        .footer-logo-main {
-            width: 80px; /* Nice big logo in middle */
-            height: auto;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
-        }
-
-        /* RIGHT: Address Only */
-        .f-col-right { 
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: flex-end;
-            flex: 1;
-            padding-bottom: 5px; /* Align with text */
-        }
+        .address-container { text-align: right; }
         
-        .address-block { color: #fff; font-size: 10.5px; line-height: 1.5; font-weight: 700; }
-
-        /* Tagline footer */
-        .tagline-footer {
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 3px; 
-            color: var(--gold-text);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            text-align: center;
-            width: 100%;
-            padding-top: 8px;
-            border-top: 1px solid rgba(212, 175, 55, 0.3); 
+        .footer-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px; font-weight: 900;
+            background: var(--gold-foil);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1px; text-transform: uppercase;
         }
+
+        .tagline-footer {
+            font-size: 7.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--gold-text); text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            text-align: center; width: 100%; padding-top: 4px;
+            border-top: 1px solid rgba(212, 175, 55, 0.3); margin-bottom: 2px;
+        }
+
+        .address-block { color: #eee; font-size: 8.5px; line-height: 1.3; font-weight: 700; }
 
         .print-btn {
             position: fixed; top: 20px; right: 20px;
-            padding: 10px 20px; background: var(--gold); font-weight: bold;
+            padding: 10px 20px; background: var(--gold); font-weight: bold; color: #000;
             border: none; border-radius: 5px; cursor: pointer; z-index: 9999;
         }
 
         @media print {
-            @page { size: A5 portrait; margin: 0; }
-            body { background: none; margin: 0; padding: 0; display: block; }
+            body { background: none; padding: 0; display: block; }
             .print-btn { display: none; }
-            .pamphlet-a5 { 
-                width: 100%; height: 100%; box-shadow: none; margin: 0; 
-                border: 3px solid var(--gold) !important;
-                -webkit-print-color-adjust: exact; print-color-adjust: exact;
-            }
+            .pamphlet-a5 { width: 100%; height: 100%; box-shadow: none; margin: 0; border: 3px solid var(--gold) !important; }
+            @page { size: A5; margin: 0; }
         }
     </style>
 </head>
@@ -303,38 +311,31 @@
 
     <div class="pamphlet-a5">
         
+        <div class="header-section">
+            <img src="logo.png" class="top-logo" alt="Zafran Delight">
+        </div>
+
         <div class="hero-container">
-            <img src="image_121387.png" class="hero-img" alt="Delicious Food">
+            <div class="hero-frame">
+                <img src="image_121387.png" class="hero-img" alt="Delicious Food">
+            </div>
         </div>
 
         <div class="content-body">
             
             <div class="food-row">
                 <div class="food-box">
-                    <div class="section-header">Mittagstisch</div>
-                    <div style="font-size:9.5px; color:#ddd; margin-bottom:8px; font-weight:600;">Di – Fr | 12:00 – 15:00 Uhr</div>
-                    
-                    <div class="lunch-row">
-                        <span>Tagesgericht Vegetarisch</span>
-                        <span class="price">8,00 €</span>
-                    </div>
-                    <div class="lunch-row" style="border:none;">
-                        <span>Tagesgericht Hähnchen</span>
-                        <span class="price">10,00 €</span>
-                    </div>
-                </div>
-
-                <div class="food-box" style="flex:1.4;">
                     <div class="buffet-inner">
                         <div class="buffet-text">
                             <div class="section-header">Sonntagsbuffet</div>
-                            <div style="font-size:9.5px; color:#ddd; margin-bottom:8px; font-weight:600;">
-                                Jeden letzten Sonntag im Monat<br>12:00 – 16:00 Uhr
+                            <div class="buffet-sub">
+                                Jeden letzten Sonntag im Monat<br>
+                                <span style="color:var(--gold-text); font-size:10px;">12:00 – 20:00 Uhr</span>
                             </div>
                             <div class="buffet-grid">
-                                <span>Erwachsene</span> <span class="price">20,00 €</span>
-                                <span>Kinder (6-14)</span> <span class="price">15,00 €</span>
-                                <span>Kinder (< 6)</span> <span style="text-align:right; color:#fff;">Gratis</span>
+                                <span>Above 12 & Erwachsen</span> <span class="price">20,00 €</span>
+                                <span>Kinder (6 bis 12)</span> <span class="price">15,00 €</span>
+                                <span>Kinder (< 6)</span> <span style="text-align:right; color:#fff; font-weight:800;">Gratis</span>
                             </div>
                         </div>
                         <div class="b-qr-area">
@@ -348,38 +349,36 @@
             </div>
 
             <div class="coupon-section-title">Exklusive Angebote & Gutscheine</div>
+            
             <div class="coupon-grid">
                 
-                <div class="coupon online">
-                    <span class="c-title">SPAR10</span>
-                    <span class="c-desc">10% ONLINE RABATT</span>
-                    <span class="c-small">Ab 40€ | Bis 30.04.26</span>
-                </div>
-
-                <div class="coupon online">
+                <div class="coupon gold-style">
                     <span class="c-title">WELCOME26</span>
                     <span class="c-desc">15% ONLINE RABATT</span>
                     <span class="c-small">Ab 55€ | Gültig bis auf Widerruf</span>
                 </div>
 
-                <div class="coupon physical">
-                    <img src="logo.png" class="side-logo" alt="logo">
-                    <div class="c-center">
-                        <span class="c-title" style="color:#C62828;">5% DINE-IN</span>
-                        <span class="c-desc">Vorzeigen im Restaurant</span>
-                        <span class="c-small">*Nicht für Mittagstisch</span>
-                    </div>
-                    <img src="logo.png" class="side-logo" alt="logo">
+                <div class="coupon white-style">
+                    <span class="c-title">10% STUDI RABATT</span>
+                    <span class="c-desc">Gegen Studentenausweis</span>
+                    <span class="c-small">
+                        *Zeig diesen Gutschein & Ausweis vor.<br>
+                        (1 Gutschein pro Person | Min. 15€)
+                    </span>
+                    <svg class="cut-icon" viewBox="0 0 24 24" fill="black"><path d="M6 6C4.9 6 4 6.9 4 8S4.9 10 6 10C6.7 10 7.3 9.6 7.7 9L10.5 13L9 15.5L12 17L15 13H19C20.1 13 21 12.1 21 11C21 9.9 20.1 9 19 9H15L12 5L9 6.5L10.5 9C10.1 9.6 9.4 10 8.7 10H8C7.4 10 7 9.6 7 9C7 8.4 7.4 8 8 8H9V6H8C7.3 6 6.7 5.6 6.3 5C6.7 4.4 7 3.7 7 3H5C5 4.7 5.4 5.4 6 6M19 10H15.5L16.2 11L15.5 12H19V10Z"/></svg>
                 </div>
 
-                <div class="coupon physical">
-                    <img src="logo.png" class="side-logo" alt="logo">
-                    <div class="c-center">
-                        <span class="c-title" style="color:#C62828;">10% STUDI</span>
-                        <span class="c-desc">Gegen Studentenausweis</span>
-                        <span class="c-small">*Nicht für Mittagstisch</span>
-                    </div>
-                    <img src="logo.png" class="side-logo" alt="logo">
+                <div class="coupon gold-style">
+                    <span class="c-title">GRATIS LASSI</span>
+                    <span class="c-desc">Mango, Salz oder Rose</span>
+                    <span class="c-small">Zu jeder Bestellung ab 35€<br>(Nur Online)</span>
+                </div>
+
+                <div class="coupon white-style">
+                    <span class="c-title">FAMILY DEAL</span>
+                    <span class="c-desc">1x GRATIS VORSPEISE</span>
+                    <span class="c-small">Ab 3 Hauptgerichten<br>(Dine-In & Abholung)</span>
+                     <svg class="cut-icon" viewBox="0 0 24 24" fill="black"><path d="M6 6C4.9 6 4 6.9 4 8S4.9 10 6 10C6.7 10 7.3 9.6 7.7 9L10.5 13L9 15.5L12 17L15 13H19C20.1 13 21 12.1 21 11C21 9.9 20.1 9 19 9H15L12 5L9 6.5L10.5 9C10.1 9.6 9.4 10 8.7 10H8C7.4 10 7 9.6 7 9C7 8.4 7.4 8 8 8H9V6H8C7.3 6 6.7 5.6 6.3 5C6.7 4.4 7 3.7 7 3H5C5 4.7 5.4 5.4 6 6M19 10H15.5L16.2 11L15.5 12H19V10Z"/></svg>
                 </div>
 
             </div>
@@ -387,29 +386,22 @@
         </div>
 
         <div class="footer">
-            <div class="footer-content-row">
-                
-                <div class="f-col-left">
-                    <div class="footer-brand-white">ZAFRAN Delight</div>
-                    <div class="qr-section">
-                        <div class="f-qr-box">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
-                        </div>
-                        <div class="cta-text">
-                            HIER SCANNEN:<br>
-                            <span class="cta-subtext">
-                                SPEISEKARTE & BESTELLUNG<br>
-                                (ABHOLUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 13C10.34 13 9 11.66 9 10H7C7 12.76 9.24 15 12 15C14.76 15 17 12.76 17 10H15C15 11.66 13.66 13 12 13ZM7 4V2H17V4H22V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V4H7ZM9 4H15V2H9V4ZM4 6V20H20V6H4Z"/></svg>& LIEFERUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5,6C19.3,6 20,5.3 20,4.5C20,3.7 19.3,3 18.5,3C17.7,3 17,3.7 17,4.5C17,5.3 17.7,6 18.5,6M13,22C15.2,22 17,20.2 17,18C17,15.8 15.2,14 13,14C10.8,14 9,15.8 9,18C9,20.2 10.8,22 13,22M13,20C11.9,20 11,19.1 11,18C11,16.9 11.9,16 13,16C14.1,16 15,16.9 15,18C15,19.1 14.1,20 13,20M22,22C24.2,22 26,20.2 26,18C26,15.8 24.2,14 22,14C19.8,14 18,15.8 18,18C18,20.2 19.8,22 22,22M22,20C20.9,20 20,19.1 20,18C20,16.9 20.9,16 22,16C23.1,16 24,16.9 24,18C24,19.1 23.1,20 22,20M13,13H24V11H22V7H16V11H13C11.9,11 11,10.1 11,9V4H7V7C7,10.3 9.7,13 13,13M5,11H9V9H5V11Z" transform="translate(-3,0)"/></svg>)
-                            </span>
-                        </div>
+            <div class="footer-top-content">
+                <div class="qr-section">
+                    <div class="f-qr-box">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://zafraneuskirchen.de" class="qr-img">
+                    </div>
+                    <div class="cta-text">
+                        HIER SCANNEN:<br>
+                        <span class="cta-subtext">
+                            SPEISEKARTE, ONLINE BESTELLUNG<br>
+                            (ABHOLUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 13C10.34 13 9 11.66 9 10H7C7 12.76 9.24 15 12 15C14.76 15 17 12.76 17 10H15C15 11.66 13.66 13 12 13ZM7 4V2H17V4H22V20C22 21.1 21.1 22 20 22H4C2.9 22 2 21.1 2 20V4H7ZM9 4H15V2H9V4ZM4 6V20H20V6H4Z"/></svg>& LIEFERUNG<svg class="f-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5,6C19.3,6 20,5.3 20,4.5C20,3.7 19.3,3 18.5,3C17.7,3 17,3.7 17,4.5C17,5.3 17.7,6 18.5,6M13,22C15.2,22 17,20.2 17,18C17,15.8 15.2,14 13,14C10.8,14 9,15.8 9,18C9,20.2 10.8,22 13,22M13,20C11.9,20 11,19.1 11,18C11,16.9 11.9,16 13,16C14.1,16 15,16.9 15,18C15,19.1 14.1,20 13,20M22,22C24.2,22 26,20.2 26,18C26,15.8 24.2,14 22,14C19.8,14 18,15.8 18,18C18,20.2 19.8,22 22,22M22,20C20.9,20 20,19.1 20,18C20,16.9 20.9,16 22,16C23.1,16 24,16.9 24,18C24,19.1 23.1,20 22,20M13,13H24V11H22V7H16V11H13C11.9,11 11,10.1 11,9V4H7V7C7,10.3 9.7,13 13,13M5,11H9V9H5V11Z" transform="translate(-3,0)"/></svg>)
+                        </span>
                     </div>
                 </div>
 
-                <div class="f-col-center">
-                    <img src="logo.png" class="footer-logo-main" alt="Zafran Logo">
-                </div>
-
-                <div class="f-col-right">
+                <div class="address-container">
+                    <div class="footer-brand">Zafran Delight</div>
                     <div class="address-block">
                         Kessenicher Str. 9, 53879 Euskirchen<br>
                         Tel: 02251 1290950<br>

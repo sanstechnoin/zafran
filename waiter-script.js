@@ -862,7 +862,7 @@ if (loginButton) {
         });
     }
 
-  // --- RESERVATION LOGIC START (FIXED) ---
+  // --- RESERVATION LOGIC START (SECURE VERSION) ---
 
     // 1. Email Config
     const RES_EMAIL_KEY = "fpg7eAy2ugtnzqoqU"; 
@@ -876,8 +876,9 @@ if (loginButton) {
     let pendingReservations = [];
     let todayActiveReservations = [];
     let isResInitialLoad = true; 
+    let resUnsubscribe = null; // Store listener to prevent duplicates
 
-    // 3. Make Sound Function Global (Fixes the Close Button)
+    // 3. Global Sound Stopper
     window.stopWaiterSound = function() {
         if(typeof serviceBell !== 'undefined') {
             serviceBell.pause();
@@ -887,55 +888,69 @@ if (loginButton) {
         if(popup) popup.classList.add('hidden');
     };
 
-    // 4. Real-time Listener
-    db.collection("reservations")
-      .where("status", "in", ["pending", "confirmed"])
-      .onSnapshot(snapshot => {
-          pendingReservations = [];
-          todayActiveReservations = [];
-          
-          const todayStr = new Date().toISOString().split('T')[0];
-          const now = new Date();
+    // 4. WAIT FOR LOGIN BEFORE LISTENING
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            console.log("User authenticated for Reservations. Starting listener...");
+            startReservationListener();
+        } else {
+            console.log("Waiting for login...");
+        }
+    });
 
-          // A. CHECK FOR NEW ARRIVALS
-          snapshot.docChanges().forEach(change => {
-              if (change.type === "added" && !isResInitialLoad) {
-                  const r = change.doc.data();
-                  if (r.status === 'pending') {
-                      triggerResPopup(r); 
-                  }
-              }
-          });
+    function startReservationListener() {
+        // Prevent multiple listeners
+        if (resUnsubscribe) resUnsubscribe();
 
-          // B. REBUILD LISTS
-          snapshot.forEach(doc => {
-              const r = { id: doc.id, ...doc.data() };
+        resUnsubscribe = db.collection("reservations")
+          .where("status", "in", ["pending", "confirmed"])
+          .onSnapshot(snapshot => {
+              pendingReservations = [];
+              todayActiveReservations = [];
               
-              if (r.status === 'pending') {
-                  pendingReservations.push(r);
-              } 
-              else if (r.status === 'confirmed' && r.date === todayStr) {
-                  // Check 2-Hour Rule
-                  const [h, m] = r.time.split(':');
-                  const resDate = new Date();
-                  resDate.setHours(h, m, 0);
-                  const twoHoursAfter = new Date(resDate.getTime() + (2 * 60 * 60 * 1000));
-                  
-                  if (now < twoHoursAfter) {
-                      todayActiveReservations.push(r);
-                  }
-              }
-          });
+              const todayStr = new Date().toISOString().split('T')[0];
+              const now = new Date();
 
-          isResInitialLoad = false; 
-          updateBellIcon();
-          
-          // Live update if modal is open
-          const modal = document.getElementById('res-modal');
-          if(modal && modal.style.display === 'flex') {
-              renderResModal(); 
-          }
-      });
+              // A. CHECK FOR NEW ARRIVALS
+              snapshot.docChanges().forEach(change => {
+                  if (change.type === "added" && !isResInitialLoad) {
+                      const r = change.doc.data();
+                      if (r.status === 'pending') {
+                          triggerResPopup(r); 
+                      }
+                  }
+              });
+
+              // B. REBUILD LISTS
+              snapshot.forEach(doc => {
+                  const r = { id: doc.id, ...doc.data() };
+                  
+                  if (r.status === 'pending') {
+                      pendingReservations.push(r);
+                  } 
+                  else if (r.status === 'confirmed' && r.date === todayStr) {
+                      const [h, m] = r.time.split(':');
+                      const resDate = new Date();
+                      resDate.setHours(h, m, 0);
+                      const twoHoursAfter = new Date(resDate.getTime() + (2 * 60 * 60 * 1000));
+                      
+                      if (now < twoHoursAfter) {
+                          todayActiveReservations.push(r);
+                      }
+                  }
+              });
+
+              isResInitialLoad = false; 
+              updateBellIcon();
+              
+              const modal = document.getElementById('res-modal');
+              if(modal && modal.style.display === 'flex') {
+                  renderResModal(); 
+              }
+          }, (error) => {
+              console.error("Reservation Listener Error:", error);
+          });
+    }
 
     // 5. TRIGGER POPUP FUNCTION
     function triggerResPopup(r) {
@@ -974,6 +989,8 @@ if (loginButton) {
         const btn = document.getElementById('res-bell-btn');
         const countSpan = document.getElementById('res-count');
         
+        if(!btn) return;
+
         if (pendingReservations.length > 0) {
             btn.className = "yellow"; 
             btn.classList.remove('hidden');

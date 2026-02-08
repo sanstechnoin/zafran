@@ -862,7 +862,7 @@ if (loginButton) {
         });
     }
 
-  // --- RESERVATION LOGIC START (POPUP CONTROL VERSION) ---
+  // --- RESERVATION LOGIC ---
 
     // 1. Email Config
     const RES_EMAIL_KEY = "fpg7eAy2ugtnzqoqU"; 
@@ -910,7 +910,8 @@ if (loginButton) {
               // A. CHECK FOR NEW ARRIVALS
               snapshot.docChanges().forEach(change => {
                   if (change.type === "added" && !isResInitialLoad) {
-                      const r = change.doc.data();
+                      // *** FIX IS HERE: INCLUDE THE ID ***
+                      const r = { id: change.doc.id, ...change.doc.data() }; 
                       if (r.status === 'pending') {
                           triggerResPopup(r); 
                       }
@@ -997,8 +998,7 @@ if (loginButton) {
     
     // 6. HELPER: Handle Popup Click
     window.handlePopupAction = function(id, action, email, name, date, time, guests) {
-        window.stopWaiterSound(); // Stop Noise
-        // Process directly (skip confirmation dialog for speed)
+        window.stopWaiterSound(); 
         window.processRes(id, action, email, name, date, time, guests, true);
     };
 
@@ -1078,14 +1078,12 @@ if (loginButton) {
 
     // 9. Process Logic (Database + Email)
     window.processRes = function(id, action, email, name, date, time, guests, skipConfirm = false) {
-        // If 'skipConfirm' is true (from popup), we don't show the alert.
         if (!skipConfirm && !confirm(action === 'confirm' ? "Confirm this booking?" : "Reject this booking?")) return;
 
         const newStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
         
         db.collection("reservations").doc(id).update({ status: newStatus })
         .then(() => {
-            // Render list again if open
             if(document.getElementById('res-modal').style.display === 'flex') renderResModal();
 
             if (email && email.includes('@')) {

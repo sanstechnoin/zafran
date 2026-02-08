@@ -862,7 +862,7 @@ if (loginButton) {
         });
     }
 
-  // --- RESERVATION LOGIC START (SECURE VERSION) ---
+  // --- RESERVATION LOGIC START (POPUP CONTROL VERSION) ---
 
     // 1. Email Config
     const RES_EMAIL_KEY = "fpg7eAy2ugtnzqoqU"; 
@@ -876,7 +876,7 @@ if (loginButton) {
     let pendingReservations = [];
     let todayActiveReservations = [];
     let isResInitialLoad = true; 
-    let resUnsubscribe = null; // Store listener to prevent duplicates
+    let resUnsubscribe = null; 
 
     // 3. Global Sound Stopper
     window.stopWaiterSound = function() {
@@ -891,15 +891,11 @@ if (loginButton) {
     // 4. WAIT FOR LOGIN BEFORE LISTENING
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-            console.log("User authenticated for Reservations. Starting listener...");
             startReservationListener();
-        } else {
-            console.log("Waiting for login...");
         }
     });
 
     function startReservationListener() {
-        // Prevent multiple listeners
         if (resUnsubscribe) resUnsubscribe();
 
         resUnsubscribe = db.collection("reservations")
@@ -943,6 +939,7 @@ if (loginButton) {
               isResInitialLoad = false; 
               updateBellIcon();
               
+              // Live update if list modal is open
               const modal = document.getElementById('res-modal');
               if(modal && modal.style.display === 'flex') {
                   renderResModal(); 
@@ -952,24 +949,43 @@ if (loginButton) {
           });
     }
 
-    // 5. TRIGGER POPUP FUNCTION
+    // 5. TRIGGER POPUP FUNCTION (WITH ACTION BUTTONS)
     function triggerResPopup(r) {
         const popup = document.getElementById('res-alert-popup');
         const details = document.getElementById('res-alert-details');
-        const btn = document.getElementById('btn-open-res-modal');
+        const btnForTarget = document.getElementById('btn-open-res-modal');
         
         if(!popup) return;
 
+        // Render Details
         details.innerHTML = `
-            <strong>${r.name}</strong><br>
-            ${r.guests} Guests at ${r.time}<br>
-            <span style="font-size:0.8em; color:#ccc;">Date: ${r.date}</span>
+            <div style="text-align:center;">
+                <strong style="font-size:1.6em; color:white; text-transform:uppercase;">${r.name}</strong><br>
+                <div style="margin:10px 0; font-size:1.4em; color:#FFC107; border:1px solid #FFC107; display:inline-block; padding:5px 15px; border-radius:8px;">
+                    ${r.guests} Pers • ${r.time}
+                </div><br>
+                <span style="font-size:0.9em; color:#ccc;">${r.date}</span>
+                ${r.notes ? `<br><div style="background:#333; padding:8px; margin-top:10px; font-style:italic; font-size:0.9em; border-radius:4px; color:#fff;">"${r.notes}"</div>` : ''}
+            </div>
         `;
         
-        btn.onclick = function() {
-            window.stopWaiterSound();
-            openResModal(); 
-        };
+        // Inject DIRECT ACTION Buttons
+        if(btnForTarget && btnForTarget.parentNode) {
+            const container = btnForTarget.parentNode;
+            const safeName = r.name.replace(/'/g, "\\'");
+            const safeEmail = (r.email || '').replace(/'/g, "\\'");
+            
+            container.innerHTML = `
+                <button onclick="handlePopupAction('${r.id}', 'reject', '${safeEmail}', '${safeName}', '${r.date}', '${r.time}', null)" 
+                    style="flex:1; padding:15px; background:#2a2a2a; color:#ff6b6b; border:2px solid #ff6b6b; border-radius:8px; font-weight:bold; font-size:1.2rem; cursor:pointer;">
+                    ✕ REJECT
+                </button>
+                <button onclick="handlePopupAction('${r.id}', 'confirm', '${safeEmail}', '${safeName}', '${r.date}', '${r.time}', '${r.guests}')" 
+                    style="flex:1; padding:15px; background:#28a745; color:white; border:none; border-radius:8px; font-weight:bold; font-size:1.2rem; cursor:pointer; box-shadow:0 0 15px rgba(40,167,69,0.4);">
+                    ✔ CONFIRM
+                </button>
+            `;
+        }
         
         popup.classList.remove('hidden');
         
@@ -979,12 +995,14 @@ if (loginButton) {
         }
     }
     
-    // EXPOSE FOR TESTING
-    window.testPopup = function() {
-        triggerResPopup({name: "TEST GUEST", guests: 4, time: "20:00", date: "2026-01-01"});
-    }
+    // 6. HELPER: Handle Popup Click
+    window.handlePopupAction = function(id, action, email, name, date, time, guests) {
+        window.stopWaiterSound(); // Stop Noise
+        // Process directly (skip confirmation dialog for speed)
+        window.processRes(id, action, email, name, date, time, guests, true);
+    };
 
-    // 6. Update Bell Icon
+    // 7. Update Bell Icon
     function updateBellIcon() {
         const btn = document.getElementById('res-bell-btn');
         const countSpan = document.getElementById('res-count');
@@ -1005,7 +1023,7 @@ if (loginButton) {
         }
     }
 
-    // 7. Modal Logic
+    // 8. Modal Logic (List View)
     window.openResModal = function() {
         const modal = document.getElementById('res-modal');
         modal.style.display = 'flex';
@@ -1016,6 +1034,7 @@ if (loginButton) {
         const container = document.getElementById('res-list-container');
         container.innerHTML = "";
 
+        // Pending Section
         if (pendingReservations.length > 0) {
             container.innerHTML += `<h4 style="color:#FFC107; border-bottom:1px solid #444; padding-bottom:5px;">⚠️ Waiting for Confirmation</h4>`;
             pendingReservations.forEach(r => {
@@ -1035,6 +1054,7 @@ if (loginButton) {
             });
         }
 
+        // Today Active Section
         if (todayActiveReservations.length > 0) {
             container.innerHTML += `<h4 style="color:#2ecc71; border-bottom:1px solid #444; padding-bottom:5px; margin-top:20px;">📅 Guests Today</h4>`;
             todayActiveReservations.sort((a,b) => a.time.localeCompare(b.time));
@@ -1056,14 +1076,18 @@ if (loginButton) {
         }
     }
 
-    // 8. Action Logic
-    window.processRes = function(id, action, email, name, date, time, guests) {
-        if (!confirm(action === 'confirm' ? "Confirm this booking?" : "Reject this booking?")) return;
+    // 9. Process Logic (Database + Email)
+    window.processRes = function(id, action, email, name, date, time, guests, skipConfirm = false) {
+        // If 'skipConfirm' is true (from popup), we don't show the alert.
+        if (!skipConfirm && !confirm(action === 'confirm' ? "Confirm this booking?" : "Reject this booking?")) return;
 
         const newStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
         
         db.collection("reservations").doc(id).update({ status: newStatus })
         .then(() => {
+            // Render list again if open
+            if(document.getElementById('res-modal').style.display === 'flex') renderResModal();
+
             if (email && email.includes('@')) {
                 const templateId = action === 'confirm' ? RES_TEMPLATE_CONFIRM : RES_TEMPLATE_REJECT;
                 let datePretty = date;
@@ -1080,6 +1104,4 @@ if (loginButton) {
         })
         .catch(e => alert("Error: " + e.message));
     };
-    
-    // --- RESERVATION LOGIC END ---
 });

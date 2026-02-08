@@ -862,7 +862,7 @@ if (loginButton) {
         });
     }
 
-  // --- RESERVATION LOGIC START (UPDATED) ---
+  // --- RESERVATION LOGIC START (FIXED) ---
 
     // 1. Email Config
     const RES_EMAIL_KEY = "fpg7eAy2ugtnzqoqU"; 
@@ -875,9 +875,19 @@ if (loginButton) {
     // 2. Variables
     let pendingReservations = [];
     let todayActiveReservations = [];
-    let isResInitialLoad = true; // Prevents popup on first page load
+    let isResInitialLoad = true; 
 
-    // 3. Real-time Listener
+    // 3. Make Sound Function Global (Fixes the Close Button)
+    window.stopWaiterSound = function() {
+        if(typeof serviceBell !== 'undefined') {
+            serviceBell.pause();
+            serviceBell.currentTime = 0;
+        }
+        const popup = document.getElementById('res-alert-popup');
+        if(popup) popup.classList.add('hidden');
+    };
+
+    // 4. Real-time Listener
     db.collection("reservations")
       .where("status", "in", ["pending", "confirmed"])
       .onSnapshot(snapshot => {
@@ -887,17 +897,17 @@ if (loginButton) {
           const todayStr = new Date().toISOString().split('T')[0];
           const now = new Date();
 
-          // A. CHECK FOR NEW ARRIVALS (TRIGGER POPUP)
+          // A. CHECK FOR NEW ARRIVALS
           snapshot.docChanges().forEach(change => {
               if (change.type === "added" && !isResInitialLoad) {
                   const r = change.doc.data();
                   if (r.status === 'pending') {
-                      triggerResPopup(r); // Show the Popup!
+                      triggerResPopup(r); 
                   }
               }
           });
 
-          // B. REBUILD LISTS (FOR BELL ICON)
+          // B. REBUILD LISTS
           snapshot.forEach(doc => {
               const r = { id: doc.id, ...doc.data() };
               
@@ -917,7 +927,7 @@ if (loginButton) {
               }
           });
 
-          isResInitialLoad = false; // Disable flag after first run
+          isResInitialLoad = false; 
           updateBellIcon();
           
           // Live update if modal is open
@@ -927,7 +937,7 @@ if (loginButton) {
           }
       });
 
-    // 4. TRIGGER POPUP FUNCTION
+    // 5. TRIGGER POPUP FUNCTION
     function triggerResPopup(r) {
         const popup = document.getElementById('res-alert-popup');
         const details = document.getElementById('res-alert-details');
@@ -941,42 +951,44 @@ if (loginButton) {
             <span style="font-size:0.8em; color:#ccc;">Date: ${r.date}</span>
         `;
         
-        // "View & Confirm" Button Logic
         btn.onclick = function() {
-            popup.classList.add('hidden');
-            if(typeof stopWaiterSound === 'function') stopWaiterSound();
-            openResModal(); // Opens the Bell Menu
+            window.stopWaiterSound();
+            openResModal(); 
         };
         
         popup.classList.remove('hidden');
         
-        // Play Sound
         if(typeof serviceBell !== 'undefined') {
             serviceBell.currentTime = 0;
             serviceBell.play().catch(e => console.log("Audio play failed", e));
         }
     }
+    
+    // EXPOSE FOR TESTING
+    window.testPopup = function() {
+        triggerResPopup({name: "TEST GUEST", guests: 4, time: "20:00", date: "2026-01-01"});
+    }
 
-    // 5. Update Bell Icon
+    // 6. Update Bell Icon
     function updateBellIcon() {
         const btn = document.getElementById('res-bell-btn');
         const countSpan = document.getElementById('res-count');
         
         if (pendingReservations.length > 0) {
-            btn.className = "yellow"; // Yellow Logic
+            btn.className = "yellow"; 
             btn.classList.remove('hidden');
             countSpan.innerText = pendingReservations.length;
         } else if (todayActiveReservations.length > 0) {
-            btn.className = "green"; // Green Logic
+            btn.className = "green"; 
             btn.classList.remove('hidden');
             const totalGuests = todayActiveReservations.reduce((sum, r) => sum + (parseInt(r.guests)||0), 0);
             countSpan.innerText = totalGuests; 
         } else {
-            btn.classList.add('hidden'); // Hide if empty
+            btn.classList.add('hidden'); 
         }
     }
 
-    // 6. Modal Logic (Opens the list)
+    // 7. Modal Logic
     window.openResModal = function() {
         const modal = document.getElementById('res-modal');
         modal.style.display = 'flex';
@@ -987,7 +999,6 @@ if (loginButton) {
         const container = document.getElementById('res-list-container');
         container.innerHTML = "";
 
-        // Show Pending
         if (pendingReservations.length > 0) {
             container.innerHTML += `<h4 style="color:#FFC107; border-bottom:1px solid #444; padding-bottom:5px;">⚠️ Waiting for Confirmation</h4>`;
             pendingReservations.forEach(r => {
@@ -1007,7 +1018,6 @@ if (loginButton) {
             });
         }
 
-        // Show Active Today
         if (todayActiveReservations.length > 0) {
             container.innerHTML += `<h4 style="color:#2ecc71; border-bottom:1px solid #444; padding-bottom:5px; margin-top:20px;">📅 Guests Today</h4>`;
             todayActiveReservations.sort((a,b) => a.time.localeCompare(b.time));
@@ -1029,7 +1039,7 @@ if (loginButton) {
         }
     }
 
-    // 7. Action Logic
+    // 8. Action Logic
     window.processRes = function(id, action, email, name, date, time, guests) {
         if (!confirm(action === 'confirm' ? "Confirm this booking?" : "Reject this booking?")) return;
 

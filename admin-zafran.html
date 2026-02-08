@@ -220,8 +220,8 @@
             <div class="filter-group">
                 <label>Status:</label>
                 <select id="filter-status">
-                    <option value="all">Alle</option>
-                    <option value="pending" selected>Ausstehend</option>
+                    <option value="all" selected>Alle</option>
+                    <option value="pending">Ausstehend</option>
                     <option value="confirmed">Bestätigt</option>
                     <option value="cancelled">Storniert</option>
                 </select>
@@ -376,7 +376,7 @@
         
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Verbinde Live-Daten...</td></tr>';
 
-        let query = db.collection("reservations").where("date", "==", dateVal);
+        let query = db.collection("reservations").where("date", ">=", dateVal);
         
         if (statusVal !== 'all') {
             query = query.where("status", "==", statusVal);
@@ -407,7 +407,10 @@
                 list.push({ id: doc.id, ...doc.data() });
             });
 
-            list.sort((a, b) => a.time.localeCompare(b.time));
+            list.sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.time.localeCompare(b.time);
+            });
 
             tbody.innerHTML = "";
             
@@ -432,7 +435,7 @@
 
                 tbody.innerHTML += `
                     <tr style="${res.status==='cancelled'?'opacity:0.5':''}">
-                        <td style="color:var(--gold); font-weight:bold; font-size:1.1rem;">${res.time}</td>
+                        <td style="color:var(--gold); font-weight:bold; font-size:1rem;"><span style="color:#aaa; font-size:0.8rem;">${res.date}</span><br>${res.time}</td>
                         <td>
                             <div style="font-weight:bold;">${res.name}</div>
                             <div style="font-size:0.8rem; color:#aaa;"><a href="tel:${res.phone}" style="color:#aaa;text-decoration:none;">${res.phone}</a></div>

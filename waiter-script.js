@@ -861,4 +861,162 @@ if (loginButton) {
             };
         });
     }
+
+  // --- RESERVATION LOGIC START ---
+
+    // 1. Email Config (Same as Admin)
+    const RES_EMAIL_KEY = "fpg7eAy2ugtnzqoqU"; 
+    const RES_SERVICE_ID = "service_p890pdo"; 
+    const RES_TEMPLATE_CONFIRM = "zafran-res";
+    const RES_TEMPLATE_REJECT = "zafran-rej";
+    
+    try { emailjs.init(RES_EMAIL_KEY); } catch(e) { console.log("EmailJS init error", e); }
+
+    // 2. Real-time Listener
+    let pendingReservations = [];
+    let todayActiveReservations = [];
+
+    db.collection("reservations")
+      .where("status", "in", ["pending", "confirmed"])
+      .onSnapshot(snapshot => {
+          pendingReservations = [];
+          todayActiveReservations = [];
+          
+          const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+          const now = new Date();
+
+          snapshot.forEach(doc => {
+              const r = { id: doc.id, ...doc.data() };
+              
+              if (r.status === 'pending') {
+                  pendingReservations.push(r);
+              } 
+              else if (r.status === 'confirmed' && r.date === todayStr) {
+                  // Check 2-Hour Rule
+                  const [h, m] = r.time.split(':');
+                  const resDate = new Date();
+                  resDate.setHours(h, m, 0);
+                  
+                  // Logic: If Current Time < (Res Time + 2 Hours)
+                  // It means they are either coming or currently eating.
+                  const twoHoursAfter = new Date(resDate.getTime() + (2 * 60 * 60 * 1000));
+                  
+                  if (now < twoHoursAfter) {
+                      todayActiveReservations.push(r);
+                  }
+              }
+          });
+
+          updateBellIcon();
+          if(document.getElementById('res-modal').style.display === 'flex') {
+              renderResModal(); // Live update if open
+          }
+      });
+
+    // 3. Update Button UI
+    function updateBellIcon() {
+        const btn = document.getElementById('res-bell-btn');
+        const countSpan = document.getElementById('res-count');
+        
+        if (pendingReservations.length > 0) {
+            // PRIORITY: YELLOW (Pending Action Required)
+            btn.className = "yellow";
+            btn.classList.remove('hidden');
+            countSpan.innerText = pendingReservations.length;
+        } else if (todayActiveReservations.length > 0) {
+            // SECONDARY: GREEN (Info for Today)
+            btn.className = "green";
+            btn.classList.remove('hidden');
+            // Calculate total guests for green
+            const totalGuests = todayActiveReservations.reduce((sum, r) => sum + (parseInt(r.guests)||0), 0);
+            countSpan.innerText = totalGuests; // Show guest count, not booking count
+        } else {
+            // HIDDEN
+            btn.classList.add('hidden');
+        }
+    }
+
+    // 4. Modal Logic
+    window.openResModal = function() {
+        const modal = document.getElementById('res-modal');
+        modal.style.display = 'flex';
+        renderResModal();
+    };
+
+    function renderResModal() {
+        const container = document.getElementById('res-list-container');
+        container.innerHTML = "";
+
+        // A. Show Pending First
+        if (pendingReservations.length > 0) {
+            container.innerHTML += `<h4 style="color:#FFC107; border-bottom:1px solid #444; padding-bottom:5px;">⚠️ Waiting for Confirmation</h4>`;
+            pendingReservations.forEach(r => {
+                container.innerHTML += `
+                    <div class="res-item pending">
+                        <div style="display:flex; justify-content:space-between; color:white; font-weight:bold;">
+                            <span>${r.name} (${r.guests}P)</span>
+                            <span>${r.time}</span>
+                        </div>
+                        <div style="font-size:0.85rem; color:#aaa;">${r.date} | ${r.phone}</div>
+                        <div style="font-size:0.85rem; color:#aaa; font-style:italic;">${r.notes || ''}</div>
+                        <div class="res-actions">
+                            <button class="btn-res-accept" onclick="processRes('${r.id}', 'confirm', '${r.email}', '${r.name}', '${r.date}', '${r.time}', '${r.guests}')">✔ Confirm</button>
+                            <button class="btn-res-reject" onclick="processRes('${r.id}', 'reject', '${r.email}', '${r.name}', '${r.date}', '${r.time}')">✕ Reject</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // B. Show Active Today Second
+        if (todayActiveReservations.length > 0) {
+            container.innerHTML += `<h4 style="color:#2ecc71; border-bottom:1px solid #444; padding-bottom:5px; margin-top:20px;">📅 Guests Today</h4>`;
+            todayActiveReservations.sort((a,b) => a.time.localeCompare(b.time));
+            todayActiveReservations.forEach(r => {
+                container.innerHTML += `
+                    <div class="res-item today">
+                        <div style="display:flex; justify-content:space-between; color:white;">
+                            <span>${r.name}</span>
+                            <span style="font-weight:bold; color:#2ecc71;">${r.time}</span>
+                        </div>
+                        <div style="font-size:0.9rem; color:#ccc;">Guests: <strong>${r.guests}</strong></div>
+                        <div style="font-size:0.8rem; color:#888;">${r.notes || ''}</div>
+                    </div>
+                `;
+            });
+        }
+
+        if (pendingReservations.length === 0 && todayActiveReservations.length === 0) {
+            container.innerHTML = "<p style='color:#888; text-align:center;'>No active reservations.</p>";
+        }
+    }
+
+    // 5. Action Logic (Handles Email + DB)
+    window.processRes = function(id, action, email, name, date, time, guests) {
+        if (!confirm(action === 'confirm' ? "Confirm this booking?" : "Reject this booking?")) return;
+
+        const newStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
+        
+        db.collection("reservations").doc(id).update({ status: newStatus })
+        .then(() => {
+            // Send Email
+            if (email && email.includes('@')) {
+                const templateId = action === 'confirm' ? RES_TEMPLATE_CONFIRM : RES_TEMPLATE_REJECT;
+                // Format Date nicely
+                let datePretty = date;
+                try { datePretty = new Date(date).toLocaleDateString('de-DE'); } catch(e){}
+
+                emailjs.send(RES_SERVICE_ID, templateId, {
+                    to_email: email,
+                    to_name: name,
+                    res_date: datePretty,
+                    res_time: time,
+                    res_guests: guests || ''
+                });
+            }
+        })
+        .catch(e => alert("Error: " + e.message));
+    };
+    
+    // --- RESERVATION LOGIC END ---
 });

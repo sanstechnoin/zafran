@@ -862,9 +862,9 @@ if (loginButton) {
         });
     }
 
-  // --- RESERVATION LOGIC START ---
+  // --- RESERVATION LOGIC START (UPDATED) ---
 
-    // 1. Email Config (Same as Admin)
+    // 1. Email Config
     const RES_EMAIL_KEY = "fpg7eAy2ugtnzqoqU"; 
     const RES_SERVICE_ID = "service_p890pdo"; 
     const RES_TEMPLATE_CONFIRM = "zafran-res";
@@ -872,19 +872,32 @@ if (loginButton) {
     
     try { emailjs.init(RES_EMAIL_KEY); } catch(e) { console.log("EmailJS init error", e); }
 
-    // 2. Real-time Listener
+    // 2. Variables
     let pendingReservations = [];
     let todayActiveReservations = [];
+    let isResInitialLoad = true; // Prevents popup on first page load
 
+    // 3. Real-time Listener
     db.collection("reservations")
       .where("status", "in", ["pending", "confirmed"])
       .onSnapshot(snapshot => {
           pendingReservations = [];
           todayActiveReservations = [];
           
-          const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+          const todayStr = new Date().toISOString().split('T')[0];
           const now = new Date();
 
+          // A. CHECK FOR NEW ARRIVALS (TRIGGER POPUP)
+          snapshot.docChanges().forEach(change => {
+              if (change.type === "added" && !isResInitialLoad) {
+                  const r = change.doc.data();
+                  if (r.status === 'pending') {
+                      triggerResPopup(r); // Show the Popup!
+                  }
+              }
+          });
+
+          // B. REBUILD LISTS (FOR BELL ICON)
           snapshot.forEach(doc => {
               const r = { id: doc.id, ...doc.data() };
               
@@ -896,9 +909,6 @@ if (loginButton) {
                   const [h, m] = r.time.split(':');
                   const resDate = new Date();
                   resDate.setHours(h, m, 0);
-                  
-                  // Logic: If Current Time < (Res Time + 2 Hours)
-                  // It means they are either coming or currently eating.
                   const twoHoursAfter = new Date(resDate.getTime() + (2 * 60 * 60 * 1000));
                   
                   if (now < twoHoursAfter) {
@@ -907,36 +917,66 @@ if (loginButton) {
               }
           });
 
+          isResInitialLoad = false; // Disable flag after first run
           updateBellIcon();
-          if(document.getElementById('res-modal').style.display === 'flex') {
-              renderResModal(); // Live update if open
+          
+          // Live update if modal is open
+          const modal = document.getElementById('res-modal');
+          if(modal && modal.style.display === 'flex') {
+              renderResModal(); 
           }
       });
 
-    // 3. Update Button UI
+    // 4. TRIGGER POPUP FUNCTION
+    function triggerResPopup(r) {
+        const popup = document.getElementById('res-alert-popup');
+        const details = document.getElementById('res-alert-details');
+        const btn = document.getElementById('btn-open-res-modal');
+        
+        if(!popup) return;
+
+        details.innerHTML = `
+            <strong>${r.name}</strong><br>
+            ${r.guests} Guests at ${r.time}<br>
+            <span style="font-size:0.8em; color:#ccc;">Date: ${r.date}</span>
+        `;
+        
+        // "View & Confirm" Button Logic
+        btn.onclick = function() {
+            popup.classList.add('hidden');
+            if(typeof stopWaiterSound === 'function') stopWaiterSound();
+            openResModal(); // Opens the Bell Menu
+        };
+        
+        popup.classList.remove('hidden');
+        
+        // Play Sound
+        if(typeof serviceBell !== 'undefined') {
+            serviceBell.currentTime = 0;
+            serviceBell.play().catch(e => console.log("Audio play failed", e));
+        }
+    }
+
+    // 5. Update Bell Icon
     function updateBellIcon() {
         const btn = document.getElementById('res-bell-btn');
         const countSpan = document.getElementById('res-count');
         
         if (pendingReservations.length > 0) {
-            // PRIORITY: YELLOW (Pending Action Required)
-            btn.className = "yellow";
+            btn.className = "yellow"; // Yellow Logic
             btn.classList.remove('hidden');
             countSpan.innerText = pendingReservations.length;
         } else if (todayActiveReservations.length > 0) {
-            // SECONDARY: GREEN (Info for Today)
-            btn.className = "green";
+            btn.className = "green"; // Green Logic
             btn.classList.remove('hidden');
-            // Calculate total guests for green
             const totalGuests = todayActiveReservations.reduce((sum, r) => sum + (parseInt(r.guests)||0), 0);
-            countSpan.innerText = totalGuests; // Show guest count, not booking count
+            countSpan.innerText = totalGuests; 
         } else {
-            // HIDDEN
-            btn.classList.add('hidden');
+            btn.classList.add('hidden'); // Hide if empty
         }
     }
 
-    // 4. Modal Logic
+    // 6. Modal Logic (Opens the list)
     window.openResModal = function() {
         const modal = document.getElementById('res-modal');
         modal.style.display = 'flex';
@@ -947,7 +987,7 @@ if (loginButton) {
         const container = document.getElementById('res-list-container');
         container.innerHTML = "";
 
-        // A. Show Pending First
+        // Show Pending
         if (pendingReservations.length > 0) {
             container.innerHTML += `<h4 style="color:#FFC107; border-bottom:1px solid #444; padding-bottom:5px;">⚠️ Waiting for Confirmation</h4>`;
             pendingReservations.forEach(r => {
@@ -963,12 +1003,11 @@ if (loginButton) {
                             <button class="btn-res-accept" onclick="processRes('${r.id}', 'confirm', '${r.email}', '${r.name}', '${r.date}', '${r.time}', '${r.guests}')">✔ Confirm</button>
                             <button class="btn-res-reject" onclick="processRes('${r.id}', 'reject', '${r.email}', '${r.name}', '${r.date}', '${r.time}')">✕ Reject</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
-        // B. Show Active Today Second
+        // Show Active Today
         if (todayActiveReservations.length > 0) {
             container.innerHTML += `<h4 style="color:#2ecc71; border-bottom:1px solid #444; padding-bottom:5px; margin-top:20px;">📅 Guests Today</h4>`;
             todayActiveReservations.sort((a,b) => a.time.localeCompare(b.time));
@@ -981,8 +1020,7 @@ if (loginButton) {
                         </div>
                         <div style="font-size:0.9rem; color:#ccc;">Guests: <strong>${r.guests}</strong></div>
                         <div style="font-size:0.8rem; color:#888;">${r.notes || ''}</div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
@@ -991,7 +1029,7 @@ if (loginButton) {
         }
     }
 
-    // 5. Action Logic (Handles Email + DB)
+    // 7. Action Logic
     window.processRes = function(id, action, email, name, date, time, guests) {
         if (!confirm(action === 'confirm' ? "Confirm this booking?" : "Reject this booking?")) return;
 
@@ -999,10 +1037,8 @@ if (loginButton) {
         
         db.collection("reservations").doc(id).update({ status: newStatus })
         .then(() => {
-            // Send Email
             if (email && email.includes('@')) {
                 const templateId = action === 'confirm' ? RES_TEMPLATE_CONFIRM : RES_TEMPLATE_REJECT;
-                // Format Date nicely
                 let datePretty = date;
                 try { datePretty = new Date(date).toLocaleDateString('de-DE'); } catch(e){}
 

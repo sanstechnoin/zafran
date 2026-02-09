@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zafran Delight - Ramadan Special</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #F4C430;
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FDB931 50%, #FFD700 100%);
+            --bg-gradient: linear-gradient(180deg, #1a0505 0%, #0d0000 60%, #000000 100%);
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            background-color: #222;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* CARD CONTAINER - Perfect for Mobile/Social Media */
+        .social-card {
+            width: 100%;
+            max-width: 450px; /* Mobile width */
+            background: var(--bg-gradient);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        /* ORNAMENTAL BORDER (Top/Bottom) */
+        .ornament {
+            height: 8px;
+            background: var(--gold-gradient);
+            width: 100%;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px 20px 10px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .title-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gold);
+            text-transform: uppercase;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px black;
+            margin: 0;
+        }
+        
+        .title-sub {
+            font-size: 14px;
+            color: #ddd;
+            font-weight: 500;
+            margin-top: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* HIGHLIGHT DISHES BOX */
+        .highlight-box {
+            margin: 15px 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+        }
+
+        .dish-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            color: #fff;
+            margin: 5px 0;
+            font-weight: 700;
+        }
+
+        .dish-desc {
+            font-size: 12px;
+            color: var(--gold);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(244, 196, 48, 0.3);
+            width: 60%;
+            margin: 10px auto;
+        }
+
+        /* TIME & DATE */
+        .date-badge {
+            background: var(--gold-gradient);
+            color: #000;
+            padding: 10px 0;
+            font-weight: 800;
+            font-size: 18px;
+            text-transform: uppercase;
+            margin: 10px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .time-text {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        /* PRICING */
+        .price-section {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            align-items: center;
+        }
+
+        .price-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-label {
+            font-size: 12px;
+            color: #ccc;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .price-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            color: var(--gold);
+            font-weight: 900;
+            text-shadow: 0 2px 4px black;
+        }
+        
+        .price-small {
+            font-size: 24px; /* Smaller for kids */
+        }
+
+        /* FOOTER */
+        .card-footer {
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            font-size: 11px;
+            color: #ccc;
+            line-height: 1.5;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .address-text {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="social-card">
+        <div class="ornament"></div>
+
+        <div class="header">
+            <img src="logo.png" class="logo" alt="Zafran Delight">
+            <h1 class="title-main">Ramadan Spezial Buffet</h1>
+            <div class="title-sub">Sonntags-Edition</div>
+        </div>
+
+        <div class="date-badge">
+            15. FEB 2026
+            <div class="time-text">12:00 – 16:00 UHR</div>
+        </div>
+
+        <div class="highlight-box">
+            <div class="dish-desc">Unsere Highlights</div>
+            
+            <div class="dish-title">Chicken Biriyani</div>
+            <div class="divider"></div>
+            <div class="dish-title">Halwa Puri Channa</div>
+        </div>
+
+        <div class="price-section">
+            <div class="price-box">
+                <span class="price-label">Erwachsene</span>
+                <span class="price-val">15€</span>
+            </div>
+            <div class="price-box">
+                <span class="price-label">Kinder (ab 6 J.)</span>
+                <span class="price-val price-small">8€</span>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <span class="address-text">ZAFRAN DELIGHT</span>
+            Kessenicher Str. 9, 53879 Euskirchen<br>
+            Tel: 02251 1290950
+        </div>
+
+        <div class="ornament"></div>
+    </div>
+
+</body>
+</html>

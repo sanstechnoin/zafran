@@ -322,28 +322,11 @@
         }
 
         @media print {
-            @page { 
-                size: A5 portrait; 
-                margin: 0; 
-            }
-            html, body { 
-                width: 148mm; 
-                height: 209.5mm; 
-                margin: 0; 
-                padding: 0; 
-                background: none; 
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact;
-            }
-            .print-btn { display: none !important; }
-            .pamphlet-a5 { 
-                width: 100%; 
-                height: 100%; 
-                box-shadow: none; 
-                margin: 0; 
-                border: 3px solid var(--gold) !important; 
-                page-break-inside: avoid;
-            }
+            body { background: none; padding: 0; display: block; }
+            .print-btn { display: none; }
+            .pamphlet-a5 { width: 100%; height: 100%; box-shadow: none; margin: 0; border: 3px solid var(--gold) !important; }
+            @page { size: 151mm 213mm; margin: 0; }
+
         }
     </style>
 </head>

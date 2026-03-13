@@ -111,7 +111,7 @@ function initOrderListener() {
         .orderBy("createdAt", "asc")
         .onSnapshot((snapshot) => {
             driverContainer.innerHTML = "";
-            
+            window.driverOrders = {};
             if (snapshot.empty) {
                 driverContainer.innerHTML = `
                     <div class="empty-state">
@@ -125,6 +125,7 @@ function initOrderListener() {
 
             snapshot.forEach((doc) => {
                 const order = doc.data();
+                window.driverOrders[doc.id] = order;
                 renderDriverCard(doc.id, order, now);
             });
         }, (error) => {
@@ -244,7 +245,9 @@ function renderDriverCard(id, order, now) {
                 </a>
             </div>
         </div>
-
+        <button onclick="openDriverItemsModal('${id}')" class="btn-action" style="width:100%; background:#2a2a2a; border:1px solid #444; color:#fff; margin-bottom: 15px;">
+            <span class="material-icons" style="margin-right:8px;">receipt_long</span> VIEW ORDER ITEMS
+        </button>
         <div class="payment-info">💰 Zu Kassieren: ${order.total.toFixed(2)} €</div>
 
         <button onclick="completeDelivery('${id}')" class="complete-btn" ${isDisabled ? 'disabled style="opacity:0.5"' : ''}>
@@ -366,3 +369,48 @@ window.completeDelivery = function(orderId) {
         alert("Error: " + error.message);
     });
 }
+
+// --- 9. ORDER ITEMS MODAL ---
+window.openDriverItemsModal = function(id) {
+    const order = window.driverOrders[id];
+    if (!order) return;
+    
+    const contentDiv = document.getElementById('driver-items-content');
+    
+    // Build the items list
+    let html = '<ul style="list-style:none; padding:0; margin:0;">';
+    if(order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+            html += `
+                <li style="padding: 12px 0; border-bottom: 1px dashed #444; display:flex; gap:10px;">
+                    <span style="color:#D4AF37; font-weight:bold; min-width:30px;">${item.quantity}x</span>
+                    <span style="flex:1;">${item.name}</span>
+                </li>`;
+        });
+    } else {
+        html += '<li style="color:#888;">No items found.</li>';
+    }
+    html += '</ul>';
+
+    // If there are customer notes, show them in a bright box
+    if(order.notes && order.notes.trim() !== "") {
+        html += `
+            <div style="margin-top:20px; background:rgba(212,68,55,0.1); border-left:4px solid #D44437; padding:15px; border-radius:4px;">
+                <strong style="color:#D44437; font-size:0.9rem; text-transform:uppercase;">⚠️ Customer Note:</strong>
+                <div style="margin-top:5px; color:#fff; font-style:italic;">"${order.notes}"</div>
+            </div>`;
+    }
+
+    contentDiv.innerHTML = html;
+    
+    // Show modal
+    const modal = document.getElementById('driver-items-modal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+};
+
+window.closeDriverItemsModal = function() {
+    const modal = document.getElementById('driver-items-modal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+};

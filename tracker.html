@@ -524,7 +524,11 @@
             else if (status === 'preparing' || status === 'seen') {
                 progress = 37;
                 title = "Zubereitung";
-                sub = "Frisch für Sie zubereitet.";
+                if (data.estimatedTime && data.estimatedTime !== "ASAP") {
+                    sub = `✅ Bestellung bestätigt!\nGeplante Zeit: ${data.estimatedTime} Uhr`;
+                } else {
+                    sub = "✅ Bestellung bestätigt!\nWird schnellstmöglich zubereitet.";
+                }
                 badgeText = "Küche";
                 document.getElementById('step-new').classList.add('completed');
                 document.getElementById('step-preparing').classList.add('active');

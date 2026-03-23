@@ -54,9 +54,8 @@ const pickupGrid = document.getElementById('pickup-grid');
 // Popups & Controls
 const newOrderPopup = document.getElementById('new-order-popup-overlay');
 const popupOrderDetails = document.getElementById('popup-order-details');
-const acceptOrderBtn = document.getElementById('accept-order-btn');
+const actionButtonsContainer = document.getElementById('popup-action-buttons');
 const masterClearBtn = document.getElementById('master-clear-btn');
-const rejectOrderBtn = document.getElementById('reject-order-btn');
 
 // Waiter Call
 const waiterCallOverlay = document.getElementById('waiter-call-overlay');
@@ -241,8 +240,6 @@ function processNewOrderQueue() {
         `<li>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></li>`
     ).join('');
 
-    // --- THE VISIBILITY FIX ---
-    // Black Text + Gold Background = High Visibility
     const pendingText = `
         <div style="font-size: 1.5rem; color: black; background: #D4AF37; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; border: 2px solid white;">
             PENDING ORDERS: ${newOrderQueue.length}
@@ -254,58 +251,92 @@ function processNewOrderQueue() {
         <ul>${itemsHtml}</ul>
         ${currentOrder.notes ? `<p style="color:#ff8888;">⚠️ ${currentOrder.notes}</p>` : ''}
     `;
-    // Only show Reject button for Delivery/Pickup
-    if(rejectOrderBtn) {
-        if (currentOrder.orderType === 'pickup' || currentOrder.orderType === 'delivery') {
-            rejectOrderBtn.style.display = 'block';
-        } else {
-            rejectOrderBtn.style.display = 'none'; // Hide for Dine-In tables
-        }
+
+    // INJECT DYNAMIC TIME BUTTONS BASED ON TYPE
+    if (currentOrder.orderType === 'dine-in') {
+        // --- TABLE ORDERS: ONLY "ACCEPT" BUTTON ---
+        actionButtonsContainer.innerHTML = `
+            <button onclick="acceptOrderWithTime(0)" style="font-size:2rem; padding:25px; width:100%; font-weight:bold; background-color:#D4AF37; color:black; border:none; border-radius:10px; cursor:pointer;">
+                ACCEPT TABLE ORDER ✅
+            </button>
+        `;
+    } else {
+        // --- ONLINE ORDERS: TIMELINES & REJECT BUTTONS ---
+        const custTime = currentOrder.timeSlot || "ASAP";
+        actionButtonsContainer.innerHTML = `
+            <div style="display:flex; gap:15px; width:100%;">
+                <button onclick="rejectOrder()" style="flex:1; font-size:1.8rem; padding:20px; font-weight:bold; background-color:#ff4444; color:white; border:none; border-radius:10px; cursor:pointer;">
+                    ❌ REJECT
+                </button>
+                <button onclick="acceptOrderWithTime(0)" style="flex:2; font-size:1.8rem; padding:20px; font-weight:bold; background-color:#D4AF37; color:black; border:none; border-radius:10px; cursor:pointer;">
+                    ✅ ACCEPT (${custTime})
+                </button>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:15px; width:100%;">
+                <button onclick="acceptOrderWithTime(15)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">15 Min</button>
+                <button onclick="acceptOrderWithTime(30)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">30 Min</button>
+                <button onclick="acceptOrderWithTime(45)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">45 Min</button>
+                <button onclick="acceptOrderWithTime(60)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">60 Min</button>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:10px; width:100%;">
+                <input type="number" id="custom-minutes-input" placeholder="Min" min="1" style="flex:1; font-size:1.6rem; padding:15px; text-align:center; background:#222; color:white; border:2px solid #555; border-radius:10px; outline:none;">
+                <button onclick="acceptCustomTime()" style="flex:3; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#555; color:white; border:none; border-radius:10px; cursor:pointer;">
+                    ⏳ SET CUSTOM TIME
+                </button>
+            </div>
+        `;
     }
+
     newOrderPopup.classList.remove('hidden');
 }
 
-// Accept Button Click Handler
-acceptOrderBtn.onclick = () => {
-    if (newOrderQueue.length > 0) {
-        const orderToAccept = newOrderQueue.shift(); // Remove first from queue
-        
-        // Mark as 'seen' in DB so it doesn't pop up again
-        db.collection("orders").doc(orderToAccept.id).update({ status: "seen" });
-        
-        // Process next one immediately
-        processNewOrderQueue();
+window.acceptCustomTime = function() {
+    const inputVal = document.getElementById('custom-minutes-input').value;
+    const addedMinutes = parseInt(inputVal, 10);
+    
+    if (isNaN(addedMinutes) || addedMinutes <= 0) {
+        alert("Please enter a valid number of minutes.");
+        return;
     }
+    acceptOrderWithTime(addedMinutes);
 };
 
-// Reject Button Click Handler
-if(rejectOrderBtn) {
-    rejectOrderBtn.onclick = () => {
-        if (newOrderQueue.length > 0) {
-            // Confirm first to prevent accidents
-            if(!confirm("⚠️ REJECT ORDER?\n\nThis will mark the order as CANCELLED and notify the customer.\n\nAre you sure?")) {
-                return;
-            }
+window.acceptOrderWithTime = function(addedMinutes) {
+    if (newOrderQueue.length === 0) return;
+    const orderToAccept = newOrderQueue.shift(); 
 
-            const orderToReject = newOrderQueue.shift(); // Remove from queue
-            
-            // Update status to 'cancelled'
-            db.collection("orders").doc(orderToReject.id).update({ 
-                status: "cancelled" 
-            }).then(() => {
-                console.log(`Order ${orderToReject.id} cancelled.`);
-            }).catch(err => console.error(err));
-            
-            // Stop sound immediately
-            alertAudio.loop = false;
-            alertAudio.pause();
-            alertAudio.currentTime = 0;
+    let finalEstimatedTime = orderToAccept.timeSlot || "ASAP";
+    
+    if (addedMinutes > 0) {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() + addedMinutes);
+        finalEstimatedTime = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    }
 
-            // Process next order in queue
-            processNewOrderQueue();
-        }
-    };
-}
+    db.collection("orders").doc(orderToAccept.id).update({ 
+        status: "seen",
+        estimatedTime: finalEstimatedTime
+    });
+    
+    processNewOrderQueue();
+};
+
+window.rejectOrder = function() {
+    if (newOrderQueue.length === 0) return;
+    if(!confirm("⚠️ REJECT ORDER?\n\nThis will mark the order as CANCELLED and notify the customer.\n\nAre you sure?")) return;
+
+    const orderToReject = newOrderQueue.shift(); 
+    
+    db.collection("orders").doc(orderToReject.id).update({ status: "cancelled" });
+    
+    alertAudio.loop = false;
+    alertAudio.pause();
+    alertAudio.currentTime = 0;
+    processNewOrderQueue();
+};
+
 
 // --- RENDER DINE-IN ---
 function renderDineInTable(tableId) {

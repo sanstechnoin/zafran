@@ -707,7 +707,7 @@ function checkBusinessStatus() {
 
     // 4. GENERATE TIME SLOTS (with Rounding Logic)
     // Delivery = 60 min, Pickup = 45 min
-    const bufferMinutes = isDeliveryPage() ? 60 : 45;
+    const bufferMinutes = isDeliveryPage() ? 30 : 30;
     
     // Enable UI
     if (statusMsg) statusMsg.style.display = 'none';

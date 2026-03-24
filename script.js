@@ -444,58 +444,97 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // 2. Save to Firebase
                 await db.collection("orders").doc(orderId).set(orderData);
                 
-                // 3. POPULATE THE MODAL (Old List + New Number)
-                
-                // A. Build the Old List HTML (Items, Address, Total)
-                let html = `<strong style="color:var(--gold)">Kunde:</strong> ${formData.name}<br>`;
-                if (isDeliveryPage()) {
-                    html += `<strong style="color:var(--gold)">Lieferung an:</strong> ${formData.address.street} ${formData.address.house}, ${formData.address.zip}<br>`;
-                }
-                html += `<strong style="color:var(--gold)">Zeit:</strong> ${formData.time} Uhr<br>`;
-                html += `<strong style="color:var(--gold)">Bestellung:</strong><br>${summaryData.summaryText.replace(/\n/g, '<br>')}`;
-                
-                if (summaryData.discount > 0) {
-                   html += `<br>Zwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
-                   html += `<br><span style="color:#28a745">Gutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €</span>`;
-                }
+                // 3. Show Live Spinner (Change Button State)
+                const originalBtnText = firebaseBtn.innerHTML;
+                firebaseBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Warten auf Küche...';
+                firebaseBtn.disabled = true;
 
-                html += `<br><br><strong style="font-size:1.1rem; color:#fff;">Total: ${summaryData.finalTotal.toFixed(2)} €</strong>`;
+                // 3. The 15-Second Race Logic
+                let isResolved = false;
                 
-                if (formData.notes) {
-                    html += `<br><br><strong style="color:var(--gold)">Anmerkungen:</strong><br>${formData.notes.replace(/\n/g, '<br>')}`;
-                }
+                // Function to build and show the success modal
+                const triggerSuccess = (kitchenTime) => {
+                    let html = ``;
+                    
+                    if (kitchenTime) {
+                        html += `
+                        <div style="background:rgba(76,175,80,0.1); border:1px solid #4CAF50; padding:12px; border-radius:8px; margin-bottom:15px; color:#fff; font-size:0.95rem;">
+                            ✅ <strong>Bestätigt!</strong> Die Küche hat Ihre Bestellung für <strong>${kitchenTime} Uhr</strong> bestätigt.
+                        </div>`;
+                    } else {
+                        html += `
+                        <div style="background:rgba(212,175,55,0.1); border:1px solid var(--gold); padding:12px; border-radius:8px; margin-bottom:15px; color:#fff; font-size:0.95rem;">
+                            🕒 <strong>Erfolgreich!</strong> Wir haben Ihre Bestellung. Bitte checken Sie den Tracker für die genaue Zeit der Küche.
+                        </div>`;
+                    }
 
-                // B. Inject Data into Modal Elements
-                // Ensure your HTML has these IDs in the Success Modal
-                const summaryEl = document.getElementById('success-summary-content');
-                const pinEl = document.getElementById('modal-order-pin');
-                const trackLinkEl = document.getElementById('modal-track-link');
+                    html += `<strong style="color:var(--gold)">Kunde:</strong> ${formData.name}<br>`;
+                    if (isDeliveryPage()) html += `<strong style="color:var(--gold)">Lieferung an:</strong> ${formData.address.street} ${formData.address.house}, ${formData.address.zip}<br>`;
+                    
+                    html += `<strong style="color:var(--gold)">Angefragt:</strong> ${formData.time} Uhr<br>`;
+                    html += `<strong style="color:var(--gold)">Bestellung:</strong><br>${summaryData.summaryText.replace(/\n/g, '<br>')}`;
+                    
+                    if (summaryData.discount > 0) {
+                       html += `<br>Zwischensumme: ${summaryData.originalTotal.toFixed(2)} €`;
+                       html += `<br><span style="color:#28a745">Gutschein (${summaryData.couponInfo}): -${summaryData.discount.toFixed(2)} €</span>`;
+                    }
 
-                if (summaryEl) summaryEl.innerHTML = html;
-                if (pinEl) pinEl.innerText = orderPin;
-                if (trackLinkEl) trackLinkEl.href = `tracker.html?id=${orderId}`;
-                
-                // C. Show Modal & Hide Cart
-                closeCart(); 
-                const successModal = document.getElementById('success-modal');
-                if (successModal) successModal.classList.add('flex');
-                
-                // D. Clear Data
-                cart = [];
-                sessionStorage.removeItem('zafran_cart');
-                orderForm.reset();
-                if(currentCoupon) {
-                    currentCoupon = null;
-                    const cInput = document.getElementById('coupon-input');
-                    const cMsg = document.getElementById('coupon-message');
-                    if(cInput) cInput.value = "";
-                    if(cMsg) cMsg.textContent = "";
-                }
-                updateCart();
-                
-                // Reset Button
-                firebaseBtn.innerText = "Kostenpflichtig Bestellen";
-                firebaseBtn.disabled = false;
+                    html += `<br><br><strong style="font-size:1.1rem; color:#fff;">Total: ${summaryData.finalTotal.toFixed(2)} €</strong>`;
+                    if (formData.notes) html += `<br><br><strong style="color:var(--gold)">Anmerkungen:</strong><br>${formData.notes.replace(/\n/g, '<br>')}`;
+
+                    // Inject Data into Modal Elements
+                    const summaryEl = document.getElementById('success-summary-content');
+                    const pinEl = document.getElementById('modal-order-pin');
+                    const trackLinkEl = document.getElementById('modal-track-link');
+
+                    if (summaryEl) summaryEl.innerHTML = html;
+                    if (pinEl) pinEl.innerText = orderPin;
+                    if (trackLinkEl) trackLinkEl.href = `tracker.html?id=${orderId}`;
+                    
+                    // Show Modal & Clear Cart
+                    closeCart(); 
+                    const successModal = document.getElementById('success-modal');
+                    if (successModal) successModal.classList.add('flex');
+                    
+                    cart = [];
+                    sessionStorage.removeItem('zafran_cart');
+                    orderForm.reset();
+                    if(currentCoupon) {
+                        currentCoupon = null;
+                        if(document.getElementById('coupon-input')) document.getElementById('coupon-input').value = "";
+                        if(document.getElementById('coupon-message')) document.getElementById('coupon-message').textContent = "";
+                    }
+                    updateCart();
+                    
+                    // Reset Button
+                    firebaseBtn.innerHTML = originalBtnText;
+                    firebaseBtn.disabled = false;
+                };
+
+                // A. Listen for Kitchen Acceptance
+                const unsubscribe = db.collection("orders").doc(orderId).onSnapshot((doc) => {
+                    if (isResolved) return;
+                    const data = doc.data();
+                    if (data && (data.status === 'seen' || data.status === 'preparing' || data.estimatedTime !== undefined)) {
+                        isResolved = true;
+                        unsubscribe();
+                        clearTimeout(timeoutId);
+                        
+                        // If Kitchen set a specific time, use it. Otherwise use what the customer requested.
+                        let confirmedTime = (data.estimatedTime && data.estimatedTime !== "ASAP") ? data.estimatedTime : formData.time;
+                        if (confirmedTime === "ASAP") confirmedTime = "schnellstmöglich"; // friendly text
+                        
+                        triggerSuccess(confirmedTime);
+                    }
+                });
+
+                // B. The 15 Second Timeout
+                const timeoutId = setTimeout(() => {
+                    if (isResolved) return;
+                    isResolved = true;
+                    unsubscribe(); // Stop listening
+                    triggerSuccess(null); // Trigger success without a confirmed time
+                }, 15000);
 
             } catch (error) {
                 console.error("Error sending order: ", error);

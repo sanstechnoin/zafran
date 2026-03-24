@@ -511,20 +511,36 @@ document.addEventListener("DOMContentLoaded", async () => {
                     firebaseBtn.disabled = false;
                 };
 
-                // A. Listen for Kitchen Acceptance
+                // A. Listen for Kitchen Acceptance OR Rejection
                 const unsubscribe = db.collection("orders").doc(orderId).onSnapshot((doc) => {
                     if (isResolved) return;
                     const data = doc.data();
-                    if (data && (data.status === 'seen' || data.status === 'preparing' || data.estimatedTime !== undefined)) {
-                        isResolved = true;
-                        unsubscribe();
-                        clearTimeout(timeoutId);
+                    
+                    if (data) {
+                        // SCENARIO 1: KITCHEN REJECTED THE ORDER
+                        if (data.status === 'cancelled') {
+                            isResolved = true;
+                            unsubscribe();
+                            clearTimeout(timeoutId);
+                            
+                            // Stop spinner, show error, keep cart intact!
+                            alert("⚠️ Bestellung abgelehnt!\n\nLeider kann das Restaurant Ihre Bestellung derzeit nicht annehmen (z.B. Küche überlastet oder Zutaten ausverkauft). Bitte versuchen Sie es später noch einmal oder rufen Sie uns an.");
+                            
+                            firebaseBtn.innerHTML = originalBtnText;
+                            firebaseBtn.disabled = false;
+                        }
                         
-                        // If Kitchen set a specific time, use it. Otherwise use what the customer requested.
-                        let confirmedTime = (data.estimatedTime && data.estimatedTime !== "ASAP") ? data.estimatedTime : formData.time;
-                        if (confirmedTime === "ASAP") confirmedTime = "schnellstmöglich"; // friendly text
-                        
-                        triggerSuccess(confirmedTime);
+                        // SCENARIO 2: KITCHEN ACCEPTED THE ORDER
+                        else if (data.status === 'seen' || data.status === 'preparing' || data.estimatedTime !== undefined) {
+                            isResolved = true;
+                            unsubscribe();
+                            clearTimeout(timeoutId);
+                            
+                            let confirmedTime = (data.estimatedTime && data.estimatedTime !== "ASAP") ? data.estimatedTime : formData.time;
+                            if (confirmedTime === "ASAP") confirmedTime = "schnellstmöglich";
+                            
+                            triggerSuccess(confirmedTime);
+                        }
                     }
                 });
 

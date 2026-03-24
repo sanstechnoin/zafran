@@ -706,8 +706,8 @@ function checkBusinessStatus() {
     }
 
     // 4. GENERATE TIME SLOTS (with Rounding Logic)
-    // Delivery = 60 min, Pickup = 45 min
-    const bufferMinutes = isDeliveryPage() ? 60 : 45;
+    // Delivery = 60 min, Pickup = 30 min
+    const bufferMinutes = isDeliveryPage() ? 60 : 30;
     
     // Enable UI
     if (statusMsg) statusMsg.style.display = 'none';
@@ -719,7 +719,7 @@ function checkBusinessStatus() {
 
 function generateTimeSlots(now, selectElement, bufferMinutes, shopOpenDate, shopCloseDate) {
     if(!selectElement) return;
-    selectElement.innerHTML = '<option value="" disabled selected>-- Zeit wählen --</option>';
+    selectElement.innerHTML = '<option value="ASAP" selected>So schnell wie möglich (ASAP)</option>';
 
     // 1. Calculate Earliest Possible Slot based on "Now + Buffer"
     let readyTime = new Date(now.getTime() + bufferMinutes * 60000);

@@ -205,18 +205,30 @@ function renderDriverCard(id, order, now) {
 
         elapsedHtml = `<div class="elapsed-time" style="color:${timeColor}">⏱️ ${diff} min (${hh}:${mm})</div>`;
     }
+
+    // --- NEW: SMART TIME DISPLAY FOR DRIVER ---
+    let displayTimeSlot = order.timeSlot === "ASAP" ? "SOFORT" : (order.timeSlot || "SOFORT");
+    let timeHtml = `🕒 ${displayTimeSlot}`;
+    let timeStyle = isOverdue ? 'color:#D44437;' : '';
+
+    if (order.estimatedTime && order.estimatedTime !== order.timeSlot) {
+        let activeColor = isOverdue ? '#D44437' : '#4CAF50'; // Red if late, Green if confirmed
+        timeHtml = `<div style="font-weight:bold; font-size:1.1rem;">🕒 ${order.estimatedTime}</div><div style="font-size:0.8rem; color:#aaa; margin-top:2px;">(Req: ${displayTimeSlot})</div>`;
+        timeStyle = `color:${activeColor}; text-align:right;`;
+    }
+
     const html = `
     <div class="order-card ${statusClass}" id="card-${id}">
         
-        <div class="order-header">
+        <div class="order-header" style="align-items:flex-start;">
         <div>
             <span class="order-id">#${order.orderPin || id.slice(-4).toUpperCase()}</span>
             ${isOverdue ? `<span class="overdue-badge">⚠️ LATE</span>` : ''}
             
             ${elapsedHtml}  </div>
-        <span class="order-time" style="${isOverdue ? 'color:#D44437' : ''}">
-            🕒 ${order.timeSlot || 'ASAP'}
-        </span>
+        <div class="order-time" style="${timeStyle}">
+            ${timeHtml}
+        </div>
     </div>
 
         <div id="in-app-map-${id}" class="in-app-map-container"></div>

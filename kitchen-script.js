@@ -245,9 +245,19 @@ function processNewOrderQueue() {
             PENDING ORDERS: ${newOrderQueue.length}
         </div>`;
 
+    // NEW: Grab the address if it's a delivery!
+    let addressHtml = "";
+    if (currentOrder.orderType === 'delivery' && currentOrder.deliveryAddress) {
+        addressHtml = `
+        <div style="font-size: 1.8rem; color: white; background: #222; padding: 15px; border-radius: 8px; border: 1px solid #555; margin-bottom: 20px;">
+            📍 ${currentOrder.deliveryAddress.street} ${currentOrder.deliveryAddress.house}, ${currentOrder.deliveryAddress.zip}
+        </div>`;
+    }
+
     popupOrderDetails.innerHTML = `
         ${pendingText}
         <h2>${title}</h2>
+        ${addressHtml}
         <ul>${itemsHtml}</ul>
         ${currentOrder.notes ? `<p style="color:#ff8888;">⚠️ ${currentOrder.notes}</p>` : ''}
     `;
@@ -425,6 +435,19 @@ function renderOnlineGrid() {
             targetHtml = `<div style="font-weight:bold; color:#4CAF50;">Target: ${order.estimatedTime} <span style="font-size:0.8rem; color:#888;">(Requested: ${displayTimeSlot})</span></div>`;
         }
 
+        // NEW: Check if Kitchen set a custom time!
+        let displayTimeSlot = order.timeSlot === "ASAP" ? "SOFORT" : order.timeSlot;
+        let targetHtml = `<div style="font-weight:bold; color:#D4AF37;">Target: ${displayTimeSlot}</div>`;
+        if (order.estimatedTime && order.estimatedTime !== order.timeSlot) {
+            targetHtml = `<div style="font-weight:bold; color:#4CAF50;">Target: ${order.estimatedTime} <span style="font-size:0.8rem; color:#888;">(Requested: ${displayTimeSlot})</span></div>`;
+        }
+
+        // NEW: Grab the address for the small card!
+        let addressHtml = "";
+        if (order.orderType === 'delivery' && order.deliveryAddress) {
+            addressHtml = `<div style="font-size:0.85rem; color:#ccc; margin-bottom:8px; padding:5px; background:rgba(255,255,255,0.1); border-radius:4px;"><strong>📍</strong> ${order.deliveryAddress.street} ${order.deliveryAddress.house}, ${order.deliveryAddress.zip}</div>`;
+        }
+
         pickupGrid.innerHTML += `
             <div class="pickup-box" style="border-top: 3px solid ${typeColor}; ${isReady ? 'opacity:0.6;' : ''}">
                 <div class="table-header">
@@ -432,6 +455,7 @@ function renderOnlineGrid() {
                     <span class="order-time">@ ${time}</span>
                 </div>
                 <div style="margin-bottom:8px;"><span style="background:${typeColor}; padding:2px 6px; border-radius:4px;">${typeBadge}</span></div>
+                ${addressHtml}
                 ${targetHtml}
                 <ul>${itemsHtml}</ul>
                 ${order.notes ? `<div style="color:#ff8888;">📝 "${order.notes}"</div>` : ''}

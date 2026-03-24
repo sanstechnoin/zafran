@@ -417,10 +417,12 @@ function renderOnlineGrid() {
             `<li>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></li>`
         ).join('');
 
-        // NEW: Check if Kitchen set a custom time!
-        let targetHtml = `<div style="font-weight:bold; color:#D4AF37;">Target: ${order.timeSlot}</div>`;
+        // NEW: Translate ASAP to "SOFORT" for the Kitchen Grid
+        let displayTimeSlot = order.timeSlot === "ASAP" ? "SOFORT" : order.timeSlot;
+        let targetHtml = `<div style="font-weight:bold; color:#D4AF37;">Target: ${displayTimeSlot}</div>`;
+        
         if (order.estimatedTime && order.estimatedTime !== order.timeSlot) {
-            targetHtml = `<div style="font-weight:bold; color:#4CAF50;">Target: ${order.estimatedTime} <span style="font-size:0.8rem; color:#888;">(Requested: ${order.timeSlot})</span></div>`;
+            targetHtml = `<div style="font-weight:bold; color:#4CAF50;">Target: ${order.estimatedTime} <span style="font-size:0.8rem; color:#888;">(Requested: ${displayTimeSlot})</span></div>`;
         }
 
         pickupGrid.innerHTML += `

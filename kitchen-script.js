@@ -260,16 +260,26 @@ function processNewOrderQueue() {
                 ACCEPT TABLE ORDER ✅
             </button>
         `;
-    } else {
+  } else {
         // --- ONLINE ORDERS: TIMELINES & REJECT BUTTONS ---
-        const custTime = currentOrder.timeSlot || "ASAP";
+        let custTime = currentOrder.timeSlot || "ASAP";
+        
+        let defaultMins = 0;
+        let acceptLabel = `✅ ACCEPT (${custTime})`;
+
+        // MAGIC: Change "ASAP" to default to 60/30 minutes automatically!
+        if (custTime === "ASAP") {
+            defaultMins = currentOrder.orderType === 'delivery' ? 60 : 30;
+            acceptLabel = `✅ ACCEPT (${defaultMins} Min Standard)`;
+        }
+
         actionButtonsContainer.innerHTML = `
             <div style="display:flex; gap:15px; width:100%;">
                 <button onclick="rejectOrder()" style="flex:1; font-size:1.8rem; padding:20px; font-weight:bold; background-color:#ff4444; color:white; border:none; border-radius:10px; cursor:pointer;">
                     ❌ REJECT
                 </button>
-                <button onclick="acceptOrderWithTime(0)" style="flex:2; font-size:1.8rem; padding:20px; font-weight:bold; background-color:#D4AF37; color:black; border:none; border-radius:10px; cursor:pointer;">
-                    ✅ ACCEPT (${custTime})
+                <button onclick="acceptOrderWithTime(${defaultMins})" style="flex:2; font-size:1.8rem; padding:20px; font-weight:bold; background-color:#D4AF37; color:black; border:none; border-radius:10px; cursor:pointer;">
+                    ${acceptLabel}
                 </button>
             </div>
             

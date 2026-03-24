@@ -758,7 +758,7 @@ function checkBusinessStatus() {
 
 function generateTimeSlots(now, selectElement, bufferMinutes, shopOpenDate, shopCloseDate) {
     if(!selectElement) return;
-    selectElement.innerHTML = '<option value="ASAP" selected>So schnell wie möglich (ASAP)</option>';
+    selectElement.innerHTML = '<option value="ASAP" selected>So schnell wie möglich (Sofort)</option>';
 
     // 1. Calculate Earliest Possible Slot based on "Now + Buffer"
     let readyTime = new Date(now.getTime() + bufferMinutes * 60000);

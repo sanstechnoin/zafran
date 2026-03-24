@@ -708,6 +708,14 @@ if (loginButton) {
             let style = `border-top: 3px solid ${typeColor};`;
             if (isCooked) style = 'opacity:0.6; border:1px solid #444;';
 
+            // --- NEW: SMART TARGET TIME DISPLAY ---
+            let displayTimeSlot = order.timeSlot === "ASAP" ? "SOFORT" : order.timeSlot;
+            let targetHtml = `<div style="font-weight:bold; color:#D4AF37; margin-bottom:5px;">Target: ${displayTimeSlot} Uhr</div>`;
+            
+            if (order.estimatedTime && order.estimatedTime !== order.timeSlot) {
+                targetHtml = `<div style="font-weight:bold; color:#4CAF50; margin-bottom:5px;">Target: ${order.estimatedTime} Uhr <span style="font-size:0.8rem; color:#888;">(Req: ${displayTimeSlot})</span></div>`;
+            }
+
             pickupGrid.innerHTML += `
                 <div class="${boxClass}" style="${style}">
                     <div class="table-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
@@ -717,7 +725,7 @@ if (loginButton) {
                     <div style="margin-bottom:8px;">${statusHtml}</div>
                     <div style="font-size:0.85rem; color:#aaa; margin-bottom:5px;">📞 ${order.customerPhone}</div>
                     ${addressHtml}
-                    <div style="font-weight:bold; color:#D4AF37; margin-bottom:5px;">Target: ${order.timeSlot} Uhr</div>
+                    ${targetHtml}
                     ${couponHtml} 
                     ${notesHtml}
                     <ul class="order-list" style="margin-top:5px;">${itemsHtml}</ul>

@@ -407,6 +407,12 @@ function renderOnlineGrid() {
             `<li>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></li>`
         ).join('');
 
+        // NEW: Check if Kitchen set a custom time!
+        let targetHtml = `<div style="font-weight:bold; color:#D4AF37;">Target: ${order.timeSlot}</div>`;
+        if (order.estimatedTime && order.estimatedTime !== order.timeSlot) {
+            targetHtml = `<div style="font-weight:bold; color:#4CAF50;">Target: ${order.estimatedTime} <span style="font-size:0.8rem; color:#888;">(Requested: ${order.timeSlot})</span></div>`;
+        }
+
         pickupGrid.innerHTML += `
             <div class="pickup-box" style="border-top: 3px solid ${typeColor}; ${isReady ? 'opacity:0.6;' : ''}">
                 <div class="table-header">
@@ -414,7 +420,7 @@ function renderOnlineGrid() {
                     <span class="order-time">@ ${time}</span>
                 </div>
                 <div style="margin-bottom:8px;"><span style="background:${typeColor}; padding:2px 6px; border-radius:4px;">${typeBadge}</span></div>
-                <div style="font-weight:bold; color:#D4AF37;">Target: ${order.timeSlot}</div>
+                ${targetHtml}
                 <ul>${itemsHtml}</ul>
                 ${order.notes ? `<div style="color:#ff8888;">📝 "${order.notes}"</div>` : ''}
                 <button class="clear-pickup-btn" onclick="handleServe('${order.id}')">${isReady ? 'Undo' : 'Mark Ready'}</button>

@@ -525,6 +525,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             
                             firebaseBtn.innerHTML = "Kostenpflichtig Bestellen";
                             firebaseBtn.disabled = false;
+                            closeCart();
                         }
                         
                         // SCENARIO 2: KITCHEN ACCEPTED THE ORDER

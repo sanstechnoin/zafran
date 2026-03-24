@@ -437,9 +437,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 orderPin: orderPin 
             };
 
-            firebaseBtn.innerText = "Senden...";
-            firebaseBtn.disabled = true;
-
             try {
                 // 2. Save to Firebase
                 await db.collection("orders").doc(orderId).set(orderData);
@@ -526,7 +523,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             // Stop spinner, show error, keep cart intact!
                             alert("⚠️ Bestellung abgelehnt!\n\nLeider kann das Restaurant Ihre Bestellung derzeit nicht annehmen (z.B. Küche überlastet oder Zutaten ausverkauft). Bitte versuchen Sie es später noch einmal oder rufen Sie uns an.");
                             
-                            firebaseBtn.innerHTML = originalBtnText;
+                            firebaseBtn.innerHTML = "Kostenpflichtig Bestellen";
                             firebaseBtn.disabled = false;
                         }
                         

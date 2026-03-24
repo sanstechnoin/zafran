@@ -273,7 +273,6 @@ function processNewOrderQueue() {
   } else {
         // --- ONLINE ORDERS: TIMELINES & REJECT BUTTONS ---
         let custTime = currentOrder.timeSlot || "ASAP";
-        
         let defaultMins = 0;
         let acceptLabel = `✅ ACCEPT (${custTime})`;
 
@@ -294,10 +293,10 @@ function processNewOrderQueue() {
             </div>
             
             <div style="display:flex; gap:10px; margin-top:15px; width:100%;">
-                <button onclick="acceptOrderWithTime(15)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">15 Min</button>
                 <button onclick="acceptOrderWithTime(30)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">30 Min</button>
                 <button onclick="acceptOrderWithTime(45)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">45 Min</button>
                 <button onclick="acceptOrderWithTime(60)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">60 Min</button>
+                <button onclick="acceptOrderWithTime(90)" style="flex:1; font-size:1.6rem; padding:20px; font-weight:bold; background-color:#333; color:white; border:2px solid #555; border-radius:10px; cursor:pointer;">90 Min</button>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:10px; width:100%;">
@@ -429,15 +428,7 @@ function renderOnlineGrid() {
 
         // NEW: Translate ASAP to "SOFORT" for the Kitchen Grid
         let displayTimeSlot = order.timeSlot === "ASAP" ? "SOFORT" : order.timeSlot;
-        let targetHtml = `<div style="font-weight:bold; color:#D4AF37;">Target: ${displayTimeSlot}</div>`;
-        
-        if (order.estimatedTime && order.estimatedTime !== order.timeSlot) {
-            targetHtml = `<div style="font-weight:bold; color:#4CAF50;">Target: ${order.estimatedTime} <span style="font-size:0.8rem; color:#888;">(Requested: ${displayTimeSlot})</span></div>`;
-        }
-
-        // NEW: Check if Kitchen set a custom time!
-        let displayTimeSlot = order.timeSlot === "ASAP" ? "SOFORT" : order.timeSlot;
-        let targetHtml = `<div style="font-weight:bold; color:#D4AF37;">Target: ${displayTimeSlot}</div>`;
+        let targetHtml = `<div style="font-weight:bold; color:#D4AF37;">Target: ${displayTimeSlot}</div>`;      
         if (order.estimatedTime && order.estimatedTime !== order.timeSlot) {
             targetHtml = `<div style="font-weight:bold; color:#4CAF50;">Target: ${order.estimatedTime} <span style="font-size:0.8rem; color:#888;">(Requested: ${displayTimeSlot})</span></div>`;
         }

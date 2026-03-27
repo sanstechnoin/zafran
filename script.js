@@ -662,10 +662,10 @@ function loadSettingsAndHours() {
             // Fallback Defaults
             businessHours = {
                 weekly: {
-                    monday: {open:false}, tuesday:{open:true, start:"12:00", end:"21:00"},
-                    wednesday:{open:true, start:"12:00", end:"21:00"}, thursday:{open:true, start:"12:00", end:"21:00"},
-                    friday:{open:true, start:"12:00", end:"21:00"}, saturday:{open:true, start:"12:00", end:"21:00"},
-                    sunday:{open:true, start:"12:00", end:"21:00"}
+                    monday: {open:false}, tuesday:{open:false},
+                    wednesday:{open:false}, thursday:{open:false},
+                    friday:{open:false}, saturday:{open:false},
+                    sunday:{open:false}
                 },
                 holidays: [],
                 pause: null
@@ -747,12 +747,18 @@ function checkBusinessStatus() {
 
     // Parse Opening/Closing Times for Today
     const [openH, openM] = openTimeStr.split(':').map(Number);
-    const [closeH, closeM] = closeTimeStr.split(':').map(Number);
+    let [closeH, closeM] = closeTimeStr.split(':').map(Number);
 
     const openDate = new Date(now); openDate.setHours(openH, openM, 0);
-    const closeDate = new Date(now); closeDate.setHours(closeH, closeM, 0);
+    const closeDate = new Date(now); 
+    
+    if (closeH === 0 || closeH === 24) {
+        closeDate.setDate(closeDate.getDate() + 1);
+        closeDate.setHours(0, closeM, 0);
+    } else {
+        closeDate.setHours(closeH, closeM, 0);
+    }
 
-    // If "Now" is past closing time
     if(now > closeDate) {
         disableShop("Wir haben für heute geschlossen.");
         return;
@@ -772,7 +778,17 @@ function checkBusinessStatus() {
 
 function generateTimeSlots(now, selectElement, bufferMinutes, shopOpenDate, shopCloseDate) {
     if(!selectElement) return;
-    selectElement.innerHTML = '<option value="ASAP" selected>So schnell wie möglich (Sofort)</option>';
+    
+    selectElement.innerHTML = '';
+
+    // 🚨 SMART ASAP LOGIC 🚨
+    // Only show "ASAP" if the restaurant is CURRENTLY OPEN. 
+    // If they visit early, force them to pick from the future time slots!
+    if (now >= shopOpenDate) {
+        selectElement.innerHTML = '<option value="ASAP" selected>So schnell wie möglich (Sofort)</option>';
+    } else {
+        selectElement.innerHTML = '<option value="" disabled selected>-- Bitte Zeit wählen --</option>';
+    }
 
     // 1. Calculate Earliest Possible Slot based on "Now + Buffer"
     let readyTime = new Date(now.getTime() + bufferMinutes * 60000);
@@ -786,16 +802,15 @@ function generateTimeSlots(now, selectElement, bufferMinutes, shopOpenDate, shop
     }
 
     // 2. Ensure we don't start BEFORE the shop actually opens
-    // If "ReadyTime" is 11:30 but shop opens at 12:00 -> Start at 12:00
+    // (e.g., if it's 12:30 PM but Delivery starts at 16:00, push first slot to 16:00)
     if (readyTime < shopOpenDate) {
         readyTime = shopOpenDate;
     }
 
     // 3. Generate Slots until Closing Time
     let slotTime = new Date(readyTime);
-
-    // Safety: prevent infinite loop if times are weird
     let count = 0; 
+    
     while (slotTime <= shopCloseDate && count < 100) {
         let h = slotTime.getHours();
         let min = slotTime.getMinutes();
@@ -811,7 +826,8 @@ function generateTimeSlots(now, selectElement, bufferMinutes, shopOpenDate, shop
         count++;
     }
 
-    if(selectElement.options.length <= 1) {
+    // 4. HARD STOP: Disable shop if no future slots exist (e.g. right before closing)
+    if(selectElement.options.length <= 1 && now >= shopOpenDate) {
         disableShop("Für heute sind keine Termine mehr verfügbar.");
     }
 }

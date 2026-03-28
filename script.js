@@ -224,13 +224,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- NEW: SLEEK CHOICE MODAL ---
     function showPromoChoiceModal(couponData, msgEl, codeInput) {
-        // Create the dark overlay
+        // Create the dark overlay 
         const overlay = document.createElement('div');
-        overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px; animation: fadeIn 0.2s ease;";
+        overlay.style.cssText = "position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:100000; display:flex; justify-content:center; align-items:center; padding:15px; box-sizing:border-box; animation: fadeIn 0.2s ease;";
 
-        // Create the modern popup box
+        // Create the modern popup box 
         const box = document.createElement('div');
-        box.style.cssText = "background:#222; border:2px solid #D4AF37; border-radius:12px; padding:20px; width:100%; max-width:350px; text-align:center; color:white; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height:90vh; overflow-y:auto; box-sizing:border-box;";
+        box.style.cssText = "background:#222; border:2px solid #D4AF37; border-radius:12px; padding:20px; width:100%; max-width:350px; text-align:center; color:white; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height:80vh; overflow-y:auto; box-sizing:border-box; margin:auto;";
 
         box.innerHTML = `
             <h3 style="color:#D4AF37; margin-top:0; font-size:1.3rem; text-transform:uppercase;">Gratis-Artikel Wählen</h3>
@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button class="promo-choice-btn" data-choice="Mango Lassi" style="background:#333; color:white; border:1px solid #555; padding:12px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; transition:0.2s;">🥭 Mango Lassi</button>
                 <button class="promo-choice-btn" data-choice="Rosé Lassi" style="background:#333; color:white; border:1px solid #555; padding:12px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; transition:0.2s;">🌹 Rose Lassi</button>
-                <button class="promo-choice-btn" data-choice="Lassi (Normal)" style="background:#333; color:white; border:1px solid #555; padding:12px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; transition:0.2s;">🧂 Salz Lassi</button>
+                <button class="promo-choice-btn" data-choice="Salz Lassi" style="background:#333; color:white; border:1px solid #555; padding:12px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; transition:0.2s;">🧂 Salz Lassi</button>
             </div>
             <button id="promo-cancel-btn" style="background:transparent; color:#ff4444; border:1px solid #ff4444; padding:10px; border-radius:8px; margin-top:15px; width:100%; cursor:pointer; font-weight:bold; font-size:1rem;">Abbrechen</button>
         `;
@@ -1160,10 +1160,11 @@ async function checkAndShowMarketing() {
     }
 
     const modalDiv = document.createElement('div');
-    modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; padding:20px; animation: popIn 0.4s ease;";
+    modalDiv.style.cssText = "position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; padding:15px; box-sizing:border-box; animation: popIn 0.4s ease;";
+    
     modalDiv.innerHTML = `
         <style>@keyframes popIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }</style>
-        <div style="background:#222; border:2px solid var(--gold); padding:25px 20px; border-radius:12px; max-width:500px; width:100%; max-height:90vh; overflow-y:auto; box-sizing:border-box; text-align:center; box-shadow:0 15px 40px rgba(0,0,0,0.9); position:relative;">
+        <div style="background:#222; border:2px solid var(--gold); padding:25px 20px; border-radius:12px; max-width:500px; width:100%; max-height:80vh; overflow-y:auto; box-sizing:border-box; text-align:center; box-shadow:0 15px 40px rgba(0,0,0,0.9); position:relative; margin:auto;">
             <button id="close-flash-btn-x" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#888; font-size:2.5rem; cursor:pointer; line-height:1;">&times;</button>
             ${html}
             <button id="close-flash-btn-main" style="background:var(--gold); color:black; font-weight:bold; border:none; padding:15px; border-radius:8px; margin-top:20px; font-size:1.2rem; cursor:pointer; width:100%; text-transform:uppercase; box-shadow:0 4px 10px rgba(0,0,0,0.5);">Weiter zur Karte</button>

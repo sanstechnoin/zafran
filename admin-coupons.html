@@ -186,13 +186,23 @@
 
         <h2 data-i18n="settings_title">Webseiten Einstellungen</h2>
         <form id="settings-form">
-            <div class="form-group">
-                <label data-i18n="marquee_label">Laufschrift (Marquee) Text</label>
-                <input type="text" id="marqueeText" placeholder="z.B. Willkommen! 10% Rabatt...">
-            </div>
-            <div class="form-group">
-                <label data-i18n="whatsapp_label">WhatsApp Nummer</label>
-                <input type="text" id="whatsappNumber" placeholder="4915123456789">
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label data-i18n="marquee_label">Laufschrift (Marquee) Text</label>
+                    <input type="text" id="marqueeText" placeholder="z.B. Willkommen! 10% Rabatt...">
+                </div>
+                <div class="form-group full-width">
+                    <label data-i18n="whatsapp_label">WhatsApp Nummer</label>
+                    <input type="text" id="whatsappNumber" placeholder="4915123456789">
+                </div>
+                <div class="form-group">
+                    <label>Google Bewertung (z.B. 4.8)</label>
+                    <input type="number" step="0.1" min="1" max="5" id="googleScore" placeholder="4.8">
+                </div>
+                <div class="form-group">
+                    <label>Lieferando Bewertung (z.B. 4.6)</label>
+                    <input type="number" step="0.1" min="1" max="5" id="lieferandoScore" placeholder="4.6">
+                </div>
             </div>
             <button type="submit" id="settingsBtn" class="btn-blue" data-i18n="save_settings">Einstellungen Speichern</button>
             <div id="settings-message" class="message-box"></div>
@@ -236,7 +246,7 @@
             <button class="btn-blue" onclick="addHoliday()" style="margin-top:10px;" data-i18n="add_closure">Schließzeit Hinzufügen</button>
             
             <div class="holiday-list" id="holidayList">
-                </div>
+            </div>
         </div>
 
         <div class="service-card">
@@ -250,7 +260,7 @@
                     <div style="text-align:center; color:var(--gold);" data-i18n="delivery_hours">Lieferzeiten (Extrawurst)</div>
                 </div>
                 <div id="weekly-schedule-container">
-                    </div>
+                </div>
             </div>
             <button onclick="saveHours()" style="margin-top:20px;" data-i18n="save_hours">Öffnungszeiten Speichern</button>
             <div id="hours-message" class="message-box"></div>
@@ -272,7 +282,7 @@
         </div>
     </div>
 
-            <div class="admin-container">
+    <div class="admin-container">
         <h2>📢 Pop-Up Banners (Special Message)</h2>
         <form id="banner-form">
             <div class="form-grid">
@@ -575,6 +585,8 @@
                 const data = doc.data();
                 document.getElementById('marqueeText').value = data.marqueeText || "";
                 document.getElementById('whatsappNumber').value = data.whatsappNumber || "";
+                document.getElementById('googleScore').value = data.googleScore || "";
+                document.getElementById('lieferandoScore').value = data.lieferandoScore || "";
             }
         });
     }
@@ -586,6 +598,8 @@
             await db.collection('settings').doc('general').set({
                 marqueeText: document.getElementById('marqueeText').value.trim(),
                 whatsappNumber: document.getElementById('whatsappNumber').value.trim(),
+                googleScore: document.getElementById('googleScore').value.trim(),
+                lieferandoScore: document.getElementById('lieferandoScore').value.trim(),
                 updatedAt: new Date()
             }, { merge: true });
             alert(currentLang === 'de' ? "Gespeichert!" : "Saved!");
@@ -791,7 +805,7 @@
     }
 
     // ==========================================
-    // 3. DRIVER PIN LOGIC (NEW)
+    // 3. DRIVER PIN LOGIC
     // ==========================================
     function loadDriverPin() {
         db.collection('settings').doc('driver_auth').get().then(doc => {
@@ -820,11 +834,11 @@
     };
 
     // ==========================================
-    // 4. COUPON LOGIC
+    // 4. COUPON & BANNER LOGIC
     // ==========================================
     const couponForm = document.getElementById('coupon-form');
     
-        function loadCoupons() {
+    function loadCoupons() {
         const tableBody = document.getElementById('coupons-body');
         db.collection("coupons").orderBy("createdAt", "desc").get().then((snap) => {
             tableBody.innerHTML = "";
@@ -878,7 +892,6 @@
         document.getElementById('startDateGroup').style.display = now ? 'none' : 'block';
     }
 
-            // --- NEW LOGIC: BANNER, TOGGLES, AND COUPON SAVE ---
     window.toggleDiscountFields = function() {
         const type = document.querySelector('input[name="discountType"]:checked').value;
         document.getElementById('gratisFields').style.display = type === 'gratis' ? 'block' : 'none';
@@ -937,7 +950,7 @@
         }
     });
     
-    // ---  Load the HTML into the Editor ---
+    // --- Load the HTML into the Editor ---
     function loadSpecialBanner() {
         db.collection('settings').doc('banner').get().then(doc => {
             if(doc.exists) {
@@ -951,7 +964,7 @@
         });
     }
     
-    // ---  Save the HTML from the Editor ---
+    // --- Save the HTML from the Editor ---
     document.getElementById('banner-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const finalMessage = isHtmlMode ? document.getElementById('html-editor').value : quill.root.innerHTML;
@@ -964,6 +977,7 @@
         alert("Pop-Up Banner erfolgreich gespeichert!");
     });
 
+    // --- Save the Coupon ---
     couponForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const code = document.getElementById('code').value.toUpperCase().trim();

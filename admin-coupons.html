@@ -263,6 +263,37 @@
         </div>
     </div>
 
+            <div class="admin-container">
+        <h2>📢 Pop-Up Banners (Special Message)</h2>
+        <form id="banner-form">
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Sichtbar auf (Valid For)</label>
+                    <select id="bannerValidFor">
+                        <option value="both">Überall (Pickup & Delivery)</option>
+                        <option value="pickup">Nur Abholung (Pickup)</option>
+                        <option value="delivery">Nur Lieferung (Delivery)</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Titel (z.B. Willkommen bei Zaffran!)</label>
+                    <input type="text" id="bannerTitle" placeholder="Titel hier eingeben...">
+                </div>
+                <div class="form-group full-width">
+                    <label>Nachricht</label>
+                    <textarea id="bannerMessage" rows="3" placeholder="Probieren Sie heute unser neues Gericht..."></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="bannerActive" style="width:20px; height:20px;">
+                        <span style="color:var(--gold); font-size:1.1rem;">Banner Aktivieren? (Wird Kunden 1x pro Sitzung angezeigt)</span>
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="btn-blue">Banner Speichern</button>
+        </form>
+    </div>
+
     <div class="admin-container">
         <h2 data-i18n="coupon_title">Coupon Manager</h2>
         <form id="coupon-form">
@@ -305,16 +336,44 @@
                 </div>
 
                 <div class="form-group">
-                    <label data-i18n="disc_type">Typ</label>
+                    <label>Gültig für *</label>
+                    <select id="validFor">
+                        <option value="both">Abholung & Lieferung</option>
+                        <option value="pickup">Nur Abholung (Pickup)</option>
+                        <option value="delivery">Nur Lieferung (Delivery)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="disc_type">Typ *</label>
                     <div class="radio-group">
-                        <label class="radio-item"><input type="radio" name="discountType" value="percent" checked> % Prozent</label>
-                        <label class="radio-item"><input type="radio" name="discountType" value="fixed"> € Euro</label>
+                        <label class="radio-item"><input type="radio" name="discountType" value="percent" checked onchange="toggleDiscountFields()"> %</label>
+                        <label class="radio-item"><input type="radio" name="discountType" value="fixed" onchange="toggleDiscountFields()"> €</label>
+                        <label class="radio-item"><input type="radio" name="discountType" value="gratis" onchange="toggleDiscountFields()"> 🎁 Gratis Artikel</label>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label data-i18n="value">Wert *</label>
-                    <input type="number" id="discountValue" step="0.1" required>
+
+                <div id="gratisFields" style="display:none; background:#222; padding:15px; border-radius:4px; margin-bottom:15px;" class="full-width">
+                    <div class="form-group">
+                        <label>Artikel Name (z.B. Vorspeise des Tages 1)</label>
+                        <input type="text" id="promoItemName" placeholder="Gratis Vorspeise des Tages 1">
+                    </div>
+                    <label class="checkbox-item" style="margin-top:10px;">
+                        <input type="checkbox" id="promoAskChoice">
+                        <span style="color:var(--gold);">Kunde soll Lassi-Sorte wählen? (Prompt)</span>
+                    </label>
                 </div>
+
+                <div class="form-group" id="valueGroup">
+                    <label data-i18n="value">Wert *</label>
+                    <input type="number" id="discountValue" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Min. Hauptgerichte (>= 12€)</label>
+                    <input type="number" id="minMainDishes" value="0">
+                </div>
+
                 <div class="form-group full-width">
                     <label data-i18n="min_order">Mindestbestellwert (€)</label>
                     <input type="number" id="minOrder" value="20">
@@ -488,7 +547,8 @@
         loadSettings();
         loadHours(); 
         loadCoupons();
-        loadDriverPin(); // Load the PIN
+        loadDriverPin();
+        loadSpecialBanner();    
     }
 
     // ==========================================
@@ -749,22 +809,36 @@
     // ==========================================
     const couponForm = document.getElementById('coupon-form');
     
-    function loadCoupons() {
+        function loadCoupons() {
         const tableBody = document.getElementById('coupons-body');
         db.collection("coupons").orderBy("createdAt", "desc").get().then((snap) => {
             tableBody.innerHTML = "";
             snap.forEach(doc => {
                 const d = doc.data();
                 const isPercent = d.discountType === 'percent';
-                const badge = isPercent ? 'badge-percent' : 'badge-fixed';
-                const val = isPercent ? `${d.discountValue}%` : `${d.discountValue}€`;
+                let badge = 'badge-fixed';
+                let val = '';
                 
+                if (d.discountType === 'gratis') {
+                    badge = 'badge-fixed';
+                    val = '🎁 GRATIS';
+                } else {
+                    badge = isPercent ? 'badge-percent' : 'badge-fixed';
+                    val = isPercent ? `${d.discountValue}%` : `${d.discountValue}€`;
+                }
+                
+                const eyeColor = d.showDropdown ? 'var(--success-green)' : '#444';
+                const micColor = d.showBanner ? 'var(--gold)' : '#444';
+
                 const row = `<tr>
                     <td style="color:var(--gold); font-weight:bold;">${d.code}</td>
                     <td><span class="badge ${badge}">${val}</span></td>
-                    <td>${d.minOrder}€</td>
-                    <td>${d.mode === 'recurring' ? 'Recurring' : (d.validUntil || d.expiryDate)}</td>
-                    <td><span class="status-active">Active</span></td>
+                    <td>${d.minOrder || 0}€</td>
+                    <td>${d.mode === 'recurring' ? 'Recurring' : (d.validUntil || d.expiryDate || 'N/A')}</td>
+                    <td>
+                        <button style="background:${eyeColor}; border:none; border-radius:4px; padding:5px; cursor:pointer; margin-right:5px; font-size:1.2rem;" onclick="toggleCouponFlag('${d.code}', 'showDropdown')" title="Als Dropdown am Warenkorb zeigen">👁️</button>
+                        <button style="background:${micColor}; border:none; border-radius:4px; padding:5px; cursor:pointer; margin-right:5px; font-size:1.2rem;" onclick="toggleCouponFlag('${d.code}', 'showBanner')" title="Als Popup Flash-Banner zeigen">🎙️</button>
+                    </td>
                     <td><button class="btn-action-x" onclick="deleteCoupon('${d.code}')">X</button></td>
                 </tr>`;
                 tableBody.innerHTML += row;
@@ -789,23 +863,101 @@
         document.getElementById('startDateGroup').style.display = now ? 'none' : 'block';
     }
 
+        // --- NEW LOGIC: BANNER, TOGGLES, AND COUPON SAVE ---
+    window.toggleDiscountFields = function() {
+        const type = document.querySelector('input[name="discountType"]:checked').value;
+        document.getElementById('gratisFields').style.display = type === 'gratis' ? 'block' : 'none';
+        document.getElementById('valueGroup').style.display = type === 'gratis' ? 'none' : 'block';
+        document.getElementById('discountValue').required = (type !== 'gratis');
+    }
+
+    window.toggleCouponFlag = function(code, flag) {
+        db.collection("coupons").doc(code).get().then(doc => {
+            let currentVal = doc.data()[flag] || false;
+            db.collection("coupons").doc(code).update({ [flag]: !currentVal }).then(loadCoupons);
+        });
+    }
+
+    function loadSpecialBanner() {
+        db.collection('settings').doc('banner').get().then(doc => {
+            if(doc.exists) {
+                const data = doc.data();
+                document.getElementById('bannerTitle').value = data.title || "";
+                document.getElementById('bannerMessage').value = data.message || "";
+                document.getElementById('bannerValidFor').value = data.validFor || "both";
+                document.getElementById('bannerActive').checked = data.active || false;
+            }
+        });
+    }
+    
+    document.getElementById('banner-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await db.collection('settings').doc('banner').set({
+            title: document.getElementById('bannerTitle').value,
+            message: document.getElementById('bannerMessage').value,
+            validFor: document.getElementById('bannerValidFor').value,
+            active: document.getElementById('bannerActive').checked
+        });
+        alert("Pop-Up Banner erfolgreich gespeichert!");
+    });
+
+        // --- NEW LOGIC: BANNER, TOGGLES, AND COUPON SAVE ---
+    window.toggleDiscountFields = function() {
+        const type = document.querySelector('input[name="discountType"]:checked').value;
+        document.getElementById('gratisFields').style.display = type === 'gratis' ? 'block' : 'none';
+        document.getElementById('valueGroup').style.display = type === 'gratis' ? 'none' : 'block';
+        document.getElementById('discountValue').required = (type !== 'gratis');
+    }
+
+    window.toggleCouponFlag = function(code, flag) {
+        db.collection("coupons").doc(code).get().then(doc => {
+            let currentVal = doc.data()[flag] || false;
+            db.collection("coupons").doc(code).update({ [flag]: !currentVal }).then(loadCoupons);
+        });
+    }
+
+    function loadSpecialBanner() {
+        db.collection('settings').doc('banner').get().then(doc => {
+            if(doc.exists) {
+                const data = doc.data();
+                document.getElementById('bannerTitle').value = data.title || "";
+                document.getElementById('bannerMessage').value = data.message || "";
+                document.getElementById('bannerValidFor').value = data.validFor || "both";
+                document.getElementById('bannerActive').checked = data.active || false;
+            }
+        });
+    }
+    
+    document.getElementById('banner-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await db.collection('settings').doc('banner').set({
+            title: document.getElementById('bannerTitle').value,
+            message: document.getElementById('bannerMessage').value,
+            validFor: document.getElementById('bannerValidFor').value,
+            active: document.getElementById('bannerActive').checked
+        });
+        alert("Pop-Up Banner erfolgreich gespeichert!");
+    });
+
     couponForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const code = document.getElementById('code').value.toUpperCase().trim();
         const mode = document.getElementById('validityMode').value;
+        const discountType = document.querySelector('input[name="discountType"]:checked').value;
+
         const data = {
-            code, mode,
-            discountType: document.querySelector('input[name="discountType"]:checked').value,
-            discountValue: parseFloat(document.getElementById('discountValue').value),
-            minOrder: parseFloat(document.getElementById('minOrder').value),
+            code, mode, discountType,
+            validFor: document.getElementById('validFor').value,
+            discountValue: discountType === 'gratis' ? 0 : parseFloat(document.getElementById('discountValue').value),
+            minOrder: parseFloat(document.getElementById('minOrder').value) || 0,
+            minMainDishes: parseInt(document.getElementById('minMainDishes').value) || 0,
+            promoItemName: document.getElementById('promoItemName').value.trim(),
+            promoAskChoice: document.getElementById('promoAskChoice').checked,
             createdAt: new Date().toISOString(),
             validCategories: [] 
         };
 
-        // Collect Categories
-        document.querySelectorAll('input[name="cat"]:checked').forEach(cb => {
-            data.validCategories.push(cb.value);
-        });
+        document.querySelectorAll('input[name="cat"]:checked').forEach(cb => { data.validCategories.push(cb.value); });
         if(data.validCategories.length === 0) data.validCategories = 'all';
 
         if(mode === 'range') {

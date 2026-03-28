@@ -35,7 +35,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             margin: 0;
             padding: 0;
-            min-height: 100vh;
         }
         
         /* --- MOBILE TOP HEADER (Hidden on Desktop) --- */
@@ -161,6 +160,7 @@
             min-height: 100vh;
             background: var(--bg-dark);
             box-sizing: border-box;
+            padding-bottom: 40px;
         }
 
         .content-wrapper { padding: 40px; max-width: 1000px; margin: 0 auto; }
@@ -180,13 +180,12 @@
 
         /* --- SPLIT SCREEN HTML PREVIEW --- */
         #html-mode-container { display: none; gap: 15px; }
+        #html-mode-container.active { display: flex; flex-direction: row; }
         #html-editor { flex: 1; height: 250px; font-family: monospace; font-size: 0.85rem; }
         .preview-box { flex: 1; background: #222; border: 2px solid var(--gold); border-radius: 12px; padding: 35px 20px 20px 20px; box-sizing: border-box; overflow-y: auto; height: 250px; position: relative; }
         .preview-badge { position: absolute; top: 0; left: 0; background: var(--gold); color: black; font-size: 0.7rem; padding: 3px 8px; border-radius: 8px 0 8px 0; font-weight: bold; }
-        
-        @media (min-width: 769px) { #html-mode-container { flex-direction: row; } }
 
-        /* --- MOBILE BOTTOM NAV --- */
+        /* --- MOBILE RESPONSIVE --- */
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
             
@@ -212,7 +211,8 @@
             .app-main { margin-left: 0; width: 100%; padding-top: 60px; padding-bottom: 90px; }
             .content-wrapper { padding: 20px 15px; }
             .tab-content { padding: 20px 15px; }
-            #html-mode-container { flex-direction: column; }
+            
+            #html-mode-container.active { flex-direction: column; }
             #html-editor, .preview-box { height: 220px; width: 100%; }
         }
 
@@ -270,12 +270,6 @@
         
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 10000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 8px; border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 400px; }
-        
-        @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .full-width { grid-column: span 1; }
-            .hours-row { grid-template-columns: 1fr; gap: 5px; border-bottom: 2px dashed #444; padding: 15px 0; }
-        }
 
         .ql-toolbar.ql-snow { background: #f0f0f0; border-radius: 4px 4px 0 0; border: none; }
         .ql-container.ql-snow { background: #fff; color: #000; border-radius: 0 0 4px 4px; border: none; font-size: 1rem; }
@@ -307,7 +301,7 @@
     </div>
 </div>
 
-<div id="admin-content" style="display:none; width:100%; height:100%;">
+<div id="admin-content" style="display:none; width:100%;">
 
     <nav class="app-sidebar">
         <div class="sidebar-header">
@@ -341,8 +335,8 @@
         </div>
 
         <div class="sidebar-footer">
-            <p>Created & Developed by<br><strong style="color: #ccc;"><a href="https://santechnologies.de" target="_blank">SAN Technologies</a></strong><br>+49 162 3757839</p>
-            <p>© Zaffran Delight, Euskirchen 2025<br></p>
+            <p>Created & Developed by<br><strong style="color: #ccc;">SAN Technologies</strong><br>+49 162 3757839</p>
+            <p>© Zaffran Delight, Euskirchen 2025<br>(<a href="https://santechnologies.de" target="_blank">SAN Technologies</a>)</p>
         </div>
     </nav>
 
@@ -472,7 +466,7 @@
                             
                             <div id="editor-container" style="height: 150px; background: #fff; color: #000;"></div>
                             
-                            <div id="html-mode-container" style="display: flex;">
+                            <div id="html-mode-container">
                                 <textarea id="html-editor" placeholder="Fügen Sie hier Ihren HTML Code ein..."></textarea>
                                 <div class="preview-box">
                                     <span class="preview-badge">LIVE VORSCHAU</span>
@@ -715,8 +709,6 @@
     const ADMIN_PASSWORD = "zafran"; 
 
     document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('html-mode-container').style.display = 'none';
-        
         if(sessionStorage.getItem('zafran_admin_logged_in') === 'true') {
             initAdmin();
         }
@@ -752,10 +744,7 @@
 
     function initAdmin() {
         document.getElementById('login-overlay').style.display = 'none';
-        
-        if(window.innerWidth <= 768) {
-            document.getElementById('mobile-header-bar').style.display = 'flex';
-        }
+        document.getElementById('admin-content').style.display = 'block'; // Fixed Flexbox bug
         
         changeAdminLang(currentLang);
         loadSettings();
@@ -1052,6 +1041,7 @@
         });
     }
 
+    // --- RICH TEXT & SPLIT PREVIEW LOGIC ---
     var quill = new Quill('#editor-container', {
         theme: 'snow',
         placeholder: 'Schreiben Sie hier Ihre Special Message...',
@@ -1073,7 +1063,6 @@
     const htmlPreview = document.getElementById('html-preview');
     let isHtmlMode = false;
 
-    // Live Preview updates as you type
     htmlEditor.addEventListener('input', () => {
         htmlPreview.innerHTML = htmlEditor.value;
     });
@@ -1081,21 +1070,19 @@
     toggleHtmlBtn.addEventListener('click', () => {
         isHtmlMode = !isHtmlMode;
         if (isHtmlMode) {
-            // Switch to Split-Screen HTML & Preview Mode
             htmlEditor.value = quill.root.innerHTML; 
             htmlPreview.innerHTML = htmlEditor.value;
             
             editorContainer.style.display = 'none';
             document.querySelector('.ql-toolbar').style.display = 'none';
-            htmlModeContainer.style.display = window.innerWidth <= 768 ? 'column' : 'flex';
+            htmlModeContainer.classList.add('active'); // Safely triggers CSS Flex
             
-            toggleHtmlBtn.innerText = 'Visueller Editor (Achtung: Löscht ggf. Styles)';
+            toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)';
             toggleHtmlBtn.style.background = 'var(--warning-orange)';
             toggleHtmlBtn.style.color = '#fff';
         } else {
-            // Switch back to Basic Visual Editor
             quill.clipboard.dangerouslyPasteHTML(htmlEditor.value); 
-            htmlModeContainer.style.display = 'none';
+            htmlModeContainer.classList.remove('active');
             
             editorContainer.style.display = 'block';
             document.querySelector('.ql-toolbar').style.display = 'block';
@@ -1116,7 +1103,6 @@
                 
                 const msg = data.message || "";
                 
-                // SMART AUTO-DETECT: If the saved message contains complex HTML elements, open it safely in the Split Screen Preview mode to protect it from being stripped by Quill.
                 if(msg.includes('<div') || msg.includes('style=')) {
                     isHtmlMode = true;
                     htmlEditor.value = msg;
@@ -1124,13 +1110,12 @@
                     
                     editorContainer.style.display = 'none';
                     if(document.querySelector('.ql-toolbar')) document.querySelector('.ql-toolbar').style.display = 'none';
-                    htmlModeContainer.style.display = window.innerWidth <= 768 ? 'column' : 'flex';
+                    htmlModeContainer.classList.add('active');
                     
-                    toggleHtmlBtn.innerText = 'Visueller Editor (Achtung: Löscht ggf. Styles)';
+                    toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)';
                     toggleHtmlBtn.style.background = 'var(--warning-orange)';
                     toggleHtmlBtn.style.color = '#fff';
                 } else {
-                    // Standard visual mode for simple text
                     quill.clipboard.dangerouslyPasteHTML(msg);
                 }
             }

@@ -1133,9 +1133,17 @@ async function checkAndShowMarketing() {
 
     let showSpecial = false;
     if (bannerData && bannerData.active) {
-        if (bannerData.validFor === 'both' || (bannerData.validFor === 'pickup' && !isDelivery) || (bannerData.validFor === 'delivery' && isDelivery)) {
-            showSpecial = true;
-        }
+        // Detect Page Type securely
+        const hasOrderForm = document.getElementById('pickup-time') !== null;
+        const isHome = !hasOrderForm; // If no order form exists, assume it's the home page
+        
+        const v = bannerData.validFor;
+        
+        if (v === 'all') showSpecial = true;
+        else if (v === 'both' && hasOrderForm) showSpecial = true;
+        else if (v === 'home' && isHome) showSpecial = true;
+        else if (v === 'pickup' && hasOrderForm && !isDelivery) showSpecial = true;
+        else if (v === 'delivery' && isDelivery) showSpecial = true;
     }
 
     if (!showSpecial && flashCoupons.length === 0) return; 

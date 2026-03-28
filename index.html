@@ -1067,7 +1067,7 @@
                     offersGrid.insertAdjacentHTML('afterbegin', dynamicCardsHtml);
                 }
             }
-
+        }
         // Run this script 0.5 seconds after the page loads
         setTimeout(loadDynamicHomepageData, 500);
 
@@ -1131,8 +1131,7 @@
             sessionStorage.setItem('zafran_marketing_seen', 'true');
             const closeFn = () => {
                 modalDiv.remove();
-                document.body.style.overflow = ''; // Unlocks the background site
-                sessionStorage.setItem('zafran_marketing_seen', 'true');
+                document.body.style.overflow = ''; 
             };
             document.getElementById('close-flash-btn-x').onclick = closeFn;
             document.getElementById('close-flash-btn-main').onclick = closeFn;

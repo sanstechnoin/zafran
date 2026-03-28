@@ -536,17 +536,6 @@
                     <p style="color: #ccc; font-size: 0.9rem;" data-i18n="buffet_desc">All-you-can-eat Spezialitäten</p>
                     <button class="btn btn-gold" onclick="openModal()" data-i18n="btn_book_buffet">Tisch Buchen</button>
                 </div>
-
-                <div class="offer-card">
-                    <span class="offer-tag" style="background: var(--fresh-green); color: #fff;" data-i18n="tag_lunch">Mittagsangebot</span>
-                    <h3 class="offer-title" data-i18n="lunch_title">Mittagstisch</h3>
-                    <p style="font-size: 0.9rem; color: #aaa;" data-i18n="lunch_time">Di-Fr 12:00 - 15:00 Uhr</p>
-                    <div class="offer-detail">
-                        <div style="color:var(--fresh-green); font-weight:bold; font-size:1.4rem;">Veg: 8,00 €</div>
-                        <div style="color:var(--fresh-green); font-weight:bold; font-size:1.4rem;">Chicken: 10,00 €</div>
-                    </div>
-                    <p style="font-size: 0.8rem; font-style: italic; color: #888;" data-i18n="dine_in_only">*Nur im Restaurant (Dine-in)</p>
-                </div>
             </div>
         </div>
     </section>
@@ -1071,9 +1060,13 @@
             // Inject the dynamic cards at the VERY FRONT of the Offers Grid
             const offersGrid = document.querySelector('.offers-grid');
             if (offersGrid && dynamicCardsHtml !== '') {
-                offersGrid.insertAdjacentHTML('afterbegin', dynamicCardsHtml);
+                const buffetCard = offersGrid.querySelector('.offer-card');
+                if (buffetCard) {
+                    buffetCard.insertAdjacentHTML('afterend', dynamicCardsHtml);
+                } else {
+                    offersGrid.insertAdjacentHTML('afterbegin', dynamicCardsHtml);
+                }
             }
-        }
 
         // Run this script 0.5 seconds after the page loads
         setTimeout(loadDynamicHomepageData, 500);
@@ -1135,7 +1128,7 @@
             document.body.appendChild(modalDiv);
 
             document.body.style.overflow = 'hidden'; 
-
+            sessionStorage.setItem('zafran_marketing_seen', 'true');
             const closeFn = () => {
                 modalDiv.remove();
                 document.body.style.overflow = ''; // Unlocks the background site

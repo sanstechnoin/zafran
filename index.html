@@ -538,30 +538,6 @@
                 </div>
 
                 <div class="offer-card">
-                    <span class="offer-tag" style="background: var(--spice-red); color: #fff;" data-i18n="tag_weekly">Wochen-Spezial</span>
-                    <h3 class="offer-title" data-i18n="lamb_title">Lamm-Woche</h3>
-                    <p style="font-size: 0.9rem; color: #aaa;" data-i18n="week_2_only">Nur 2. Woche des Monats</p>
-                    <div class="offer-detail">
-                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--gold);" data-i18n="off_lamb_10">10% Rabatt auf alle Lammgerichte</p>
-                    </div>
-                    <p style="font-size: 0.8rem; font-style: italic; color: #888;" data-i18n="min_order_30">Mindestbestellwert: 30 €</p>
-                    <div class="code-box" style="border-color: var(--spice-red); color: var(--spice-red);">CODE: LAMM10</div>
-                    <a href="pickup.html" class="btn btn-red" style="margin-top: 15px; background: var(--spice-red);" data-i18n="btn_order">Bestellen</a>
-                </div>
-
-                <div class="offer-card">
-                    <span class="offer-tag" style="background: var(--spice-orange); color: #fff;" data-i18n="tag_weekly">Wochen-Spezial</span>
-                    <h3 class="offer-title" data-i18n="chicken_title">Hähnchen-Woche</h3>
-                    <p style="font-size: 0.9rem; color: #aaa;" data-i18n="week_3_only">Nur 3. Woche des Monats</p>
-                    <div class="offer-detail">
-                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--gold);" data-i18n="off_chicken_10">10% Rabatt auf alle Hähnchengerichte</p>
-                    </div>
-                    <p style="font-size: 0.8rem; font-style: italic; color: #888;" data-i18n="min_order_30">Mindestbestellwert: 30 €</p>
-                    <div class="code-box" style="border-color: var(--spice-orange); color: var(--spice-orange);">CODE: HUHN10</div>
-                    <a href="pickup.html" class="btn btn-red" style="margin-top: 15px; background: var(--spice-orange);" data-i18n="btn_order">Bestellen</a>
-                </div>
-
-                <div class="offer-card">
                     <span class="offer-tag" style="background: var(--fresh-green); color: #fff;" data-i18n="tag_lunch">Mittagsangebot</span>
                     <h3 class="offer-title" data-i18n="lunch_title">Mittagstisch</h3>
                     <p style="font-size: 0.9rem; color: #aaa;" data-i18n="lunch_time">Di-Fr 12:00 - 15:00 Uhr</p>
@@ -571,15 +547,6 @@
                     </div>
                     <p style="font-size: 0.8rem; font-style: italic; color: #888;" data-i18n="dine_in_only">*Nur im Restaurant (Dine-in)</p>
                 </div>
-
-                <div class="offer-card">
-                    <span class="offer-tag" style="background: #b71c1c; color: #fff;" data-i18n="tag_deal">Online Deal</span>
-                    <h3 class="offer-title" data-i18n="discount_title">Abhol-Rabatt</h3>
-                    <p class="offer-detail" data-i18n="discount_desc">10% Rabatt ab 40 € Bestellwert</p>
-                    <div class="code-box">CODE: SPAR10</div>
-                    <a href="pickup.html" class="btn btn-red" style="margin-top: 15px;" data-i18n="btn_order">Bestellen</a>
-                </div>
-
             </div>
         </div>
     </section>
@@ -1031,6 +998,143 @@
         if (!localStorage.getItem('cookieConsent')) {
             document.getElementById('cookie-banner').style.display = 'block';
         }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script>
+        async function loadDynamicHomepageData() {
+            // --- 1. LOAD GOOGLE & LIEFERANDO TRUST BANNER ---
+            const generalDoc = await db.collection('settings').doc('general').get();
+            if (generalDoc.exists) {
+                const settings = generalDoc.data();
+                if (settings.googleScore || settings.lieferandoScore) {
+                    const heroContent = document.querySelector('.hero-content');
+                    if (heroContent) {
+                        let gScore = settings.googleScore ? `<div style="display:flex; align-items:center; gap:8px;"><span style="font-size:1.4rem;">⭐</span> <strong style="font-size:1.1rem;">Google: ${settings.googleScore} / 5</strong></div>` : '';
+                        let lScore = settings.lieferandoScore ? `<div style="display:flex; align-items:center; gap:8px;"><span style="font-size:1.4rem;">🛵</span> <strong style="font-size:1.1rem;">Lieferando: ${settings.lieferandoScore} / 5</strong></div>` : '';
+                        
+                        let trustHtml = `
+                        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:30px; margin-top:40px; background:rgba(0,0,0,0.6); padding:15px 30px; border-radius:50px; border:1px solid rgba(212,175,55,0.4); color:white; box-shadow:0 5px 15px rgba(0,0,0,0.5); animation: fadeIn 1s ease;">
+                            <span style="color:#aaa; font-style:italic; margin-right:10px;">Unsere Gäste lieben uns:</span>
+                            ${gScore}
+                            ${lScore}
+                        </div>
+                        `;
+                        heroContent.insertAdjacentHTML('beforeend', trustHtml);
+                    }
+                }
+            }
+
+            // --- 2. LOAD DYNAMIC OFFER CARDS ---
+            const couponsSnap = await db.collection('coupons').get();
+            let dynamicCardsHtml = '';
+            const today = new Date().toISOString().split('T')[0];
+
+            couponsSnap.forEach(doc => {
+                const data = doc.data();
+                
+                // Only show valid coupons
+                if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) return;
+                
+                let badgeColor = data.discountType === 'gratis' ? 'var(--fresh-green)' : 'var(--spice-red)';
+                let tagText = data.discountType === 'gratis' ? 'Gratis Deal' : 'Aktion';
+                let titleText = data.discountType === 'gratis' ? 'Gratis Artikel' : 'Sonderrabatt';
+                
+                let valueText = '';
+                if(data.discountType === 'gratis') {
+                    valueText = `Gratis: ${data.promoItemName || 'Spezial-Artikel'}`;
+                } else if (data.discountType === 'percent') {
+                    valueText = `${data.discountValue}% Rabatt`;
+                } else {
+                    valueText = `${data.discountValue}€ Rabatt`;
+                }
+
+                let minOrderText = data.minOrder ? `Mindestbestellwert: ${data.minOrder} €` : 'Kein Mindestbestellwert';
+                let validForText = data.validFor === 'pickup' ? 'Nur bei Abholung' : (data.validFor === 'delivery' ? 'Nur bei Lieferung' : 'Abholung & Lieferung');
+
+                dynamicCardsHtml += `
+                <div class="offer-card" style="border: 2px solid var(--gold); box-shadow: 0 0 20px rgba(212,175,55,0.15);">
+                    <span class="offer-tag" style="background: ${badgeColor}; color: #fff;">${tagText}</span>
+                    <h3 class="offer-title">${titleText}</h3>
+                    <p style="font-size: 0.9rem; color: #aaa;">${validForText}</p>
+                    <div class="offer-detail">
+                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--gold);">${valueText}</p>
+                    </div>
+                    <p style="font-size: 0.8rem; font-style: italic; color: #888;">${minOrderText}</p>
+                    <div class="code-box" style="border-color: ${badgeColor}; color: ${badgeColor};">CODE: ${data.code}</div>
+                    <a href="${data.validFor === 'delivery' ? 'delivery.html' : 'pickup.html'}" class="btn btn-red" style="margin-top: 15px; background: ${badgeColor};">Jetzt Einlösen</a>
+                </div>`;
+            });
+
+            // Inject the dynamic cards at the VERY FRONT of the Offers Grid
+            const offersGrid = document.querySelector('.offers-grid');
+            if (offersGrid && dynamicCardsHtml !== '') {
+                offersGrid.insertAdjacentHTML('afterbegin', dynamicCardsHtml);
+            }
+        }
+
+        // Run this script 0.5 seconds after the page loads
+        setTimeout(loadDynamicHomepageData, 500);
+
+        // --- 3. FLASH BANNER LOGIC ---
+        async function showIndexBanner() {
+            if (sessionStorage.getItem('zafran_marketing_seen') === 'true') return; 
+            const bannerDoc = await db.collection('settings').doc('banner').get();
+            const bannerData = bannerDoc.exists ? bannerDoc.data() : null;
+            const couponsSnap = await db.collection('coupons').get();
+            let flashCoupons = [];
+            const today = new Date().toISOString().split('T')[0];
+
+            couponsSnap.forEach(doc => {
+                const data = doc.data();
+                if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) return;
+                if (data.showBanner) flashCoupons.push(data);
+            });
+
+            let showSpecial = false;
+            if (bannerData && bannerData.active) showSpecial = true;
+            if (!showSpecial && flashCoupons.length === 0) return; 
+
+            let html = '';
+            if (showSpecial) {
+                html += `<h2 style="color:var(--gold); margin-top:0; font-size:1.8rem; text-transform:uppercase;">${bannerData.title}</h2>`;
+                html += `<p style="font-size:1.1rem; line-height:1.6; color:#eee;">${bannerData.message.replace(/\n/g, '<br>')}</p>`;
+                if(flashCoupons.length > 0) html += `<hr style="border-top:1px dashed #555; margin:20px 0;">`;
+            }
+            if (flashCoupons.length > 0) {
+                html += `<h3 style="color:#28a745; margin-bottom:15px; font-size:1.4rem;">🎁 Unsere Angebote für Sie:</h3>`;
+                flashCoupons.forEach(c => {
+                    html += `<div style="background:#111; border:2px dashed var(--gold); padding:15px; margin-bottom:12px; border-radius:8px;">`;
+                    html += `<strong style="font-size:1.3rem; color:white; letter-spacing:1px;">Code: ${c.code}</strong>`;
+                    if(c.discountType === 'gratis') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Gratis: ${c.promoItemName || 'Spezial-Artikel'}</span>`;
+                    else if(c.discountType === 'percent') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Sie sparen: ${c.discountValue}% Rabatt</span>`;
+                    else html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Sie sparen: ${c.discountValue}€ Rabatt</span>`;
+                    html += `</div>`;
+                });
+            }
+
+            const modalDiv = document.createElement('div');
+            modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; padding:20px; animation: popIn 0.4s ease;";
+            modalDiv.innerHTML = `
+                <style>@keyframes popIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }</style>
+                <div style="background:#222; border:2px solid var(--gold); padding:30px; border-radius:12px; max-width:500px; width:100%; text-align:center; box-shadow:0 15px 40px rgba(0,0,0,0.9); position:relative;">
+                    <button id="close-flash-btn-x" style="position:absolute; top:15px; right:20px; background:none; border:none; color:#888; font-size:2.5rem; cursor:pointer; line-height:1;">&times;</button>
+                    ${html}
+                    <button id="close-flash-btn-main" style="background:var(--gold); color:black; font-weight:bold; border:none; padding:15px; border-radius:8px; margin-top:20px; font-size:1.2rem; cursor:pointer; width:100%; text-transform:uppercase; box-shadow:0 4px 10px rgba(0,0,0,0.5);">Schließen</button>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
+
+            const closeFn = () => {
+                modalDiv.remove();
+                sessionStorage.setItem('zafran_marketing_seen', 'true');
+            };
+            document.getElementById('close-flash-btn-x').onclick = closeFn;
+            document.getElementById('close-flash-btn-main').onclick = closeFn;
+        }
+        setTimeout(showIndexBanner, 600);
     </script>
 </body>
 </html>

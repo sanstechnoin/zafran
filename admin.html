@@ -494,19 +494,31 @@
                         </div>
                         
                         <div class="form-group full-width">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <label style="margin: 0;">Nachricht</label>
-                                <button type="button" id="toggle-html-btn" class="btn-small" style="background:#444; color:var(--gold); margin:0;">Code & Vorschau `< >`</button>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <label style="margin: 0;">Nachricht (Message)</label>
+                                
+                                <div style="display: flex; background: #111; border: 1px solid #444; border-radius: 6px; overflow: hidden;">
+                                    <button type="button" id="btn-mode-visual" onclick="setBannerMode('visual')" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: var(--gold); color: #000; border: none; text-transform: none;">👁️ Visuell</button>
+                                    <button type="button" id="btn-mode-html" onclick="setBannerMode('html')" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: transparent; color: #888; border: none; border-left: 1px solid #444; text-transform: none;">⌨️ HTML Code</button>
+                                </div>
                             </div>
                             
                             <div id="editor-container" style="height: 150px; background: #fff; color: #000;"></div>
                             
-                            <div id="html-mode-container">
-                                <textarea id="html-editor" placeholder="Fügen Sie hier Ihren HTML Code ein..."></textarea>
-                                <div class="preview-box">
-                                    <span class="preview-badge">LIVE VORSCHAU</span>
-                                    <div id="html-preview" style="color: #eee; font-size: 1rem; line-height: 1.6; text-align: center;"></div>
+                            <div id="html-mode-container" style="display: none; flex-direction: column; gap: 25px;">
+                                
+                                <div style="position: relative; padding-top: 10px;">
+                                    <span style="position: absolute; top: -5px; left: 15px; background: var(--gold); color: black; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 2;">HTML CODE EDITOR</span>
+                                    <textarea id="html-editor" style="width: 100%; height: 220px; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; background: #0a0a0a; color: #4af626; border: 2px solid #444; border-radius: 8px; padding: 25px 15px 15px 15px; line-height: 1.5; resize: vertical;" placeholder="Fügen Sie hier Ihren HTML Code ein..."></textarea>
                                 </div>
+                                
+                                <div style="position: relative; padding-top: 10px;">
+                                    <span style="position: absolute; top: -5px; left: 15px; background: #007bff; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 2;">LIVE VORSCHAU</span>
+                                    <div class="preview-box" style="width: 100%; background: #222; border: 2px dashed #007bff; border-radius: 8px; padding: 25px 20px 20px 20px; min-height: 150px; max-height: 350px; overflow-y: auto;">
+                                        <div id="html-preview" style="color: #eee; font-size: 1rem; line-height: 1.6; text-align: center;"></div>
+                                    </div>
+                                </div>
+                                
                             </div>
                         </div>
 
@@ -1204,39 +1216,78 @@
     });
 
     // ==========================================
-    // 5. BANNER LOGIC (RICH TEXT)
+    // 5. BANNER LOGIC (RICH TEXT & CODE EDITOR)
     // ==========================================
     var quill = new Quill('#editor-container', { theme: 'snow', placeholder: 'Schreiben Sie hier Ihre Message...', modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'color': [] }, { 'background': [] }], [{ 'list': 'ordered'}, { 'list': 'bullet' }], [{ 'align': [] }], ['link', 'clean']] } });
-    const toggleHtmlBtn = document.getElementById('toggle-html-btn'); const editorContainer = document.getElementById('editor-container'); const htmlEditor = document.getElementById('html-editor'); const htmlModeContainer = document.getElementById('html-mode-container'); const htmlPreview = document.getElementById('html-preview');
+    
+    const editorContainer = document.getElementById('editor-container'); 
+    const htmlEditor = document.getElementById('html-editor'); 
+    const htmlModeContainer = document.getElementById('html-mode-container'); 
+    const htmlPreview = document.getElementById('html-preview');
     let isHtmlMode = false;
 
+    // Automatically update the live preview when typing code
     htmlEditor.addEventListener('input', () => { htmlPreview.innerHTML = htmlEditor.value; });
-    toggleHtmlBtn.addEventListener('click', () => {
-        isHtmlMode = !isHtmlMode;
-        if (isHtmlMode) {
-            htmlEditor.value = quill.root.innerHTML; htmlPreview.innerHTML = htmlEditor.value; editorContainer.style.display = 'none'; document.querySelector('.ql-toolbar').style.display = 'none'; htmlModeContainer.classList.add('active');
-            toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)'; toggleHtmlBtn.style.background = 'var(--warning-orange)'; toggleHtmlBtn.style.color = '#fff';
+    
+    // The new Sleek Toggle Function
+    window.setBannerMode = function(mode) {
+        const btnVis = document.getElementById('btn-mode-visual');
+        const btnHtml = document.getElementById('btn-mode-html');
+        const toolbar = document.querySelector('.ql-toolbar');
+
+        if(mode === 'html') {
+            isHtmlMode = true;
+            btnVis.style.background = 'transparent'; btnVis.style.color = '#888';
+            btnHtml.style.background = 'var(--gold)'; btnHtml.style.color = '#000';
+            
+            htmlEditor.value = quill.root.innerHTML; 
+            htmlPreview.innerHTML = htmlEditor.value; 
+            
+            editorContainer.style.display = 'none'; 
+            if(toolbar) toolbar.style.display = 'none'; 
+            htmlModeContainer.style.display = 'flex';
         } else {
-            quill.clipboard.dangerouslyPasteHTML(htmlEditor.value); htmlModeContainer.classList.remove('active'); editorContainer.style.display = 'block'; document.querySelector('.ql-toolbar').style.display = 'block';
-            toggleHtmlBtn.innerText = 'Code & Vorschau `< >`'; toggleHtmlBtn.style.background = '#444'; toggleHtmlBtn.style.color = 'var(--gold)';
+            isHtmlMode = false;
+            btnHtml.style.background = 'transparent'; btnHtml.style.color = '#888';
+            btnVis.style.background = 'var(--gold)'; btnVis.style.color = '#000';
+            
+            quill.clipboard.dangerouslyPasteHTML(htmlEditor.value); 
+            htmlModeContainer.style.display = 'none'; 
+            editorContainer.style.display = 'block'; 
+            if(toolbar) toolbar.style.display = 'block';
         }
-    });
+    };
     
     function loadSpecialBanner() {
         db.collection('settings').doc('banner').get().then(doc => {
             if(doc.exists) {
-                const data = doc.data(); document.getElementById('bannerTitle').value = data.title || ""; document.getElementById('bannerValidFor').value = data.validFor || "both"; document.getElementById('bannerActive').checked = data.active || false;
+                const data = doc.data(); 
+                document.getElementById('bannerTitle').value = data.title || ""; 
+                document.getElementById('bannerValidFor').value = data.validFor || "both"; 
+                document.getElementById('bannerActive').checked = data.active || false;
+                
                 const msg = data.message || "";
                 if(msg.includes('<div') || msg.includes('style=')) {
-                    isHtmlMode = true; htmlEditor.value = msg; htmlPreview.innerHTML = msg; editorContainer.style.display = 'none'; if(document.querySelector('.ql-toolbar')) document.querySelector('.ql-toolbar').style.display = 'none'; htmlModeContainer.classList.add('active'); toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)'; toggleHtmlBtn.style.background = 'var(--warning-orange)'; toggleHtmlBtn.style.color = '#fff';
-                } else { quill.clipboard.dangerouslyPasteHTML(msg); }
+                    // Smart Detect: If complex HTML is saved, open directly in Code Mode
+                    quill.root.innerHTML = msg; 
+                    setBannerMode('html');
+                } else { 
+                    quill.clipboard.dangerouslyPasteHTML(msg); 
+                    setBannerMode('visual');
+                }
             }
         });
     }
     
     document.getElementById('banner-form').addEventListener('submit', async (e) => {
-        e.preventDefault(); const finalMessage = isHtmlMode ? document.getElementById('html-editor').value : quill.root.innerHTML;
-        await db.collection('settings').doc('banner').set({ title: document.getElementById('bannerTitle').value, message: finalMessage, validFor: document.getElementById('bannerValidFor').value, active: document.getElementById('bannerActive').checked });
+        e.preventDefault(); 
+        const finalMessage = isHtmlMode ? htmlEditor.value : quill.root.innerHTML;
+        await db.collection('settings').doc('banner').set({ 
+            title: document.getElementById('bannerTitle').value, 
+            message: finalMessage, 
+            validFor: document.getElementById('bannerValidFor').value, 
+            active: document.getElementById('bannerActive').checked 
+        });
         alert("Pop-Up Banner gespeichert!");
     });
 

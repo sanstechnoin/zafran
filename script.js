@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     // --- 1. LOAD SETTINGS & CHECK STATUS ---
     await loadSettingsAndHours();
+    checkAndShowMarketing();
 
     // --- NEW: LOAD CART MEMORY ---
     const savedCart = sessionStorage.getItem('zafran_cart');
@@ -157,7 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateCart();
     }
 
-    // --- COUPON LOGIC ---
+   // --- COUPON LOGIC ---
     async function handleApplyCoupon() {
         const codeInput = document.getElementById('coupon-input');
         const msgEl = document.getElementById('coupon-message');
@@ -183,7 +184,36 @@ document.addEventListener("DOMContentLoaded", async () => {
                     msgEl.textContent = "Gutschein abgelaufen.";
                     msgEl.style.color = "red";
                     currentCoupon = null;
-                } else {
+                } 
+                else if (data.validFor === 'pickup' && isDeliveryPage()) {
+                    msgEl.textContent = "Dieser Code gilt nur für Abholung (Pickup)!";
+                    msgEl.style.color = "red";
+                    currentCoupon = null;
+                }
+                else if (data.validFor === 'delivery' && !isDeliveryPage()) {
+                    msgEl.textContent = "Dieser Code gilt nur für Lieferung (Delivery)!";
+                    msgEl.style.color = "red";
+                    currentCoupon = null;
+                }
+                else {
+                    if (data.discountType === 'gratis') {
+                        if (data.promoAskChoice) {
+                            let choice = prompt("Wählen Sie Ihren Gratis-Artikel:\n\n1 = Mango Lassi\n2 = Rosé Lassi\n3 = Lassi (Normal)", "1");
+                            if (choice === null) {
+                                msgEl.textContent = "Auswahl abgebrochen.";
+                                currentCoupon = null;
+                                updateCart();
+                                return;
+                            }
+                            let itemName = "Mango Lassi";
+                            if (choice === "2") itemName = "Rosé Lassi";
+                            if (choice === "3") itemName = "Lassi (Normal)";
+                            data.finalPromoName = itemName; 
+                        } else {
+                            data.finalPromoName = data.promoItemName;
+                        }
+                    }
+
                     currentCoupon = data;
                     msgEl.textContent = `Code gefunden. Prüfe...`;
                     msgEl.style.color = "#666";
@@ -204,42 +234,63 @@ document.addEventListener("DOMContentLoaded", async () => {
         let couponStatusColor = "";
 
         if (currentCoupon) {
-            const minOrder = currentCoupon.minOrder || 0; 
-            const isPercent = currentCoupon.discountType === 'percent';
-            const value = currentCoupon.discountValue || 0;
+            const reqMinOrder = currentCoupon.minOrder || 0; 
+            const reqMainDishes = currentCoupon.minMainDishes || 0;
 
-            if (cartSubtotal < minOrder) {
-                couponStatusMsg = `Gutschein "${currentCoupon.code}": Mindestbestellwert ${minOrder}€ nicht erreicht.`;
+            let baseSubtotal = 0;
+            let mainDishCount = 0;
+            cart.forEach(item => {
+                if(!item.isPromo) {
+                    baseSubtotal += (item.price * item.quantity);
+                    if (item.price >= 12.00) mainDishCount += item.quantity;
+                }
+            });
+
+            if (baseSubtotal < reqMinOrder) {
+                couponStatusMsg = `Gutschein "${currentCoupon.code}": Mindestbestellwert ${reqMinOrder}€ nicht erreicht (Noch ${(reqMinOrder - baseSubtotal).toFixed(2)}€).`;
                 couponStatusColor = "orange";
                 discountAmount = 0; 
-            } else {
-                const isAll = currentCoupon.validCategories === 'all' || 
-                              (Array.isArray(currentCoupon.validCategories) && currentCoupon.validCategories.includes('all'));
-
-                let eligibleAmount = 0;
-
-                if (isAll) {
-                    eligibleAmount = cartSubtotal;
-                } else {
-                    cart.forEach(item => {
-                        if (item.category && currentCoupon.validCategories.includes(item.category)) {
-                            eligibleAmount += (item.price * item.quantity);
-                        }
-                    });
-                }
-
-                if (eligibleAmount > 0) {
-                    if (isPercent) {
-                        discountAmount = (eligibleAmount * value) / 100;
-                        couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}%) aktiviert: -${discountAmount.toFixed(2)} €`;
-                    } else {
-                        discountAmount = Math.min(value, eligibleAmount);
-                        couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}€) aktiviert: -${discountAmount.toFixed(2)} €`;
-                    }
+            } 
+            else if (mainDishCount < reqMainDishes) {
+                couponStatusMsg = `Gutschein "${currentCoupon.code}": Es fehlen noch ${reqMainDishes - mainDishCount} Hauptgerichte (>= 12€).`;
+                couponStatusColor = "orange";
+                discountAmount = 0; 
+            }
+            else {
+                if (currentCoupon.discountType === 'gratis') {
+                    couponStatusMsg = `Gutschein "${currentCoupon.code}" aktiv: Gratis Artikel hinzugefügt!`;
                     couponStatusColor = "green";
-                } else {
-                    couponStatusMsg = `Gutschein "${currentCoupon.code}" nicht anwendbar auf diese Artikel.`;
-                    couponStatusColor = "orange";
+                    discountAmount = 0; 
+                } 
+                else {
+                    const isPercent = currentCoupon.discountType === 'percent';
+                    const value = currentCoupon.discountValue || 0;
+                    const isAll = currentCoupon.validCategories === 'all' || (Array.isArray(currentCoupon.validCategories) && currentCoupon.validCategories.includes('all'));
+
+                    let eligibleAmount = 0;
+                    if (isAll) {
+                        eligibleAmount = baseSubtotal;
+                    } else {
+                        cart.forEach(item => {
+                            if (!item.isPromo && item.category && currentCoupon.validCategories.includes(item.category)) {
+                                eligibleAmount += (item.price * item.quantity);
+                            }
+                        });
+                    }
+
+                    if (eligibleAmount > 0) {
+                        if (isPercent) {
+                            discountAmount = (eligibleAmount * value) / 100;
+                            couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}%) aktiviert: -${discountAmount.toFixed(2)} €`;
+                        } else {
+                            discountAmount = Math.min(value, eligibleAmount);
+                            couponStatusMsg = `Gutschein "${currentCoupon.code}" (${value}€) aktiviert: -${discountAmount.toFixed(2)} €`;
+                        }
+                        couponStatusColor = "green";
+                    } else {
+                        couponStatusMsg = `Gutschein "${currentCoupon.code}" nicht anwendbar auf diese Artikel.`;
+                        couponStatusColor = "orange";
+                    }
                 }
             }
         }
@@ -249,12 +300,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function updateCart() {
+        cart = cart.filter(item => !item.isPromo);
+
+        let baseSubtotal = 0;
+        let mainDishCount = 0;
+        cart.forEach(item => {
+            baseSubtotal += (item.price * item.quantity);
+            if (item.price >= 12.00) mainDishCount += item.quantity;
+        });
+
+        if (currentCoupon && currentCoupon.discountType === 'gratis') {
+            const reqMinOrder = currentCoupon.minOrder || 0;
+            const reqMainDishes = currentCoupon.minMainDishes || 0;
+
+            if (baseSubtotal >= reqMinOrder && mainDishCount >= reqMainDishes) {
+                cart.push({
+                    id: 'promo-item',
+                    name: '🎁 GRATIS ' + (currentCoupon.finalPromoName || "Artikel"),
+                    price: 0,
+                    quantity: 1,
+                    isPromo: true 
+                });
+            }
+        }
+
         cartItemsContainer.innerHTML = "";
         let subtotal = 0;
         let itemCount = 0;
 
         document.querySelectorAll('.item-qty').forEach(qtyEl => {
-            const item = cart.find(i => i.id === qtyEl.dataset.id);
+            const item = cart.find(i => i.id === qtyEl.dataset.id && !i.isPromo);
             const controlsDiv = qtyEl.closest('.quantity-controls');
             if (item) {
                 qtyEl.innerText = item.quantity;
@@ -274,15 +349,24 @@ document.addEventListener("DOMContentLoaded", async () => {
                 itemCount += item.quantity;
                 const itemEl = document.createElement('div');
                 itemEl.classList.add('cart-item');
-                itemEl.innerHTML = `
-                    <span class="cart-item-name">${item.name}</span>
-                    <div class="cart-item-controls">
-                        <button class="cart-btn-minus" data-id="${item.id}">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="cart-btn-plus" data-id="${item.id}">+</button>
-                    </div>
-                    <span class="cart-item-price">${itemTotal.toFixed(2)} €</span>
-                `;
+                
+                if (item.isPromo) {
+                    itemEl.innerHTML = `
+                        <span class="cart-item-name" style="color:#28a745; font-weight:bold;">${item.name}</span>
+                        <div class="cart-item-controls"><span style="color:#28a745; font-weight:bold;">GRATIS</span></div>
+                        <span class="cart-item-price" style="color:#28a745;">0.00 €</span>
+                    `;
+                } else {
+                    itemEl.innerHTML = `
+                        <span class="cart-item-name">${item.name}</span>
+                        <div class="cart-item-controls">
+                            <button class="cart-btn-minus" data-id="${item.id}">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="cart-btn-plus" data-id="${item.id}">+</button>
+                        </div>
+                        <span class="cart-item-price">${itemTotal.toFixed(2)} €</span>
+                    `;
+                }
                 cartItemsContainer.appendChild(itemEl);
             });
         }
@@ -291,7 +375,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if(subtotalAmountEl) subtotalAmountEl.innerText = `${subtotal.toFixed(2)} €`;
 
         const { discountAmount, finalTotal, couponStatusMsg, couponStatusColor } = calculateFinalTotals();
-
         totalAmountEl.innerText = `${finalTotal.toFixed(2)} €`;
         
         const msgEl = document.getElementById('coupon-message');
@@ -306,7 +389,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         cartToggleBtn.classList.toggle('hidden', itemCount === 0);
         addCartItemControls();
 
-        // ADD THIS: Save to Session Storage
         sessionStorage.setItem('zafran_cart', JSON.stringify(cart)); 
     }
 
@@ -917,3 +999,106 @@ function validateForm() {
     return true;
 }
 
+// ===============================================
+// 4. SMART MARKETING SYSTEM (BANNERS & DROPDOWNS)
+// ===============================================
+async function checkAndShowMarketing() {
+    const bannerDoc = await db.collection('settings').doc('banner').get();
+    const bannerData = bannerDoc.exists ? bannerDoc.data() : null;
+
+    const couponsSnap = await db.collection('coupons').get();
+    let flashCoupons = [];
+    let dropdownCoupons = [];
+    
+    const today = new Date().toISOString().split('T')[0];
+    const isDelivery = isDeliveryPage();
+
+    couponsSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) return;
+        if (data.validFor === 'pickup' && isDelivery) return;
+        if (data.validFor === 'delivery' && !isDelivery) return;
+
+        if (data.showBanner) flashCoupons.push(data);
+        if (data.showDropdown) dropdownCoupons.push(data);
+    });
+
+    const couponInputArea = document.getElementById('coupon-input');
+    if (couponInputArea && dropdownCoupons.length > 0) {
+        let dropDiv = document.getElementById('coupon-dropdown-badges');
+        if(!dropDiv) {
+            dropDiv = document.createElement('div');
+            dropDiv.id = 'coupon-dropdown-badges';
+            dropDiv.style.marginTop = '10px';
+            dropDiv.style.display = 'flex';
+            dropDiv.style.gap = '8px';
+            dropDiv.style.flexWrap = 'wrap';
+            couponInputArea.parentNode.appendChild(dropDiv);
+        }
+        dropDiv.innerHTML = ''; 
+        
+        dropdownCoupons.forEach(c => {
+            let badge = document.createElement('span');
+            badge.innerHTML = `🎟️ ${c.code}`;
+            badge.style.cssText = "background:rgba(212,175,55,0.2); color:var(--gold); border:1px solid var(--gold); padding:6px 12px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:0.85rem; transition:0.2s;";
+            
+            badge.onmouseover = () => { badge.style.background = "var(--gold)"; badge.style.color = "black"; };
+            badge.onmouseout = () => { badge.style.background = "rgba(212,175,55,0.2)"; badge.style.color = "var(--gold)"; };
+
+            badge.onclick = () => {
+                document.getElementById('coupon-input').value = c.code;
+                document.getElementById('apply-coupon-btn').click();
+            };
+            dropDiv.appendChild(badge);
+        });
+    }
+
+    if (sessionStorage.getItem('zafran_marketing_seen') === 'true') return; 
+
+    let showSpecial = false;
+    if (bannerData && bannerData.active) {
+        if (bannerData.validFor === 'both' || (bannerData.validFor === 'pickup' && !isDelivery) || (bannerData.validFor === 'delivery' && isDelivery)) {
+            showSpecial = true;
+        }
+    }
+
+    if (!showSpecial && flashCoupons.length === 0) return; 
+
+    let html = '';
+    if (showSpecial) {
+        html += `<h2 style="color:var(--gold); margin-top:0; font-size:1.8rem; text-transform:uppercase;">${bannerData.title}</h2>`;
+        html += `<p style="font-size:1.1rem; line-height:1.6; color:#eee;">${bannerData.message.replace(/\n/g, '<br>')}</p>`;
+        if(flashCoupons.length > 0) html += `<hr style="border-top:1px dashed #555; margin:20px 0;">`;
+    }
+    
+    if (flashCoupons.length > 0) {
+        html += `<h3 style="color:#28a745; margin-bottom:15px; font-size:1.4rem;">🎁 Unsere Angebote für Sie:</h3>`;
+        flashCoupons.forEach(c => {
+            html += `<div style="background:#111; border:2px dashed var(--gold); padding:15px; margin-bottom:12px; border-radius:8px;">`;
+            html += `<strong style="font-size:1.3rem; color:white; letter-spacing:1px;">Code: ${c.code}</strong>`;
+            if(c.discountType === 'gratis') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Gratis: ${c.promoItemName || 'Spezial-Artikel'}</span>`;
+            else if(c.discountType === 'percent') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Sie sparen: ${c.discountValue}% Rabatt</span>`;
+            else html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Sie sparen: ${c.discountValue}€ Rabatt</span>`;
+            html += `</div>`;
+        });
+    }
+
+    const modalDiv = document.createElement('div');
+    modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; padding:20px; animation: popIn 0.4s ease;";
+    modalDiv.innerHTML = `
+        <style>@keyframes popIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }</style>
+        <div style="background:#222; border:2px solid var(--gold); padding:30px; border-radius:12px; max-width:500px; width:100%; text-align:center; box-shadow:0 15px 40px rgba(0,0,0,0.9); position:relative;">
+            <button id="close-flash-btn-x" style="position:absolute; top:15px; right:20px; background:none; border:none; color:#888; font-size:2.5rem; cursor:pointer; line-height:1;">&times;</button>
+            ${html}
+            <button id="close-flash-btn-main" style="background:var(--gold); color:black; font-weight:bold; border:none; padding:15px; border-radius:8px; margin-top:20px; font-size:1.2rem; cursor:pointer; width:100%; text-transform:uppercase; box-shadow:0 4px 10px rgba(0,0,0,0.5);">Weiter zur Karte</button>
+        </div>
+    `;
+    document.body.appendChild(modalDiv);
+
+    const closeFn = () => {
+        modalDiv.remove();
+        sessionStorage.setItem('zafran_marketing_seen', 'true');
+    };
+    document.getElementById('close-flash-btn-x').onclick = closeFn;
+    document.getElementById('close-flash-btn-main').onclick = closeFn;
+}

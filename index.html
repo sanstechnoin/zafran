@@ -1099,14 +1099,16 @@
 
             let html = '';
             if (showSpecial) {
-                html += `<h2 style="color:var(--gold); margin-top:0; font-size:1.8rem; text-transform:uppercase;">${bannerData.title}</h2>`;
-                html += `<p style="font-size:1.1rem; line-height:1.6; color:#eee;">${bannerData.message.replace(/\n/g, '<br>')}</p>`;
+                html += `<h2 style="color:var(--gold); margin-top:0; font-size:1.8rem; text-transform:uppercase; text-align:center;">${bannerData.title}</h2>`;
+                
+                html += `<div style="font-size:1.1rem; line-height:1.6; color:#eee; margin-bottom: 20px;">${bannerData.message}</div>`;
+                
                 if(flashCoupons.length > 0) html += `<hr style="border-top:1px dashed #555; margin:20px 0;">`;
             }
             if (flashCoupons.length > 0) {
-                html += `<h3 style="color:#28a745; margin-bottom:15px; font-size:1.4rem;">🎁 Unsere Angebote für Sie:</h3>`;
+                html += `<h3 style="color:#28a745; margin-bottom:15px; font-size:1.4rem; text-align:center;">🎁 Unsere Angebote für Sie:</h3>`;
                 flashCoupons.forEach(c => {
-                    html += `<div style="background:#111; border:2px dashed var(--gold); padding:15px; margin-bottom:12px; border-radius:8px;">`;
+                    html += `<div style="background:#111; border:2px dashed var(--gold); padding:15px; margin-bottom:12px; border-radius:8px; text-align:center;">`;
                     html += `<strong style="font-size:1.3rem; color:white; letter-spacing:1px;">Code: ${c.code}</strong>`;
                     if(c.discountType === 'gratis') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Gratis: ${c.promoItemName || 'Spezial-Artikel'}</span>`;
                     else if(c.discountType === 'percent') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Sie sparen: ${c.discountValue}% Rabatt</span>`;
@@ -1116,19 +1118,27 @@
             }
 
             const modalDiv = document.createElement('div');
-            modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; padding:20px; animation: popIn 0.4s ease;";
+            
+            modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; overflow-y:auto; padding:5vh 20px; box-sizing:border-box; animation: popIn 0.3s ease;";
+            
             modalDiv.innerHTML = `
                 <style>@keyframes popIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }</style>
-                <div style="background:#222; border:2px solid var(--gold); padding:30px; border-radius:12px; max-width:500px; width:100%; text-align:center; box-shadow:0 15px 40px rgba(0,0,0,0.9); position:relative;">
-                    <button id="close-flash-btn-x" style="position:absolute; top:15px; right:20px; background:none; border:none; color:#888; font-size:2.5rem; cursor:pointer; line-height:1;">&times;</button>
+                
+                <div style="background:#222; border:2px solid var(--gold); padding:30px 20px; border-radius:12px; max-width:500px; margin:0 auto; position:relative; box-shadow:0 15px 40px rgba(0,0,0,0.9);">
+                    <button id="close-flash-btn-x" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#888; font-size:2.5rem; cursor:pointer; line-height:1; z-index:10;">&times;</button>
+                    
                     ${html}
+                    
                     <button id="close-flash-btn-main" style="background:var(--gold); color:black; font-weight:bold; border:none; padding:15px; border-radius:8px; margin-top:20px; font-size:1.2rem; cursor:pointer; width:100%; text-transform:uppercase; box-shadow:0 4px 10px rgba(0,0,0,0.5);">Schließen</button>
                 </div>
             `;
             document.body.appendChild(modalDiv);
 
+            document.body.style.overflow = 'hidden'; 
+
             const closeFn = () => {
                 modalDiv.remove();
+                document.body.style.overflow = ''; // Unlocks the background site
                 sessionStorage.setItem('zafran_marketing_seen', 'true');
             };
             document.getElementById('close-flash-btn-x').onclick = closeFn;

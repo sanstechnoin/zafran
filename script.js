@@ -230,7 +230,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Create the modern popup box
         const box = document.createElement('div');
-        const box = document.createElement('div');
         box.style.cssText = "background:#222; border:2px solid #D4AF37; border-radius:12px; padding:20px; width:100%; max-width:350px; text-align:center; color:white; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height:90vh; overflow-y:auto; box-sizing:border-box;";
 
         box.innerHTML = `

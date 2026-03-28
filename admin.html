@@ -398,9 +398,17 @@
                 <h2 data-i18n="res_title">📅 Reservierungen</h2>
                 <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;" data-i18n="res_desc">Verwalten Sie hier alle einkommenden Tisch- und Buffetreservierungen.</p>
                 
-                <div style="display:flex; justify-content:center; gap: 15px; margin-bottom:20px;">
-                    <button class="btn-small btn-blue" id="btn-upcoming" onclick="loadReservations('upcoming')" style="min-width: 150px;">Neu / Akzeptiert</button>
-                    <button class="btn-small btn-outline" id="btn-past" onclick="loadReservations('past')" style="min-width: 150px;">Vergangen / Storniert</button>
+                <div style="display:flex; justify-content:center; gap: 15px; margin-bottom:10px;">
+                    <button class="btn-small btn-blue" id="btn-upcoming" onclick="loadReservations('upcoming')" style="min-width: 120px;">Upcoming</button>
+                    <button class="btn-small btn-outline" id="btn-archived" onclick="loadReservations('archived')" style="min-width: 120px;">Archived</button>
+                </div>
+
+                <div id="archived-filters" style="display:none; justify-content:center; margin-bottom: 20px;">
+                    <select id="archive-status" onchange="applyArchiveFilter()" style="max-width:250px; padding:8px; font-size:0.9rem;">
+                        <option value="all">Alle (All)</option>
+                        <option value="confirmed">Bestätigt (Approved)</option>
+                        <option value="cancelled">Storniert (Not Approved)</option>
+                    </select>
                 </div>
 
                 <div class="table-container">
@@ -806,8 +814,8 @@
         if(mode === 'day') {
             const dateStr = document.getElementById('fin-date').value;
             if(!dateStr) return;
-            start = new Date(dateStr); start.setHours(0,0,0,0);
-            end = new Date(dateStr); end.setHours(23,59,59,999);
+            start = new Date(dateStr + 'T00:00:00');
+            end = new Date(dateStr + 'T23:59:59');
         } 
         else if(mode === 'week') {
             const weekStr = document.getElementById('fin-week').value;
@@ -827,10 +835,13 @@
             end = new Date(year, parseInt(month), 0); end.setHours(23,59,59,999);
         }
 
-        // Native JS Dates instead of strict Timestamp wrapper to avoid empty reads
-        db.collection("records")
-          .where("closedAt", ">=", start)
-          .where("closedAt", "<=", end)
+        // FIXED: Query 'archived_orders' using strict Firestore Timestamps
+        const tStart = firebase.firestore.Timestamp.fromDate(start);
+        const tEnd = firebase.firestore.Timestamp.fromDate(end);
+
+        db.collection("archived_orders")
+          .where("closedAt", ">=", tStart)
+          .where("closedAt", "<=", tEnd)
           .get().then(snap => {
               
             let stats = {
@@ -841,8 +852,6 @@
 
             snap.forEach(doc => {
                 const r = doc.data();
-                
-                // FIXED CASE SENSITIVITY: "Pickup" vs "pickup", "Dine-In" vs "dine-in"
                 const typeRaw = (r.orderType || 'pickup').toLowerCase();
                 let type = 'pickup';
                 if(typeRaw.includes('del')) type = 'delivery';
@@ -870,64 +879,95 @@
         }).catch(err => console.error("Finance query error:", err));
     }
 
-
-    // ==========================================
-    // 0.5 RESERVATIONS MANAGER (FIXED DATA FETCHING)
+        // ==========================================
+    // 0.5 RESERVATIONS MANAGER
     // ==========================================
     let currentResView = 'upcoming';
+    let allReservationsRaw = [];
+
+    function applyArchiveFilter() {
+        renderReservations();
+    }
 
     function loadReservations(view = 'upcoming') {
         currentResView = view;
         document.getElementById('btn-upcoming').className = view === 'upcoming' ? 'btn-small btn-blue' : 'btn-small btn-outline';
-        document.getElementById('btn-past').className = view === 'past' ? 'btn-small btn-blue' : 'btn-small btn-outline';
+        document.getElementById('btn-archived').className = view === 'archived' ? 'btn-small btn-blue' : 'btn-small btn-outline';
+        document.getElementById('archived-filters').style.display = view === 'archived' ? 'flex' : 'none';
         
-        const tbody = document.getElementById('res-body');
-        
-        // FIXED: Removed .orderBy("timestamp") to prevent silent failure if the Index is missing in Firebase. We sort in Javascript instead!
         db.collection("reservations").onSnapshot(snap => {
-            tbody.innerHTML = ""; 
+            allReservationsRaw = [];
+            snap.forEach(doc => allReservationsRaw.push({ id: doc.id, ...doc.data() }));
             
-            let allDocs = [];
-            snap.forEach(doc => allDocs.push({ id: doc.id, ...doc.data() }));
-            
-            // Javascript Sort (Newest first)
-            allDocs.sort((a, b) => {
+            // Sort: Upcoming (Soonest First), Archived (Newest First)
+            allReservationsRaw.sort((a, b) => {
                 const timeA = a.timestamp || new Date(a.date).getTime() || 0;
                 const timeB = b.timestamp || new Date(b.date).getTime() || 0;
-                return timeB - timeA;
+                if(view === 'upcoming') return timeA - timeB; 
+                return timeB - timeA; 
             });
 
-            let hasRecords = false;
-
-            allDocs.forEach(d => {
-                const isPast = d.status === 'cancelled' || d.status === 'past';
-                if ((view === 'upcoming' && isPast) || (view === 'past' && !isPast)) return;
-
-                hasRecords = true;
-                const dateObj = new Date(d.date); 
-                const niceDate = dateObj.toLocaleDateString('de-DE'); 
-                const timeStr = d.time || "";
-                
-                let statusBadge = `<span class="badge" style="background:#ffc107; color:#000;">Neu</span>`;
-                if(d.status === 'confirmed') statusBadge = `<span class="badge" style="background:var(--success-green); color:#fff;">Bestätigt</span>`;
-                if(d.status === 'cancelled') statusBadge = `<span class="badge" style="background:var(--danger-red); color:#fff;">Storniert</span>`;
-
-                let actions = "";
-                if(view === 'upcoming' && d.status !== 'confirmed') actions += `<button class="btn-action-ok" onclick="acceptRes('${d.id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}', '${d.guests}')" title="Bestätigen">✓</button>`;
-                if(view === 'upcoming') actions += `<button class="btn-action-x" onclick="deleteRes('${d.id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}')" title="Stornieren">X</button>`;
-
-                const row = `<tr>
-                    <td><strong style="color:var(--gold);">${d.name}</strong><br><span style="font-size:0.8rem; color:#aaa;">${d.phone || ''} <br> ${d.email || ''}</span></td>
-                    <td>${niceDate}<br><span style="color:#aaa; font-size:0.8rem;">${timeStr}</span></td>
-                    <td style="font-weight:bold; font-size:1.1rem;">${d.guests}</td>
-                    <td>${statusBadge}</td>
-                    <td>${actions}</td>
-                </tr>`;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
-
-            if(!hasRecords) tbody.innerHTML = `<tr><td colspan=\"5\" style=\"text-align:center; padding:20px; color:#888;\">Keine Einträge gefunden.</td></tr>`;
+            renderReservations();
         });
+    }
+
+    function renderReservations() {
+        const tbody = document.getElementById('res-body');
+        tbody.innerHTML = "";
+        let hasRecords = false;
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        const archiveFilter = document.getElementById('archive-status').value;
+
+        allReservationsRaw.forEach(d => {
+            const resDate = new Date(d.date + "T23:59:59");
+            const isPast = resDate < today;
+            const isCancelled = d.status === 'cancelled';
+
+            // Filter logic
+            if (currentResView === 'upcoming') {
+                if (isPast || isCancelled) return; 
+            } else { 
+                if (!isPast && !isCancelled) return; 
+                if (archiveFilter === 'confirmed' && d.status !== 'confirmed') return;
+                if (archiveFilter === 'cancelled' && d.status !== 'cancelled') return;
+            }
+
+            hasRecords = true;
+            const niceDate = resDate.toLocaleDateString('de-DE'); 
+            const timeStr = d.time || "";
+            
+            let statusBadge = `<span class="badge" style="background:#ffc107; color:#000;">Neu</span>`;
+            if(d.status === 'confirmed') statusBadge = `<span class="badge" style="background:var(--success-green); color:#fff;">Bestätigt</span>`;
+            if(d.status === 'cancelled') statusBadge = `<span class="badge" style="background:var(--danger-red); color:#fff;">Storniert</span>`;
+
+            let actions = "";
+            if(currentResView === 'upcoming') {
+                if(d.status !== 'confirmed') actions += `<button class="btn-action-ok" onclick="acceptRes('${d.id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}', '${d.guests}')" title="Bestätigen">✓</button>`;
+                actions += `<button class="btn-action-x" onclick="deleteRes('${d.id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}')" title="Stornieren">X</button>`;
+            } else {
+                actions += `<button class="btn-action-x" onclick="hardDeleteRes('${d.id}')" title="Endgültig Löschen" style="background:#333;">🗑️</button>`;
+            }
+
+            const row = `<tr>
+                <td><strong style="color:var(--gold);">${d.name}</strong><br><span style="font-size:0.8rem; color:#aaa;">${d.phone || ''} <br> ${d.email || ''}</span></td>
+                <td>${niceDate}<br><span style="color:#aaa; font-size:0.8rem;">${timeStr}</span></td>
+                <td style="font-weight:bold; font-size:1.1rem;">${d.guests}</td>
+                <td>${statusBadge}</td>
+                <td>${actions}</td>
+            </tr>`;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+
+        if(!hasRecords) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">Keine Einträge gefunden.</td></tr>`;
+    }
+
+    window.hardDeleteRes = function(id) {
+        if(confirm("Diesen Eintrag endgültig aus der Datenbank löschen?")) {
+            db.collection("reservations").doc(id).delete();
+        }
     }
 
     window.acceptRes = function(id, name, email, date, time, guests) {
@@ -941,6 +981,19 @@
         }).catch(e => alert("Fehler: " + e.message));
     };
 
+    window.deleteRes = function(id, name, email, date, time) { 
+        if(!confirm(`Möchten Sie die Reservierung von ${name} wirklich stornieren?`)) return;
+        let sendRejection = false;
+        if(email && email.includes("@")) sendRejection = confirm("Soll eine höfliche Absage-Email gesendet werden?");
+        db.collection("reservations").doc(id).update({ status: "cancelled" })
+        .then(() => {
+            if(sendRejection) {
+                const params = { to_email: email, to_name: name, res_date: new Date(date).toLocaleDateString('de-DE'), res_time: time };
+                emailjs.send(EMAIL_SERVICE_ID, EMAIL_REJECT_ID, params).then(() => alert("Storniert & Absage-Email gesendet.")).catch(() => alert("Storniert, Email fehlgeschlagen."));
+            } else alert("Storniert.");
+        }).catch(e => alert("Fehler: " + e.message));
+    };
+    
     window.deleteRes = function(id, name, email, date, time) { 
         if(!confirm(`Möchten Sie die Reservierung von ${name} wirklich stornieren?`)) return;
         let sendRejection = false;

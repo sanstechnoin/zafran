@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zafran Admin - Master Dashboard</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     
@@ -26,7 +26,8 @@
             --info-blue: #007bff;
         }
 
-        /* --- SLEEK NATIVE SCROLLBAR --- */
+        /* --- GLOBAL & SCROLLBAR --- */
+        * { box-sizing: border-box; }
         body::-webkit-scrollbar { width: 8px; }
         body::-webkit-scrollbar-track { background: var(--bg-dark); }
         body::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
@@ -39,6 +40,7 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
         /* --- MOBILE TOP HEADER --- */
@@ -50,7 +52,6 @@
             background: #111;
             border-bottom: 1px solid var(--border-color);
             height: 60px;
-            box-sizing: border-box;
             width: 100%;
             position: fixed;
             top: 0;
@@ -101,7 +102,7 @@
         .tab-btn {
             background: transparent; color: #888; border: none; padding: 14px 20px; cursor: pointer;
             font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 15px;
-            transition: all 0.2s ease; text-align: left; width: 100%; box-sizing: border-box;
+            transition: all 0.2s ease; text-align: left; width: 100%;
             border-left: 4px solid transparent; border-radius: 0 8px 8px 0; margin-right: 15px;
         }
         .tab-btn:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
@@ -123,7 +124,6 @@
             width: calc(100% - 260px);
             min-height: 100vh;
             background: var(--bg-dark);
-            box-sizing: border-box;
             padding-bottom: 40px;
         }
 
@@ -140,55 +140,60 @@
         #html-mode-container { display: none; gap: 15px; }
         #html-mode-container.active { display: flex; flex-direction: row; }
         #html-editor { flex: 1; height: 250px; font-family: monospace; font-size: 0.85rem; }
-        .preview-box { flex: 1; background: #222; border: 2px solid var(--gold); border-radius: 12px; padding: 35px 20px 20px 20px; box-sizing: border-box; overflow-y: auto; height: 250px; position: relative; }
+        .preview-box { flex: 1; background: #222; border: 2px solid var(--gold); border-radius: 12px; padding: 35px 20px 20px 20px; overflow-y: auto; height: 250px; position: relative; }
         .preview-badge { position: absolute; top: 0; left: 0; background: var(--gold); color: black; font-size: 0.7rem; padding: 3px 8px; border-radius: 8px 0 8px 0; font-weight: bold; }
 
-        /* --- MOBILE RESPONSIVE (SWIPEABLE BOTTOM NAV) --- */
+        /* --- NATIVE MOBILE APP NAVIGATION --- */
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
             .app-sidebar {
-                width: 100%; height: 70px; top: auto; bottom: 0; flex-direction: row;
+                width: 100vw; height: 65px; top: auto; bottom: 0; flex-direction: row;
                 border-right: none; border-top: 1px solid #333; background: #111;
                 padding-bottom: env(safe-area-inset-bottom);
             }
             .sidebar-header, .sidebar-footer { display: none; } 
             
             .sidebar-menu { 
-                flex-direction: row; justify-content: flex-start; align-items: center; 
-                padding: 10px 15px; gap: 10px; overflow-x: auto; scrollbar-width: none;
+                flex-direction: row; justify-content: space-evenly; align-items: center; 
+                padding: 0; width: 100%; gap: 0;
             }
-            .sidebar-menu::-webkit-scrollbar { display: none; } 
 
-            .tab-btn { flex: 0 0 auto; padding: 10px 15px; border-radius: 50px; border-left: none; margin-right: 0; }
-            .tab-btn .tab-text { display: none; font-size: 0.85rem; margin-left: 8px; }
-            .tab-btn.active { background: rgba(212, 175, 55, 0.15); border-left: none; }
-            .tab-btn.active .tab-text { display: inline-block; animation: fadeIn 0.3s ease; }
+            .tab-btn { 
+                flex-direction: column; padding: 8px 0; border-radius: 8px; border-left: none; margin: 0;
+                justify-content: center; gap: 4px;
+            }
+            .tab-icon { font-size: 1.4rem; width: auto; margin: 0; }
+            .tab-btn .tab-text { display: block; font-size: 0.65rem; margin: 0; font-weight: normal; color: #888; }
             
-            .app-main { margin-left: 0; width: 100%; padding-top: 60px; padding-bottom: 90px; }
-            .content-wrapper { padding: 20px 15px; }
-            .tab-content { padding: 20px 15px; }
+            .tab-btn.active { background: transparent; border-left: none; }
+            .tab-btn.active .tab-icon { color: var(--gold); transform: scale(1.1); }
+            .tab-btn.active .tab-text { color: var(--gold); font-weight: bold; }
+            
+            .app-main { margin-left: 0; width: 100vw; padding-top: 60px; padding-bottom: 90px; }
+            .content-wrapper { padding: 15px; }
+            .tab-content { padding: 20px 15px; border-radius: 8px; }
             #html-mode-container.active { flex-direction: column; }
             #html-editor, .preview-box { height: 220px; width: 100%; }
         }
 
         /* --- STANDARD FORMS & TABLES --- */
         h2, h3 { color: var(--gold); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        h2 { border-bottom: 2px solid var(--gold); padding-bottom: 10px; text-align: center; }
+        h2 { border-bottom: 2px solid var(--gold); padding-bottom: 10px; text-align: center; font-size: 1.5rem; }
 
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 15px; }
         .full-width { grid-column: span 2; }
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; color: var(--gold); }
         
         input[type="text"], input[type="number"], input[type="date"], input[type="week"], input[type="month"], input[type="time"], input[type="datetime-local"], input[type="password"], select, textarea { 
-            width: 100%; padding: 12px; border: 1px solid var(--border-color); background-color: #111; color: white; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
+            width: 100%; padding: 12px; border: 1px solid var(--border-color); background-color: #111; color: white; border-radius: 4px; font-size: 1rem;
         }
-        input[type="week"], input[type="month"] { color-scheme: dark; } /* Ensures native dark UI */
+        input[type="week"], input[type="month"] { color-scheme: dark; } 
         input:focus, select:focus { border-color: var(--gold); outline: none; }
         
-        .radio-group { display: flex; gap: 20px; padding: 10px 0; }
+        .radio-group { display: flex; gap: 15px; padding: 10px 0; flex-wrap: wrap; }
         .radio-item, .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95rem; }
-        input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); transform: scale(1.2); cursor: pointer; width: auto; }
+        input[type="checkbox"], input[type="radio"] { accent-color: var(--gold); transform: scale(1.2); cursor: pointer; width: auto; margin:0; }
         .checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 5px; background: #111; padding: 15px; border-radius: 4px; border: 1px solid var(--border-color); }
 
         button { background-color: var(--gold); color: #000; border: none; padding: 12px; width: 100%; font-size: 1rem; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 10px; text-transform: uppercase; }
@@ -202,8 +207,9 @@
         .success { background-color: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid #2ecc71; display: block; }
         .error { background-color: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid #ff6b6b; display: block; }
 
-        .table-container { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; background: #222; border-radius: 4px; overflow: hidden; }
+        /* FIXED: Table overflowing on mobile */
+        .table-container { overflow-x: auto; margin-top: 20px; width: 100%; display: block; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; background: #222; border-radius: 4px; min-width: 600px; }
         th { background-color: #111; color: var(--gold); padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color); white-space: nowrap; }
         td { padding: 12px; border-bottom: 1px solid #333; vertical-align: middle; color: #ddd; }
         tr:hover { background-color: #2f2f2f; }
@@ -228,6 +234,12 @@
         
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 10000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 8px; border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 400px; }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .hours-row { grid-template-columns: 1fr; gap: 5px; border-bottom: 2px dashed #444; padding: 15px 0; }
+        }
     </style>
 </head>
 <body>
@@ -273,25 +285,22 @@
 
         <div class="sidebar-menu">
             <button class="tab-btn active" onclick="switchTab('tab-settings', this)">
-                <span class="tab-icon">⚙️</span> <span class="tab-text" data-i18n="tab_settings">Website</span>
+                <span class="tab-icon">⚙️</span> <span class="tab-text" data-i18n="tab_settings">Web</span>
             </button>
             <button class="tab-btn" onclick="switchTab('tab-hours', this)">
-                <span class="tab-icon">⏰</span> <span class="tab-text" data-i18n="tab_hours">Zeiten</span>
-            </button>
-            <button class="tab-btn" onclick="switchTab('tab-driver', this)">
-                <span class="tab-icon">🚗</span> <span class="tab-text" data-i18n="tab_driver">Fahrer</span>
+                <span class="tab-icon">⏰</span> <span class="tab-text" data-i18n="tab_hours">Zeit</span>
             </button>
             <button class="tab-btn" onclick="switchTab('tab-reservations', this)">
-                <span class="tab-icon">📅</span> <span class="tab-text" data-i18n="tab_res">Reservierungen</span>
+                <span class="tab-icon">📅</span> <span class="tab-text" data-i18n="tab_res">Tische</span>
             </button>
             <button class="tab-btn" onclick="switchTab('tab-finance', this)">
-                <span class="tab-icon">💰</span> <span class="tab-text" data-i18n="tab_finance">Finanzen</span>
+                <span class="tab-icon">💰</span> <span class="tab-text" data-i18n="tab_finance">Cash</span>
             </button>
             <button class="tab-btn" onclick="switchTab('tab-banner', this)">
-                <span class="tab-icon">📢</span> <span class="tab-text" data-i18n="tab_banner">Banners</span>
+                <span class="tab-icon">📢</span> <span class="tab-text" data-i18n="tab_banner">Pop</span>
             </button>
             <button class="tab-btn" onclick="switchTab('tab-coupons', this)">
-                <span class="tab-icon">🎟️</span> <span class="tab-text" data-i18n="tab_coupons">Coupons</span>
+                <span class="tab-icon">🎟️</span> <span class="tab-text" data-i18n="tab_coupons">Code</span>
             </button>
         </div>
 
@@ -332,15 +341,29 @@
 
             <div id="tab-hours" class="tab-content">
                 <h2 data-i18n="hours_title">Öffnungszeiten & Status</h2>
+                
                 <div class="service-card" style="border-color: var(--warning-orange);">
                     <h3 style="margin-bottom:10px; font-size:1.1rem; color:var(--warning-orange);" data-i18n="emergency_mode">🛑 Notfall / Pause (Scenario 4)</h3>
                     <p style="font-size:0.9rem; color:#ccc;" data-i18n="emergency_desc">Stoppen Sie Bestellungen sofort für eine kurze Zeit.</p>
+                    
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                        <select id="pauseServiceType"><option value="all" data-i18n="srv_all">Alle Services</option><option value="delivery" data-i18n="srv_delivery">Nur Lieferung</option><option value="pickup" data-i18n="srv_pickup">Nur Abholung</option></select>
-                        <select id="pauseDuration"><option value="30">30 Min</option><option value="60">1 Std</option><option value="120">2 Std</option><option value="240">4 Std</option><option value="today" data-i18n="rest_of_day">Rest des Tages</option></select>
+                        <select id="pauseServiceType">
+                            <option value="all" data-i18n="srv_all">Alle Services</option>
+                            <option value="delivery" data-i18n="srv_delivery">Nur Lieferung</option>
+                            <option value="pickup" data-i18n="srv_pickup">Nur Abholung</option>
+                        </select>
+                        <select id="pauseDuration">
+                            <option value="30">30 Min</option>
+                            <option value="60">1 Std</option>
+                            <option value="120">2 Std</option>
+                            <option value="240">4 Std</option>
+                            <option value="today" data-i18n="rest_of_day">Rest des Tages</option>
+                        </select>
                     </div>
                     <button class="btn-red" style="margin-top:10px;" onclick="applyPause()" data-i18n="btn_apply_pause">Pause Aktivieren</button>
-                    <div id="active-pause-info" style="margin-top:10px; color:var(--warning-orange); font-weight:bold; display:none;">⚠️ <span id="pause-text"></span> <button class="btn-small" onclick="clearPause()" style="margin-left:10px;">RESET</button></div>
+                    <div id="active-pause-info" style="margin-top:10px; color:var(--warning-orange); font-weight:bold; display:none;">
+                        ⚠️ <span id="pause-text"></span> <button class="btn-small" onclick="clearPause()" style="margin-left:10px;">RESET</button>
+                    </div>
                 </div>
 
                 <div class="service-card">
@@ -357,29 +380,17 @@
                 <div class="service-card">
                     <h3 style="margin-bottom:10px; font-size:1.1rem;" data-i18n="weekly_schedule">⏰ Wochenplan (Scenario 1 & 2)</h3>
                     <p style="font-size:0.85rem; color:#888; margin-bottom:15px;" data-i18n="schedule_hint">Definieren Sie hier, wann das Restaurant geöffnet ist und wann Lieferung möglich ist.</p>
+                    
                     <div style="background:#111; padding:10px; border-radius:4px;">
                         <div class="hours-row" style="border-bottom:2px solid var(--gold);">
                             <div data-i18n="day">Tag</div>
-                            <div style="text-align:center; color:var(--gold);" data-i18n="shop_hours">Restaurant Öffnungszeit</div>
-                            <div style="text-align:center; color:var(--gold);" data-i18n="delivery_hours">Lieferzeiten (Extrawurst)</div>
+                            <div style="text-align:center; color:var(--gold);" data-i18n="shop_hours">Restaurant</div>
+                            <div style="text-align:center; color:var(--gold);" data-i18n="delivery_hours">Lieferzeiten</div>
                         </div>
                         <div id="weekly-schedule-container"></div>
                     </div>
                     <button onclick="saveHours()" style="margin-top:20px;" data-i18n="save_hours">Öffnungszeiten Speichern</button>
                     <div id="hours-message" class="message-box"></div>
-                </div>
-            </div>
-
-            <div id="tab-driver" class="tab-content">
-                <h2 data-i18n="driver_access_title">🚗 Fahrer Zugang</h2>
-                <div class="service-card">
-                    <p style="text-align:center; color:#ccc; margin-bottom:15px;" data-i18n="driver_pin_desc">Legen Sie hier den 6-stelligen PIN fest, den alle Fahrer zum Einloggen benötigen.</p>
-                    <div class="pin-box">
-                        <span style="font-weight:bold; color:#888;" data-i18n="current_pin">AKTUELLER PIN:</span>
-                        <input type="text" id="driver-pin-input" class="pin-input" maxlength="6" placeholder="123456">
-                        <button class="btn-save-pin" onclick="saveDriverPin()" data-i18n="save_pin">SPEICHERN</button>
-                    </div>
-                    <div id="pin-status" class="message-box"></div>
                 </div>
             </div>
 
@@ -414,8 +425,8 @@
                 
                 <div class="service-card" style="text-align:center;">
                     <div class="radio-group" style="justify-content:center; margin-bottom:15px; flex-wrap:wrap;">
-                        <label class="radio-item"><input type="radio" name="financeView" value="day" checked onchange="updateFinanceInputs()"> <span data-i18n="fin_day">Tag (Kalender)</span></label>
-                        <label class="radio-item"><input type="radio" name="financeView" value="week" onchange="updateFinanceInputs()"> <span data-i18n="fin_week">Woche (KW)</span></label>
+                        <label class="radio-item"><input type="radio" name="financeView" value="day" checked onchange="updateFinanceInputs()"> <span data-i18n="fin_day">Tag</span></label>
+                        <label class="radio-item"><input type="radio" name="financeView" value="week" onchange="updateFinanceInputs()"> <span data-i18n="fin_week">KW</span></label>
                         <label class="radio-item"><input type="radio" name="financeView" value="month" onchange="updateFinanceInputs()"> <span data-i18n="fin_month">Monat</span></label>
                     </div>
                     
@@ -451,7 +462,7 @@
                 <div style="background:rgba(212,175,55,0.1); padding:20px; border-radius:8px; border:2px solid var(--gold); text-align:center; margin-top:20px;">
                     <h3 style="margin:0 0 5px 0; font-size:1.2rem; color:var(--gold);" data-i18n="fin_total">GESAMTUMSATZ</h3>
                     <div style="font-size:2.2rem; font-weight:bold; color:#fff;" id="fin-grand-total">0,00 €</div>
-                    <div style="color:#aaa; font-size:1rem; margin-top:5px;" id="fin-grand-count">0 Orders</div>
+                    <div style="color:#aaa; font-size:1rem; margin-top:5px;" id="fin-grand-count">0 Orders Total</div>
                 </div>
             </div>
 
@@ -666,9 +677,9 @@
     // --- TRANSLATIONS (DE/EN) ---
     const translations = {
         de: {
-            tab_settings: "Website", tab_hours: "Zeiten", tab_driver: "Fahrer", tab_banner: "Banners", tab_coupons: "Coupons", tab_res: "Reservierungen", tab_finance: "Finanzen",
+            tab_settings: "Web", tab_hours: "Zeit", tab_driver: "Fahrer", tab_banner: "Pop", tab_coupons: "Code", tab_res: "Tische", tab_finance: "Cash",
             res_title: "📅 Tischreservierungen", res_desc: "Verwalten Sie hier alle einkommenden Tisch- und Buffetreservierungen.",
-            finance_title: "Finanzen Übersicht", finance_desc: "Wählen Sie einen Tag, eine Woche oder einen Monat für die Auswertung.", fin_day: "Tag (Kalender)", fin_week: "Woche (KW)", fin_month: "Monat", fin_total: "GESAMTUMSATZ",
+            finance_title: "Finanzen Übersicht", finance_desc: "Wählen Sie einen Tag, eine Woche oder einen Monat.", fin_day: "Tag", fin_week: "KW", fin_month: "Monat", fin_total: "GESAMTUMSATZ",
             settings_title: "Webseiten Einstellungen", marquee_label: "Laufschrift Text", whatsapp_label: "WhatsApp Nummer", save_settings: "Einstellungen Speichern",
             hours_title: "Öffnungszeiten & Status", emergency_mode: "🛑 Notfall / Pause", emergency_desc: "Stoppen Sie Bestellungen sofort für eine kurze Zeit.",
             srv_all: "Alle Services", srv_delivery: "Nur Lieferung", srv_pickup: "Nur Abholung", rest_of_day: "Rest des Tages",
@@ -683,7 +694,7 @@
             current_pin: "AKTUELLER PIN:", save_pin: "SPEICHERN", pin_saved: "PIN erfolgreich gespeichert!", pin_error: "PIN muss mindestens 4 Zeichen haben."
         },
         en: {
-            tab_settings: "Website", tab_hours: "Hours", tab_driver: "Driver", tab_banner: "Banners", tab_coupons: "Coupons", tab_res: "Reservations", tab_finance: "Finance",
+            tab_settings: "Web", tab_hours: "Time", tab_driver: "Driver", tab_banner: "Pop", tab_coupons: "Code", tab_res: "Tables", tab_finance: "Cash",
             res_title: "📅 Table Reservations", res_desc: "Manage all incoming table and buffet reservations here.",
             finance_title: "Financial Overview", finance_desc: "Select a day, week, or month for the evaluation.", fin_day: "Day", fin_week: "Week", fin_month: "Month", fin_total: "GRAND TOTAL",
             settings_title: "Website Settings", marquee_label: "Marquee Text", whatsapp_label: "WhatsApp Number", save_settings: "Save Settings",
@@ -761,23 +772,19 @@
     }
 
     // ==========================================
-    // 0. FINANCE MANAGER (NEW)
+    // 0. FINANCE MANAGER (FIXED DATA FETCHING)
     // ==========================================
     function initFinanceTab() {
-        // Set today's date automatically when opening tab
         if(!document.getElementById('fin-date').value) {
             const today = new Date();
             document.getElementById('fin-date').valueAsDate = today;
             
-            // Format Week
             const d = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
             const dayNum = d.getUTCDay() || 7;
             d.setUTCDate(d.getUTCDate() + 4 - dayNum);
             const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
             const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
             document.getElementById('fin-week').value = `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2,'0')}`;
-            
-            // Format Month
             document.getElementById('fin-month').value = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}`;
             
             loadFinanceData();
@@ -820,13 +827,10 @@
             end = new Date(year, parseInt(month), 0); end.setHours(23,59,59,999);
         }
 
-        // Fetch from Firestore
-        const tStart = firebase.firestore.Timestamp.fromDate(start);
-        const tEnd = firebase.firestore.Timestamp.fromDate(end);
-
+        // Native JS Dates instead of strict Timestamp wrapper to avoid empty reads
         db.collection("records")
-          .where("closedAt", ">=", tStart)
-          .where("closedAt", "<=", tEnd)
+          .where("closedAt", ">=", start)
+          .where("closedAt", "<=", end)
           .get().then(snap => {
               
             let stats = {
@@ -837,15 +841,18 @@
 
             snap.forEach(doc => {
                 const r = doc.data();
-                const type = r.orderType || 'pickup';
+                
+                // FIXED CASE SENSITIVITY: "Pickup" vs "pickup", "Dine-In" vs "dine-in"
+                const typeRaw = (r.orderType || 'pickup').toLowerCase();
+                let type = 'pickup';
+                if(typeRaw.includes('del')) type = 'delivery';
+                else if(typeRaw.includes('dine') || typeRaw.includes('table')) type = 'dine-in';
+
                 const amt = Number(r.paidAmount || r.total || 0);
-                if(stats[type]) {
-                    stats[type].count += 1;
-                    stats[type].total += amt;
-                }
+                stats[type].count += 1;
+                stats[type].total += amt;
             });
 
-            // Update UI
             document.getElementById('fin-dine-total').innerText = stats['dine-in'].total.toFixed(2).replace('.', ',') + ' €';
             document.getElementById('fin-dine-count').innerText = stats['dine-in'].count + " Orders";
             
@@ -865,7 +872,7 @@
 
 
     // ==========================================
-    // 0.5 RESERVATIONS MANAGER
+    // 0.5 RESERVATIONS MANAGER (FIXED DATA FETCHING)
     // ==========================================
     let currentResView = 'upcoming';
 
@@ -876,23 +883,38 @@
         
         const tbody = document.getElementById('res-body');
         
-        db.collection("reservations").orderBy("timestamp", "desc").onSnapshot(snap => {
-            tbody.innerHTML = ""; let hasRecords = false;
+        // FIXED: Removed .orderBy("timestamp") to prevent silent failure if the Index is missing in Firebase. We sort in Javascript instead!
+        db.collection("reservations").onSnapshot(snap => {
+            tbody.innerHTML = ""; 
+            
+            let allDocs = [];
+            snap.forEach(doc => allDocs.push({ id: doc.id, ...doc.data() }));
+            
+            // Javascript Sort (Newest first)
+            allDocs.sort((a, b) => {
+                const timeA = a.timestamp || new Date(a.date).getTime() || 0;
+                const timeB = b.timestamp || new Date(b.date).getTime() || 0;
+                return timeB - timeA;
+            });
 
-            snap.forEach(doc => {
-                const d = doc.data(); const id = doc.id;
+            let hasRecords = false;
+
+            allDocs.forEach(d => {
                 const isPast = d.status === 'cancelled' || d.status === 'past';
                 if ((view === 'upcoming' && isPast) || (view === 'past' && !isPast)) return;
 
                 hasRecords = true;
-                const dateObj = new Date(d.date); const niceDate = dateObj.toLocaleDateString('de-DE'); const timeStr = d.time || "";
+                const dateObj = new Date(d.date); 
+                const niceDate = dateObj.toLocaleDateString('de-DE'); 
+                const timeStr = d.time || "";
+                
                 let statusBadge = `<span class="badge" style="background:#ffc107; color:#000;">Neu</span>`;
                 if(d.status === 'confirmed') statusBadge = `<span class="badge" style="background:var(--success-green); color:#fff;">Bestätigt</span>`;
                 if(d.status === 'cancelled') statusBadge = `<span class="badge" style="background:var(--danger-red); color:#fff;">Storniert</span>`;
 
                 let actions = "";
-                if(view === 'upcoming' && d.status !== 'confirmed') actions += `<button class="btn-action-ok" onclick="acceptRes('${id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}', '${d.guests}')" title="Bestätigen">✓</button>`;
-                if(view === 'upcoming') actions += `<button class="btn-action-x" onclick="deleteRes('${id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}')" title="Stornieren">X</button>`;
+                if(view === 'upcoming' && d.status !== 'confirmed') actions += `<button class="btn-action-ok" onclick="acceptRes('${d.id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}', '${d.guests}')" title="Bestätigen">✓</button>`;
+                if(view === 'upcoming') actions += `<button class="btn-action-x" onclick="deleteRes('${d.id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}')" title="Stornieren">X</button>`;
 
                 const row = `<tr>
                     <td><strong style="color:var(--gold);">${d.name}</strong><br><span style="font-size:0.8rem; color:#aaa;">${d.phone || ''} <br> ${d.email || ''}</span></td>
@@ -904,7 +926,7 @@
                 tbody.insertAdjacentHTML('beforeend', row);
             });
 
-            if(!hasRecords) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">Keine Einträge gefunden.</td></tr>`;
+            if(!hasRecords) tbody.innerHTML = `<tr><td colspan=\"5\" style=\"text-align:center; padding:20px; color:#888;\">Keine Einträge gefunden.</td></tr>`;
         });
     }
 
@@ -931,7 +953,6 @@
             } else alert("Storniert.");
         }).catch(e => alert("Fehler: " + e.message));
     };
-
 
     // ==========================================
     // 1. GENERAL SETTINGS

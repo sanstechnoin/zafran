@@ -85,7 +85,7 @@
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            position: fixed; /* Fixed to screen */
+            position: fixed; 
             top: 0;
             left: 0;
             height: 100vh;
@@ -156,7 +156,7 @@
 
         /* --- MAIN CONTENT STAGE --- */
         .app-main {
-            margin-left: 260px; /* Offset by sidebar width */
+            margin-left: 260px; 
             width: calc(100% - 260px);
             min-height: 100vh;
             background: var(--bg-dark);
@@ -178,7 +178,15 @@
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- MOBILE BOTTOM NAV (Expanding Pill Animation) --- */
+        /* --- SPLIT SCREEN HTML PREVIEW --- */
+        #html-mode-container { display: none; gap: 15px; }
+        #html-editor { flex: 1; height: 250px; font-family: monospace; font-size: 0.85rem; }
+        .preview-box { flex: 1; background: #222; border: 2px solid var(--gold); border-radius: 12px; padding: 35px 20px 20px 20px; box-sizing: border-box; overflow-y: auto; height: 250px; position: relative; }
+        .preview-badge { position: absolute; top: 0; left: 0; background: var(--gold); color: black; font-size: 0.7rem; padding: 3px 8px; border-radius: 8px 0 8px 0; font-weight: bold; }
+        
+        @media (min-width: 769px) { #html-mode-container { flex-direction: row; } }
+
+        /* --- MOBILE BOTTOM NAV --- */
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
             
@@ -195,36 +203,17 @@
             }
             .sidebar-header, .sidebar-footer { display: none; } 
             
-            .sidebar-menu {
-                flex-direction: row;
-                justify-content: space-around;
-                align-items: center;
-                padding: 10px 5px;
-                gap: 5px;
-                overflow: hidden;
-            }
-
-            .tab-btn {
-                flex: 1;
-                justify-content: center;
-                padding: 10px 0;
-                border-radius: 50px;
-                border-left: none;
-                margin-right: 0;
-            }
+            .sidebar-menu { flex-direction: row; justify-content: space-around; align-items: center; padding: 10px 5px; gap: 5px; overflow: hidden; }
+            .tab-btn { flex: 1; justify-content: center; padding: 10px 0; border-radius: 50px; border-left: none; margin-right: 0; }
             .tab-btn .tab-text { display: none; font-size: 0.8rem; margin-left: 5px; }
-            
             .tab-btn.active { flex: 2.5; background: rgba(212, 175, 55, 0.15); border-left: none; border-radius: 50px; }
             .tab-btn.active .tab-text { display: inline-block; animation: fadeIn 0.3s ease; }
             
-            .app-main { 
-                margin-left: 0;
-                width: 100%;
-                padding-top: 60px; 
-                padding-bottom: 90px; 
-            }
+            .app-main { margin-left: 0; width: 100%; padding-top: 60px; padding-bottom: 90px; }
             .content-wrapper { padding: 20px 15px; }
             .tab-content { padding: 20px 15px; }
+            #html-mode-container { flex-direction: column; }
+            #html-editor, .preview-box { height: 220px; width: 100%; }
         }
 
         /* --- STANDARD STYLES --- */
@@ -308,7 +297,6 @@
 
 <div class="mobile-header" id="mobile-header-bar">
     <img src="logo.png" alt="Zafran Logo" style="height: 40px;">
-    
     <div class="lang-toggle-container">
         <span class="lang-label de active">DE</span>
         <label class="switch">
@@ -324,7 +312,6 @@
     <nav class="app-sidebar">
         <div class="sidebar-header">
             <img src="logo.png" alt="Zafran Logo">
-            
             <div class="lang-toggle-container">
                 <span class="lang-label de active">DE</span>
                 <label class="switch">
@@ -354,8 +341,8 @@
         </div>
 
         <div class="sidebar-footer">
-            <p>Created & Developed by<br><strong style="color: #888;">SAN Technologies</strong><br>+49 162 3757839</p>
-            <p>© Zaffran Delight, Euskirchen 2025<br>(<a href="https://santechnologies.de" target="_blank">SAN Technologies</a>)</p>
+            <p>Created & Developed by<br><strong style="color: #ccc;"><a href="https://santechnologies.de" target="_blank">SAN Technologies</a></strong><br>+49 162 3757839</p>
+            <p>© Zaffran Delight, Euskirchen 2025<br></p>
         </div>
     </nav>
 
@@ -476,14 +463,24 @@
                             <label>Titel (z.B. Willkommen bei Zaffran!)</label>
                             <input type="text" id="bannerTitle" placeholder="Titel hier eingeben...">
                         </div>
+                        
                         <div class="form-group full-width">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <label style="margin: 0;">Nachricht</label>
-                                <button type="button" id="toggle-html-btn" class="btn-small" style="background:#444; color:var(--gold); margin:0;">HTML Ansicht `< >`</button>
+                                <button type="button" id="toggle-html-btn" class="btn-small" style="background:#444; color:var(--gold); margin:0;">Code & Vorschau `< >`</button>
                             </div>
-                            <div id="editor-container" style="height: 150px;"></div>
-                            <textarea id="html-editor" style="display: none; height: 150px; font-family: monospace; font-size: 0.9rem;" placeholder="Schreiben Sie hier Ihren raw HTML Code..."></textarea>
+                            
+                            <div id="editor-container" style="height: 150px; background: #fff; color: #000;"></div>
+                            
+                            <div id="html-mode-container" style="display: flex;">
+                                <textarea id="html-editor" placeholder="Fügen Sie hier Ihren HTML Code ein..."></textarea>
+                                <div class="preview-box">
+                                    <span class="preview-badge">LIVE VORSCHAU</span>
+                                    <div id="html-preview" style="color: #eee; font-size: 1rem; line-height: 1.6; text-align: center;"></div>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="form-group full-width">
                             <label class="checkbox-item">
                                 <input type="checkbox" id="bannerActive" style="width:20px; height:20px;">
@@ -631,22 +628,14 @@
 <script>
     // --- NEW TAB SWITCHER LOGIC ---
     function switchTab(tabId, clickedBtn) {
-        // Hide all contents
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        // Remove active class from all buttons
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         
-        // Show target content and highlight button
         document.getElementById(tabId).classList.add('active');
         clickedBtn.classList.add('active');
         
-        // On Mobile, scroll smoothly to the top of the content
         if(window.innerWidth <= 768) {
-            document.querySelector('.app-main').scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
 
@@ -697,13 +686,10 @@
         localStorage.setItem('admin_lang', lang);
         
         const isEn = (lang === 'en');
-        
-        // Sync all toggle switches & labels
         document.querySelectorAll('.lang-checkbox').forEach(cb => cb.checked = isEn);
         document.querySelectorAll('.lang-label.de').forEach(el => el.classList.toggle('active', !isEn));
         document.querySelectorAll('.lang-label.en').forEach(el => el.classList.toggle('active', isEn));
 
-        // Translate
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if(translations[lang][key]) {
@@ -711,8 +697,6 @@
                 else el.innerText = translations[lang][key];
             }
         });
-        
-        // Re-render schedule to translate days
         renderWeeklySchedule();
     }
 
@@ -728,10 +712,11 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- AUTH & LOAD ---
     const ADMIN_PASSWORD = "zafran"; 
 
     document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('html-mode-container').style.display = 'none';
+        
         if(sessionStorage.getItem('zafran_admin_logged_in') === 'true') {
             initAdmin();
         }
@@ -768,8 +753,9 @@
     function initAdmin() {
         document.getElementById('login-overlay').style.display = 'none';
         
-        // Remove 'display:none' correctly based on screen size structure
-        document.getElementById('admin-content').style.display = 'block'; 
+        if(window.innerWidth <= 768) {
+            document.getElementById('mobile-header-bar').style.display = 'flex';
+        }
         
         changeAdminLang(currentLang);
         loadSettings();
@@ -1083,24 +1069,38 @@
     const toggleHtmlBtn = document.getElementById('toggle-html-btn');
     const editorContainer = document.getElementById('editor-container');
     const htmlEditor = document.getElementById('html-editor');
+    const htmlModeContainer = document.getElementById('html-mode-container');
+    const htmlPreview = document.getElementById('html-preview');
     let isHtmlMode = false;
+
+    // Live Preview updates as you type
+    htmlEditor.addEventListener('input', () => {
+        htmlPreview.innerHTML = htmlEditor.value;
+    });
 
     toggleHtmlBtn.addEventListener('click', () => {
         isHtmlMode = !isHtmlMode;
         if (isHtmlMode) {
+            // Switch to Split-Screen HTML & Preview Mode
             htmlEditor.value = quill.root.innerHTML; 
+            htmlPreview.innerHTML = htmlEditor.value;
+            
             editorContainer.style.display = 'none';
             document.querySelector('.ql-toolbar').style.display = 'none';
-            htmlEditor.style.display = 'block';
-            toggleHtmlBtn.innerText = 'Visuelle Ansicht';
-            toggleHtmlBtn.style.background = 'var(--gold)';
-            toggleHtmlBtn.style.color = '#000';
+            htmlModeContainer.style.display = window.innerWidth <= 768 ? 'column' : 'flex';
+            
+            toggleHtmlBtn.innerText = 'Visueller Editor (Achtung: Löscht ggf. Styles)';
+            toggleHtmlBtn.style.background = 'var(--warning-orange)';
+            toggleHtmlBtn.style.color = '#fff';
         } else {
-            quill.root.innerHTML = htmlEditor.value; 
-            htmlEditor.style.display = 'none';
+            // Switch back to Basic Visual Editor
+            quill.clipboard.dangerouslyPasteHTML(htmlEditor.value); 
+            htmlModeContainer.style.display = 'none';
+            
             editorContainer.style.display = 'block';
             document.querySelector('.ql-toolbar').style.display = 'block';
-            toggleHtmlBtn.innerText = 'HTML Ansicht `< >`';
+            
+            toggleHtmlBtn.innerText = 'Code & Vorschau `< >`';
             toggleHtmlBtn.style.background = '#444';
             toggleHtmlBtn.style.color = 'var(--gold)';
         }
@@ -1113,7 +1113,26 @@
                 document.getElementById('bannerTitle').value = data.title || "";
                 document.getElementById('bannerValidFor').value = data.validFor || "both";
                 document.getElementById('bannerActive').checked = data.active || false;
-                quill.root.innerHTML = data.message || "";
+                
+                const msg = data.message || "";
+                
+                // SMART AUTO-DETECT: If the saved message contains complex HTML elements, open it safely in the Split Screen Preview mode to protect it from being stripped by Quill.
+                if(msg.includes('<div') || msg.includes('style=')) {
+                    isHtmlMode = true;
+                    htmlEditor.value = msg;
+                    htmlPreview.innerHTML = msg;
+                    
+                    editorContainer.style.display = 'none';
+                    if(document.querySelector('.ql-toolbar')) document.querySelector('.ql-toolbar').style.display = 'none';
+                    htmlModeContainer.style.display = window.innerWidth <= 768 ? 'column' : 'flex';
+                    
+                    toggleHtmlBtn.innerText = 'Visueller Editor (Achtung: Löscht ggf. Styles)';
+                    toggleHtmlBtn.style.background = 'var(--warning-orange)';
+                    toggleHtmlBtn.style.color = '#fff';
+                } else {
+                    // Standard visual mode for simple text
+                    quill.clipboard.dangerouslyPasteHTML(msg);
+                }
             }
         });
     }

@@ -1180,9 +1180,12 @@ async function checkAndShowMarketing() {
     `;
     document.body.appendChild(modalDiv);
 
+    document.body.style.overflow = 'hidden'; 
+    sessionStorage.setItem('zafran_marketing_seen', 'true');
+  
     const closeFn = () => {
         modalDiv.remove();
-        sessionStorage.setItem('zafran_marketing_seen', 'true');
+        document.body.style.overflow = '';
     };
     document.getElementById('close-flash-btn-x').onclick = closeFn;
     document.getElementById('close-flash-btn-main').onclick = closeFn;

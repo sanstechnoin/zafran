@@ -54,7 +54,7 @@
         .lang-btn { background: transparent; border: none; color: var(--gold); padding: 5px 12px; cursor: pointer; font-weight: bold; }
         .lang-btn.active { background: var(--gold); color: #000; }
 
-        /* --- DESKTOP VERTICAL SIDEBAR (Gemini Style) --- */
+        /* --- DESKTOP VERTICAL SIDEBAR (Enterprise Style) --- */
         .app-sidebar {
             width: 260px;
             background: #111;
@@ -70,14 +70,14 @@
             text-align: center;
             border-bottom: 1px solid #222;
         }
-        .sidebar-header img { height: 60px; margin-bottom: 15px; }
+        .sidebar-header img { height: 60px; margin-bottom: 15px; object-fit: contain; }
 
         .sidebar-menu {
             flex: 1;
-            padding: 20px 10px;
+            padding: 20px 0; /* Removed side padding for flush active state */
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
             overflow-y: auto;
         }
         
@@ -85,23 +85,50 @@
             background: transparent;
             color: #888;
             border: none;
-            padding: 12px 20px;
-            border-radius: 50px; /* Pill Shape */
+            padding: 14px 20px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 0.95rem;
             display: flex;
             align-items: center;
-            gap: 12px;
-            transition: all 0.3s ease;
+            gap: 15px;
+            transition: all 0.2s ease;
             text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+            border-left: 4px solid transparent; /* Placeholder for active state */
+            border-radius: 0 8px 8px 0; /* Flat left, rounded right */
+            margin-right: 15px;
         }
-        .tab-btn:hover { background: #222; color: #fff; }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
+        
         .tab-btn.active {
-            background: rgba(212, 175, 55, 0.15);
+            background: rgba(212, 175, 55, 0.1);
             color: var(--gold);
+            border-left: 4px solid var(--gold); /* Sharp Enterprise Indicator */
         }
-        .tab-icon { font-size: 1.2rem; }
+        
+        .tab-icon { 
+            font-size: 1.3rem; 
+            width: 25px; 
+            text-align: center; 
+            display: inline-block; 
+        }
+
+        /* --- SIDEBAR FOOTER (SAN Technologies) --- */
+        .sidebar-footer {
+            padding: 20px 15px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #666;
+            border-top: 1px solid #222;
+            background: #0a0a0a;
+            line-height: 1.5;
+        }
+        .sidebar-footer p { margin-bottom: 10px; color: #666; }
+        .sidebar-footer p:last-child { margin-bottom: 0; }
+        .sidebar-footer a { color: var(--gold); text-decoration: none; transition: color 0.2s; }
+        .sidebar-footer a:hover { color: #fff; text-decoration: underline; }
 
         /* --- MAIN CONTENT STAGE --- */
         .app-main {
@@ -141,9 +168,10 @@
                 border-right: none;
                 border-top: 1px solid #333;
                 background: #111;
-                padding-bottom: env(safe-area-inset-bottom); /* For iPhones */
+                padding-bottom: env(safe-area-inset-bottom);
             }
             .sidebar-header { display: none; }
+            .sidebar-footer { display: none; } /* Hide footer on mobile to save bottom space */
             
             .sidebar-menu {
                 flex-direction: row;
@@ -159,6 +187,8 @@
                 justify-content: center;
                 padding: 10px 0;
                 border-radius: 50px;
+                border-left: none; /* Remove sharp border for mobile pill */
+                margin-right: 0;
             }
             .tab-btn .tab-text { display: none; font-size: 0.8rem; margin-left: 5px; }
             
@@ -166,6 +196,8 @@
             .tab-btn.active {
                 flex: 2.5; 
                 background: rgba(212, 175, 55, 0.15);
+                border-left: none;
+                border-radius: 50px;
             }
             .tab-btn.active .tab-text { display: inline-block; animation: fadeIn 0.3s ease; }
             
@@ -293,6 +325,11 @@
             <button class="tab-btn" onclick="switchTab('tab-coupons', this)">
                 <span class="tab-icon">🎟️</span> <span class="tab-text" data-i18n="tab_coupons">Coupons</span>
             </button>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>Created & Developed by<br><strong style="color: #888;">SAN Technologies</strong><br>+49 162 3757839</p>
+            <p>© Zaffran Delight, Euskirchen 2025<br>(<a href="https://santechnologies.de" target="_blank">SAN Technologies</a>)</p>
         </div>
     </nav>
 
@@ -556,10 +593,6 @@
                     </table>
                 </div>
             </div>
-
-            <footer style="text-align:center; padding:20px; color:#666; font-size:0.8rem; margin-top: 40px;">
-                &copy; 2025 Zafran Delight Admin
-            </footer>
 
         </div>
     </main>

@@ -279,7 +279,9 @@
                 <div class="form-group full-width">
                     <label>Sichtbar auf (Valid For)</label>
                     <select id="bannerValidFor">
-                        <option value="both">Überall (Pickup & Delivery)</option>
+                        <option value="all">Überall (Startseite, Pickup & Delivery)</option>
+                        <option value="both">Nur Bestellseiten (Pickup & Delivery)</option>
+                        <option value="home">Nur Startseite (Home / Index)</option>
                         <option value="pickup">Nur Abholung (Pickup)</option>
                         <option value="delivery">Nur Lieferung (Delivery)</option>
                     </select>
@@ -289,8 +291,12 @@
                     <input type="text" id="bannerTitle" placeholder="Titel hier eingeben...">
                 </div>
                 <div class="form-group full-width">
-                    <label>Nachricht</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label style="margin: 0;">Nachricht</label>
+                        <button type="button" id="toggle-html-btn" class="btn-small" style="background:#444; color:var(--gold); margin:0;">HTML Ansicht `< >`</button>
+                    </div>
                     <div id="editor-container" style="height: 150px;"></div>
+                    <textarea id="html-editor" style="display: none; height: 150px; font-family: monospace; font-size: 0.9rem;" placeholder="Schreiben Sie hier Ihren raw HTML Code..."></textarea>
                 </div>
                 <div class="form-group full-width">
                     <label class="checkbox-item">
@@ -902,6 +908,35 @@
         }
     });
 
+    // --- HTML / VISUAL TOGGLE LOGIC ---
+    const toggleHtmlBtn = document.getElementById('toggle-html-btn');
+    const editorContainer = document.getElementById('editor-container');
+    const htmlEditor = document.getElementById('html-editor');
+    let isHtmlMode = false;
+
+    toggleHtmlBtn.addEventListener('click', () => {
+        isHtmlMode = !isHtmlMode;
+        if (isHtmlMode) {
+            htmlEditor.value = quill.root.innerHTML; 
+            editorContainer.style.display = 'none';
+            document.querySelector('.ql-toolbar').style.display = 'none';
+            htmlEditor.style.display = 'block';
+            
+            toggleHtmlBtn.innerText = 'Visuelle Ansicht';
+            toggleHtmlBtn.style.background = 'var(--gold)';
+            toggleHtmlBtn.style.color = '#000';
+        } else {
+            quill.root.innerHTML = htmlEditor.value; 
+            htmlEditor.style.display = 'none';
+            editorContainer.style.display = 'block';
+            document.querySelector('.ql-toolbar').style.display = 'block';
+            
+            toggleHtmlBtn.innerText = 'HTML Ansicht `< >`';
+            toggleHtmlBtn.style.background = '#444';
+            toggleHtmlBtn.style.color = 'var(--gold)';
+        }
+    });
+    
     // ---  Load the HTML into the Editor ---
     function loadSpecialBanner() {
         db.collection('settings').doc('banner').get().then(doc => {
@@ -919,9 +954,10 @@
     // ---  Save the HTML from the Editor ---
     document.getElementById('banner-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const finalMessage = isHtmlMode ? document.getElementById('html-editor').value : quill.root.innerHTML;
         await db.collection('settings').doc('banner').set({
             title: document.getElementById('bannerTitle').value,
-            message: quill.root.innerHTML, // Grab the raw HTML from Quill!
+            message: finalMessage,
             validFor: document.getElementById('bannerValidFor').value,
             active: document.getElementById('bannerActive').checked
         });

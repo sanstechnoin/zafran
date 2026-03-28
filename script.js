@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateCart();
     }
 
-   // --- COUPON LOGIC ---
+    // --- COUPON LOGIC ---
     async function handleApplyCoupon() {
         const codeInput = document.getElementById('coupon-input');
         const msgEl = document.getElementById('coupon-message');
@@ -176,6 +176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 msgEl.textContent = "Ungültiger Code.";
                 msgEl.style.color = "red";
                 currentCoupon = null;
+                updateCart();
             } else {
                 const data = doc.data();
                 const today = new Date().toISOString().split('T')[0];
@@ -184,48 +185,98 @@ document.addEventListener("DOMContentLoaded", async () => {
                     msgEl.textContent = "Gutschein abgelaufen.";
                     msgEl.style.color = "red";
                     currentCoupon = null;
+                    updateCart();
                 } 
                 else if (data.validFor === 'pickup' && isDeliveryPage()) {
                     msgEl.textContent = "Dieser Code gilt nur für Abholung (Pickup)!";
                     msgEl.style.color = "red";
                     currentCoupon = null;
+                    updateCart();
                 }
                 else if (data.validFor === 'delivery' && !isDeliveryPage()) {
                     msgEl.textContent = "Dieser Code gilt nur für Lieferung (Delivery)!";
                     msgEl.style.color = "red";
                     currentCoupon = null;
+                    updateCart();
                 }
                 else {
-                    if (data.discountType === 'gratis') {
-                        if (data.promoAskChoice) {
-                            let choice = prompt("Wählen Sie Ihren Gratis-Artikel:\n\n1 = Mango Lassi\n2 = Rosé Lassi\n3 = Lassi (Normal)", "1");
-                            if (choice === null) {
-                                msgEl.textContent = "Auswahl abgebrochen.";
-                                currentCoupon = null;
-                                updateCart();
-                                return;
-                            }
-                            let itemName = "Mango Lassi";
-                            if (choice === "2") itemName = "Rosé Lassi";
-                            if (choice === "3") itemName = "Lassi (Normal)";
-                            data.finalPromoName = itemName; 
-                        } else {
-                            data.finalPromoName = data.promoItemName;
-                        }
+                    // 🚨 NEW: Custom UI Modal instead of Prompt
+                    if (data.discountType === 'gratis' && data.promoAskChoice) {
+                        showPromoChoiceModal(data, msgEl, codeInput);
+                        return; // Stop execution here. The modal handles the rest!
+                    } 
+                    else {
+                        if (data.discountType === 'gratis') data.finalPromoName = data.promoItemName;
+                        currentCoupon = data;
+                        msgEl.textContent = `Code gefunden. Prüfe...`;
+                        msgEl.style.color = "#666";
+                        codeInput.value = ""; 
+                        updateCart();
                     }
-
-                    currentCoupon = data;
-                    msgEl.textContent = `Code gefunden. Prüfe...`;
-                    msgEl.style.color = "#666";
-                    codeInput.value = ""; 
                 }
             }
-            updateCart(); 
         } catch (error) {
             console.error("Coupon Error:", error);
             msgEl.textContent = "Fehler beim Prüfen.";
             msgEl.style.color = "red";
         }
+    }
+
+    // --- NEW: SLEEK CHOICE MODAL ---
+    function showPromoChoiceModal(couponData, msgEl, codeInput) {
+        // Create the dark overlay
+        const overlay = document.createElement('div');
+        overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px; animation: fadeIn 0.2s ease;";
+
+        // Create the modern popup box
+        const box = document.createElement('div');
+        box.style.cssText = "background:#222; border:2px solid #D4AF37; border-radius:12px; padding:25px; width:100%; max-width:350px; text-align:center; color:white; box-shadow:0 10px 30px rgba(0,0,0,0.8);";
+
+        box.innerHTML = `
+            <h3 style="color:#D4AF37; margin-top:0; font-size:1.4rem; text-transform:uppercase;">Gratis-Artikel Wählen</h3>
+            <p style="margin-bottom:20px; color:#ccc; font-size:0.95rem;">Bitte wählen Sie Ihre gewünschte Sorte:</p>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button class="promo-choice-btn" data-choice="Mango Lassi" style="background:#333; color:white; border:1px solid #555; padding:15px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; transition:0.2s;">🥭 Mango Lassi</button>
+                <button class="promo-choice-btn" data-choice="Rosé Lassi" style="background:#333; color:white; border:1px solid #555; padding:15px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; transition:0.2s;">🌹 Rosé Lassi</button>
+                <button class="promo-choice-btn" data-choice="Lassi (Normal)" style="background:#333; color:white; border:1px solid #555; padding:15px; border-radius:8px; font-size:1.1rem; cursor:pointer; font-weight:bold; transition:0.2s;">🥛 Lassi (Normal)</button>
+            </div>
+            <button id="promo-cancel-btn" style="background:transparent; color:#ff4444; border:1px solid #ff4444; padding:12px; border-radius:8px; margin-top:20px; width:100%; cursor:pointer; font-weight:bold; font-size:1rem;">Abbrechen</button>
+        `;
+
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        // Make the buttons hover gold and process the order when clicked
+        const btns = box.querySelectorAll('.promo-choice-btn');
+        btns.forEach(btn => {
+            btn.onmouseover = () => { btn.style.background = '#D4AF37'; btn.style.color = 'black'; btn.style.borderColor = '#D4AF37'; };
+            btn.onmouseout = () => { btn.style.background = '#333'; btn.style.color = 'white'; btn.style.borderColor = '#555'; };
+
+            btn.onclick = () => {
+                couponData.finalPromoName = btn.dataset.choice;
+                currentCoupon = couponData;
+
+                if(msgEl) {
+                    msgEl.textContent = `Code gefunden. Prüfe...`;
+                    msgEl.style.color = "#666";
+                }
+                if(codeInput) codeInput.value = "";
+
+                overlay.remove();
+                updateCart(); // Trigger the cart calculation!
+            };
+        });
+
+        // Handle Cancel
+        box.querySelector('#promo-cancel-btn').onclick = () => {
+            if(msgEl) {
+                msgEl.textContent = "Auswahl abgebrochen.";
+                msgEl.style.color = "orange";
+            }
+            currentCoupon = null;
+            overlay.remove();
+            updateCart();
+        };
     }
 
     function calculateFinalTotals() {
@@ -1025,32 +1076,57 @@ async function checkAndShowMarketing() {
 
     const couponInputArea = document.getElementById('coupon-input');
     if (couponInputArea && dropdownCoupons.length > 0) {
-        let dropDiv = document.getElementById('coupon-dropdown-badges');
+        // Set parent to relative so the dropdown attaches directly to the input box
+        couponInputArea.parentNode.style.position = 'relative';
+        
+        let dropDiv = document.getElementById('coupon-dropdown-list');
         if(!dropDiv) {
             dropDiv = document.createElement('div');
-            dropDiv.id = 'coupon-dropdown-badges';
-            dropDiv.style.marginTop = '10px';
-            dropDiv.style.display = 'flex';
-            dropDiv.style.gap = '8px';
-            dropDiv.style.flexWrap = 'wrap';
+            dropDiv.id = 'coupon-dropdown-list';
+            // Styling exactly like a modern autocomplete dropdown
+            dropDiv.style.cssText = "position:absolute; top:100%; left:0; width:100%; background:#fff; border:1px solid #ccc; border-radius:4px; box-shadow:0 4px 6px rgba(0,0,0,0.2); z-index:1000; display:none; max-height:150px; overflow-y:auto; margin-top:2px;";
             couponInputArea.parentNode.appendChild(dropDiv);
         }
         dropDiv.innerHTML = ''; 
         
         dropdownCoupons.forEach(c => {
-            let badge = document.createElement('span');
-            badge.innerHTML = `🎟️ ${c.code}`;
-            badge.style.cssText = "background:rgba(212,175,55,0.2); color:var(--gold); border:1px solid var(--gold); padding:6px 12px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:0.85rem; transition:0.2s;";
+            let item = document.createElement('div');
             
-            badge.onmouseover = () => { badge.style.background = "var(--gold)"; badge.style.color = "black"; };
-            badge.onmouseout = () => { badge.style.background = "rgba(212,175,55,0.2)"; badge.style.color = "var(--gold)"; };
+            // Format the discount text for the right side of the dropdown
+            let discountText = '';
+            if (c.discountType === 'gratis') discountText = '🎁 GRATIS';
+            else if (c.discountType === 'percent') discountText = `${c.discountValue}% OFF`;
+            else discountText = `${c.discountValue}€ OFF`;
 
-            badge.onclick = () => {
+            item.style.cssText = "padding:12px 15px; border-bottom:1px solid #eee; cursor:pointer; display:flex; justify-content:space-between; align-items:center; color:#333; font-size:0.95rem; font-weight:bold; font-family:sans-serif;";
+            
+            item.innerHTML = `<span>${c.code}</span><span style="color:#008000; font-size:0.85rem;">${discountText}</span>`;
+            
+            // Hover effect
+            item.onmouseover = () => item.style.backgroundColor = '#f5f5f5';
+            item.onmouseout = () => item.style.backgroundColor = '#fff';
+
+            // Auto-fill and apply when clicked
+            item.onclick = () => {
                 document.getElementById('coupon-input').value = c.code;
-                document.getElementById('apply-coupon-btn').click();
+                const applyBtn = document.getElementById('apply-coupon-btn');
+                if(applyBtn) applyBtn.click();
+                dropDiv.style.display = 'none';
             };
-            dropDiv.appendChild(badge);
+            dropDiv.appendChild(item);
         });
+
+        // Show dropdown when user clicks into the input
+        couponInputArea.onfocus = () => {
+            dropDiv.style.display = 'block';
+        };
+        
+        // Hide dropdown when user clicks away (with a tiny delay so the click registers)
+        couponInputArea.onblur = () => {
+            setTimeout(() => {
+                if(dropDiv) dropDiv.style.display = 'none';
+            }, 200);
+        };
     }
 
     if (sessionStorage.getItem('zafran_marketing_seen') === 'true') return; 

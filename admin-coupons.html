@@ -901,44 +901,6 @@
         alert("Pop-Up Banner erfolgreich gespeichert!");
     });
 
-        // --- NEW LOGIC: BANNER, TOGGLES, AND COUPON SAVE ---
-    window.toggleDiscountFields = function() {
-        const type = document.querySelector('input[name="discountType"]:checked').value;
-        document.getElementById('gratisFields').style.display = type === 'gratis' ? 'block' : 'none';
-        document.getElementById('valueGroup').style.display = type === 'gratis' ? 'none' : 'block';
-        document.getElementById('discountValue').required = (type !== 'gratis');
-    }
-
-    window.toggleCouponFlag = function(code, flag) {
-        db.collection("coupons").doc(code).get().then(doc => {
-            let currentVal = doc.data()[flag] || false;
-            db.collection("coupons").doc(code).update({ [flag]: !currentVal }).then(loadCoupons);
-        });
-    }
-
-    function loadSpecialBanner() {
-        db.collection('settings').doc('banner').get().then(doc => {
-            if(doc.exists) {
-                const data = doc.data();
-                document.getElementById('bannerTitle').value = data.title || "";
-                document.getElementById('bannerMessage').value = data.message || "";
-                document.getElementById('bannerValidFor').value = data.validFor || "both";
-                document.getElementById('bannerActive').checked = data.active || false;
-            }
-        });
-    }
-    
-    document.getElementById('banner-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await db.collection('settings').doc('banner').set({
-            title: document.getElementById('bannerTitle').value,
-            message: document.getElementById('bannerMessage').value,
-            validFor: document.getElementById('bannerValidFor').value,
-            active: document.getElementById('bannerActive').checked
-        });
-        alert("Pop-Up Banner erfolgreich gespeichert!");
-    });
-
     couponForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const code = document.getElementById('code').value.toUpperCase().trim();

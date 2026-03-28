@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zafran Admin - Dashboard</title>
+    <title>Zafran Admin - Master Dashboard</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <style>
         /* --- KDS THEME VARIABLES --- */
@@ -21,6 +23,7 @@
             --success-green: #28a745;
             --danger-red: #dc3545;
             --warning-orange: #d35400;
+            --info-blue: #007bff;
         }
 
         /* --- SLEEK NATIVE SCROLLBAR --- */
@@ -35,9 +38,10 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             margin: 0;
             padding: 0;
+            min-height: 100vh;
         }
         
-        /* --- MOBILE TOP HEADER (Hidden on Desktop) --- */
+        /* --- MOBILE TOP HEADER --- */
         .mobile-header {
             display: none;
             justify-content: space-between;
@@ -54,20 +58,9 @@
         }
 
         /* --- LANGUAGE TOGGLE SWITCH --- */
-        .lang-toggle-container { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            justify-content: center; 
-        }
-        .lang-label { 
-            font-size: 0.85rem; 
-            font-weight: bold; 
-            color: #666; 
-            transition: color 0.3s; 
-        }
+        .lang-toggle-container { display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .lang-label { font-size: 0.85rem; font-weight: bold; color: #666; transition: color 0.3s; }
         .lang-label.active { color: var(--gold); }
-        
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border: 1px solid var(--border-color); }
@@ -77,7 +70,7 @@
         .slider.round { border-radius: 24px; }
         .slider.round:before { border-radius: 50%; }
 
-        /* --- DESKTOP VERTICAL SIDEBAR (Enterprise Style) --- */
+        /* --- DESKTOP VERTICAL SIDEBAR --- */
         .app-sidebar {
             width: 260px;
             background: #111;
@@ -91,11 +84,7 @@
             z-index: 1000;
         }
 
-        .sidebar-header {
-            padding: 30px 20px 20px 20px;
-            text-align: center;
-            border-bottom: 1px solid #222;
-        }
+        .sidebar-header { padding: 30px 20px 20px 20px; text-align: center; border-bottom: 1px solid #222; }
         .sidebar-header img { height: 60px; margin-bottom: 15px; object-fit: contain; }
 
         .sidebar-menu {
@@ -110,43 +99,18 @@
         .sidebar-menu::-webkit-scrollbar { display: none; }
         
         .tab-btn {
-            background: transparent;
-            color: #888;
-            border: none;
-            padding: 14px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: all 0.2s ease;
-            text-align: left;
-            width: 100%;
-            box-sizing: border-box;
-            border-left: 4px solid transparent; 
-            border-radius: 0 8px 8px 0; 
-            margin-right: 15px;
+            background: transparent; color: #888; border: none; padding: 14px 20px; cursor: pointer;
+            font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 15px;
+            transition: all 0.2s ease; text-align: left; width: 100%; box-sizing: border-box;
+            border-left: 4px solid transparent; border-radius: 0 8px 8px 0; margin-right: 15px;
         }
         .tab-btn:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
-        
-        .tab-btn.active {
-            background: rgba(212, 175, 55, 0.1);
-            color: var(--gold);
-            border-left: 4px solid var(--gold);
-        }
-        
+        .tab-btn.active { background: rgba(212, 175, 55, 0.1); color: var(--gold); border-left: 4px solid var(--gold); }
         .tab-icon { font-size: 1.3rem; width: 25px; text-align: center; display: inline-block; }
 
-        /* --- SIDEBAR FOOTER (SAN Technologies) --- */
         .sidebar-footer {
-            padding: 20px 15px;
-            text-align: center;
-            font-size: 0.75rem;
-            color: #666;
-            border-top: 1px solid #222;
-            background: #0a0a0a;
-            line-height: 1.5;
+            padding: 20px 15px; text-align: center; font-size: 0.75rem; color: #666;
+            border-top: 1px solid #222; background: #0a0a0a; line-height: 1.5;
         }
         .sidebar-footer p { margin-bottom: 10px; color: #666; }
         .sidebar-footer p:last-child { margin-bottom: 0; }
@@ -166,16 +130,10 @@
         .content-wrapper { padding: 40px; max-width: 1000px; margin: 0 auto; }
         
         .tab-content { 
-            display: none; 
-            background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            border: 1px solid var(--border-color);
-            animation: fadeIn 0.3s ease;
+            display: none; background: var(--card-bg); padding: 30px; border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border-color); animation: fadeIn 0.3s ease;
         }
         .tab-content.active { display: block; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- SPLIT SCREEN HTML PREVIEW --- */
@@ -185,38 +143,35 @@
         .preview-box { flex: 1; background: #222; border: 2px solid var(--gold); border-radius: 12px; padding: 35px 20px 20px 20px; box-sizing: border-box; overflow-y: auto; height: 250px; position: relative; }
         .preview-badge { position: absolute; top: 0; left: 0; background: var(--gold); color: black; font-size: 0.7rem; padding: 3px 8px; border-radius: 8px 0 8px 0; font-weight: bold; }
 
-        /* --- MOBILE RESPONSIVE --- */
+        /* --- MOBILE RESPONSIVE (SWIPEABLE BOTTOM NAV) --- */
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
-            
             .app-sidebar {
-                width: 100%;
-                height: 70px;
-                top: auto;
-                bottom: 0;
-                flex-direction: row;
-                border-right: none;
-                border-top: 1px solid #333;
-                background: #111;
+                width: 100%; height: 70px; top: auto; bottom: 0; flex-direction: row;
+                border-right: none; border-top: 1px solid #333; background: #111;
                 padding-bottom: env(safe-area-inset-bottom);
             }
             .sidebar-header, .sidebar-footer { display: none; } 
             
-            .sidebar-menu { flex-direction: row; justify-content: space-around; align-items: center; padding: 10px 5px; gap: 5px; overflow: hidden; }
-            .tab-btn { flex: 1; justify-content: center; padding: 10px 0; border-radius: 50px; border-left: none; margin-right: 0; }
-            .tab-btn .tab-text { display: none; font-size: 0.8rem; margin-left: 5px; }
-            .tab-btn.active { flex: 2.5; background: rgba(212, 175, 55, 0.15); border-left: none; border-radius: 50px; }
+            .sidebar-menu { 
+                flex-direction: row; justify-content: flex-start; align-items: center; 
+                padding: 10px 15px; gap: 10px; overflow-x: auto; scrollbar-width: none;
+            }
+            .sidebar-menu::-webkit-scrollbar { display: none; } 
+
+            .tab-btn { flex: 0 0 auto; padding: 10px 15px; border-radius: 50px; border-left: none; margin-right: 0; }
+            .tab-btn .tab-text { display: none; font-size: 0.85rem; margin-left: 8px; }
+            .tab-btn.active { background: rgba(212, 175, 55, 0.15); border-left: none; }
             .tab-btn.active .tab-text { display: inline-block; animation: fadeIn 0.3s ease; }
             
             .app-main { margin-left: 0; width: 100%; padding-top: 60px; padding-bottom: 90px; }
             .content-wrapper { padding: 20px 15px; }
             .tab-content { padding: 20px 15px; }
-            
             #html-mode-container.active { flex-direction: column; }
             #html-editor, .preview-box { height: 220px; width: 100%; }
         }
 
-        /* --- STANDARD STYLES --- */
+        /* --- STANDARD FORMS & TABLES --- */
         h2, h3 { color: var(--gold); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         h2 { border-bottom: 2px solid var(--gold); padding-bottom: 10px; text-align: center; }
 
@@ -225,9 +180,10 @@
         .full-width { grid-column: span 2; }
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; color: var(--gold); }
         
-        input[type="text"], input[type="number"], input[type="date"], input[type="time"], input[type="datetime-local"], input[type="password"], select, textarea { 
+        input[type="text"], input[type="number"], input[type="date"], input[type="week"], input[type="month"], input[type="time"], input[type="datetime-local"], input[type="password"], select, textarea { 
             width: 100%; padding: 12px; border: 1px solid var(--border-color); background-color: #111; color: white; border-radius: 4px; box-sizing: border-box; font-size: 1rem;
         }
+        input[type="week"], input[type="month"] { color-scheme: dark; } /* Ensures native dark UI */
         input:focus, select:focus { border-color: var(--gold); outline: none; }
         
         .radio-group { display: flex; gap: 20px; padding: 10px 0; }
@@ -237,9 +193,10 @@
 
         button { background-color: var(--gold); color: #000; border: none; padding: 12px; width: 100%; font-size: 1rem; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 10px; text-transform: uppercase; }
         button:hover { background-color: #fff; }
-        button.btn-blue { background-color: #007bff; color: white; }
+        button.btn-blue { background-color: var(--info-blue); color: white; }
         button.btn-red { background-color: var(--danger-red); color: white; }
-        button.btn-small { padding: 8px; font-size: 0.8rem; width: auto; display: inline-block; margin: 0; }
+        button.btn-small { padding: 8px 12px; font-size: 0.85rem; width: auto; display: inline-block; margin: 0; }
+        button.btn-outline { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
 
         .message-box { margin-top: 15px; padding: 12px; text-align: center; border-radius: 4px; display: none; font-weight: bold; font-size: 0.9rem; }
         .success { background-color: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid #2ecc71; display: block; }
@@ -267,12 +224,10 @@
         .btn-save-pin { background: var(--success-green); color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: auto; margin-top: 0; }
 
         .btn-action-x { background-color: var(--danger-red); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; line-height: 28px; padding: 0; }
+        .btn-action-ok { background-color: var(--success-green); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; line-height: 28px; padding: 0; margin-right: 5px; }
         
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 10000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .login-box { background: var(--card-bg); padding: 40px; border-radius: 8px; border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 400px; }
-
-        .ql-toolbar.ql-snow { background: #f0f0f0; border-radius: 4px 4px 0 0; border: none; }
-        .ql-container.ql-snow { background: #fff; color: #000; border-radius: 0 0 4px 4px; border: none; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -326,6 +281,12 @@
             <button class="tab-btn" onclick="switchTab('tab-driver', this)">
                 <span class="tab-icon">🚗</span> <span class="tab-text" data-i18n="tab_driver">Fahrer</span>
             </button>
+            <button class="tab-btn" onclick="switchTab('tab-reservations', this)">
+                <span class="tab-icon">📅</span> <span class="tab-text" data-i18n="tab_res">Reservierungen</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-finance', this)">
+                <span class="tab-icon">💰</span> <span class="tab-text" data-i18n="tab_finance">Finanzen</span>
+            </button>
             <button class="tab-btn" onclick="switchTab('tab-banner', this)">
                 <span class="tab-icon">📢</span> <span class="tab-text" data-i18n="tab_banner">Banners</span>
             </button>
@@ -371,29 +332,15 @@
 
             <div id="tab-hours" class="tab-content">
                 <h2 data-i18n="hours_title">Öffnungszeiten & Status</h2>
-                
                 <div class="service-card" style="border-color: var(--warning-orange);">
                     <h3 style="margin-bottom:10px; font-size:1.1rem; color:var(--warning-orange);" data-i18n="emergency_mode">🛑 Notfall / Pause (Scenario 4)</h3>
                     <p style="font-size:0.9rem; color:#ccc;" data-i18n="emergency_desc">Stoppen Sie Bestellungen sofort für eine kurze Zeit.</p>
-                    
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                        <select id="pauseServiceType">
-                            <option value="all" data-i18n="srv_all">Alle Services</option>
-                            <option value="delivery" data-i18n="srv_delivery">Nur Lieferung</option>
-                            <option value="pickup" data-i18n="srv_pickup">Nur Abholung</option>
-                        </select>
-                        <select id="pauseDuration">
-                            <option value="30">30 Min</option>
-                            <option value="60">1 Std</option>
-                            <option value="120">2 Std</option>
-                            <option value="240">4 Std</option>
-                            <option value="today" data-i18n="rest_of_day">Rest des Tages</option>
-                        </select>
+                        <select id="pauseServiceType"><option value="all" data-i18n="srv_all">Alle Services</option><option value="delivery" data-i18n="srv_delivery">Nur Lieferung</option><option value="pickup" data-i18n="srv_pickup">Nur Abholung</option></select>
+                        <select id="pauseDuration"><option value="30">30 Min</option><option value="60">1 Std</option><option value="120">2 Std</option><option value="240">4 Std</option><option value="today" data-i18n="rest_of_day">Rest des Tages</option></select>
                     </div>
                     <button class="btn-red" style="margin-top:10px;" onclick="applyPause()" data-i18n="btn_apply_pause">Pause Aktivieren</button>
-                    <div id="active-pause-info" style="margin-top:10px; color:var(--warning-orange); font-weight:bold; display:none;">
-                        ⚠️ <span id="pause-text"></span> <button class="btn-small" onclick="clearPause()" style="margin-left:10px;">RESET</button>
-                    </div>
+                    <div id="active-pause-info" style="margin-top:10px; color:var(--warning-orange); font-weight:bold; display:none;">⚠️ <span id="pause-text"></span> <button class="btn-small" onclick="clearPause()" style="margin-left:10px;">RESET</button></div>
                 </div>
 
                 <div class="service-card">
@@ -410,7 +357,6 @@
                 <div class="service-card">
                     <h3 style="margin-bottom:10px; font-size:1.1rem;" data-i18n="weekly_schedule">⏰ Wochenplan (Scenario 1 & 2)</h3>
                     <p style="font-size:0.85rem; color:#888; margin-bottom:15px;" data-i18n="schedule_hint">Definieren Sie hier, wann das Restaurant geöffnet ist und wann Lieferung möglich ist.</p>
-                    
                     <div style="background:#111; padding:10px; border-radius:4px;">
                         <div class="hours-row" style="border-bottom:2px solid var(--gold);">
                             <div data-i18n="day">Tag</div>
@@ -427,15 +373,85 @@
             <div id="tab-driver" class="tab-content">
                 <h2 data-i18n="driver_access_title">🚗 Fahrer Zugang</h2>
                 <div class="service-card">
-                    <p style="text-align:center; color:#ccc; margin-bottom:15px;" data-i18n="driver_pin_desc">
-                        Legen Sie hier den 6-stelligen PIN fest, den alle Fahrer zum Einloggen benötigen.
-                    </p>
+                    <p style="text-align:center; color:#ccc; margin-bottom:15px;" data-i18n="driver_pin_desc">Legen Sie hier den 6-stelligen PIN fest, den alle Fahrer zum Einloggen benötigen.</p>
                     <div class="pin-box">
                         <span style="font-weight:bold; color:#888;" data-i18n="current_pin">AKTUELLER PIN:</span>
                         <input type="text" id="driver-pin-input" class="pin-input" maxlength="6" placeholder="123456">
                         <button class="btn-save-pin" onclick="saveDriverPin()" data-i18n="save_pin">SPEICHERN</button>
                     </div>
                     <div id="pin-status" class="message-box"></div>
+                </div>
+            </div>
+
+            <div id="tab-reservations" class="tab-content">
+                <h2 data-i18n="res_title">📅 Reservierungen</h2>
+                <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;" data-i18n="res_desc">Verwalten Sie hier alle einkommenden Tisch- und Buffetreservierungen.</p>
+                
+                <div style="display:flex; justify-content:center; gap: 15px; margin-bottom:20px;">
+                    <button class="btn-small btn-blue" id="btn-upcoming" onclick="loadReservations('upcoming')" style="min-width: 150px;">Neu / Akzeptiert</button>
+                    <button class="btn-small btn-outline" id="btn-past" onclick="loadReservations('past')" style="min-width: 150px;">Vergangen / Storniert</button>
+                </div>
+
+                <div class="table-container">
+                    <table id="res-table">
+                        <thead>
+                            <tr>
+                                <th>Name / Kontakt</th>
+                                <th>Wann (Datum & Zeit)</th>
+                                <th>Gäste</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="res-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-finance" class="tab-content">
+                <h2 data-i18n="finance_title">Finanzen Übersicht</h2>
+                <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;" data-i18n="finance_desc">Wählen Sie einen Tag, eine Woche oder einen Monat für die Auswertung.</p>
+                
+                <div class="service-card" style="text-align:center;">
+                    <div class="radio-group" style="justify-content:center; margin-bottom:15px; flex-wrap:wrap;">
+                        <label class="radio-item"><input type="radio" name="financeView" value="day" checked onchange="updateFinanceInputs()"> <span data-i18n="fin_day">Tag (Kalender)</span></label>
+                        <label class="radio-item"><input type="radio" name="financeView" value="week" onchange="updateFinanceInputs()"> <span data-i18n="fin_week">Woche (KW)</span></label>
+                        <label class="radio-item"><input type="radio" name="financeView" value="month" onchange="updateFinanceInputs()"> <span data-i18n="fin_month">Monat</span></label>
+                    </div>
+                    
+                    <div id="fin-day-group" style="display:block;">
+                        <input type="date" id="fin-date" onchange="loadFinanceData()" style="max-width:250px; margin:0 auto; font-size:1.1rem;">
+                    </div>
+                    <div id="fin-week-group" style="display:none;">
+                        <input type="week" id="fin-week" onchange="loadFinanceData()" style="max-width:250px; margin:0 auto; font-size:1.1rem;">
+                    </div>
+                    <div id="fin-month-group" style="display:none;">
+                        <input type="month" id="fin-month" onchange="loadFinanceData()" style="max-width:250px; margin:0 auto; font-size:1.1rem;">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:20px;">
+                    <div style="background:#111; padding:20px; border-radius:8px; border:1px solid #444; text-align:center;">
+                        <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Dine-in</h3>
+                        <div style="font-size:1.8rem; font-weight:bold; color:#fff;" id="fin-dine-total">0,00 €</div>
+                        <div style="color:#aaa; font-size:0.9rem; margin-top:5px;" id="fin-dine-count">0 Orders</div>
+                    </div>
+                    <div style="background:#111; padding:20px; border-radius:8px; border:1px solid #444; text-align:center;">
+                        <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Pickup</h3>
+                        <div style="font-size:1.8rem; font-weight:bold; color:#fff;" id="fin-pickup-total">0,00 €</div>
+                        <div style="color:#aaa; font-size:0.9rem; margin-top:5px;" id="fin-pickup-count">0 Orders</div>
+                    </div>
+                    <div style="background:#111; padding:20px; border-radius:8px; border:1px solid #444; text-align:center;">
+                        <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Delivery</h3>
+                        <div style="font-size:1.8rem; font-weight:bold; color:#fff;" id="fin-delivery-total">0,00 €</div>
+                        <div style="color:#aaa; font-size:0.9rem; margin-top:5px;" id="fin-delivery-count">0 Orders</div>
+                    </div>
+                </div>
+                
+                <div style="background:rgba(212,175,55,0.1); padding:20px; border-radius:8px; border:2px solid var(--gold); text-align:center; margin-top:20px;">
+                    <h3 style="margin:0 0 5px 0; font-size:1.2rem; color:var(--gold);" data-i18n="fin_total">GESAMTUMSATZ</h3>
+                    <div style="font-size:2.2rem; font-weight:bold; color:#fff;" id="fin-grand-total">0,00 €</div>
+                    <div style="color:#aaa; font-size:1rem; margin-top:5px;" id="fin-grand-count">0 Orders</div>
                 </div>
             </div>
 
@@ -620,7 +636,13 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
 <script>
-    // --- NEW TAB SWITCHER LOGIC ---
+    // --- EMAILJS CONFIG FOR RESERVATIONS ---
+    emailjs.init("T020QG7Dq2gI1E_8J"); 
+    const EMAIL_SERVICE_ID = "service_6xem24i";
+    const EMAIL_ACCEPT_ID = "template_7jigzrn"; 
+    const EMAIL_REJECT_ID = "template_eokntj3";
+
+    // --- TAB SWITCHER LOGIC ---
     function switchTab(tabId, clickedBtn) {
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -629,11 +651,13 @@
         clickedBtn.classList.add('active');
         
         if(window.innerWidth <= 768) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.querySelector('.app-main').scrollTo({ top: 0, behavior: 'smooth' });
         }
+        
+        if(tabId === 'tab-reservations') loadReservations(currentResView);
+        if(tabId === 'tab-finance') initFinanceTab();
     }
 
-    // --- LANGUAGE TOGGLE LOGIC ---
     function toggleLang(checkboxElem) {
         const isEn = checkboxElem.checked;
         changeAdminLang(isEn ? 'en' : 'de');
@@ -642,7 +666,9 @@
     // --- TRANSLATIONS (DE/EN) ---
     const translations = {
         de: {
-            tab_settings: "Website", tab_hours: "Zeiten", tab_driver: "Fahrer", tab_banner: "Banners", tab_coupons: "Coupons",
+            tab_settings: "Website", tab_hours: "Zeiten", tab_driver: "Fahrer", tab_banner: "Banners", tab_coupons: "Coupons", tab_res: "Reservierungen", tab_finance: "Finanzen",
+            res_title: "📅 Tischreservierungen", res_desc: "Verwalten Sie hier alle einkommenden Tisch- und Buffetreservierungen.",
+            finance_title: "Finanzen Übersicht", finance_desc: "Wählen Sie einen Tag, eine Woche oder einen Monat für die Auswertung.", fin_day: "Tag (Kalender)", fin_week: "Woche (KW)", fin_month: "Monat", fin_total: "GESAMTUMSATZ",
             settings_title: "Webseiten Einstellungen", marquee_label: "Laufschrift Text", whatsapp_label: "WhatsApp Nummer", save_settings: "Einstellungen Speichern",
             hours_title: "Öffnungszeiten & Status", emergency_mode: "🛑 Notfall / Pause", emergency_desc: "Stoppen Sie Bestellungen sofort für eine kurze Zeit.",
             srv_all: "Alle Services", srv_delivery: "Nur Lieferung", srv_pickup: "Nur Abholung", rest_of_day: "Rest des Tages",
@@ -657,7 +683,9 @@
             current_pin: "AKTUELLER PIN:", save_pin: "SPEICHERN", pin_saved: "PIN erfolgreich gespeichert!", pin_error: "PIN muss mindestens 4 Zeichen haben."
         },
         en: {
-            tab_settings: "Website", tab_hours: "Hours", tab_driver: "Driver", tab_banner: "Banners", tab_coupons: "Coupons",
+            tab_settings: "Website", tab_hours: "Hours", tab_driver: "Driver", tab_banner: "Banners", tab_coupons: "Coupons", tab_res: "Reservations", tab_finance: "Finance",
+            res_title: "📅 Table Reservations", res_desc: "Manage all incoming table and buffet reservations here.",
+            finance_title: "Financial Overview", finance_desc: "Select a day, week, or month for the evaluation.", fin_day: "Day", fin_week: "Week", fin_month: "Month", fin_total: "GRAND TOTAL",
             settings_title: "Website Settings", marquee_label: "Marquee Text", whatsapp_label: "WhatsApp Number", save_settings: "Save Settings",
             hours_title: "Business Hours & Status", emergency_mode: "🛑 Emergency / Pause", emergency_desc: "Stop orders immediately for a short duration.",
             srv_all: "All Services", srv_delivery: "Delivery Only", srv_pickup: "Pickup Only", rest_of_day: "Rest of Day",
@@ -705,54 +733,205 @@
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
     const ADMIN_PASSWORD = "zafran"; 
 
     document.addEventListener("DOMContentLoaded", () => {
-        if(sessionStorage.getItem('zafran_admin_logged_in') === 'true') {
-            initAdmin();
-        }
+        document.getElementById('html-mode-container').style.display = 'none';
+        if(sessionStorage.getItem('zafran_admin_logged_in') === 'true') initAdmin();
 
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const inputPass = document.getElementById('admin-password').value;
-            const loginError = document.getElementById('login-error');
             const loginBtn = document.querySelector('#login-form button');
 
             if(inputPass === ADMIN_PASSWORD) {
-                loginBtn.innerText = "Authenticating...";
-                loginBtn.disabled = true;
-
-                const hiddenEmail = "webmaster@zafraneuskirchen.de"; 
-                const hiddenPass  = "!Zafran2025"; 
-
-                firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
-                .then(() => {
-                    sessionStorage.setItem('zafran_admin_logged_in', 'true');
-                    initAdmin();
-                })
-                .catch((error) => {
-                    loginError.textContent = "Database Connection Failed";
-                    loginBtn.innerText = "Login";
-                    loginBtn.disabled = false;
-                });
-            } else {
-                loginError.textContent = "Incorrect Password";
-            }
+                loginBtn.innerText = "Authenticating..."; loginBtn.disabled = true;
+                firebase.auth().signInWithEmailAndPassword("webmaster@zafraneuskirchen.de", "!Zafran2025")
+                .then(() => { sessionStorage.setItem('zafran_admin_logged_in', 'true'); initAdmin(); })
+                .catch((error) => { document.getElementById('login-error').textContent = "Connection Failed"; loginBtn.innerText = "Login"; loginBtn.disabled = false; });
+            } else { document.getElementById('login-error').textContent = "Incorrect Password"; }
         });
     });
 
     function initAdmin() {
         document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('admin-content').style.display = 'block'; // Fixed Flexbox bug
-        
+        document.getElementById('admin-content').style.display = 'block'; 
         changeAdminLang(currentLang);
-        loadSettings();
-        loadHours(); 
-        loadCoupons();
-        loadDriverPin();
-        loadSpecialBanner();    
+        loadSettings(); loadHours(); loadCoupons(); loadDriverPin(); loadSpecialBanner();    
     }
+
+    // ==========================================
+    // 0. FINANCE MANAGER (NEW)
+    // ==========================================
+    function initFinanceTab() {
+        // Set today's date automatically when opening tab
+        if(!document.getElementById('fin-date').value) {
+            const today = new Date();
+            document.getElementById('fin-date').valueAsDate = today;
+            
+            // Format Week
+            const d = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+            document.getElementById('fin-week').value = `${d.getUTCFullYear()}-W${weekNo.toString().padStart(2,'0')}`;
+            
+            // Format Month
+            document.getElementById('fin-month').value = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2,'0')}`;
+            
+            loadFinanceData();
+        }
+    }
+
+    function updateFinanceInputs() {
+        const mode = document.querySelector('input[name="financeView"]:checked').value;
+        document.getElementById('fin-day-group').style.display = mode === 'day' ? 'block' : 'none';
+        document.getElementById('fin-week-group').style.display = mode === 'week' ? 'block' : 'none';
+        document.getElementById('fin-month-group').style.display = mode === 'month' ? 'block' : 'none';
+        loadFinanceData();
+    }
+
+    function loadFinanceData() {
+        const mode = document.querySelector('input[name="financeView"]:checked').value;
+        let start, end;
+
+        if(mode === 'day') {
+            const dateStr = document.getElementById('fin-date').value;
+            if(!dateStr) return;
+            start = new Date(dateStr); start.setHours(0,0,0,0);
+            end = new Date(dateStr); end.setHours(23,59,59,999);
+        } 
+        else if(mode === 'week') {
+            const weekStr = document.getElementById('fin-week').value;
+            if(!weekStr) return;
+            const [yearStr, weekNumStr] = weekStr.split('-W');
+            const simple = new Date(parseInt(yearStr), 0, 1 + (parseInt(weekNumStr) - 1) * 7);
+            if (simple.getDay() <= 4) simple.setDate(simple.getDate() - simple.getDay() + 1);
+            else simple.setDate(simple.getDate() + 8 - simple.getDay());
+            start = new Date(simple); start.setHours(0,0,0,0);
+            end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
+        }
+        else if(mode === 'month') {
+            const monthStr = document.getElementById('fin-month').value;
+            if(!monthStr) return;
+            const [year, month] = monthStr.split('-');
+            start = new Date(year, parseInt(month)-1, 1); start.setHours(0,0,0,0);
+            end = new Date(year, parseInt(month), 0); end.setHours(23,59,59,999);
+        }
+
+        // Fetch from Firestore
+        const tStart = firebase.firestore.Timestamp.fromDate(start);
+        const tEnd = firebase.firestore.Timestamp.fromDate(end);
+
+        db.collection("records")
+          .where("closedAt", ">=", tStart)
+          .where("closedAt", "<=", tEnd)
+          .get().then(snap => {
+              
+            let stats = {
+                pickup: { count: 0, total: 0 },
+                delivery: { count: 0, total: 0 },
+                'dine-in': { count: 0, total: 0 }
+            };
+
+            snap.forEach(doc => {
+                const r = doc.data();
+                const type = r.orderType || 'pickup';
+                const amt = Number(r.paidAmount || r.total || 0);
+                if(stats[type]) {
+                    stats[type].count += 1;
+                    stats[type].total += amt;
+                }
+            });
+
+            // Update UI
+            document.getElementById('fin-dine-total').innerText = stats['dine-in'].total.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-dine-count').innerText = stats['dine-in'].count + " Orders";
+            
+            document.getElementById('fin-pickup-total').innerText = stats['pickup'].total.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-pickup-count').innerText = stats['pickup'].count + " Orders";
+            
+            document.getElementById('fin-delivery-total').innerText = stats['delivery'].total.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-delivery-count').innerText = stats['delivery'].count + " Orders";
+
+            const grandTotal = stats['dine-in'].total + stats['pickup'].total + stats['delivery'].total;
+            const grandCount = stats['dine-in'].count + stats['pickup'].count + stats['delivery'].count;
+            document.getElementById('fin-grand-total').innerText = grandTotal.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-grand-count').innerText = grandCount + " Orders Total";
+
+        }).catch(err => console.error("Finance query error:", err));
+    }
+
+
+    // ==========================================
+    // 0.5 RESERVATIONS MANAGER
+    // ==========================================
+    let currentResView = 'upcoming';
+
+    function loadReservations(view = 'upcoming') {
+        currentResView = view;
+        document.getElementById('btn-upcoming').className = view === 'upcoming' ? 'btn-small btn-blue' : 'btn-small btn-outline';
+        document.getElementById('btn-past').className = view === 'past' ? 'btn-small btn-blue' : 'btn-small btn-outline';
+        
+        const tbody = document.getElementById('res-body');
+        
+        db.collection("reservations").orderBy("timestamp", "desc").onSnapshot(snap => {
+            tbody.innerHTML = ""; let hasRecords = false;
+
+            snap.forEach(doc => {
+                const d = doc.data(); const id = doc.id;
+                const isPast = d.status === 'cancelled' || d.status === 'past';
+                if ((view === 'upcoming' && isPast) || (view === 'past' && !isPast)) return;
+
+                hasRecords = true;
+                const dateObj = new Date(d.date); const niceDate = dateObj.toLocaleDateString('de-DE'); const timeStr = d.time || "";
+                let statusBadge = `<span class="badge" style="background:#ffc107; color:#000;">Neu</span>`;
+                if(d.status === 'confirmed') statusBadge = `<span class="badge" style="background:var(--success-green); color:#fff;">Bestätigt</span>`;
+                if(d.status === 'cancelled') statusBadge = `<span class="badge" style="background:var(--danger-red); color:#fff;">Storniert</span>`;
+
+                let actions = "";
+                if(view === 'upcoming' && d.status !== 'confirmed') actions += `<button class="btn-action-ok" onclick="acceptRes('${id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}', '${d.guests}')" title="Bestätigen">✓</button>`;
+                if(view === 'upcoming') actions += `<button class="btn-action-x" onclick="deleteRes('${id}', '${d.name}', '${d.email}', '${d.date}', '${timeStr}')" title="Stornieren">X</button>`;
+
+                const row = `<tr>
+                    <td><strong style="color:var(--gold);">${d.name}</strong><br><span style="font-size:0.8rem; color:#aaa;">${d.phone || ''} <br> ${d.email || ''}</span></td>
+                    <td>${niceDate}<br><span style="color:#aaa; font-size:0.8rem;">${timeStr}</span></td>
+                    <td style="font-weight:bold; font-size:1.1rem;">${d.guests}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actions}</td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+            if(!hasRecords) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">Keine Einträge gefunden.</td></tr>`;
+        });
+    }
+
+    window.acceptRes = function(id, name, email, date, time, guests) {
+        if(!confirm(`Reservierung von ${name} für ${guests} Personen bestätigen?`)) return;
+        db.collection("reservations").doc(id).update({ status: "confirmed" })
+        .then(() => {
+            if(email && email.includes("@")) {
+                const params = { to_email: email, to_name: name, res_date: new Date(date).toLocaleDateString('de-DE'), res_time: time, res_guests: guests };
+                emailjs.send(EMAIL_SERVICE_ID, EMAIL_ACCEPT_ID, params).then(() => alert("Bestätigt & Email gesendet.")).catch(() => alert("Bestätigt, Email fehlgeschlagen."));
+            } else alert("Reservierung bestätigt.");
+        }).catch(e => alert("Fehler: " + e.message));
+    };
+
+    window.deleteRes = function(id, name, email, date, time) { 
+        if(!confirm(`Möchten Sie die Reservierung von ${name} wirklich stornieren?`)) return;
+        let sendRejection = false;
+        if(email && email.includes("@")) sendRejection = confirm("Soll eine höfliche Absage-Email gesendet werden?");
+        db.collection("reservations").doc(id).update({ status: "cancelled" })
+        .then(() => {
+            if(sendRejection) {
+                const params = { to_email: email, to_name: name, res_date: new Date(date).toLocaleDateString('de-DE'), res_time: time };
+                emailjs.send(EMAIL_SERVICE_ID, EMAIL_REJECT_ID, params).then(() => alert("Storniert & Absage-Email gesendet.")).catch(() => alert("Storniert, Email fehlgeschlagen."));
+            } else alert("Storniert.");
+        }).catch(e => alert("Fehler: " + e.message));
+    };
+
 
     // ==========================================
     // 1. GENERAL SETTINGS
@@ -788,26 +967,15 @@
     // ==========================================
     // 2. HOURS & SCHEDULE LOGIC
     // ==========================================
-    let weeklyConfig = {};
-    let holidays = [];
-    let pauseConfig = null;
-
+    let weeklyConfig = {}; let holidays = []; let pauseConfig = null;
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    const daysLabel = {
-        de: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
-        en: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    };
+    const daysLabel = { de: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'], en: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] };
 
     function loadHours() {
         db.collection('settings').doc('hours').get().then((doc) => {
             if(doc.exists) {
-                const data = doc.data();
-                weeklyConfig = data.weekly || {};
-                holidays = data.holidays || [];
-                pauseConfig = data.pause || null;
-                renderWeeklySchedule();
-                renderHolidays();
-                renderPauseStatus();
+                const data = doc.data(); weeklyConfig = data.weekly || {}; holidays = data.holidays || []; pauseConfig = data.pause || null;
+                renderWeeklySchedule(); renderHolidays(); renderPauseStatus();
             } else {
                 days.forEach(d => { weeklyConfig[d] = { open: true, start: "12:00", end: "21:00", delStart: "", delEnd: "" }; });
                 renderWeeklySchedule();
@@ -816,32 +984,16 @@
     }
 
     function renderWeeklySchedule() {
-        const container = document.getElementById('weekly-schedule-container');
-        if(!container) return;
+        const container = document.getElementById('weekly-schedule-container'); if(!container) return;
         container.innerHTML = "";
-        
         days.forEach((day, index) => {
             const conf = weeklyConfig[day] || { open: false, start: "", end: "", delStart: "", delEnd: "" };
             const dayName = daysLabel[currentLang][index];
-
             const html = `
             <div class="hours-row" id="row-${day}">
-                <div class="day-label">
-                    <label class="checkbox-item" style="margin:0;">
-                        <input type="checkbox" onchange="toggleDay('${day}')" ${conf.open ? 'checked' : ''} id="check-${day}">
-                        ${dayName}
-                    </label>
-                </div>
-                <div style="display:flex; gap:5px; align-items:center;">
-                    <input type="time" id="start-${day}" value="${conf.start}" ${!conf.open ? 'disabled' : ''}>
-                    <span>-</span>
-                    <input type="time" id="end-${day}" value="${conf.end}" ${!conf.open ? 'disabled' : ''}>
-                </div>
-                <div style="display:flex; gap:5px; align-items:center;">
-                    <input type="time" id="delStart-${day}" value="${conf.delStart}" ${!conf.open ? 'disabled' : ''} placeholder="Same">
-                    <span>-</span>
-                    <input type="time" id="delEnd-${day}" value="${conf.delEnd}" ${!conf.open ? 'disabled' : ''} placeholder="Same">
-                </div>
+                <div class="day-label"><label class="checkbox-item" style="margin:0;"><input type="checkbox" onchange="toggleDay('${day}')" ${conf.open ? 'checked' : ''} id="check-${day}"> ${dayName}</label></div>
+                <div style="display:flex; gap:5px; align-items:center;"><input type="time" id="start-${day}" value="${conf.start}" ${!conf.open ? 'disabled' : ''}><span>-</span><input type="time" id="end-${day}" value="${conf.end}" ${!conf.open ? 'disabled' : ''}></div>
+                <div style="display:flex; gap:5px; align-items:center;"><input type="time" id="delStart-${day}" value="${conf.delStart}" ${!conf.open ? 'disabled' : ''} placeholder="Same"><span>-</span><input type="time" id="delEnd-${day}" value="${conf.delEnd}" ${!conf.open ? 'disabled' : ''} placeholder="Same"></div>
             </div>`;
             container.insertAdjacentHTML('beforeend', html);
         });
@@ -850,9 +1002,7 @@
     window.toggleDay = function(day) {
         const isOpen = document.getElementById(`check-${day}`).checked;
         ['start', 'end', 'delStart', 'delEnd'].forEach(prefix => {
-            const input = document.getElementById(`${prefix}-${day}`);
-            input.disabled = !isOpen;
-            if(!isOpen) input.value = "";
+            const input = document.getElementById(`${prefix}-${day}`); input.disabled = !isOpen; if(!isOpen) input.value = "";
         });
     }
 
@@ -860,92 +1010,56 @@
         const newConfig = {};
         days.forEach(day => {
             newConfig[day] = {
-                open: document.getElementById(`check-${day}`).checked,
-                start: document.getElementById(`start-${day}`).value,
-                end: document.getElementById(`end-${day}`).value,
-                delStart: document.getElementById(`delStart-${day}`).value,
-                delEnd: document.getElementById(`delEnd-${day}`).value
+                open: document.getElementById(`check-${day}`).checked, start: document.getElementById(`start-${day}`).value,
+                end: document.getElementById(`end-${day}`).value, delStart: document.getElementById(`delStart-${day}`).value, delEnd: document.getElementById(`delEnd-${day}`).value
             };
         });
-
-        const btn = document.querySelector('button[onclick="saveHours()"]');
-        btn.disabled = true; btn.innerText = "...";
-
+        const btn = document.querySelector('button[onclick="saveHours()"]'); btn.disabled = true; btn.innerText = "...";
         try {
             await db.collection('settings').doc('hours').set({ weekly: newConfig, holidays: holidays, pause: pauseConfig }, { merge: true });
-            const msg = document.getElementById('hours-message');
-            msg.textContent = currentLang === 'de' ? "Wochenplan Gespeichert!" : "Schedule Saved!";
-            msg.className = "message-box success";
-            msg.style.display = "block";
-            setTimeout(() => msg.style.display = "none", 3000);
+            alert("Gespeichert!");
         } catch(e) { alert(e.message); }
         btn.disabled = false; btn.innerText = translations[currentLang].save_hours;
     }
 
     window.applyPause = async function() {
-        const type = document.getElementById('pauseServiceType').value;
-        const duration = document.getElementById('pauseDuration').value;
-        let until = 0;
-        if(duration === 'today') {
-            const now = new Date(); now.setHours(23, 59, 59, 999); until = now.getTime();
-        } else { until = Date.now() + (parseInt(duration) * 60000); }
-
+        const type = document.getElementById('pauseServiceType').value; const duration = document.getElementById('pauseDuration').value; let until = 0;
+        if(duration === 'today') { const now = new Date(); now.setHours(23, 59, 59, 999); until = now.getTime(); } 
+        else { until = Date.now() + (parseInt(duration) * 60000); }
         pauseConfig = { active: true, type: type, until: until };
         await db.collection('settings').doc('hours').set({ pause: pauseConfig }, { merge: true });
         renderPauseStatus();
     }
 
-    window.clearPause = async function() {
-        pauseConfig = null;
-        await db.collection('settings').doc('hours').set({ pause: null }, { merge: true });
-        renderPauseStatus();
-    }
+    window.clearPause = async function() { pauseConfig = null; await db.collection('settings').doc('hours').set({ pause: null }, { merge: true }); renderPauseStatus(); }
 
     function renderPauseStatus() {
-        const info = document.getElementById('active-pause-info');
-        const text = document.getElementById('pause-text');
+        const info = document.getElementById('active-pause-info'); const text = document.getElementById('pause-text');
         if(pauseConfig && pauseConfig.active && pauseConfig.until > Date.now()) {
-            const date = new Date(pauseConfig.until);
-            const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            text.innerText = `${pauseConfig.type.toUpperCase()} PAUSED UNTIL ${timeStr}`;
-            info.style.display = "block";
+            const timeStr = new Date(pauseConfig.until).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            text.innerText = `${pauseConfig.type.toUpperCase()} PAUSED UNTIL ${timeStr}`; info.style.display = "block";
         } else { info.style.display = "none"; }
     }
 
     window.addHoliday = async function() {
-        const start = document.getElementById('holidayStart').value;
-        const end = document.getElementById('holidayEnd').value;
-        const reason = document.getElementById('holidayReason').value;
+        const start = document.getElementById('holidayStart').value; const end = document.getElementById('holidayEnd').value; const reason = document.getElementById('holidayReason').value;
         if(!start || !end) return alert("Start & End required");
-
         holidays.push({ start, end, reason, id: Date.now() });
         await db.collection('settings').doc('hours').set({ holidays: holidays }, { merge: true });
-        renderHolidays();
-        document.getElementById('holidayStart').value = ""; document.getElementById('holidayEnd').value = "";
+        renderHolidays(); document.getElementById('holidayStart').value = ""; document.getElementById('holidayEnd').value = "";
     }
 
     window.removeHoliday = async function(id) {
-        holidays = holidays.filter(h => h.id !== id);
-        await db.collection('settings').doc('hours').set({ holidays: holidays }, { merge: true });
-        renderHolidays();
+        holidays = holidays.filter(h => h.id !== id); await db.collection('settings').doc('hours').set({ holidays: holidays }, { merge: true }); renderHolidays();
     }
 
     function renderHolidays() {
-        const list = document.getElementById('holidayList');
-        list.innerHTML = "";
-        holidays.sort((a,b) => new Date(a.start) - new Date(b.start));
-
+        const list = document.getElementById('holidayList'); list.innerHTML = ""; holidays.sort((a,b) => new Date(a.start) - new Date(b.start));
         holidays.forEach(h => {
             const startDate = new Date(h.start).toLocaleDateString() + " " + new Date(h.start).toLocaleTimeString([],{hour:'2-digit', minute:'2-digit'});
             const endDate = new Date(h.end).toLocaleDateString() + " " + new Date(h.end).toLocaleTimeString([],{hour:'2-digit', minute:'2-digit'});
-            const isPast = new Date(h.end) < new Date();
-            const style = isPast ? "opacity:0.5;" : "border-left:3px solid var(--danger-red);";
-
-            const item = `
-            <div class="holiday-item" style="${style}">
-                <div><div style="font-weight:bold; color:var(--gold);">${h.reason || 'Closed'}</div><div style="font-size:0.8rem; color:#ccc;">${startDate} ➝ ${endDate}</div></div>
-                <button class="btn-action-x" onclick="removeHoliday(${h.id})">X</button>
-            </div>`;
+            const style = new Date(h.end) < new Date() ? "opacity:0.5;" : "border-left:3px solid var(--danger-red);";
+            const item = `<div class="holiday-item" style="${style}"><div><div style="font-weight:bold; color:var(--gold);">${h.reason || 'Closed'}</div><div style="font-size:0.8rem; color:#ccc;">${startDate} ➝ ${endDate}</div></div><button class="btn-action-x" onclick="removeHoliday(${h.id})">X</button></div>`;
             list.insertAdjacentHTML('beforeend', item);
         });
     }
@@ -956,27 +1070,18 @@
     function loadDriverPin() {
         db.collection('settings').doc('driver_auth').get().then(doc => {
             if(doc.exists) document.getElementById('driver-pin-input').value = doc.data().pin || "";
-            else document.getElementById('driver-pin-input').value = "";
         });
     }
 
     window.saveDriverPin = function() {
         const newPin = document.getElementById('driver-pin-input').value.trim();
-        const statusEl = document.getElementById('pin-status');
         if(newPin.length < 4) return alert(translations[currentLang].pin_error);
-
         db.collection('settings').doc('driver_auth').set({ pin: newPin })
-        .then(() => {
-            statusEl.innerText = translations[currentLang].pin_saved;
-            statusEl.className = "message-box success";
-            statusEl.style.display = "block";
-            setTimeout(() => statusEl.style.display = "none", 3000);
-        })
-        .catch(e => alert("Error: " + e.message));
+        .then(() => { alert(translations[currentLang].pin_saved); })
     };
 
     // ==========================================
-    // 4. COUPON & BANNER LOGIC
+    // 4. COUPON MANAGER
     // ==========================================
     const couponForm = document.getElementById('coupon-form');
     
@@ -985,14 +1090,9 @@
         db.collection("coupons").orderBy("createdAt", "desc").get().then((snap) => {
             tableBody.innerHTML = "";
             snap.forEach(doc => {
-                const d = doc.data();
-                const isPercent = d.discountType === 'percent';
-                let badge = 'badge-fixed';
-                let val = '';
-                
-                if (d.discountType === 'gratis') { badge = 'badge-fixed'; val = '🎁 GRATIS'; } 
-                else { badge = isPercent ? 'badge-percent' : 'badge-fixed'; val = isPercent ? `${d.discountValue}%` : `${d.discountValue}€`; }
-                
+                const d = doc.data(); const isPercent = d.discountType === 'percent';
+                let badge = d.discountType === 'gratis' ? 'badge-fixed' : (isPercent ? 'badge-percent' : 'badge-fixed');
+                let val = d.discountType === 'gratis' ? '🎁 GRATIS' : (isPercent ? `${d.discountValue}%` : `${d.discountValue}€`);
                 const eyeColor = d.showDropdown ? 'var(--success-green)' : '#444';
                 const micColor = d.showBanner ? 'var(--gold)' : '#444';
 
@@ -1012,162 +1112,58 @@
         });
     }
 
-    window.deleteCoupon = function(code) {
-        if(confirm("Delete " + code + "?")) db.collection("coupons").doc(code).delete().then(loadCoupons);
-    }
+    window.deleteCoupon = function(code) { if(confirm("Delete " + code + "?")) db.collection("coupons").doc(code).delete().then(loadCoupons); }
+    window.toggleDateInputs = function() { const mode = document.getElementById('validityMode').value; document.getElementById('rangeInputs').style.display = mode === 'range' ? 'block' : 'none'; document.getElementById('recurringInputs').style.display = mode === 'recurring' ? 'block' : 'none'; }
+    window.toggleStartField = function() { const now = document.getElementById('startNow').checked; document.getElementById('startDateGroup').style.display = now ? 'none' : 'block'; }
+    window.toggleDiscountFields = function() { const type = document.querySelector('input[name="discountType"]:checked').value; document.getElementById('gratisFields').style.display = type === 'gratis' ? 'block' : 'none'; document.getElementById('valueGroup').style.display = type === 'gratis' ? 'none' : 'block'; document.getElementById('discountValue').required = (type !== 'gratis'); }
+    window.toggleCouponFlag = function(code, flag) { db.collection("coupons").doc(code).get().then(doc => { db.collection("coupons").doc(code).update({ [flag]: !(doc.data()[flag] || false) }).then(loadCoupons); }); }
 
-    window.toggleDateInputs = function() {
-        const mode = document.getElementById('validityMode').value;
-        document.getElementById('rangeInputs').style.display = mode === 'range' ? 'block' : 'none';
-        document.getElementById('recurringInputs').style.display = mode === 'recurring' ? 'block' : 'none';
-    }
-    
-    window.toggleStartField = function() {
-        const now = document.getElementById('startNow').checked;
-        document.getElementById('startDateGroup').style.display = now ? 'none' : 'block';
-    }
-
-    window.toggleDiscountFields = function() {
-        const type = document.querySelector('input[name="discountType"]:checked').value;
-        document.getElementById('gratisFields').style.display = type === 'gratis' ? 'block' : 'none';
-        document.getElementById('valueGroup').style.display = type === 'gratis' ? 'none' : 'block';
-        document.getElementById('discountValue').required = (type !== 'gratis');
-    }
-
-    window.toggleCouponFlag = function(code, flag) {
-        db.collection("coupons").doc(code).get().then(doc => {
-            let currentVal = doc.data()[flag] || false;
-            db.collection("coupons").doc(code).update({ [flag]: !currentVal }).then(loadCoupons);
-        });
-    }
-
-    // --- RICH TEXT & SPLIT PREVIEW LOGIC ---
-    var quill = new Quill('#editor-container', {
-        theme: 'snow',
-        placeholder: 'Schreiben Sie hier Ihre Special Message...',
-        modules: {
-            toolbar: [
-                ['bold', 'italic', 'underline'], 
-                [{ 'color': [] }, { 'background': [] }], 
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'align': [] }],
-                ['link', 'clean']
-            ]
-        }
+    couponForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('code').value.toUpperCase().trim(); const mode = document.getElementById('validityMode').value; const discountType = document.querySelector('input[name="discountType"]:checked').value;
+        const data = { code, mode, discountType, validFor: document.getElementById('validFor').value, discountValue: discountType === 'gratis' ? 0 : parseFloat(document.getElementById('discountValue').value), minOrder: parseFloat(document.getElementById('minOrder').value) || 0, minMainDishes: parseInt(document.getElementById('minMainDishes').value) || 0, promoItemName: document.getElementById('promoItemName').value.trim(), promoAskChoice: document.getElementById('promoAskChoice').checked, createdAt: new Date().toISOString(), validCategories: [] };
+        document.querySelectorAll('input[name="cat"]:checked').forEach(cb => { data.validCategories.push(cb.value); });
+        if(data.validCategories.length === 0) data.validCategories = 'all';
+        if(mode === 'range') { if(document.getElementById('startNow').checked) data.validFrom = new Date().toISOString().split('T')[0]; else data.validFrom = document.getElementById('startDate').value; data.validUntil = document.getElementById('expiry').value; } 
+        else { data.recurringRule = document.getElementById('recurringRule').value; }
+        await db.collection("coupons").doc(code).set(data); couponForm.reset(); document.getElementById('startNow').checked = true; loadCoupons(); alert("Coupon Saved!");
     });
 
-    const toggleHtmlBtn = document.getElementById('toggle-html-btn');
-    const editorContainer = document.getElementById('editor-container');
-    const htmlEditor = document.getElementById('html-editor');
-    const htmlModeContainer = document.getElementById('html-mode-container');
-    const htmlPreview = document.getElementById('html-preview');
+    // ==========================================
+    // 5. BANNER LOGIC (RICH TEXT)
+    // ==========================================
+    var quill = new Quill('#editor-container', { theme: 'snow', placeholder: 'Schreiben Sie hier Ihre Message...', modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'color': [] }, { 'background': [] }], [{ 'list': 'ordered'}, { 'list': 'bullet' }], [{ 'align': [] }], ['link', 'clean']] } });
+    const toggleHtmlBtn = document.getElementById('toggle-html-btn'); const editorContainer = document.getElementById('editor-container'); const htmlEditor = document.getElementById('html-editor'); const htmlModeContainer = document.getElementById('html-mode-container'); const htmlPreview = document.getElementById('html-preview');
     let isHtmlMode = false;
 
-    htmlEditor.addEventListener('input', () => {
-        htmlPreview.innerHTML = htmlEditor.value;
-    });
-
+    htmlEditor.addEventListener('input', () => { htmlPreview.innerHTML = htmlEditor.value; });
     toggleHtmlBtn.addEventListener('click', () => {
         isHtmlMode = !isHtmlMode;
         if (isHtmlMode) {
-            htmlEditor.value = quill.root.innerHTML; 
-            htmlPreview.innerHTML = htmlEditor.value;
-            
-            editorContainer.style.display = 'none';
-            document.querySelector('.ql-toolbar').style.display = 'none';
-            htmlModeContainer.classList.add('active'); // Safely triggers CSS Flex
-            
-            toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)';
-            toggleHtmlBtn.style.background = 'var(--warning-orange)';
-            toggleHtmlBtn.style.color = '#fff';
+            htmlEditor.value = quill.root.innerHTML; htmlPreview.innerHTML = htmlEditor.value; editorContainer.style.display = 'none'; document.querySelector('.ql-toolbar').style.display = 'none'; htmlModeContainer.classList.add('active');
+            toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)'; toggleHtmlBtn.style.background = 'var(--warning-orange)'; toggleHtmlBtn.style.color = '#fff';
         } else {
-            quill.clipboard.dangerouslyPasteHTML(htmlEditor.value); 
-            htmlModeContainer.classList.remove('active');
-            
-            editorContainer.style.display = 'block';
-            document.querySelector('.ql-toolbar').style.display = 'block';
-            
-            toggleHtmlBtn.innerText = 'Code & Vorschau `< >`';
-            toggleHtmlBtn.style.background = '#444';
-            toggleHtmlBtn.style.color = 'var(--gold)';
+            quill.clipboard.dangerouslyPasteHTML(htmlEditor.value); htmlModeContainer.classList.remove('active'); editorContainer.style.display = 'block'; document.querySelector('.ql-toolbar').style.display = 'block';
+            toggleHtmlBtn.innerText = 'Code & Vorschau `< >`'; toggleHtmlBtn.style.background = '#444'; toggleHtmlBtn.style.color = 'var(--gold)';
         }
     });
     
     function loadSpecialBanner() {
         db.collection('settings').doc('banner').get().then(doc => {
             if(doc.exists) {
-                const data = doc.data();
-                document.getElementById('bannerTitle').value = data.title || "";
-                document.getElementById('bannerValidFor').value = data.validFor || "both";
-                document.getElementById('bannerActive').checked = data.active || false;
-                
+                const data = doc.data(); document.getElementById('bannerTitle').value = data.title || ""; document.getElementById('bannerValidFor').value = data.validFor || "both"; document.getElementById('bannerActive').checked = data.active || false;
                 const msg = data.message || "";
-                
                 if(msg.includes('<div') || msg.includes('style=')) {
-                    isHtmlMode = true;
-                    htmlEditor.value = msg;
-                    htmlPreview.innerHTML = msg;
-                    
-                    editorContainer.style.display = 'none';
-                    if(document.querySelector('.ql-toolbar')) document.querySelector('.ql-toolbar').style.display = 'none';
-                    htmlModeContainer.classList.add('active');
-                    
-                    toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)';
-                    toggleHtmlBtn.style.background = 'var(--warning-orange)';
-                    toggleHtmlBtn.style.color = '#fff';
-                } else {
-                    quill.clipboard.dangerouslyPasteHTML(msg);
-                }
+                    isHtmlMode = true; htmlEditor.value = msg; htmlPreview.innerHTML = msg; editorContainer.style.display = 'none'; if(document.querySelector('.ql-toolbar')) document.querySelector('.ql-toolbar').style.display = 'none'; htmlModeContainer.classList.add('active'); toggleHtmlBtn.innerText = 'Visueller Editor (Löscht ggf. Styles)'; toggleHtmlBtn.style.background = 'var(--warning-orange)'; toggleHtmlBtn.style.color = '#fff';
+                } else { quill.clipboard.dangerouslyPasteHTML(msg); }
             }
         });
     }
     
     document.getElementById('banner-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const finalMessage = isHtmlMode ? document.getElementById('html-editor').value : quill.root.innerHTML;
-        await db.collection('settings').doc('banner').set({
-            title: document.getElementById('bannerTitle').value,
-            message: finalMessage,
-            validFor: document.getElementById('bannerValidFor').value,
-            active: document.getElementById('bannerActive').checked
-        });
-        alert("Pop-Up Banner erfolgreich gespeichert!");
-    });
-
-    couponForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const code = document.getElementById('code').value.toUpperCase().trim();
-        const mode = document.getElementById('validityMode').value;
-        const discountType = document.querySelector('input[name="discountType"]:checked').value;
-
-        const data = {
-            code, mode, discountType,
-            validFor: document.getElementById('validFor').value,
-            discountValue: discountType === 'gratis' ? 0 : parseFloat(document.getElementById('discountValue').value),
-            minOrder: parseFloat(document.getElementById('minOrder').value) || 0,
-            minMainDishes: parseInt(document.getElementById('minMainDishes').value) || 0,
-            promoItemName: document.getElementById('promoItemName').value.trim(),
-            promoAskChoice: document.getElementById('promoAskChoice').checked,
-            createdAt: new Date().toISOString(),
-            validCategories: [] 
-        };
-
-        document.querySelectorAll('input[name="cat"]:checked').forEach(cb => { data.validCategories.push(cb.value); });
-        if(data.validCategories.length === 0) data.validCategories = 'all';
-
-        if(mode === 'range') {
-            if(document.getElementById('startNow').checked) data.validFrom = new Date().toISOString().split('T')[0];
-            else data.validFrom = document.getElementById('startDate').value;
-            data.validUntil = document.getElementById('expiry').value;
-        } else {
-            data.recurringRule = document.getElementById('recurringRule').value;
-        }
-
-        await db.collection("coupons").doc(code).set(data);
-        couponForm.reset();
-        document.getElementById('startNow').checked = true;
-        loadCoupons();
-        alert(currentLang === 'de' ? "Coupon Gespeichert!" : "Coupon Saved!");
+        e.preventDefault(); const finalMessage = isHtmlMode ? document.getElementById('html-editor').value : quill.root.innerHTML;
+        await db.collection('settings').doc('banner').set({ title: document.getElementById('bannerTitle').value, message: finalMessage, validFor: document.getElementById('bannerValidFor').value, active: document.getElementById('bannerActive').checked });
+        alert("Pop-Up Banner gespeichert!");
     });
 
 </script>

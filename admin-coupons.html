@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zafran Admin - Dashboard</title>
     <link rel="icon" type="image/png" href="favlogo.png">
+    
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
     <style>
         /* --- KDS THEME VARIABLES --- */
         :root {
@@ -148,6 +152,11 @@
             .full-width { grid-column: span 1; }
             .hours-row { grid-template-columns: 1fr; gap: 5px; border-bottom: 2px dashed #444; padding: 15px 0; }
         }
+
+        /* Quill Editor Dark Theme Fixes */
+        .ql-toolbar.ql-snow { background: #f0f0f0; border-radius: 4px 4px 0 0; border: none; }
+        .ql-container.ql-snow { background: #fff; color: #000; border-radius: 0 0 4px 4px; border: none; font-size: 1rem; }
+        
     </style>
 </head>
 <body>
@@ -281,7 +290,7 @@
                 </div>
                 <div class="form-group full-width">
                     <label>Nachricht</label>
-                    <textarea id="bannerMessage" rows="3" placeholder="Probieren Sie heute unser neues Gericht..."></textarea>
+                    <div id="editor-container" style="height: 150px;"></div>
                 </div>
                 <div class="form-group full-width">
                     <label class="checkbox-item">
@@ -878,23 +887,41 @@
         });
     }
 
+    // --- Initialize Quill Editor ---
+    var quill = new Quill('#editor-container', {
+        theme: 'snow',
+        placeholder: 'Schreiben Sie hier Ihre Special Message...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'], 
+                [{ 'color': [] }, { 'background': [] }], 
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link', 'clean']
+            ]
+        }
+    });
+
+    // ---  Load the HTML into the Editor ---
     function loadSpecialBanner() {
         db.collection('settings').doc('banner').get().then(doc => {
             if(doc.exists) {
                 const data = doc.data();
                 document.getElementById('bannerTitle').value = data.title || "";
-                document.getElementById('bannerMessage').value = data.message || "";
                 document.getElementById('bannerValidFor').value = data.validFor || "both";
                 document.getElementById('bannerActive').checked = data.active || false;
+                // Load HTML into Quill
+                quill.root.innerHTML = data.message || "";
             }
         });
     }
     
+    // ---  Save the HTML from the Editor ---
     document.getElementById('banner-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         await db.collection('settings').doc('banner').set({
             title: document.getElementById('bannerTitle').value,
-            message: document.getElementById('bannerMessage').value,
+            message: quill.root.innerHTML, // Grab the raw HTML from Quill!
             validFor: document.getElementById('bannerValidFor').value,
             active: document.getElementById('bannerActive').checked
         });

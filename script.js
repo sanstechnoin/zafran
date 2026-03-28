@@ -1143,7 +1143,7 @@ async function checkAndShowMarketing() {
     let html = '';
     if (showSpecial) {
         html += `<h2 style="color:var(--gold); margin-top:0; font-size:1.8rem; text-transform:uppercase;">${bannerData.title}</h2>`;
-        html += `<p style="font-size:1.1rem; line-height:1.6; color:#eee;">${bannerData.message.replace(/\n/g, '<br>')}</p>`;
+        html += `<div style="font-size:1.1rem; line-height:1.6; color:#eee; text-align:left;">${bannerData.message}</div>`;
         if(flashCoupons.length > 0) html += `<hr style="border-top:1px dashed #555; margin:20px 0;">`;
     }
     

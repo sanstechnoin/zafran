@@ -47,17 +47,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const RECORDS_PASSWORD = "zafran"; 
     let allFetchedRecords = []; 
 
-    // --- 4. SECURE LOGIN LOGIC ---
+    // --- 4. NEW SECURE LOGIN LOGIC ---
     loginButton.addEventListener('click', () => {
+        // 1. Check if the staff typed the correct simple PIN ("zafran")
         if (passwordInput.value === RECORDS_PASSWORD) {
             
+            // 2. If correct, secretly log them in with the real account
             const hiddenEmail = "webmaster@zafraneuskirchen.de";
             const hiddenPass  = "!Zafran2025";
 
-            loginButton.innerText = "Verbinden..."; 
+            loginButton.innerText = "Verbinden..."; // Optional: Show loading text
             
             firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
             .then((userCredential) => {
+                // Success! The system is now logged in securely.
                 loginOverlay.style.display = 'none';
                 contentWrapper.style.opacity = '1';
                 initializeRecordsPage(); 
@@ -70,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         } else {
+            // Wrong PIN entered
             loginError.innerText = "Falsches Passwort";
             loginError.style.display = 'block';
         }
@@ -78,17 +82,21 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 
     function initializeRecordsPage() {
+        // Init UI
         statusDot.classList.add('online');
         connectionText.textContent = "System Online";
         
+        // Set Today's Date
         const today = new Date().toISOString().split('T')[0];
         startDateInput.value = today;
         endDateInput.value = today;
 
+        // Listeners
         filterBtn.addEventListener('click', fetchRecords);
         printBtn.addEventListener('click', () => window.print());
         exportBtn.addEventListener('click', exportToCSV);
         
+        // Auto Load
         fetchRecords();
     }
 
@@ -103,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         recordsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Retrieving Data from Cloud...</td></tr>`;
 
         try {
+            // Query for archived orders
             const query = db.collection("archived_orders")
                 .where("closedAt", ">=", firebase.firestore.Timestamp.fromDate(startDate))
                 .where("closedAt", "<=", firebase.firestore.Timestamp.fromDate(endDate))
@@ -110,39 +119,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const snapshot = await query.get();
             
-            // --- THE SIMPLE FIX: MERGE MULTIPLE ORDERS FOR THE SAME TABLE ---
-            const groupedMap = new Map();
+            // --- THE FIX: SAFELY GROUP ORDERS FOR THE SAME TABLE ---
+            let groupedRecords = {};
 
             snapshot.docs.forEach(doc => {
                 const data = doc.data();
+                
+                // Identify the same checkout by Table and Exact Time
                 let groupKey = doc.id; 
                 
-                // Group by Table Number and the exact millisecond they paid
                 if ((data.orderType === 'dine-in' || !data.orderType) && data.table && data.closedAt) {
-                    groupKey = data.table + "_" + data.closedAt.toMillis();
+                    // Safely get milliseconds from the Firestore Timestamp
+                    let timeVal = 0;
+                    if (typeof data.closedAt.toMillis === 'function') {
+                        timeVal = data.closedAt.toMillis();
+                    } else if (data.closedAt.seconds) {
+                        timeVal = data.closedAt.seconds * 1000;
+                    }
+                    groupKey = `table_${data.table}_${timeVal}`;
                 }
 
-                if (!groupedMap.has(groupKey)) {
-                    // First document for this table's checkout
-                    groupedMap.set(groupKey, { id: doc.id, ...data, items: data.items ? [...data.items] : [] });
+                if (!groupedRecords[groupKey]) {
+                    // Save first instance of this bill
+                    groupedRecords[groupKey] = { 
+                        id: doc.id, 
+                        ...data, 
+                        items: data.items ? [...data.items] : [] 
+                    };
                 } else {
-                    // Extra document for the same checkout, just add the items to the main bill
+                    // Combine items from split orders, do not duplicate total amount!
                     if (data.items) {
-                        groupedMap.get(groupKey).items.push(...data.items);
+                        groupedRecords[groupKey].items.push(...data.items);
                     }
                 }
             });
 
-            let records = Array.from(groupedMap.values());
+            // Convert grouped object back to array
+            const cleanRecords = Object.values(groupedRecords);
             
-            // Re-sort ascending to match original logic, then reverse so newest is on top
-            records.sort((a, b) => {
-                const timeA = a.closedAt ? a.closedAt.toMillis() : 0;
-                const timeB = b.closedAt ? b.closedAt.toMillis() : 0;
-                return timeA - timeB;
-            });
-
-            allFetchedRecords = records.reverse(); 
+            // Reverse so newest is on top
+            allFetchedRecords = cleanRecords.reverse(); 
             // --- END OF FIX ---
             
             renderRecords(allFetchedRecords);
@@ -180,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const amount = record.paidAmount || record.total || 0;
             
+            // Logic to determine Table or Customer Name
             let tableName = record.table || "Unknown";
             let typeBadge = "";
             
@@ -194,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableName = `Table ${tableName}`;
             }
 
+            // Create Table Row
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${recordDate}</td>
@@ -283,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const name = (r.orderType === 'dine-in') ? `Table ${r.table}` : (r.customerName || "Customer");
             const total = Number(r.paidAmount || r.total || 0).toFixed(2);
             
+            // Item Summary
             let itemStr = "";
             if(r.items) itemStr = r.items.map(i => `${i.quantity}x ${i.name}`).join(" | ");
             itemStr = itemStr.replace(/,/g, "").replace(/"/g, "'"); 

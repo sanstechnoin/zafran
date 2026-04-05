@@ -344,7 +344,7 @@
             }).catch(err => { console.error(err); callback(null, null); });
         }
 
-        // --- FIXED: CLEARS RED ICONS WHEN NOT FOUND ---
+       // --- FIXED: CLEARS RED ICONS WHEN NOT FOUND ---
         function setStatusMessage(title, sub) {
             document.getElementById('status-title').innerText = title;
             document.getElementById('status-sub').innerText = sub;
@@ -364,8 +364,12 @@
             ['new', 'preparing', 'delivery', 'completed'].forEach(step => {
                 const el = document.getElementById(`step-${step}`);
                 el.className = 'step'; // Remove 'active', 'completed', 'cancelled'
-                el.querySelector('.step-icon').innerHTML = getStepIcon(step); 
+                el.querySelector('.step-icon').innerHTML = getStepIcon(step, 'delivery'); // Default icon
             });
+            
+            // Reset Label
+            const deliveryLabel = document.querySelector('#step-delivery .step-label');
+            if(deliveryLabel) deliveryLabel.innerText = 'Fahrer';
         }
 
         // --- 5. TRACKER LOGIC ---
@@ -472,16 +476,22 @@
             ['new', 'preparing', 'delivery', 'completed'].forEach(step => {
                 const el = document.getElementById(`step-${step}`);
                 el.className = 'step';
-                el.querySelector('.step-icon').innerHTML = getStepIcon(step); 
+                el.querySelector('.step-icon').innerHTML = getStepIcon(step, data.orderType); 
             });
             document.getElementById('driver-card').style.display = 'none';
 
+            // --- 🚨 DYNAMIC PICKUP/DELIVERY LABEL FIX 🚨 ---
+            const deliveryLabel = document.querySelector('#step-delivery .step-label');
+            if (data.orderType === 'pickup') {
+                deliveryLabel.innerText = 'Abholung'; // Changes 'Fahrer' to 'Abholung'
+            } else {
+                deliveryLabel.innerText = 'Fahrer';
+            }
+
             // --- APPLY STATES ---
             if (status === 'cancelled') {
-                // CANCELLED STATE - Polite Message
                 progress = 100;
                 title = "Storniert";
-                // UPDATED POLITE MESSAGE:
                 sub = "Aufgrund eines hohen Bestellaufkommens haben wir die Bestellung leider abgelehnt.\nFür weitere Informationen rufen Sie uns bitte an: +49 2251 1290950.\nVielen Dank.";
                 badgeText = "Storniert";
                 badgeClass = "cancelled";
@@ -491,11 +501,10 @@
                 document.querySelectorAll('.step-icon span').forEach(icon => icon.innerText = 'block');
                 document.body.classList.remove('map-active');
             } 
-            // ADDED 'delivered' to success state
             else if (status === 'completed' || status === 'archived' || status === 'paid' || status === 'delivered') {
                 progress = 100;
                 title = "Zugestellt";
-                sub = "Guten Appetit! 🍕";
+                sub = data.orderType === 'pickup' ? "Vielen Dank für Ihren Besuch! 🍕" : "Guten Appetit! 🍕";
                 badgeText = "Fertig";
                 document.getElementById('eta-badge').style.background = '#4CAF50';
                 document.getElementById('eta-badge').style.color = '#fff';
@@ -561,10 +570,14 @@
             }
         }
 
-        function getStepIcon(step) {
+        function getStepIcon(step, orderType) {
             if(step === 'new') return '<span class="material-icons" style="font-size:16px">receipt</span>';
             if(step === 'preparing') return '<span class="material-icons" style="font-size:16px">soup_kitchen</span>';
-            if(step === 'delivery') return '<span class="material-icons" style="font-size:16px">directions_car</span>';
+            if(step === 'delivery') {
+                return orderType === 'pickup' 
+                    ? '<span class="material-icons" style="font-size:16px">local_mall</span>' 
+                    : '<span class="material-icons" style="font-size:16px">directions_car</span>';
+            }
             if(step === 'completed') return '<span class="material-icons" style="font-size:16px">check_circle</span>';
         }
     </script>

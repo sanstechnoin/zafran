@@ -503,7 +503,6 @@
             } 
             else if (status === 'completed' || status === 'archived' || status === 'paid' || status === 'delivered') {
                 progress = 100;
-                // FIX: Pickup should say Completed, Delivery should say Delivered
                 title = data.orderType === 'pickup' ? "Abgeschlossen" : "Zugestellt";
                 sub = data.orderType === 'pickup' ? "Vielen Dank für Ihren Besuch! 🍕" : "Guten Appetit! 🍕";
                 badgeText = "Fertig";
@@ -513,28 +512,39 @@
                 document.getElementById('step-completed').classList.add('active');
             }
             else if (status === 'out_for_delivery') {
-                progress = 87;
+                progress = 66; // 🚨 Line reaches the driver!
                 title = "Fahrer unterwegs";
                 sub = "Verfolgen Sie den Fahrer auf der Karte.";
                 badgeText = "LIVE";
                 badgeClass = "live";
                 document.getElementById('step-new').classList.add('completed');
                 document.getElementById('step-preparing').classList.add('completed');
-                document.getElementById('step-delivery').classList.add('active');
+                document.getElementById('step-delivery').classList.add('active'); // 🚨 TURN GOLD!
                 document.getElementById('driver-card').style.display = 'flex';
             }
             else if (status === 'ready' || status === 'cooked') {
-                progress = 62;
-                title = data.orderType === 'pickup' ? "Abholbereit" : "Verpacken";
-                sub = data.orderType === 'pickup' ? "Ihre Bestellung wartet an der Theke auf Sie!" : "Ihre Bestellung wird verpackt.";
-                badgeText = data.orderType === 'pickup' ? "Abholbereit" : "Verpacken";
-                
-                document.getElementById('step-new').classList.add('completed');
-                document.getElementById('step-preparing').classList.add('completed'); 
-                document.getElementById('step-delivery').classList.add('active');     
+                if (data.orderType === 'pickup') {
+                    // PICKUP: Ready means it's waiting for the customer. Turn Step 3 GOLD!
+                    progress = 66;
+                    title = "Abholbereit";
+                    sub = "Ihre Bestellung wartet an der Theke auf Sie!";
+                    badgeText = "Abholbereit";
+                    document.getElementById('step-new').classList.add('completed');
+                    document.getElementById('step-preparing').classList.add('completed');
+                    document.getElementById('step-delivery').classList.add('active'); // 🚨 TURN GOLD!
+                } else {
+                    // DELIVERY: Cooked means waiting for driver. Do NOT turn Step 3 gold yet!
+                    progress = 50; // 🚨 Line stops halfway between Kitchen and Driver!
+                    title = "Warten auf Fahrer";
+                    sub = "Das Essen ist fertig verpackt und wartet auf den Fahrer.";
+                    badgeText = "Verpackt";
+                    document.getElementById('step-new').classList.add('completed');
+                    document.getElementById('step-preparing').classList.add('completed');
+                    // step-delivery remains grey!
+                }
             }
             else if (status === 'preparing' || status === 'seen') {
-                progress = 37;
+                progress = 33; // Line reaches Kitchen
                 title = "Zubereitung";
                 if (data.estimatedTime && data.estimatedTime !== "ASAP") {
                     sub = `✅ Bestellung bestätigt!\nGeplante Zeit: ${data.estimatedTime} Uhr`;
@@ -546,7 +556,7 @@
                 document.getElementById('step-preparing').classList.add('active');
             }
             else {
-                progress = 12;
+                progress = 0; // Line is at Start
                 document.getElementById('step-new').classList.add('active');
             }
 

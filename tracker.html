@@ -503,7 +503,8 @@
             } 
             else if (status === 'completed' || status === 'archived' || status === 'paid' || status === 'delivered') {
                 progress = 100;
-                title = "Zugestellt";
+                // FIX: Pickup should say Completed, Delivery should say Delivered
+                title = data.orderType === 'pickup' ? "Abgeschlossen" : "Zugestellt";
                 sub = data.orderType === 'pickup' ? "Vielen Dank für Ihren Besuch! 🍕" : "Guten Appetit! 🍕";
                 badgeText = "Fertig";
                 document.getElementById('eta-badge').style.background = '#4CAF50';
@@ -524,11 +525,13 @@
             }
             else if (status === 'ready' || status === 'cooked') {
                 progress = 62;
-                title = "Verpacken";
-                sub = "Ihre Bestellung wird verpackt.";
-                badgeText = "Verpacken";
+                title = data.orderType === 'pickup' ? "Abholbereit" : "Verpacken";
+                sub = data.orderType === 'pickup' ? "Ihre Bestellung wartet an der Theke auf Sie!" : "Ihre Bestellung wird verpackt.";
+                badgeText = data.orderType === 'pickup' ? "Abholbereit" : "Verpacken";
+                
                 document.getElementById('step-new').classList.add('completed');
-                document.getElementById('step-preparing').classList.add('active');
+                document.getElementById('step-preparing').classList.add('completed'); 
+                document.getElementById('step-delivery').classList.add('active');     
             }
             else if (status === 'preparing' || status === 'seen') {
                 progress = 37;

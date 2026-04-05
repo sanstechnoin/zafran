@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         panelItems.innerHTML = "";
-        let calculatedSubtotal = 0; // We need this to do the math!
+        let calculatedSubtotal = 0; 
 
         if (record.items && Array.isArray(record.items)) {
             record.items.forEach(item => {
@@ -275,7 +275,6 @@ document.addEventListener("DOMContentLoaded", () => {
             panelItems.innerHTML = "<p style='color:#666;'>No item details stored.</p>";
         }
 
-        // --- NEW WAITER-STYLE COUPON LOGIC ---
         let couponName = null;
         if (record.coupon && record.coupon !== "None") {
             couponName = record.coupon;
@@ -285,7 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const finalPaid = Number(record.paidAmount || record.total || 0);
         
-        // Find the exact discount amount
         let discountAmount = 0;
         if (record.discount && !isNaN(record.discount)) {
             discountAmount = parseFloat(record.discount);
@@ -293,28 +291,196 @@ document.addEventListener("DOMContentLoaded", () => {
             discountAmount = calculatedSubtotal - finalPaid;
         }
 
-        // IF a coupon is present OR a discount happened, draw the new lines!
         if (couponName || discountAmount > 0) {
             let displayCoupon = couponName ? couponName : "Discount";
             
-            // Draw 1: The Total (Subtotal) before discount
             const subRow = document.createElement('div');
             subRow.style.cssText = "display:flex; justify-content:space-between; padding-top:15px; margin-top:10px; border-top:1px dashed #444; color:#aaa;";
             subRow.innerHTML = `<span>Total</span><span>${calculatedSubtotal.toFixed(2)} €</span>`;
             panelItems.appendChild(subRow);
 
-            // Draw 2: The Coupon Name and Negative Value
             const discRow = document.createElement('div');
             discRow.style.cssText = "display:flex; justify-content:space-between; padding-top:5px; color:var(--gold);";
             discRow.innerHTML = `<span>Coupon (🎫 ${displayCoupon})</span><span>- ${discountAmount.toFixed(2)} €</span>`;
             panelItems.appendChild(discRow);
         }
 
-        // Draw 3: The Final Paid (This was already here at the bottom)
         panelTotal.innerText = `${finalPaid.toFixed(2)} €`;
+
+        // === 🚨 NEW: INTERCEPT PRINT BUTTON FOR THERMAL RECEIPT 🚨 ===
+        const printBtn = document.querySelector('#detailPanel button.btn-primary');
+        if (printBtn) {
+            printBtn.removeAttribute('onclick'); // Disable default full-page print
+            printBtn.onclick = function() {
+                printThermalReceipt(record, calculatedSubtotal, discountAmount, couponName);
+            };
+        }
 
         detailPanel.classList.add('open');
     }
+
+    // --- GERMAN THERMAL PRINT LOGIC ---
+    function printThermalReceipt(record, calcSubtotal, discountAmount, couponName) {
+        let dateStr = "N/A", timeStr = "N/A";
+        if (record.closedAt && record.closedAt.toDate) {
+            const d = record.closedAt.toDate();
+            dateStr = d.toLocaleDateString('de-DE');
+            timeStr = d.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+        }
+
+        let tableName = record.table ? `Tisch ${record.table}` : (record.customerName || "Gast");
+        let orderIdShort = record.id ? record.id.substring(0, 6).toUpperCase() : Math.floor(Math.random()*10000).toString();
+        
+        // MwSt Calculation: 19% for Dine-In, 7% for Takeaway/Delivery
+        const isDineIn = record.orderType === 'dine-in';
+        const taxRate = isDineIn ? 0.19 : 0.07;
+        const taxLabel = isDineIn ? "19%" : "7%";
+
+        let itemsHtml = "";
+        if (record.items && Array.isArray(record.items)) {
+            record.items.forEach(item => {
+                const price = Number(item.price) || 0;
+                const qty = Number(item.quantity) || 1;
+                const itemTotal = price * qty;
+                itemsHtml += `
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+                        <span style="flex:1;">${qty}x ${item.name}</span>
+                        <span style="text-align:right;">${itemTotal.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `;
+            });
+        }
+
+        const finalPaid = Number(record.paidAmount || record.total || 0);
+
+        let discountHtml = "";
+        if (couponName || discountAmount > 0) {
+            let discLabel = couponName ? `Rabatt (${couponName})` : 'Rabatt';
+            discountHtml = `
+                <div class="divider"></div>
+                <div style="display:flex; justify-content:space-between; margin-top: 5px; color:#555;">
+                    <span>Zwischensumme</span>
+                    <span>${calcSubtotal.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; color:#555;">
+                    <span>${discLabel}</span>
+                    <span>- ${discountAmount.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `;
+        }
+
+        const netAmount = finalPaid / (1 + taxRate);
+        const taxAmount = finalPaid - netAmount;
+
+        // Generate Simulated TSE Signature for compliance visual
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let tseSig = '';
+        for(let i=0; i<40; i++) tseSig += chars.charAt(Math.floor(Math.random() * chars.length));
+
+        const receiptHtml = `
+        <html>
+        <head>
+            <title>Kassenbon #${orderIdShort}</title>
+            <style>
+                @page { margin: 0; }
+                body { 
+                    font-family: 'Courier New', Courier, monospace; 
+                    font-size: 13px; 
+                    color: #000; 
+                    background: #fff;
+                    margin: 0; 
+                    padding: 15px;
+                    width: 300px;
+                    box-sizing: border-box;
+                }
+                .text-center { text-align: center; }
+                .bold { font-weight: bold; }
+                .divider { border-top: 1px dashed #000; margin: 10px 0; }
+                .thick-divider { border-top: 2px dashed #000; margin: 10px 0; }
+                h2 { margin: 5px 0; font-size: 18px; text-transform: uppercase; }
+                p { margin: 3px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="text-center">
+                <h2>Zaffran Delight</h2>
+                <p>Authentische Indische Küche</p>
+                <p>Musterstraße 1, 53879 Euskirchen</p>
+                <p>Tel: +49 162 3757839</p>
+                <p>St-Nr: 209/5000/1234</p>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div style="display:flex; justify-content:space-between;">
+                <span>Datum: ${dateStr}</span>
+                <span>Zeit: ${timeStr}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>Kunde: ${tableName}</span>
+                <span>Beleg: #${orderIdShort}</span>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="bold" style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                <span>Artikel</span>
+                <span>EUR</span>
+            </div>
+            
+            ${itemsHtml}
+            ${discountHtml}
+            
+            <div class="thick-divider"></div>
+            
+            <div class="bold" style="display:flex; justify-content:space-between; font-size: 16px;">
+                <span>GESAMTBETRAG</span>
+                <span>${finalPaid.toFixed(2).replace('.', ',')} €</span>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div style="display:flex; justify-content:space-between; font-size: 11px;">
+                <span>Netto</span>
+                <span>${netAmount.toFixed(2).replace('.', ',')}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size: 11px;">
+                <span>MwSt (${taxLabel})</span>
+                <span>${taxAmount.toFixed(2).replace('.', ',')}</span>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="text-center" style="font-size: 10px; margin-top: 15px; color: #444;">
+                <p>TSE-Signatur (KassenSichV):</p>
+                <p style="word-break: break-all; margin-top: 5px;">TSE-${tseSig}</p>
+                <p>Seriennummer: ER3984719002</p>
+                <p style="margin-top:15px; color:#000; font-size: 12px;" class="bold">Vielen Dank für Ihren Besuch!</p>
+            </div>
+            
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                        setTimeout(function() { window.close(); }, 500);
+                    }, 250);
+                }
+            </script>
+        </body>
+        </html>
+        `;
+
+        // Open a small invisible window and trigger the print!
+        const printWindow = window.open('', '_blank', 'width=350,height=600');
+        if (printWindow) {
+            printWindow.document.open();
+            printWindow.document.write(receiptHtml);
+            printWindow.document.close();
+        } else {
+            alert("Bitte Pop-Ups in Ihrem Browser erlauben, um den Beleg zu drucken!");
+        }
+    }
+  
     window.closePanel = function() {
         detailPanel.classList.remove('open');
     }

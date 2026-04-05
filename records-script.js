@@ -196,14 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const amount = record.paidAmount || record.total || 0;
             
-            // --- EXACT MATCH FROM WAITER SCRIPT ---
-            let couponName = null;
-            if (record.coupon && record.coupon !== "None") {
-                couponName = record.coupon;
-            } else if (record.couponCode) {
-                couponName = record.couponCode; 
-            }
-            
             // Logic to determine Table or Customer Name
             let tableName = record.table || "Unknown";
             let typeBadge = "";
@@ -219,12 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableName = `Table ${tableName}`;
             }
 
-            // DRAW FINAL AMOUNT WITH GOLD COUPON BADGE
-            let amountDisplay = `${Number(amount).toFixed(2)} €`;
-            if (couponName) {
-                amountDisplay += `<br><span style="font-size:0.7rem; color:#f39c12; background:rgba(243,156,18,0.1); padding:2px 6px; border-radius:3px; margin-top:4px; display:inline-block; border:1px solid rgba(243,156,18,0.3); text-transform:uppercase;">🎫 ${couponName}</span>`;
-            }
-
             // Create Table Row
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -232,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${recordTime}</td>
                 <td style="font-weight:600; color:#fff;">${tableName}</td>
                 <td>${typeBadge}</td>
-                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success); line-height: 1.4;">${amountDisplay}</td>
+                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
                 <td style="text-align:center;">
                     <button class="btn-tool" style="padding:4px 10px; font-size:0.8rem; background:transparent; border:1px solid #555;" onclick="window.showDetail('${record.id}')">View</button>
                 </td>
@@ -240,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
             recordsTbody.appendChild(tr);
         });
     }
+
 
     function calculateKPIs(records) {
         let totalRevenue = 0;
@@ -269,9 +256,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         panelItems.innerHTML = "";
+        let calculatedSubtotal = 0; // We need this to do the math!
+
         if (record.items && Array.isArray(record.items)) {
             record.items.forEach(item => {
                 const price = item.price || 0;
+                calculatedSubtotal += (item.quantity * price);
+                
                 const row = document.createElement('div');
                 row.className = 'receipt-item';
                 row.innerHTML = `
@@ -284,12 +275,46 @@ document.addEventListener("DOMContentLoaded", () => {
             panelItems.innerHTML = "<p style='color:#666;'>No item details stored.</p>";
         }
 
-        const total = record.paidAmount || record.total || 0;
-        panelTotal.innerText = `${Number(total).toFixed(2)} €`;
+        // --- NEW WAITER-STYLE COUPON LOGIC ---
+        let couponName = null;
+        if (record.coupon && record.coupon !== "None") {
+            couponName = record.coupon;
+        } else if (record.couponCode) {
+            couponName = record.couponCode; 
+        }
+
+        const finalPaid = Number(record.paidAmount || record.total || 0);
+        
+        // Find the exact discount amount
+        let discountAmount = 0;
+        if (record.discount && !isNaN(record.discount)) {
+            discountAmount = parseFloat(record.discount);
+        } else if (calculatedSubtotal > finalPaid + 0.01) {
+            discountAmount = calculatedSubtotal - finalPaid;
+        }
+
+        // IF a coupon is present OR a discount happened, draw the new lines!
+        if (couponName || discountAmount > 0) {
+            let displayCoupon = couponName ? couponName : "Discount";
+            
+            // Draw 1: The Total (Subtotal) before discount
+            const subRow = document.createElement('div');
+            subRow.style.cssText = "display:flex; justify-content:space-between; padding-top:15px; margin-top:10px; border-top:1px dashed #444; color:#aaa;";
+            subRow.innerHTML = `<span>Total</span><span>${calculatedSubtotal.toFixed(2)} €</span>`;
+            panelItems.appendChild(subRow);
+
+            // Draw 2: The Coupon Name and Negative Value
+            const discRow = document.createElement('div');
+            discRow.style.cssText = "display:flex; justify-content:space-between; padding-top:5px; color:var(--gold);";
+            discRow.innerHTML = `<span>Coupon (🎫 ${displayCoupon})</span><span>- ${discountAmount.toFixed(2)} €</span>`;
+            panelItems.appendChild(discRow);
+        }
+
+        // Draw 3: The Final Paid (This was already here at the bottom)
+        panelTotal.innerText = `${finalPaid.toFixed(2)} €`;
 
         detailPanel.classList.add('open');
     }
-
     window.closePanel = function() {
         detailPanel.classList.remove('open');
     }

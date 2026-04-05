@@ -367,7 +367,10 @@ if (loginButton) {
         closeReadyPopupBtn.addEventListener('click', () => readyPopup.classList.add('hidden'));
     }
 
-    // --- PAYMENT SUMMARY LOGIC ---
+   // --- PAYMENT SUMMARY LOGIC ---
+    let basePaymentTotal = 0; 
+    let manualDiscountValue = 0;
+
     function showPaymentSummary(ordersList, title) {
         ordersToArchive = ordersList; 
         
@@ -390,12 +393,6 @@ if (loginButton) {
 
                     const row = document.createElement('div');
                     row.className = 'pay-item-row'; 
-                    row.style.display = "flex";
-                    row.style.justifyContent = "space-between";
-                    row.style.borderBottom = "1px dashed #444";
-                    row.style.padding = "8px 0";
-                    row.style.color = "#ddd";
-                    
                     row.innerHTML = `
                         <span>${item.quantity}x ${item.name} <strong style="color:var(--gold);">${getDishNumber(item.name)}</strong></span>
                         <span style="color:var(--gold); font-weight:bold;">${itemTotal.toFixed(2)} €</span>
@@ -416,34 +413,66 @@ if (loginButton) {
 
             if (totalDiscount > 0) {
                 const subRow = document.createElement('div');
-                subRow.style.display = "flex";
-                subRow.style.justifyContent = "space-between";
-                subRow.style.padding = "10px 0 5px 0";
-                subRow.style.color = "#aaa";
-                subRow.style.innerHTML = `<span>Zwischensumme:</span><span>${subTotal.toFixed(2)} €</span>`;
+                subRow.style.cssText = "display:flex; justify-content:space-between; padding:10px 0 5px 0; color:#aaa;";
+                subRow.innerHTML = `<span>Zwischensumme:</span><span>${subTotal.toFixed(2)} €</span>`;
                 paymentItemsList.appendChild(subRow);
 
                 const discountRow = document.createElement('div');
-                discountRow.style.display = "flex";
-                discountRow.style.justifyContent = "space-between";
-                discountRow.style.padding = "0 0 10px 0";
-                discountRow.style.color = "#ff4444"; 
-                discountRow.style.fontWeight = "bold";
-                
+                discountRow.style.cssText = "display:flex; justify-content:space-between; padding:0 0 10px 0; color:#ff4444; font-weight:bold;";
                 const discountText = couponName ? couponName : 'Discount';
-                
-                discountRow.innerHTML = `
-                    <span>Rabatt (${discountText}):</span>
-                    <span>- ${totalDiscount.toFixed(2)} €</span>
-                `;
+                discountRow.innerHTML = `<span>Rabatt (${discountText}):</span><span>- ${totalDiscount.toFixed(2)} €</span>`;
                 paymentItemsList.appendChild(discountRow);
             }
             
-            const finalTotal = Math.max(0, subTotal - totalDiscount);
-            if(paymentTotalDisplay) paymentTotalDisplay.innerText = finalTotal.toFixed(2) + " €";
+            // 🚨 SET BASE TOTAL & RESET MANUAL UI 🚨
+            basePaymentTotal = Math.max(0, subTotal - totalDiscount);
+            manualDiscountValue = 0; 
+            
+            const mdInput = document.getElementById('manual-discount-input');
+            const mdDisplay = document.getElementById('manual-discount-display');
+            if (mdInput) mdInput.value = '';
+            if (mdDisplay) mdDisplay.style.display = 'none';
+
+            if(paymentTotalDisplay) paymentTotalDisplay.innerText = basePaymentTotal.toFixed(2) + " €";
         }
         
         if(paymentModal) paymentModal.classList.remove('hidden');
+    }
+
+    // 🚨 NEW: APPLY DISCOUNT MATH 🚨
+    window.applyManualDiscount = function() {
+        const inputVal = parseFloat(document.getElementById('manual-discount-input').value);
+        if (isNaN(inputVal) || inputVal <= 0) {
+            manualDiscountValue = 0;
+            updatePaymentTotal();
+            return;
+        }
+        
+        const type = document.getElementById('manual-discount-type').value;
+        if (type === 'percent') {
+            manualDiscountValue = basePaymentTotal * (inputVal / 100);
+        } else {
+            manualDiscountValue = inputVal;
+        }
+        
+        if (manualDiscountValue > basePaymentTotal) manualDiscountValue = basePaymentTotal;
+        updatePaymentTotal();
+    }
+    
+    function updatePaymentTotal() {
+        const display = document.getElementById('manual-discount-display');
+        const amountText = document.getElementById('manual-discount-amount');
+        const totalDisplay = document.getElementById('payment-total-display');
+        
+        if (manualDiscountValue > 0) {
+            display.style.display = 'flex';
+            amountText.innerText = `- ${manualDiscountValue.toFixed(2)} €`;
+        } else {
+            display.style.display = 'none';
+        }
+        
+        const finalTotal = Math.max(0, basePaymentTotal - manualDiscountValue);
+        totalDisplay.innerText = finalTotal.toFixed(2) + " €";
     }
 
     window.closePaymentModal = function() {
@@ -463,17 +492,31 @@ if (loginButton) {
 
         try {
             const batch = db.batch();
-            for (const order of ordersToArchive) {
-                const finalAmountStr = document.getElementById('payment-total-display').innerText.replace(' €','').replace(',','.');
+            const finalAmountStr = document.getElementById('payment-total-display').innerText.replace(' €','').replace(',','.');
+            const finalAmountNum = parseFloat(finalAmountStr);
+
+            for (let i = 0; i < ordersToArchive.length; i++) {
+                const order = ordersToArchive[i];
                 
-                const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
-                batch.set(archiveRef, {
+                let updateData = {
                     ...order,
                     status: 'paid', 
-                    paidAmount: parseFloat(finalAmountStr), 
+                    paidAmount: finalAmountNum, 
                     closedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     day: new Date().toISOString().split('T')[0] 
-                });
+                };
+
+                // 🚨 MAGIC: Inject manual discount into Firebase for the Records page!
+                if (i === 0 && manualDiscountValue > 0) {
+                    const existingDiscount = parseFloat(order.discount) || 0;
+                    updateData.discount = existingDiscount + manualDiscountValue;
+                    
+                    const existingCoupon = order.couponCode || order.coupon || "";
+                    updateData.couponCode = existingCoupon ? existingCoupon + " + Manuell Rabatt" : "Manuell Rabatt";
+                }
+                
+                const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
+                batch.set(archiveRef, updateData);
                 
                 const docRef = db.collection("orders").doc(order.id);
                 batch.delete(docRef);

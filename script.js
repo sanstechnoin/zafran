@@ -1158,11 +1158,24 @@ async function checkAndShowMarketing() {
     if (flashCoupons.length > 0) {
         html += `<h3 style="color:#28a745; margin-bottom:15px; font-size:1.4rem;">🎁 Unsere Angebote für Sie:</h3>`;
         flashCoupons.forEach(c => {
-            html += `<div style="background:#111; border:2px dashed var(--gold); padding:15px; margin-bottom:12px; border-radius:8px;">`;
+            html += `<div style="background:#111; border:2px dashed var(--gold); padding:15px; margin-bottom:12px; border-radius:8px; text-align:center;">`;
             html += `<strong style="font-size:1.3rem; color:white; letter-spacing:1px;">Code: ${c.code}</strong>`;
+            
             if(c.discountType === 'gratis') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Gratis: ${c.promoItemName || 'Spezial-Artikel'}</span>`;
             else if(c.discountType === 'percent') html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Sie sparen: ${c.discountValue}% Rabatt</span>`;
             else html += `<br><span style="color:#aaa; font-size:1rem; margin-top:5px; display:inline-block;">Sie sparen: ${c.discountValue}€ Rabatt</span>`;
+            
+            // --- NEW: ADD REQUIREMENTS TO BANNER ---
+            let reqs = [];
+            if(c.minOrder > 0) reqs.push(`Min. ${c.minOrder} €`);
+            if(c.minMainDishes > 0) reqs.push(`Min. ${c.minMainDishes} Hauptgerichte`);
+            if(c.validFor === 'pickup') reqs.push(`Nur Abholung`);
+            if(c.validFor === 'delivery') reqs.push(`Nur Lieferung`);
+            
+            if(reqs.length > 0) {
+                html += `<div style="font-size:0.85rem; color:#888; margin-top:8px; font-style:italic; border-top:1px solid #333; padding-top:8px;">Bedingungen: ${reqs.join(' | ')}</div>`;
+            }
+            
             html += `</div>`;
         });
     }

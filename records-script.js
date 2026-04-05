@@ -196,6 +196,14 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const amount = record.paidAmount || record.total || 0;
             
+            // --- EXACT MATCH FROM WAITER SCRIPT ---
+            let couponName = null;
+            if (record.coupon && record.coupon !== "None") {
+                couponName = record.coupon;
+            } else if (record.couponCode) {
+                couponName = record.couponCode; 
+            }
+            
             // Logic to determine Table or Customer Name
             let tableName = record.table || "Unknown";
             let typeBadge = "";
@@ -211,6 +219,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableName = `Table ${tableName}`;
             }
 
+            // DRAW FINAL AMOUNT WITH GOLD COUPON BADGE
+            let amountDisplay = `${Number(amount).toFixed(2)} €`;
+            if (couponName) {
+                amountDisplay += `<br><span style="font-size:0.7rem; color:#f39c12; background:rgba(243,156,18,0.1); padding:2px 6px; border-radius:3px; margin-top:4px; display:inline-block; border:1px solid rgba(243,156,18,0.3); text-transform:uppercase;">🎫 ${couponName}</span>`;
+            }
+
             // Create Table Row
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -218,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${recordTime}</td>
                 <td style="font-weight:600; color:#fff;">${tableName}</td>
                 <td>${typeBadge}</td>
-                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
+                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success); line-height: 1.4;">${amountDisplay}</td>
                 <td style="text-align:center;">
                     <button class="btn-tool" style="padding:4px 10px; font-size:0.8rem; background:transparent; border:1px solid #555;" onclick="window.showDetail('${record.id}')">View</button>
                 </td>

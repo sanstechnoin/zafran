@@ -847,7 +847,6 @@
             end = new Date(year, parseInt(month), 0); end.setHours(23,59,59,999);
         }
 
-        // FIXED: Query 'archived_orders' using strict Firestore Timestamps
         const tStart = firebase.firestore.Timestamp.fromDate(start);
         const tEnd = firebase.firestore.Timestamp.fromDate(end);
 
@@ -856,24 +855,45 @@
           .where("closedAt", "<=", tEnd)
           .get().then(snap => {
               
-            let stats = {
-                pickup: { count: 0, total: 0 },
-                delivery: { count: 0, total: 0 },
-                'dine-in': { count: 0, total: 0 }
-            };
+            let stats = { pickup: { count: 0, total: 0 }, delivery: { count: 0, total: 0 }, 'dine-in': { count: 0, total: 0 } };
+
+            let groupedRecords = {};
 
             snap.forEach(doc => {
-                const r = doc.data();
-                const typeRaw = (r.orderType || 'pickup').toLowerCase();
+                const data = doc.data();
+                
+                const typeRaw = (data.orderType || 'pickup').toLowerCase();
                 let type = 'pickup';
                 if(typeRaw.includes('del')) type = 'delivery';
                 else if(typeRaw.includes('dine') || typeRaw.includes('table')) type = 'dine-in';
 
-                const amt = Number(r.paidAmount || r.total || 0);
-                stats[type].count += 1;
-                stats[type].total += amt;
+                let groupKey = doc.id;
+                
+                if (type === 'dine-in' && data.table && data.closedAt) {
+                    let timeVal = 0;
+                    if (typeof data.closedAt.toMillis === 'function') {
+                        timeVal = data.closedAt.toMillis();
+                    } else if (data.closedAt.seconds) {
+                        timeVal = data.closedAt.seconds * 1000;
+                    }
+                    groupKey = `table_${data.table}_${timeVal}`;
+                }
+
+                const amount = Number(data.paidAmount || data.total || 0);
+
+
+                if (!groupedRecords[groupKey]) {
+                    groupedRecords[groupKey] = { orderType: type, total: amount };
+                }
             });
 
+            // Now sum up the cleanly grouped records
+            Object.values(groupedRecords).forEach(r => {
+                stats[r.orderType].count += 1;
+                stats[r.orderType].total += r.total;
+            });
+
+            // --- Update UI ---
             document.getElementById('fin-dine-total').innerText = stats['dine-in'].total.toFixed(2).replace('.', ',') + ' €';
             document.getElementById('fin-dine-count').innerText = stats['dine-in'].count + " Orders";
             
@@ -888,10 +908,10 @@
             document.getElementById('fin-grand-total').innerText = grandTotal.toFixed(2).replace('.', ',') + ' €';
             document.getElementById('fin-grand-count').innerText = grandCount + " Orders Total";
 
-        }).catch(err => console.error("Finance query error:", err));
+        }).catch(err => console.error("Finance error:", err));
     }
 
-        // ==========================================
+    // ==========================================
     // 0.5 RESERVATIONS MANAGER
     // ==========================================
     let currentResView = 'upcoming';

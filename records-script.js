@@ -14,6 +14,8 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
+let allFetchedRecords = []; 
+
 // --- 3. DOM & State ---
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
@@ -22,255 +24,240 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordInput = document.getElementById('records-password');
     const loginError = document.getElementById('login-error');
     const contentWrapper = document.getElementById('records-content-wrapper');
-    const statusDot = document.getElementById('status-dot');
-    const connectionText = document.getElementById('connection-text');
-
+    
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
     const filterBtn = document.getElementById('filter-btn');
     const exportBtn = document.getElementById('export-btn');
-    const printBtn = document.getElementById('print-btn');
 
-    const totalRevenueEl = document.getElementById('total-revenue');
-    const totalOrdersEl = document.getElementById('total-orders');
-    const avgTicketEl = document.getElementById('avg-ticket');
-    const recordsTbody = document.getElementById('records-list');
+    // Default to today
+    const today = new Date();
+    startDateInput.valueAsDate = today;
+    endDateInput.valueAsDate = today;
 
-    // Side Panel Elements
-    const detailPanel = document.getElementById('detailPanel');
-    const panelTitle = document.getElementById('panel-title');
-    const panelId = document.getElementById('panel-id');
-    const panelTime = document.getElementById('panel-time');
-    const panelItems = document.getElementById('panel-items');
-    const panelTotal = document.getElementById('panel-total');
+    // Authentication
+    const MASTER_PASS = "zafran";
+    if (sessionStorage.getItem('records_auth') === 'true') {
+        loginOverlay.style.display = 'none';
+        contentWrapper.style.display = 'block';
+        loadRecords(getStartOfDay(today), getEndOfDay(today));
+    }
 
-    const RECORDS_PASSWORD = "zafran"; 
-    let allFetchedRecords = []; 
-
-    // --- 4. NEW SECURE LOGIN LOGIC ---
-loginButton.addEventListener('click', () => {
-    // 1. Check if the staff typed the correct simple PIN ("zafran")
-    if (passwordInput.value === RECORDS_PASSWORD) {
-        
-        // 2. If correct, secretly log them in with the real account
-        const hiddenEmail = "webmaster@zafraneuskirchen.de";
-        const hiddenPass  = "!Zafran2025";
-
-        loginButton.innerText = "Verbinden..."; // Optional: Show loading text
-        
-        firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
-        .then((userCredential) => {
-            // Success! The system is now logged in securely.
+    loginButton.addEventListener('click', () => {
+        if (passwordInput.value === MASTER_PASS) {
+            sessionStorage.setItem('records_auth', 'true');
             loginOverlay.style.display = 'none';
-            contentWrapper.style.opacity = '1';
-            initializeRecordsPage(); 
-        })
-        .catch((error) => {
-            console.error("Login Error:", error);
-            loginError.innerText = "Systemfehler: Login nicht möglich.";
-            loginError.style.display = 'block';
-            loginButton.innerText = "UNLOCK DASHBOARD";
-        });
-
-    } else {
-        // Wrong PIN entered
-        loginError.innerText = "Falsches Passwort";
-        loginError.style.display = 'block';
-    }
-});
-    passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
-
-    function initializeRecordsPage() {
-        // Init UI
-        statusDot.classList.add('online');
-        connectionText.textContent = "System Online";
-        
-        // Set Today's Date
-        const today = new Date().toISOString().split('T')[0];
-        startDateInput.value = today;
-        endDateInput.value = today;
-
-        // Listeners
-        filterBtn.addEventListener('click', fetchRecords);
-        printBtn.addEventListener('click', () => window.print());
-        exportBtn.addEventListener('click', exportToCSV);
-        
-        // Auto Load
-        fetchRecords();
-    }
-
-    async function fetchRecords() {
-        let startDate = new Date(startDateInput.value + 'T00:00:00');
-        let endDate = new Date(endDateInput.value + 'T23:59:59');
-
-        if (isNaN(startDate) || isNaN(endDate)) { alert("Please check dates."); return; }
-
-        filterBtn.disabled = true;
-        filterBtn.innerHTML = "<span>⏳</span> Loading...";
-        recordsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Retrieving Data from Cloud...</td></tr>`;
-
-        try {
-            // Query for archived orders
-            const query = db.collection("archived_orders")
-                .where("closedAt", ">=", firebase.firestore.Timestamp.fromDate(startDate))
-                .where("closedAt", "<=", firebase.firestore.Timestamp.fromDate(endDate))
-                .orderBy("closedAt", "asc"); 
-
-            const snapshot = await query.get();
-            
-            // Map and Reverse
-            const records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            allFetchedRecords = records.reverse(); 
-            
-            renderRecords(allFetchedRecords);
-            calculateKPIs(allFetchedRecords);
-
-        } catch (error) {
-            console.error("Error:", error);
-            recordsTbody.innerHTML = `<tr><td colspan="6" style="color:#ff5252; text-align:center; padding:20px;">
-                <strong>System Error:</strong> ${error.message}<br>
-                <small>Check browser console (F12) for Index Creation Link if first run.</small>
-            </td></tr>`;
-        } finally {
-            filterBtn.disabled = false;
-            filterBtn.innerHTML = "<span>🔍</span> Filter Records";
-        }
-    }
-
-    function renderRecords(records) {
-        recordsTbody.innerHTML = ""; 
-
-        if (records.length === 0) {
-            recordsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#666;">No sales records found for this period.</td></tr>`;
-            return;
-        }
-
-        records.forEach(record => {
-            let recordDate = "N/A";
-            let recordTime = "N/A";
-            
-            if (record.closedAt && record.closedAt.toDate) {
-                const dateObj = record.closedAt.toDate();
-                recordDate = dateObj.toLocaleDateString('de-DE');
-                recordTime = dateObj.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
-            }
-            
-            // --- THE FIX IS HERE: CHECK BOTH FIELDS ---
-            const amount = record.paidAmount || record.total || 0;
-            
-            // Logic to determine Table or Customer Name
-            let tableName = record.table || "Unknown";
-            let typeBadge = "";
-            
-            if (record.orderType === 'pickup') {
-                typeBadge = `<span class="badge badge-pickup">Pickup</span>`;
-                tableName = record.customerName || "Walk-in";
-            } else if (record.orderType === 'delivery') {
-                typeBadge = `<span class="badge badge-delivery">Delivery</span>`;
-                tableName = record.customerName || "Delivery";
-            } else {
-                typeBadge = `<span class="badge badge-dinein">Dine-In</span>`;
-                tableName = `Table ${tableName}`;
-            }
-
-            // Create Table Row
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${recordDate}</td>
-                <td>${recordTime}</td>
-                <td style="font-weight:600; color:#fff;">${tableName}</td>
-                <td>${typeBadge}</td>
-                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
-                <td style="text-align:center;">
-                    <button class="btn-tool" style="padding:4px 10px; font-size:0.8rem; background:transparent; border:1px solid #555;" onclick="window.showDetail('${record.id}')">View</button>
-                </td>
-            `;
-            recordsTbody.appendChild(tr);
-        });
-    }
-
-    function calculateKPIs(records) {
-        let totalRevenue = 0;
-        records.forEach(r => totalRevenue += Number(r.paidAmount || r.total || 0));
-        
-        const count = records.length;
-        const avg = count > 0 ? (totalRevenue / count) : 0;
-
-        totalRevenueEl.textContent = `${totalRevenue.toFixed(2)} €`;
-        totalOrdersEl.textContent = count;
-        avgTicketEl.textContent = `${avg.toFixed(2)} €`;
-    }
-
-    // --- SIDE PANEL LOGIC ---
-    window.showDetail = function(id) {
-        const record = allFetchedRecords.find(r => r.id === id);
-        if(!record) return;
-
-        let title = record.table;
-        if(record.orderType === 'pickup' || record.orderType === 'delivery') title = record.customerName;
-
-        panelTitle.innerText = record.orderType === 'dine-in' ? `Table ${title}` : title;
-        panelId.innerText = `#${record.id.substring(0, 8)}...`;
-        
-        if (record.closedAt && record.closedAt.toDate) {
-            panelTime.innerText = record.closedAt.toDate().toLocaleString('de-DE');
-        }
-
-        panelItems.innerHTML = "";
-        if (record.items && Array.isArray(record.items)) {
-            record.items.forEach(item => {
-                const price = item.price || 0;
-                const row = document.createElement('div');
-                row.className = 'receipt-item';
-                row.innerHTML = `
-                    <span>${item.quantity}x ${item.name}</span>
-                    <span>${(item.quantity * price).toFixed(2)} €</span>
-                `;
-                panelItems.appendChild(row);
-            });
+            contentWrapper.style.display = 'block';
+            loadRecords(getStartOfDay(today), getEndOfDay(today));
         } else {
-            panelItems.innerHTML = "<p style='color:#666;'>No item details stored.</p>";
+            loginError.style.display = 'block';
         }
+    });
 
-        // --- THE FIX IS HERE ALSO ---
-        const total = record.paidAmount || record.total || 0;
-        panelTotal.innerText = `${Number(total).toFixed(2)} €`;
+    // Filter Buttons
+    document.getElementById('btn-today').addEventListener('click', () => {
+        const d = new Date(); startDateInput.valueAsDate = d; endDateInput.valueAsDate = d;
+        loadRecords(getStartOfDay(d), getEndOfDay(d));
+    });
+    document.getElementById('btn-yesterday').addEventListener('click', () => {
+        const d = new Date(); d.setDate(d.getDate() - 1);
+        startDateInput.valueAsDate = d; endDateInput.valueAsDate = d;
+        loadRecords(getStartOfDay(d), getEndOfDay(d));
+    });
+    document.getElementById('btn-week').addEventListener('click', () => {
+        const d = new Date();
+        const day = d.getDay() || 7;
+        const start = new Date(d); start.setDate(d.getDate() - day + 1);
+        const end = new Date(d); end.setDate(start.getDate() + 6);
+        startDateInput.valueAsDate = start; endDateInput.valueAsDate = end;
+        loadRecords(getStartOfDay(start), getEndOfDay(end));
+    });
+    document.getElementById('btn-month').addEventListener('click', () => {
+        const d = new Date();
+        const start = new Date(d.getFullYear(), d.getMonth(), 1);
+        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        startDateInput.valueAsDate = start; endDateInput.valueAsDate = end;
+        loadRecords(getStartOfDay(start), getEndOfDay(end));
+    });
 
-        detailPanel.classList.add('open');
+    filterBtn.addEventListener('click', () => {
+        if (!startDateInput.value || !endDateInput.value) return alert("Select start and end dates.");
+        const start = new Date(startDateInput.value);
+        const end = new Date(endDateInput.value);
+        loadRecords(getStartOfDay(start), getEndOfDay(end));
+    });
+
+    // --- CORE LOGIC: LOAD & SMART GROUP RECORDS ---
+    function loadRecords(startOfDay, endOfDay) {
+        const recordsBody = document.getElementById('records-body');
+        recordsBody.innerHTML = "<tr><td colspan='6' class='text-center'>Lade Daten... (Loading)</td></tr>";
+
+        db.collection("archived_orders")
+            .where("closedAt", ">=", startOfDay)
+            .where("closedAt", "<=", endOfDay)
+            .orderBy("closedAt", "desc")
+            .get()
+            .then((snap) => {
+                recordsBody.innerHTML = "";
+                
+                let totalSales = 0;
+                let dineInSales = 0;
+                let pickupSales = 0;
+                let deliverySales = 0;
+                allFetchedRecords = []; 
+
+                if (snap.empty) {
+                    recordsBody.innerHTML = "<tr><td colspan='6' class='text-center text-muted'>No records found for this date range.</td></tr>";
+                    updateSummary(0, 0, 0, 0);
+                    return;
+                }
+
+                // 🚨 THE FIX: GROUPING MULTIPLE ORDERS INTO ONE SINGLE BILL 🚨
+                let groupedMap = {};
+
+                snap.forEach(doc => {
+                    const r = doc.data();
+                    
+                    let timeStr = "";
+                    let dateStr = "";
+                    let timeMillis = 0;
+                    
+                    if (r.closedAt && r.closedAt.toDate) {
+                        const d = r.closedAt.toDate();
+                        timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                        dateStr = d.toLocaleDateString('de-DE');
+                        timeMillis = d.getTime();
+                    }
+
+                    const typeStr = (r.orderType || 'pickup').toLowerCase();
+                    let type = 'pickup';
+                    if(typeStr.includes('del')) type = 'delivery';
+                    else if(typeStr.includes('dine') || typeStr.includes('table')) type = 'dine-in';
+
+                    // Group Dine-In orders by Table Number + Date + Exact Minute they checked out
+                    let groupKey = doc.id; 
+                    if (type === 'dine-in') {
+                        groupKey = `dinein_${r.table}_${dateStr}_${timeStr}`;
+                    }
+
+                    // The Grand Total is stamped on all docs, we only need it once!
+                    const amount = Number(r.paidAmount || r.total || 0);
+
+                    if (!groupedMap[groupKey]) {
+                        // Create the master bill record
+                        groupedMap[groupKey] = {
+                            id: groupKey,
+                            closedAtMillis: timeMillis,
+                            orderType: type,
+                            customerName: r.customerName || "",
+                            table: r.table || "",
+                            paymentMethod: r.paymentMethod || "Cash",
+                            total: amount, // Take the grand total ONCE
+                            items: r.items ? [...r.items] : [],
+                            dateStr: dateStr,
+                            timeStr: timeStr
+                        };
+                    } else {
+                        // Merge items from the extra orders into the master bill seamlessly
+                        if (r.items) {
+                            groupedMap[groupKey].items.push(...r.items);
+                        }
+                    }
+                });
+
+                // Convert clean mapped objects back to sorted array
+                allFetchedRecords = Object.values(groupedMap);
+                allFetchedRecords.sort((a, b) => b.closedAtMillis - a.closedAtMillis);
+
+                // Render the perfect, deduplicated records
+                allFetchedRecords.forEach(r => {
+                    const total = r.total;
+                    totalSales += total;
+
+                    if (r.orderType === 'dine-in') {
+                        dineInSales += total;
+                    } else if (r.orderType === 'delivery') {
+                        deliverySales += total;
+                    } else {
+                        pickupSales += total;
+                    }
+
+                    let itemsHtml = "";
+                    if (r.items && r.items.length > 0) {
+                        itemsHtml = r.items.map(i => {
+                            let mods = "";
+                            if (i.modifiers && i.modifiers.length > 0) {
+                                mods = ` <span style="color:#aaa; font-size:0.8rem;">(${i.modifiers.join(', ')})</span>`;
+                            }
+                            return `<div style="margin-bottom:4px;"><b>${i.quantity}x</b> ${i.name}${mods}</div>`;
+                        }).join("");
+                    } else {
+                        itemsHtml = "<span class='text-muted'>No items</span>";
+                    }
+
+                    const nameDisplay = (r.orderType === 'dine-in') 
+                        ? `Table ${r.table}` 
+                        : `<b>${r.customerName || "Customer"}</b>`;
+
+                    let typeBadge = `<span class="badge" style="background:#a5d6a7; color:#000;">Pickup</span>`;
+                    if (r.orderType === 'delivery') typeBadge = `<span class="badge" style="background:#90caf9; color:#000;">Delivery</span>`;
+                    if (r.orderType === 'dine-in') typeBadge = `<span class="badge" style="background:#ffcc80; color:#000;">Dine-In</span>`;
+
+                    const payBadge = `<span class="badge" style="background:#444; color:#fff;">${r.paymentMethod || "Cash"}</span>`;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <div style="font-weight:bold; color:var(--text-main);">${r.dateStr}</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">${r.timeStr}</div>
+                        </td>
+                        <td>${typeBadge}</td>
+                        <td>${nameDisplay}</td>
+                        <td>${itemsHtml}</td>
+                        <td>${payBadge}</td>
+                        <td style="font-weight:bold; color:var(--gold); font-size:1.1rem;">${total.toFixed(2).replace('.', ',')} €</td>
+                    `;
+                    recordsBody.appendChild(row);
+                });
+
+                updateSummary(totalSales, dineInSales, pickupSales, deliverySales);
+            })
+            .catch((error) => {
+                console.error("Error loading records: ", error);
+                recordsBody.innerHTML = "<tr><td colspan='6' class='text-center text-danger'>Error loading records. Please try again.</td></tr>";
+            });
     }
 
-    window.closePanel = function() {
-        detailPanel.classList.remove('open');
+    // --- Helpers ---
+    function getStartOfDay(date) { const d = new Date(date); d.setHours(0, 0, 0, 0); return d; }
+    function getEndOfDay(date) { const d = new Date(date); d.setHours(23, 59, 59, 999); return d; }
+
+    function updateSummary(total, dineIn, pickup, delivery) {
+        document.getElementById('sum-total').innerText = total.toFixed(2).replace('.', ',') + " €";
+        document.getElementById('sum-dine').innerText = dineIn.toFixed(2).replace('.', ',') + " €";
+        document.getElementById('sum-pickup').innerText = pickup.toFixed(2).replace('.', ',') + " €";
+        document.getElementById('sum-delivery').innerText = delivery.toFixed(2).replace('.', ',') + " €";
     }
 
-    // --- EXPORT TO CSV ---
-    function exportToCSV() {
+    // --- Export to CSV ---
+    exportBtn.addEventListener('click', () => {
         if(allFetchedRecords.length === 0) {
             alert("No data to export.");
             return;
         }
 
         let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Date,Time,OrderType,Table/Customer,Items,TotalAmount(EUR)\n";
+        csvContent += "Date,Time,OrderType,Table/Customer,Items,TotalAmount(EUR)\\n";
 
         allFetchedRecords.forEach(r => {
-            let dateStr = "", timeStr = "";
-            if (r.closedAt && r.closedAt.toDate) {
-                const d = r.closedAt.toDate();
-                dateStr = d.toLocaleDateString('de-DE');
-                timeStr = d.toLocaleTimeString('de-DE');
-            }
-            
             const name = (r.orderType === 'dine-in') ? `Table ${r.table}` : (r.customerName || "Customer");
-            // --- THE FIX IS HERE TOO ---
-            const total = Number(r.paidAmount || r.total || 0).toFixed(2);
+            const total = Number(r.total || 0).toFixed(2);
             
-            // Item Summary
             let itemStr = "";
             if(r.items) itemStr = r.items.map(i => `${i.quantity}x ${i.name}`).join(" | ");
             itemStr = itemStr.replace(/,/g, "").replace(/"/g, "'"); 
 
-            csvContent += `${dateStr},${timeStr},${r.orderType},${name},"${itemStr}",${total}\n`;
+            csvContent += `${r.dateStr},${r.timeStr},${r.orderType},${name},"${itemStr}",${total}\\n`;
         });
 
         const encodedUri = encodeURI(csvContent);
@@ -280,5 +267,5 @@ loginButton.addEventListener('click', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+    });
 });

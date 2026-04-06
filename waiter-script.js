@@ -1,148 +1,16 @@
-// --- 1. ZAFFRAN FIREBASE CONFIG ---
-const firebaseConfig = {
-  apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
-  authDomain: "zaffran-delight.firebaseapp.com",
-  projectId: "zaffran-delight",
-  storageBucket: "zaffran-delight.firebasestorage.app",
-  messagingSenderId: "1022960860126",
-  appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
-};
-
-// --- WAITER MENU LIST (MASTER KEY) ---
-const MENU_ITEMS = [
-    { name: "Tomatensuppe", price: 5.00 },        // 1
-    { name: "Daal Linsensuppe", price: 5.00 },    // 2
-    { name: "Hähnchen Suppe", price: 6.00 },      // 3
-    { name: "Mulligatawny Suppe", price: 6.50 },
-    { name: "Veg. Samosa", price: 5.00 },
-    { name: "Chicken Samosa", price: 5.50 },
-    { name: "Aloo Tiki", price: 5.00 },
-    { name: "Mix Pakora", price: 5.50 },
-    { name: "Paneer Pakora", price: 6.00 },
-    { name: "Aloo Pakora", price: 5.50 },        // 10
-    { name: "Gobi Pakora", price: 5.50 },
-    { name: "Mashroom Pakora", price: 5.50 },
-    { name: "Chicken Pakora", price: 6.00 },
-    { name: "Prawn Pakora", price: 7.50 },
-    { name: "Vegi Mix", price: 13.00 },
-    { name: "Palak Aallu", price: 13.00 },
-    { name: "Saag Aallu", price: 13.00 },
-    { name: "Tarka Daal", price: 12.50 },
-    { name: "Bhindi Masala", price: 13.00 },
-    { name: "Baingen Aallu", price: 13.00 },      // 20
-    { name: "Mushroom Aallu", price: 13.00 },
-    { name: "Gobi Aallu", price: 13.00 },
-    { name: "Channa Masala", price: 12.50 },
-    { name: "Veg. Korma", price: 13.50 },
-    { name: "Nauratan Korma", price: 14.00 },
-    { name: "Shahi Paneer", price: 14.00 },
-    { name: "Paneer Tikka Masala", price: 14.50 },
-    { name: "Paneer Jalfrezi", price: 14.00 },
-    { name: "Paneer Bhunna Masala", price: 14.00 },
-    { name: "Palak Paneer", price: 14.00 },       // 30
-    { name: "Paneer Muttar Aallu", price: 14.50 },
-    { name: "Chicken Curry", price: 14.50 },
-    { name: "Chicken Tikka Masala", price: 15.50 },
-    { name: "Chicken Korma", price: 15.00 },
-    { name: "Butter Chicken", price: 15.50 },
-    { name: "Kashmiri Chicken", price: 15.50 },
-    { name: "Chicken Goan Curry", price: 15.50 },
-    { name: "Chicken Jalfrezi", price: 15.50 },
-    { name: "Chicken Kadai", price: 15.50 },
-    { name: "Chicken Bhuna", price: 15.50 },      // 40
-    { name: "Vegi Chicken", price: 15.00 },
-    { name: "Chicken Palak", price: 15.50 },
-    { name: "Chicken Dhansik", price: 15.50 },
-    { name: "Chicken Madras", price: 15.50 },
-    { name: "Chicken Vindalo", price: 15.50 },
-    { name: "Lamb Curry", price: 17.00 },
-    { name: "Lamb Tikka Masala", price: 17.50 },
-    { name: "Lamb Korma", price: 17.00 },
-    { name: "Butter Lamb", price: 17.50 },
-    { name: "Kashmiri Lamb", price: 17.50 },      // 50
-    { name: "Lamb Goan Curry", price: 17.50 },
-    { name: "Lamb Jalfrezi", price: 17.50 },
-    { name: "Lamb Kadai", price: 17.50 },
-    { name: "Lamb Bhuna", price: 17.50 },
-    { name: "Vegi Lamb", price: 17.00 },
-    { name: "Lamb Palak", price: 17.50 },
-    { name: "Lamb Dhansik", price: 17.50 },
-    { name: "Lamb Madras", price: 17.50 },
-    { name: "Lamb Vindalo", price: 17.50 },
-    { name: "Prawn Curry", price: 18.50 },        // 60
-    { name: "Prawn Korma", price: 18.50 },
-    { name: "Prawn Tikka Masala", price: 18.50 },
-    { name: "Fish Curry", price: 18.50 },
-    { name: "Fish Tikka Masala", price: 18.50 },
-    { name: "Chicken Tikka", price: 17.50 },
-    { name: "Tandoori Chicken", price: 17.50 },
-    { name: "Malai Tikka", price: 17.50 },
-    { name: "Haryali Tikka", price: 17.50 },
-    { name: "Lamb Tikka", price: 18.50 },
-    { name: "Lamb Chops", price: 20.50 },         // 70
-    { name: "Seekh Kabab", price: 19.50 },
-    { name: "Prawn Tikka", price: 20.50 },
-    { name: "Paneer Tikka", price: 17.50 },
-    { name: "Fish Tawa Fry", price: 20.50 },
-    { name: "Zafrani Mix Grill", price: 24.00 },
-    { name: "Vegi Biryani", price: 14.50 },
-    { name: "Chicken Bombay Biryani", price: 16.50 },
-    { name: "Lamb Karachi Biryani", price: 17.50 },
-    { name: "Prawn Zafran Biryani", price: 20.50 },
-    { name: "Frisches Tandoori Brot", price: 3.50 }, // 80
-    { name: "Chapati Roti", price: 3.50 },
-    { name: "Naan", price: 3.00 },
-    { name: "Allo Naan", price: 4.50 },
-    { name: "Cheese Naan", price: 5.00 },
-    { name: "Butter Naan", price: 3.50 },
-    { name: "Garlic Naan", price: 4.50 },
-    { name: "Tandoori Parantha", price: 4.50 },
-    { name: "Mint Sauce", price: 3.00 },
-    { name: "Natur Joghurt", price: 2.50 },
-    { name: "Raita", price: 4.00 },               // 90
-    { name: "Mango Chutney", price: 3.00 },
-    { name: "Imli (Tamarind) Chutney", price: 3.00 },
-    { name: "Laal Chutney (scharfe...)", price: 3.50 },
-    { name: "Green Chutney", price: 3.50 },
-    { name: "Pickles", price: 3.50 },
-    { name: "Soße nach Wahl", price: 5.00 },
-    { name: "Gemüse-Frühlingsrollen", price: 5.00 },
-    { name: "Pommes frites", price: 3.50 },
-    { name: "Chicken Nuggets (6 Stk.)", price: 4.50 },
-    { name: "Basmati - Reis", price: 3.50 },      // 100
-    { name: "Zeera - Reis", price: 4.00 },
-    { name: "Zafrani - Reis", price: 5.50 },
-    { name: "Gemischter Salat", price: 6.00 },
-    { name: "Chicken Salat", price: 7.50 },
-    { name: "Zafrani Chicken Salat", price: 8.50 },
-    { name: "Mango Kulfi", price: 5.50 },
-    { name: "Almond Kulfi", price: 5.50 },
-    { name: "Pista Kulfi", price: 5.50 },
-    { name: "Gulab Jamun", price: 5.50 },
-    { name: "Ras Malai", price: 5.50 },           // 110
-    { name: "Lassi", price: 4.00 },
-    { name: "Mango Lassi", price: 4.50 },
-    { name: "Rosé Lassi", price: 4.50 },
-    { name: "Coca Cola", price: 3.50 },
-    { name: "Cola Zero", price: 3.50 },
-    { name: "Sprite", price: 3.50 },
-    { name: "Fanta", price: 3.50 },
-    { name: "Pinacolada", price: 5.50 },
-    { name: "Mint-Margarita", price: 5.50 },      // 119
-    { name: "Ipanema", price: 5.50 }              // 120
-];
-
-// --- HELPER: GET DISH NUMBER ---
-function getDishNumber(name) {
-    const index = MENU_ITEMS.findIndex(item => item.name === name);
-    return index !== -1 ? ` - ${index + 1}` : "";
-}
-
-// --- 2. Initialize Firebase ---
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+// --- 1. INITIALIZE FIREBASE ---
 const db = firebase.firestore();
+
+// --- 2. HELPER: GET DISH NUMBER & ALLERGY ---
+function getDishNumber(name) {
+    const item = MENU_ITEMS.find(m => m.name === name);
+    return item ? ` - ${item.id}` : "";
+}
+
+function getAllergyBadge(name) {
+    const item = MENU_ITEMS.find(m => m.name === name);
+    return (item && item.allergy) ? `<span style="color:#ff4444; font-size:0.8em; margin-left:10px; font-weight:bold; border:1px solid #ff4444; padding:2px 6px; border-radius:4px;">[Allergie: ${item.allergy}]</span>` : "";
+}
 
 // --- 3. MAIN SCRIPT LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {

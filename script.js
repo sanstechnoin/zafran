@@ -1,18 +1,61 @@
-// --- 1. ZAFFRAN FIREBASE CONFIG ---
-const firebaseConfig = {
-  apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
-  authDomain: "zaffran-delight.firebaseapp.com",
-  projectId: "zaffran-delight",
-  storageBucket: "zaffran-delight.firebasestorage.app",
-  messagingSenderId: "1022960860126",
-  appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
-};
+// ---  1. DYNAMIC MENU GENERATOR  ---
+function renderDynamicMenu() {
+    const container = document.getElementById('dynamic-menu-container');
+    if (!container) return; // Only run on pages that have the menu container
 
-// --- 2. Initialize Firebase ---
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+    let html = '';
+    
+    // Custom ID mapper to ensure your Top Navigation links still scroll perfectly!
+    const getSectionId = (catName) => {
+        if (catName.includes("Vegetarisch")) return "vegetarisches";
+        if (catName.includes("Hähnchen")) return "chicken";
+        if (catName.includes("Lamm")) return "lamm";
+        if (catName.includes("Fisch") || catName.includes("Garnelen")) return "fisch-garnelen";
+        if (catName.includes("Tandoori")) return "tandoori";
+        if (catName.includes("Biryani")) return "biryani";
+        if (catName.includes("Brot") || catName.includes("Beilagen")) return "brot"; 
+        if (catName.includes("Salate") || catName.includes("Extras")) return "salate";
+        if (catName.includes("Getränke")) return "getraenke";
+        if (catName.includes("Dessert")) return "dessert";
+        if (catName.includes("Kinder")) return "kinder";
+        if (catName.includes("Vorspeisen")) return "vorspeisen";
+        if (catName.includes("Suppen")) return "suppen";
+        return catName.toLowerCase().replace(/\s+/g, '-').replace('ä','ae').replace('ö','oe').replace('ü','ue');
+    };
+
+    MENU_DATA.forEach(cat => {
+        const sectionId = getSectionId(cat.category);
+        
+        html += `<section id="${sectionId}">`;
+        html += `<h2>${cat.category}</h2>`;
+        html += `<ul>`;
+
+        cat.items.forEach(item => {
+            const priceStr = item.price.toFixed(2).replace('.', ',');
+            const descHtml = item.desc ? `<span class="description">${item.desc}</span>` : '';
+            
+            html += `
+            <li>
+                <span class="item"><strong>${item.id}. ${item.name} <sup></sup></strong>${descHtml}</span>
+                <div class="price-action">
+                    <span class="price">${priceStr} €</span>
+                    <div class="quantity-controls hidden">
+                        <button class="menu-btn-minus" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-category="${sectionId}">-</button>
+                        <span class="item-qty" data-id="${item.id}">1</span>
+                    </div>
+                    <button class="add-btn" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}" data-category="${sectionId}">+</button>
+                </div>
+            </li>`;
+        });
+
+        html += `</ul></section>`;
+    });
+
+    container.innerHTML = html;
 }
-const db = firebase.firestore();
+
+// Execute the generator IMMEDIATELY so the HTML exists before the cart logic runs!
+renderDynamicMenu();
 
 // --- GLOBAL STATE ---
 let cart = [];

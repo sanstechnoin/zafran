@@ -108,10 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         filterBtn.disabled = true;
         filterBtn.innerHTML = "<span>⏳</span> Loading...";
-        recordsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Retrieving Data from Cloud...</td></tr>`;
+        recordsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#888;">Retrieving Data from Cloud...</td></tr>`;
 
         try {
-            // Query for archived orders
             const query = db.collection("archived_orders")
                 .where("closedAt", ">=", firebase.firestore.Timestamp.fromDate(startDate))
                 .where("closedAt", "<=", firebase.firestore.Timestamp.fromDate(endDate))
@@ -119,57 +118,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const snapshot = await query.get();
             
-            // --- THE FIX: SAFELY GROUP ORDERS FOR THE SAME TABLE ---
+            // --- SAFELY GROUP ORDERS FOR THE SAME TABLE ---
             let groupedRecords = {};
 
             snapshot.docs.forEach(doc => {
                 const data = doc.data();
                 
-                // Identify the same checkout by Table and Exact Time
                 let groupKey = doc.id; 
-                
                 if ((data.orderType === 'dine-in' || !data.orderType) && data.table && data.closedAt) {
-                    // Safely get milliseconds from the Firestore Timestamp
                     let timeVal = 0;
-                    if (typeof data.closedAt.toMillis === 'function') {
-                        timeVal = data.closedAt.toMillis();
-                    } else if (data.closedAt.seconds) {
-                        timeVal = data.closedAt.seconds * 1000;
-                    }
+                    if (typeof data.closedAt.toMillis === 'function') timeVal = data.closedAt.toMillis();
+                    else if (data.closedAt.seconds) timeVal = data.closedAt.seconds * 1000;
                     groupKey = `table_${data.table}_${timeVal}`;
                 }
 
                 if (!groupedRecords[groupKey]) {
-                    // Save first instance of this bill
                     groupedRecords[groupKey] = { 
                         id: doc.id, 
                         ...data, 
                         items: data.items ? [...data.items] : [] 
                     };
                 } else {
-                    // Combine items from split orders, do not duplicate total amount!
-                    if (data.items) {
-                        groupedRecords[groupKey].items.push(...data.items);
-                    }
+                    if (data.items) groupedRecords[groupKey].items.push(...data.items);
                 }
             });
 
-            // Convert grouped object back to array
             const cleanRecords = Object.values(groupedRecords);
-            
-            // Reverse so newest is on top
             allFetchedRecords = cleanRecords.reverse(); 
-            // --- END OF FIX ---
             
             renderRecords(allFetchedRecords);
             calculateKPIs(allFetchedRecords);
 
         } catch (error) {
             console.error("Error:", error);
-            recordsTbody.innerHTML = `<tr><td colspan="6" style="color:#ff5252; text-align:center; padding:20px;">
-                <strong>System Error:</strong> ${error.message}<br>
-                <small>Check browser console (F12) for Index Creation Link if first run.</small>
-            </td></tr>`;
+            recordsTbody.innerHTML = `<tr><td colspan="7" style="color:#ff5252; text-align:center; padding:20px;">System Error: ${error.message}</td></tr>`;
         } finally {
             filterBtn.disabled = false;
             filterBtn.innerHTML = "<span>🔍</span> Filter Records";
@@ -180,13 +162,12 @@ document.addEventListener("DOMContentLoaded", () => {
         recordsTbody.innerHTML = ""; 
 
         if (records.length === 0) {
-            recordsTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#666;">No sales records found for this period.</td></tr>`;
+            recordsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#666;">No sales records found for this period.</td></tr>`;
             return;
         }
 
         records.forEach(record => {
-            let recordDate = "N/A";
-            let recordTime = "N/A";
+            let recordDate = "N/A", recordTime = "N/A";
             
             if (record.closedAt && record.closedAt.toDate) {
                 const dateObj = record.closedAt.toDate();
@@ -196,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const amount = record.paidAmount || record.total || 0;
             
-            // Logic to determine Table or Customer Name
             let tableName = record.table || "Unknown";
             let typeBadge = "";
             
@@ -211,23 +191,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableName = `Table ${tableName}`;
             }
 
-            // --- NEW: PAYMENT BADGE ---
-            let payBadge = `<span class="badge" style="background:#555; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">UNKNOWN</span>`;
+            // --- 🚨 PAYMENT BADGE FIX: OLD ORDERS DEFAULT TO CASH 🚨 ---
+            let payBadge = `<span class="badge" style="background:#28a745; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💵 CASH</span>`;
             if (record.paymentCollected === 'card') {
                 payBadge = `<span class="badge" style="background:#007bff; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💳 CARD</span>`;
-            } else if (record.paymentCollected === 'cash' || record.orderType === 'dine-in') {
-                // Dine-in and cash deliveries default to Cash
-                payBadge = `<span class="badge" style="background:#28a745; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💵 CASH</span>`;
             }
 
-            // Create Table Row
+            let amountDisplay = `${Number(amount).toFixed(2).replace('.', ',')} €`;
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${recordDate}</td>
                 <td>${recordTime}</td>
                 <td style="font-weight:600; color:#fff;">${tableName}</td>
                 <td>${typeBadge}</td>
-                <td>${payBadge}</td> <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
+                <td>${payBadge}</td>
+                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success); line-height: 1.4;">${amountDisplay}</td>
                 <td style="text-align:center;">
                     <button class="btn-tool" style="padding:4px 10px; font-size:0.8rem; background:transparent; border:1px solid #555;" onclick="window.showDetail('${record.id}')">View</button>
                 </td>

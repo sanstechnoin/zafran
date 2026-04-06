@@ -211,6 +211,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableName = `Table ${tableName}`;
             }
 
+            // --- NEW: PAYMENT BADGE ---
+            let payBadge = `<span class="badge" style="background:#555; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">UNKNOWN</span>`;
+            if (record.paymentCollected === 'card') {
+                payBadge = `<span class="badge" style="background:#007bff; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💳 CARD</span>`;
+            } else if (record.paymentCollected === 'cash' || record.orderType === 'dine-in') {
+                // Dine-in and cash deliveries default to Cash
+                payBadge = `<span class="badge" style="background:#28a745; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💵 CASH</span>`;
+            }
+
             // Create Table Row
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -218,12 +227,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${recordTime}</td>
                 <td style="font-weight:600; color:#fff;">${tableName}</td>
                 <td>${typeBadge}</td>
-                <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
+                <td>${payBadge}</td> <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
                 <td style="text-align:center;">
                     <button class="btn-tool" style="padding:4px 10px; font-size:0.8rem; background:transparent; border:1px solid #555;" onclick="window.showDetail('${record.id}')">View</button>
                 </td>
             `;
             recordsTbody.appendChild(tr);
+        });
+    }
         });
     }
 
@@ -487,13 +498,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- EXPORT TO CSV ---
     function exportToCSV() {
-        if(allFetchedRecords.length === 0) {
-            alert("No data to export.");
-            return;
-        }
+        if(allFetchedRecords.length === 0) { alert("No data to export."); return; }
 
         let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Date,Time,OrderType,Table/Customer,Items,TotalAmount(EUR)\n";
+        // ADD PAYMENT TO EXCEL HEADERS
+        csvContent += "Date,Time,OrderType,Payment,Table/Customer,Items,TotalAmount(EUR)\n";
 
         allFetchedRecords.forEach(r => {
             let dateStr = "", timeStr = "";
@@ -506,12 +515,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const name = (r.orderType === 'dine-in') ? `Table ${r.table}` : (r.customerName || "Customer");
             const total = Number(r.paidAmount || r.total || 0).toFixed(2);
             
-            // Item Summary
+            // GET PAYMENT TEXT FOR EXCEL
+            let payText = "CASH";
+            if (r.paymentCollected === 'card') payText = "CARD";
+            
             let itemStr = "";
             if(r.items) itemStr = r.items.map(i => `${i.quantity}x ${i.name}`).join(" | ");
             itemStr = itemStr.replace(/,/g, "").replace(/"/g, "'"); 
 
-            csvContent += `${dateStr},${timeStr},${r.orderType},${name},"${itemStr}",${total}\n`;
+            // ADD PAYTEXT TO THE ROW DATA
+            csvContent += `${dateStr},${timeStr},${r.orderType},${payText},${name},"${itemStr}",${total}\n`;
         });
 
         const encodedUri = encodeURI(csvContent);

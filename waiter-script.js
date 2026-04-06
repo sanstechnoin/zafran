@@ -723,25 +723,34 @@ if (loginButton) {
 
             let notesHtml = order.notes ? `<div style="font-style:italic; color:#888; font-size:0.8rem; margin-bottom:5px;">📝 "${order.notes}"</div>` : '';
 
-            // --- DYNAMIC BUTTON ---
+            // --- DYNAMIC BUTTON & PAYMENT BADGE ---
             let buttonHtml = "";
-            
+            let paymentBadgeHtml = "";
+
             if (isDelivered) {
-                // DRIVER RETURNED CASH
-                buttonHtml = `<button class="clear-pickup-btn" style="background-color: #FFC107; color:black; font-weight:bold; animation: pulse-yellow 1s infinite;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 COLLECT CASH & CLOSE</button>`;
+                // If driver collected Card (SumUp)
+                if (order.paymentCollected === 'card') {
+                    buttonHtml = `<button class="clear-pickup-btn" style="background-color: #007bff; color:white; font-weight:bold;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💳 CLOSE (Paid via SumUp)</button>`;
+                    paymentBadgeHtml = `<span style="background:#007bff; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-left:5px;">💳 CARD</span>`;
+                } 
+                // Default: Cash
+                else {
+                    buttonHtml = `<button class="clear-pickup-btn" style="background-color: #FFC107; color:black; font-weight:bold; animation: pulse-yellow 1s infinite;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 COLLECT CASH & CLOSE</button>`;
+                    paymentBadgeHtml = `<span style="background:#28a745; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-left:5px;">💵 CASH</span>`;
+                }
             } 
             else if (isCooked) {
-                // Completed Pickup
                 buttonHtml = `<button class="clear-pickup-btn" style="background-color: #006400;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💰 Paid & Close</button>`;
             } 
             else if (isOut) {
-                // Driver is driving (No action needed, just wait)
                 buttonHtml = `<button class="clear-pickup-btn" style="background-color: #444; color:#888; cursor:default;" disabled>Driver on route...</button>`;
             }
             else {
-                // Default: Mark Ready/Sent
                 buttonHtml = `<button class="clear-pickup-btn" onclick="handleClearOrder('${order.id}', 'pickup-serve', this)">Mark Ready / Sent</button>`;
             }
+
+            // Combine the Type Badge (Pickup/Delivery) with the new Payment Badge
+            let statusHtml = `<span style="background:${typeColor}; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${typeBadge}</span> ${paymentBadgeHtml}`;
 
             // --- BOX CLASSES ---
             let boxClass = "pickup-box";

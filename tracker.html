@@ -259,22 +259,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
+    <script src="firebase-config.js"></script>
     <script>
-        // --- 1. CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
-            authDomain: "zaffran-delight.firebaseapp.com",
-            projectId: "zaffran-delight",
-            storageBucket: "zaffran-delight.firebasestorage.app",
-            messagingSenderId: "1022960860126",
-            appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
-        };
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.firestore();
-
         // --- 2. MAP SETUP ---
         const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([50.661, 6.786], 13);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);

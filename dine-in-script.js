@@ -17,8 +17,8 @@ function renderDynamicMenu() {
         case "Fisch & Garnelen": return "fisch-garnelen";
         case "Tandoori": return "tandoori";
         case "Biryani": return "biryani";
-        case "Tandoori Naan": return "tandoori-naan"; 
-        case "Soßen & Beilagen": return "sossen-beilagen"; 
+        case "Brot": return "brot"; 
+        case "Beilagen": return "beilagen";  
         case "Kinder Menüs": return "kinder";
         case "Reis": return "reis";
         case "Salate": return "salate";

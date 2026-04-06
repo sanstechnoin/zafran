@@ -126,7 +126,7 @@ const MENU_DATA = [
         ]
     },
     {
-        category: "Tandoori Naan",
+        category: "Brot",
         items: [
             { id: "80", name: "Frisches Tandoori Brot", price: 3.50, desc: "Indisches Brot aus Vollkornmehl, traditionell in Tandoor gebacken", allergy: "A" },
             { id: "81", name: "Chapati Roti", price: 3.50, desc: "Dünnes indisches Fladenbrot aus Vollkornmehl, in der heißen Pfanne gebacken", allergy: "A" },
@@ -139,7 +139,7 @@ const MENU_DATA = [
         ]
     },
     {
-        category: "Soßen & Beilagen",
+        category: "Beilagen",
         items: [
             { id: "88", name: "Mint Sauce", price: 3.00, desc: "Joghurt und Minze", allergy: "G" },
             { id: "89", name: "Natur Joghurt", price: 2.50, desc: "", allergy: "G" },

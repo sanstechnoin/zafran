@@ -364,12 +364,12 @@ let pendingDeliveryOrderId = null;
 window.completeDelivery = function(orderId) {
     if(navigator.vibrate) navigator.vibrate(50);
 
-    // Instead of finishing instantly, we open the Cash/Card popup!
+    // Show the payment popup
     pendingDeliveryOrderId = orderId;
-    document.getElementById('payment-select-modal').classList.remove('hidden');
+    document.getElementById('payment-select-modal').style.display = 'flex';
 }
 
-// NEW: Function triggered when Driver clicks Cash or Card in the popup
+// Function triggered when Driver clicks Cash or Card in the popup
 window.confirmDeliveryPayment = function(method) {
     if(!pendingDeliveryOrderId) return;
 
@@ -390,7 +390,7 @@ window.confirmDeliveryPayment = function(method) {
     });
 
     // 3. Hide the popup and reset
-    document.getElementById('payment-select-modal').classList.add('hidden');
+    document.getElementById('payment-select-modal').style.display = 'none';
     pendingDeliveryOrderId = null;
 }
 

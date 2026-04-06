@@ -593,7 +593,38 @@ if (loginButton) {
             }
         }
     }
+  
+    // --- 🚨 NEW: DIRECT ARCHIVE FOR CARD ORDERS (NO POPUP) 🚨 ---
+    window.directArchiveCardOrder = async function(orderId, btn) {
+        if(btn) { btn.disabled = true; btn.innerText = "Processing..."; }
+        const order = allOrders[orderId];
+        if(!order) return;
 
+        try {
+            const batch = db.batch();
+            
+            let updateData = {
+                ...order,
+                status: 'paid', 
+                paidAmount: Number(order.total || 0), 
+                closedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                day: new Date().toISOString().split('T')[0] 
+            };
+            
+            const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
+            batch.set(archiveRef, updateData);
+            
+            const docRef = db.collection("orders").doc(order.id);
+            batch.delete(docRef);
+            
+            await batch.commit();
+        } catch (e) {
+            console.error("Error archiving card order:", e);
+            alert("Error closing order.");
+            if(btn) { btn.disabled = false; btn.innerText = "💳 CLOSE (Paid via SumUp)"; }
+        }
+    };
+  
     // --- RENDER DINE-IN TABLE ---
     function renderDineInTable(tableId) {
         const tableBox = document.getElementById(`table-${tableId}`);
@@ -730,7 +761,7 @@ if (loginButton) {
             if (isDelivered) {
                 // If driver collected Card (SumUp)
                 if (order.paymentCollected === 'card') {
-                    buttonHtml = `<button class="clear-pickup-btn" style="background-color: #007bff; color:white; font-weight:bold;" onclick="handleClearOrder('${order.id}', 'pickup-archive', this)">💳 CLOSE (Paid via SumUp)</button>`;
+                    buttonHtml = `<button class="clear-pickup-btn" style="background-color: #007bff; color:white; font-weight:bold;" onclick="directArchiveCardOrder('${order.id}', this)">💳 CLOSE (Paid via SumUp)</button>`;
                     paymentBadgeHtml = `<span style="background:#007bff; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-left:5px;">💳 CARD</span>`;
                 } 
                 // Default: Cash

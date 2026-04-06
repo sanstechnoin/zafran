@@ -210,6 +210,61 @@
             <div id="pin-status" class="message-box"></div>
         </div>
 
+        <div class="pin-section" style="margin-top: 20px;">
+            <h3 style="color:var(--gold); margin:0 0 15px 0; font-size:1.2rem;">💰 Finanzübersicht</h3>
+
+            <div style="display:flex; justify-content:center; gap:15px; margin-bottom:15px; flex-wrap:wrap; color:#ccc;">
+                <label><input type="radio" name="financeView" value="day" checked onchange="updateFinanceInputs()"> Tag</label>
+                <label><input type="radio" name="financeView" value="week" onchange="updateFinanceInputs()"> KW</label>
+                <label><input type="radio" name="financeView" value="month" onchange="updateFinanceInputs()"> Monat</label>
+            </div>
+
+            <div id="fin-day-group" style="display:block;">
+                <input type="date" id="fin-date" onchange="loadFinanceData()" style="padding:8px; border-radius:4px; border:1px solid #444; background:#222; color:white; font-size:1rem;">
+            </div>
+            <div id="fin-week-group" style="display:none;">
+                <input type="week" id="fin-week" onchange="loadFinanceData()" style="padding:8px; border-radius:4px; border:1px solid #444; background:#222; color:white; font-size:1rem;">
+            </div>
+            <div id="fin-month-group" style="display:none;">
+                <input type="month" id="fin-month" onchange="loadFinanceData()" style="padding:8px; border-radius:4px; border:1px solid #444; background:#222; color:white; font-size:1rem;">
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:30px; margin-top:20px; padding-top:15px; border-top:1px dashed #444;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="fin-filter-cash" checked onchange="loadFinanceData()" style="width:20px; height:20px; accent-color:#28a745;">
+                    <span style="color:#28a745; font-weight:bold; font-size:1.1rem;">💵 CASH</span>
+                </label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="fin-filter-card" checked onchange="loadFinanceData()" style="width:20px; height:20px; accent-color:#007bff;">
+                    <span style="color:#007bff; font-weight:bold; font-size:1.1rem;">💳 CARD</span>
+                </label>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; justify-content:center;">
+                <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #444; flex:1; min-width:90px;">
+                    <div style="font-size:0.75rem; color:#aaa; text-transform:uppercase;">Dine-In</div>
+                    <div id="fin-dine-total" style="color:var(--gold); font-size:1.1rem; font-weight:bold;">0,00 €</div>
+                    <div id="fin-dine-count" style="font-size:0.75rem; color:#888;">0</div>
+                </div>
+                <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #444; flex:1; min-width:90px;">
+                    <div style="font-size:0.75rem; color:#aaa; text-transform:uppercase;">Pickup</div>
+                    <div id="fin-pickup-total" style="color:var(--gold); font-size:1.1rem; font-weight:bold;">0,00 €</div>
+                    <div id="fin-pickup-count" style="font-size:0.75rem; color:#888;">0</div>
+                </div>
+                <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #444; flex:1; min-width:90px;">
+                    <div style="font-size:0.75rem; color:#aaa; text-transform:uppercase;">Delivery</div>
+                    <div id="fin-delivery-total" style="color:var(--gold); font-size:1.1rem; font-weight:bold;">0,00 €</div>
+                    <div id="fin-delivery-count" style="font-size:0.75rem; color:#888;">0</div>
+                </div>
+            </div>
+            
+            <div style="background:#111; padding:15px; border-radius:8px; border:2px solid var(--success-green); margin-top:10px;">
+                <div style="font-size:0.9rem; color:#aaa; text-transform:uppercase;">Gesamtumsatz</div>
+                <div id="fin-grand-total" style="color:var(--success-green); font-size:1.5rem; font-weight:bold;">0,00 €</div>
+                <div id="fin-grand-count" style="font-size:0.9rem; color:#888;">0 Orders Total</div>
+            </div>
+        </div>
+
         <h2>Reservierungen</h2>
         
         <div class="filter-bar">
@@ -297,7 +352,7 @@
     // --- 2. LOGIN & INIT ---
     document.addEventListener("DOMContentLoaded", () => {
         setTodayDate();
-
+        initFinanceDates();
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('login-overlay').style.display = 'none';
@@ -557,6 +612,138 @@ window.deleteRes = function(id, name, email, date, time) { // Now accepts date &
     })
     .catch(e => alert("Fehler: " + e.message));
 };
+
+    // --- 6. FINANCE LOGIC FOR CLIENT ADMIN ---
+    function initFinanceDates() {
+        const today = new Date();
+        document.getElementById('fin-date').value = today.toISOString().split('T')[0];
+        
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        document.getElementById('fin-month').value = `${y}-${m}`;
+        
+        const d = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        document.getElementById('fin-week').value = `${y}-W${String(weekNo).padStart(2, '0')}`;
+    }
+
+    window.updateFinanceInputs = function() {
+        const mode = document.querySelector('input[name="financeView"]:checked').value;
+        document.getElementById('fin-day-group').style.display = mode === 'day' ? 'block' : 'none';
+        document.getElementById('fin-week-group').style.display = mode === 'week' ? 'block' : 'none';
+        document.getElementById('fin-month-group').style.display = mode === 'month' ? 'block' : 'none';
+        loadFinanceData();
+    };
+
+    window.loadFinanceData = function() {
+        const mode = document.querySelector('input[name="financeView"]:checked').value;
+        let start, end;
+
+        if(mode === 'day') {
+            const dateStr = document.getElementById('fin-date').value;
+            if(!dateStr) return;
+            start = new Date(dateStr + 'T00:00:00');
+            end = new Date(dateStr + 'T23:59:59');
+        } 
+        else if(mode === 'week') {
+            const weekStr = document.getElementById('fin-week').value;
+            if(!weekStr) return;
+            const [yearStr, weekNumStr] = weekStr.split('-W');
+            const simple = new Date(parseInt(yearStr), 0, 1 + (parseInt(weekNumStr) - 1) * 7);
+            if (simple.getDay() <= 4) simple.setDate(simple.getDate() - simple.getDay() + 1);
+            else simple.setDate(simple.getDate() + 8 - simple.getDay());
+            start = new Date(simple); start.setHours(0,0,0,0);
+            end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
+        }
+        else if(mode === 'month') {
+            const monthStr = document.getElementById('fin-month').value;
+            if(!monthStr) return;
+            const [year, month] = monthStr.split('-');
+            start = new Date(year, parseInt(month)-1, 1); start.setHours(0,0,0,0);
+            end = new Date(year, parseInt(month), 0); end.setHours(23,59,59,999);
+        }
+
+        const tStart = firebase.firestore.Timestamp.fromDate(start);
+        const tEnd = firebase.firestore.Timestamp.fromDate(end);
+
+        db.collection("archived_orders")
+          .where("closedAt", ">=", tStart)
+          .where("closedAt", "<=", tEnd)
+          .get().then(snap => {
+              
+            let stats = { pickup: { count: 0, total: 0 }, delivery: { count: 0, total: 0 }, 'dine-in': { count: 0, total: 0 } };
+            let groupedRecords = {};
+
+            snap.forEach(doc => {
+                const data = doc.data();
+                
+                // 🚨 Respect the Soft Delete! Don't count trash!
+                if (data.isVoided) return;
+                
+                const typeRaw = (data.orderType || 'pickup').toLowerCase();
+                let type = 'pickup';
+                if(typeRaw.includes('del')) type = 'delivery';
+                else if(typeRaw.includes('dine') || typeRaw.includes('table')) type = 'dine-in';
+
+                let groupKey = doc.id;
+                
+                if (type === 'dine-in' && data.table && data.closedAt) {
+                    let timeVal = 0;
+                    if (typeof data.closedAt.toMillis === 'function') timeVal = data.closedAt.toMillis();
+                    else if (data.closedAt.seconds) timeVal = data.closedAt.seconds * 1000;
+                    groupKey = `table_${data.table}_${timeVal}`;
+                }
+
+                const amount = Number(data.paidAmount || data.total || 0);
+
+                if (!groupedRecords[groupKey]) {
+                    groupedRecords[groupKey] = { orderType: type, total: amount, paymentCollected: data.paymentCollected };
+                }
+            });
+
+            const showCash = document.getElementById('fin-filter-cash').checked;
+            const showCard = document.getElementById('fin-filter-card').checked;
+
+            Object.values(groupedRecords).forEach(r => {
+                let isCard = r.paymentCollected === 'card';
+                let isCash = !isCard; 
+
+                if (isCash && !showCash) return;
+                if (isCard && !showCard) return;
+
+                stats[r.orderType].count += 1;
+                stats[r.orderType].total += r.total;
+            });
+
+            // Update UI
+            document.getElementById('fin-dine-total').innerText = stats['dine-in'].total.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-dine-count').innerText = stats['dine-in'].count + " Orders";
+            
+            document.getElementById('fin-pickup-total').innerText = stats['pickup'].total.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-pickup-count').innerText = stats['pickup'].count + " Orders";
+            
+            document.getElementById('fin-delivery-total').innerText = stats['delivery'].total.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-delivery-count').innerText = stats['delivery'].count + " Orders";
+
+            const grandTotal = stats['dine-in'].total + stats['pickup'].total + stats['delivery'].total;
+            const grandCount = stats['dine-in'].count + stats['pickup'].count + stats['delivery'].count;
+            document.getElementById('fin-grand-total').innerText = grandTotal.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('fin-grand-count').innerText = grandCount + " Orders Total";
+
+        }).catch(err => console.error("Finance error:", err));
+    }
+
+    // Call load once user logs in (trigger it manually in auth state if needed, or rely on UI click)
+    // To ensure it loads immediately upon logging in:
+    firebase.auth().onAuthStateChanged((user) => {
+        if(user) {
+            setTimeout(loadFinanceData, 1000); // Give it a second to fetch
+        }
+    });
+    
 </script>
 </body>
 </html>

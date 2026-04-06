@@ -750,7 +750,7 @@ if (loginButton) {
             }
 
             // Combine the Type Badge (Pickup/Delivery) with the new Payment Badge
-            let statusHtml = `<span style="background:${typeColor}; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${typeBadge}</span> ${paymentBadgeHtml}`;
+            statusHtml += ` ${paymentBadgeHtml}`;
 
             // --- BOX CLASSES ---
             let boxClass = "pickup-box";

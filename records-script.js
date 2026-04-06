@@ -484,7 +484,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 timeStr = d.toLocaleTimeString('de-DE');
             }            
             const name = (r.orderType === 'dine-in') ? `Table ${r.table}` : (r.customerName || "Customer");
-            const total = Number(r.paidAmount || r.total || 0).toFixed(2);            
+            const total = Number(r.paidAmount || r.total || 0).toFixed(2);
+			let payText = "CASH";
+            if (r.paymentCollected === 'card') payText = "CARD";
             let itemStr = "";
             if(r.items) itemStr = r.items.map(i => `${i.quantity}x ${i.name}`).join(" | ");
             itemStr = itemStr.replace(/,/g, "").replace(/"/g, "'"); 

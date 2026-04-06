@@ -447,6 +447,17 @@
                     <div id="fin-month-group" style="display:none;">
                         <input type="month" id="fin-month" onchange="loadFinanceData()" style="max-width:250px; margin:0 auto; font-size:1.1rem;">
                     </div>
+
+                    <div style="display:flex; justify-content:center; gap:30px; margin-top:20px; padding-top:15px; border-top:1px dashed #444;">
+                        <label class="checkbox-item" style="cursor:pointer;">
+                            <input type="checkbox" id="fin-filter-cash" checked onchange="loadFinanceData()" style="width:22px; height:22px; accent-color:#28a745;"> 
+                            <span style="color:#28a745; font-weight:bold; font-size:1.2rem;">💵 CASH</span>
+                        </label>
+                        <label class="checkbox-item" style="cursor:pointer;">
+                            <input type="checkbox" id="fin-filter-card" checked onchange="loadFinanceData()" style="width:22px; height:22px; accent-color:#007bff;"> 
+                            <span style="color:#007bff; font-weight:bold; font-size:1.2rem;">💳 CARD</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:20px;">
@@ -856,7 +867,6 @@
           .get().then(snap => {
               
             let stats = { pickup: { count: 0, total: 0 }, delivery: { count: 0, total: 0 }, 'dine-in': { count: 0, total: 0 } };
-
             let groupedRecords = {};
 
             snap.forEach(doc => {
@@ -869,6 +879,7 @@
 
                 let groupKey = doc.id;
                 
+                // Using your perfectly corrected timeVal logic!
                 if (type === 'dine-in' && data.table && data.closedAt) {
                     let timeVal = 0;
                     if (typeof data.closedAt.toMillis === 'function') {
@@ -881,19 +892,29 @@
 
                 const amount = Number(data.paidAmount || data.total || 0);
 
-
                 if (!groupedRecords[groupKey]) {
-                    groupedRecords[groupKey] = { orderType: type, total: amount };
+                    groupedRecords[groupKey] = { 
+                        orderType: type, 
+                        total: amount, 
+                        paymentCollected: data.paymentCollected 
+                    };
                 }
             });
 
-            // Now sum up the cleanly grouped records
+            const showCash = document.getElementById('fin-filter-cash').checked;
+            const showCard = document.getElementById('fin-filter-card').checked;
+
             Object.values(groupedRecords).forEach(r => {
+                let isCard = r.paymentCollected === 'card';
+                let isCash = !isCard; 
+
+                if (isCash && !showCash) return;
+                if (isCard && !showCard) return;
+
                 stats[r.orderType].count += 1;
                 stats[r.orderType].total += r.total;
             });
 
-            // --- Update UI ---
             document.getElementById('fin-dine-total').innerText = stats['dine-in'].total.toFixed(2).replace('.', ',') + ' €';
             document.getElementById('fin-dine-count').innerText = stats['dine-in'].count + " Orders";
             

@@ -47,20 +47,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const RECORDS_PASSWORD = "zafran"; 
     let allFetchedRecords = []; 
 
-    // --- 4. NEW SECURE LOGIN LOGIC ---
+    // --- 4. SECURE LOGIN LOGIC ---
     loginButton.addEventListener('click', () => {
-        // 1. Check if the staff typed the correct simple PIN ("zafran")
         if (passwordInput.value === RECORDS_PASSWORD) {
-            
-            // 2. If correct, secretly log them in with the real account
             const hiddenEmail = "webmaster@zafraneuskirchen.de";
             const hiddenPass  = "!Zafran2025";
-
-            loginButton.innerText = "Verbinden..."; // Optional: Show loading text
+            loginButton.innerText = "Verbinden..."; 
             
             firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
             .then((userCredential) => {
-                // Success! The system is now logged in securely.
                 loginOverlay.style.display = 'none';
                 contentWrapper.style.opacity = '1';
                 initializeRecordsPage(); 
@@ -71,9 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 loginError.style.display = 'block';
                 loginButton.innerText = "UNLOCK DASHBOARD";
             });
-
         } else {
-            // Wrong PIN entered
             loginError.innerText = "Falsches Passwort";
             loginError.style.display = 'block';
         }
@@ -82,21 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
 
     function initializeRecordsPage() {
-        // Init UI
         statusDot.classList.add('online');
         connectionText.textContent = "System Online";
         
-        // Set Today's Date
         const today = new Date().toISOString().split('T')[0];
         startDateInput.value = today;
         endDateInput.value = today;
 
-        // Listeners
         filterBtn.addEventListener('click', fetchRecords);
         printBtn.addEventListener('click', () => window.print());
         exportBtn.addEventListener('click', exportToCSV);
         
-        // Auto Load
         fetchRecords();
     }
 
@@ -118,32 +107,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const snapshot = await query.get();
             
-            // --- SAFELY GROUP ORDERS FOR THE SAME TABLE ---
+            // --- 🚨 FIXED TABLE GROUPING LOGIC 🚨 ---
             let groupedRecords = {};
 
             snapshot.docs.forEach(doc => {
                 const data = doc.data();
-                
                 let groupKey = doc.id; 
-                if ((data.orderType === 'dine-in' || !data.orderType) && data.table && data.closedAt) {
-                    let timeVal = 0;
-                    if (typeof data.closedAt.toMillis === 'function') timeVal = data.closedAt.toMillis();
-                    else if (data.closedAt.seconds) timeVal = data.closedAt.seconds * 1000;
-                    groupKey = `table_${data.table}_${timeVal}`;
+                
+                // Group Dine-in by Table + Day (ignores milliseconds so they merge!)
+                if ((data.orderType === 'dine-in' || !data.orderType) && data.table) {
+                    let dayString = data.day || "unknown_date";
+                    if (data.closedAt && data.closedAt.toDate) {
+                        dayString = data.closedAt.toDate().toISOString().split('T')[0];
+                    }
+                    groupKey = `table_${data.table}_${dayString}`;
                 }
 
                 if (!groupedRecords[groupKey]) {
                     groupedRecords[groupKey] = { 
                         id: doc.id, 
                         ...data, 
-                        items: data.items ? [...data.items] : [] 
+                        items: data.items ? [...data.items] : [],
+                        groupedTotal: Number(data.paidAmount || data.total || 0)
                     };
                 } else {
                     if (data.items) groupedRecords[groupKey].items.push(...data.items);
+                    groupedRecords[groupKey].groupedTotal += Number(data.paidAmount || data.total || 0);
+                    // Keep the latest timestamp
+                    if (data.closedAt && groupedRecords[groupKey].closedAt && data.closedAt > groupedRecords[groupKey].closedAt) {
+                        groupedRecords[groupKey].closedAt = data.closedAt;
+                    }
                 }
             });
 
-            const cleanRecords = Object.values(groupedRecords);
+            const cleanRecords = Object.values(groupedRecords).map(r => {
+                // Apply combined total to the order
+                if(r.orderType === 'dine-in' || !r.orderType) r.paidAmount = r.groupedTotal;
+                return r;
+            });
+
             allFetchedRecords = cleanRecords.reverse(); 
             
             renderRecords(allFetchedRecords);
@@ -191,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableName = `Table ${tableName}`;
             }
 
-            // --- 🚨 PAYMENT BADGE FIX: OLD ORDERS DEFAULT TO CASH 🚨 ---
+            // --- 🚨 PAYMENT BADGES 🚨 ---
             let payBadge = `<span class="badge" style="background:#28a745; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💵 CASH</span>`;
             if (record.paymentCollected === 'card') {
                 payBadge = `<span class="badge" style="background:#007bff; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💳 CARD</span>`;
@@ -214,9 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
             recordsTbody.appendChild(tr);
         });
     }
-        });
-    }
-
 
     function calculateKPIs(records) {
         let totalRevenue = 0;
@@ -297,10 +296,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         panelTotal.innerText = `${finalPaid.toFixed(2)} €`;
 
-        // === 🚨 NEW: INTERCEPT PRINT BUTTON FOR THERMAL RECEIPT 🚨 ===
         const printBtn = document.querySelector('#detailPanel button.btn-primary');
         if (printBtn) {
-            printBtn.removeAttribute('onclick'); // Disable default full-page print
+            printBtn.removeAttribute('onclick'); 
             printBtn.onclick = function() {
                 printThermalReceipt(record, calculatedSubtotal, discountAmount, couponName);
             };
@@ -321,7 +319,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let tableName = record.table ? `Tisch ${record.table}` : (record.customerName || "Gast");
         let orderIdShort = record.id ? record.id.substring(0, 6).toUpperCase() : Math.floor(Math.random()*10000).toString();
         
-        // MwSt Calculation: 19% for Dine-In, 7% for Takeaway/Delivery
         const isDineIn = record.orderType === 'dine-in';
         const taxRate = isDineIn ? 0.19 : 0.07;
         const taxLabel = isDineIn ? "19%" : "7%";
@@ -362,7 +359,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const netAmount = finalPaid / (1 + taxRate);
         const taxAmount = finalPaid - netAmount;
 
-        // Generate Simulated TSE Signature for compliance visual
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let tseSig = '';
         for(let i=0; i<40; i++) tseSig += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -373,16 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <title>Kassenbon #${orderIdShort}</title>
             <style>
                 @page { margin: 0; }
-                body { 
-                    font-family: 'Courier New', Courier, monospace; 
-                    font-size: 13px; 
-                    color: #000; 
-                    background: #fff;
-                    margin: 0; 
-                    padding: 15px;
-                    width: 300px;
-                    box-sizing: border-box;
-                }
+                body { font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #000; background: #fff; margin: 0; padding: 15px; width: 300px; box-sizing: border-box; }
                 .text-center { text-align: center; }
                 .bold { font-weight: bold; }
                 .divider { border-top: 1px dashed #000; margin: 10px 0; }
@@ -399,68 +386,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p>Tel: +49 162 3757839</p>
                 <p>St-Nr: 209/5000/1234</p>
             </div>
-            
             <div class="divider"></div>
-            
-            <div style="display:flex; justify-content:space-between;">
-                <span>Datum: ${dateStr}</span>
-                <span>Zeit: ${timeStr}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>Kunde: ${tableName}</span>
-                <span>Beleg: #${orderIdShort}</span>
-            </div>
-            
+            <div style="display:flex; justify-content:space-between;"><span>Datum: ${dateStr}</span><span>Zeit: ${timeStr}</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Kunde: ${tableName}</span><span>Beleg: #${orderIdShort}</span></div>
             <div class="divider"></div>
-            
-            <div class="bold" style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-                <span>Artikel</span>
-                <span>EUR</span>
-            </div>
-            
+            <div class="bold" style="display:flex; justify-content:space-between; margin-bottom: 8px;"><span>Artikel</span><span>EUR</span></div>
             ${itemsHtml}
             ${discountHtml}
-            
             <div class="thick-divider"></div>
-            
-            <div class="bold" style="display:flex; justify-content:space-between; font-size: 16px;">
-                <span>GESAMTBETRAG</span>
-                <span>${finalPaid.toFixed(2).replace('.', ',')} €</span>
-            </div>
-            
+            <div class="bold" style="display:flex; justify-content:space-between; font-size: 16px;"><span>GESAMTBETRAG</span><span>${finalPaid.toFixed(2).replace('.', ',')} €</span></div>
             <div class="divider"></div>
-            
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-                <span>Netto</span>
-                <span>${netAmount.toFixed(2).replace('.', ',')}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-                <span>MwSt (${taxLabel})</span>
-                <span>${taxAmount.toFixed(2).replace('.', ',')}</span>
-            </div>
-            
+            <div style="display:flex; justify-content:space-between; font-size: 11px;"><span>Netto</span><span>${netAmount.toFixed(2).replace('.', ',')}</span></div>
+            <div style="display:flex; justify-content:space-between; font-size: 11px;"><span>MwSt (${taxLabel})</span><span>${taxAmount.toFixed(2).replace('.', ',')}</span></div>
             <div class="divider"></div>
-            
             <div class="text-center" style="font-size: 10px; margin-top: 15px; color: #444;">
                 <p>TSE-Signatur (KassenSichV):</p>
                 <p style="word-break: break-all; margin-top: 5px;">TSE-${tseSig}</p>
                 <p>Seriennummer: ER3984719002</p>
                 <p style="margin-top:15px; color:#000; font-size: 12px;" class="bold">Vielen Dank für Ihren Besuch!</p>
             </div>
-            
-            <script>
-                window.onload = function() {
-                    setTimeout(function() {
-                        window.print();
-                        setTimeout(function() { window.close(); }, 500);
-                    }, 250);
-                }
-            </script>
+            <script>window.onload = function() { setTimeout(function() { window.print(); setTimeout(function() { window.close(); }, 500); }, 250); }</script>
         </body>
         </html>
         `;
 
-        // Open a small invisible window and trigger the print!
         const printWindow = window.open('', '_blank', 'width=350,height=600');
         if (printWindow) {
             printWindow.document.open();
@@ -478,9 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- EXPORT TO CSV ---
     function exportToCSV() {
         if(allFetchedRecords.length === 0) { alert("No data to export."); return; }
-
         let csvContent = "data:text/csv;charset=utf-8,";
-        // ADD PAYMENT TO EXCEL HEADERS
         csvContent += "Date,Time,OrderType,Payment,Table/Customer,Items,TotalAmount(EUR)\n";
 
         allFetchedRecords.forEach(r => {
@@ -490,19 +437,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 dateStr = d.toLocaleDateString('de-DE');
                 timeStr = d.toLocaleTimeString('de-DE');
             }
-            
             const name = (r.orderType === 'dine-in') ? `Table ${r.table}` : (r.customerName || "Customer");
             const total = Number(r.paidAmount || r.total || 0).toFixed(2);
-            
-            // GET PAYMENT TEXT FOR EXCEL
             let payText = "CASH";
             if (r.paymentCollected === 'card') payText = "CARD";
-            
             let itemStr = "";
             if(r.items) itemStr = r.items.map(i => `${i.quantity}x ${i.name}`).join(" | ");
             itemStr = itemStr.replace(/,/g, "").replace(/"/g, "'"); 
-
-            // ADD PAYTEXT TO THE ROW DATA
             csvContent += `${dateStr},${timeStr},${r.orderType},${payText},${name},"${itemStr}",${total}\n`;
         });
 

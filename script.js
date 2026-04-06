@@ -7,21 +7,27 @@ function renderDynamicMenu() {
     
     // Custom ID mapper to ensure your Top Navigation links still scroll perfectly!
     const getSectionId = (catName) => {
-        if (catName.includes("Vegetarisch")) return "vegetarisches";
-        if (catName.includes("Hähnchen")) return "chicken";
-        if (catName.includes("Lamm")) return "lamm";
-        if (catName.includes("Fisch") || catName.includes("Garnelen")) return "fisch-garnelen";
-        if (catName.includes("Tandoori")) return "tandoori";
-        if (catName.includes("Biryani")) return "biryani";
-        if (catName.includes("Brot") || catName.includes("Beilagen")) return "brot"; 
-        if (catName.includes("Salate") || catName.includes("Extras")) return "salate";
-        if (catName.includes("Getränke")) return "getraenke";
-        if (catName.includes("Dessert")) return "dessert";
-        if (catName.includes("Kinder")) return "kinder";
-        if (catName.includes("Vorspeisen")) return "vorspeisen";
-        if (catName.includes("Suppen")) return "suppen";
-        return catName.toLowerCase().replace(/\s+/g, '-').replace('ä','ae').replace('ö','oe').replace('ü','ue');
-    };
+    switch (catName) {
+        case "Suppen": return "suppen";
+        case "Vorspeisen": return "vorspeisen";
+        case "Veganes": return "veganes";
+        case "Vegetarisches": return "vegetarisches";
+        case "Chicken": return "chicken";
+        case "Lamm": return "lamm";
+        case "Fisch & Garnelen": return "fisch-garnelen";
+        case "Tandoori": return "tandoori";
+        case "Biryani": return "biryani";
+        case "Tandoori Naan": return "tandoori-naan"; 
+        case "Soßen & Beilagen": return "sossen-beilagen"; 
+        case "Kinder Menüs": return "kinder";
+        case "Reis": return "reis";
+        case "Salate": return "salate";
+        case "Dessert": return "dessert";
+        case "Getränke": return "getraenke";
+        default:
+            return catName.toLowerCase().replace(/\s+/g, '-').replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/&/g, 'und');
+    }
+};
 
     MENU_DATA.forEach(cat => {
         const sectionId = getSectionId(cat.category);

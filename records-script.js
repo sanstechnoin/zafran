@@ -45,7 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelTotal = document.getElementById('panel-total');
 
     const RECORDS_PASSWORD = "zafran"; 
+    
+    // --- 🚨 VAULT STATE VARIABLES 🚨 ---
     let allFetchedRecords = []; 
+    let currentDisplayRecords = []; 
+    let isEditMode = false;
+    let currentView = 'active'; // 'active' or 'trash'
+    const MASTER_PASS = "ZafranMaster";
 
     // --- 4. SECURE LOGIN LOGIC ---
     loginButton.addEventListener('click', () => {
@@ -86,9 +92,175 @@ document.addEventListener("DOMContentLoaded", () => {
         printBtn.addEventListener('click', () => window.print());
         exportBtn.addEventListener('click', exportToCSV);
         
+        initBankVaultUI(); // 🚨 Initialize the Vault UI
         fetchRecords();
     }
 
+    // --- 🚨 5. THE ADMIN VAULT LOGIC 🚨 ---
+    function initBankVaultUI() {
+        const tableContainer = recordsTbody.parentNode; 
+        
+        // 1. Create the Top Vault Bar
+        const vaultHeader = document.createElement('div');
+        vaultHeader.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-top:20px; margin-bottom:15px; padding:12px 20px; background:rgba(212, 175, 55, 0.05); border:1px dashed var(--gold); border-radius:8px;";
+        vaultHeader.innerHTML = `
+            <div>
+                <strong style="color:var(--gold); font-size:1.2rem;">🏛️ Admin Vault</strong>
+                <span id="vault-status" style="margin-left:10px; font-size:0.9rem; color:#aaa;">(Locked)</span>
+            </div>
+            <div>
+                <button id="btn-vault-trash" class="btn-tool" style="background:transparent; border:1px solid #ff5252; color:#ff5252; padding:6px 12px; margin-right:10px; display:none; font-weight:bold;">🗑️ View Trash Bin</button>
+                <button id="btn-vault-unlock" class="btn-tool" style="background:transparent; border:1px solid var(--gold); color:var(--gold); padding:6px 12px; font-weight:bold;">🔒 Unlock Edit Mode</button>
+            </div>
+        `;
+
+        // 2. Create the Red Action Bar
+        const bulkActionBar = document.createElement('div');
+        bulkActionBar.id = "bulk-action-bar";
+        bulkActionBar.style.cssText = "display:none; padding:15px; background:rgba(220, 53, 69, 0.1); border:1px solid #ff5252; border-radius:8px; margin-bottom:15px;";
+        bulkActionBar.innerHTML = `
+            <span style="color:#ff5252; font-weight:bold; margin-right:20px;">⚠️ EDIT MODE ACTIVE</span>
+            <button id="btn-bulk-void" style="background:#ff5252; color:white; border:none; padding:8px 15px; border-radius:4px; font-weight:bold; cursor:pointer;">🗑️ Move Selected to Trash</button>
+            <button id="btn-bulk-restore" style="background:#28a745; color:white; border:none; padding:8px 15px; border-radius:4px; font-weight:bold; cursor:pointer; display:none;">♻️ Restore Selected</button>
+            <button id="btn-bulk-delete" style="background:#8B0000; color:white; border:none; padding:8px 15px; border-radius:4px; font-weight:bold; cursor:pointer; display:none; margin-left:10px;">💀 Permanently Delete</button>
+            
+            <button id="btn-vault-lock" style="background:#444; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; float:right;">Lock Vault</button>
+        `;
+
+        tableContainer.parentNode.insertBefore(vaultHeader, tableContainer);
+        tableContainer.parentNode.insertBefore(bulkActionBar, tableContainer);
+
+        // --- BUTTON LISTENERS ---
+        document.getElementById('btn-vault-unlock').onclick = () => {
+            if (!isEditMode) {
+                const pass = prompt("Enter Master Deletion Password:");
+                if (pass === MASTER_PASS) {
+                    isEditMode = true;
+                    document.getElementById('vault-status').innerText = "(UNLOCKED)";
+                    document.getElementById('vault-status').style.color = "#ff5252";
+                    document.getElementById('btn-vault-unlock').style.display = 'none';
+                    document.getElementById('btn-vault-trash').style.display = 'inline-block';
+                    bulkActionBar.style.display = 'block';
+                    updateTableView();
+                } else if (pass !== null) {
+                    alert("Incorrect Password.");
+                }
+            }
+        };
+
+        document.getElementById('btn-vault-lock').onclick = () => {
+            isEditMode = false;
+            currentView = 'active'; 
+            document.getElementById('vault-status').innerText = "(Locked)";
+            document.getElementById('vault-status').style.color = "#aaa";
+            document.getElementById('btn-vault-unlock').style.display = 'inline-block';
+            document.getElementById('btn-vault-trash').style.display = 'none';
+            document.getElementById('btn-vault-trash').innerText = "🗑️ View Trash Bin";
+            document.getElementById('btn-vault-trash').style.color = "#ff5252";
+            document.getElementById('btn-vault-trash').style.borderColor = "#ff5252";
+            bulkActionBar.style.display = 'none';
+            updateTableView();
+        };
+
+        document.getElementById('btn-vault-trash').onclick = (e) => {
+            const btnVoid = document.getElementById('btn-bulk-void');
+            const btnRestore = document.getElementById('btn-bulk-restore');
+            const btnDelete = document.getElementById('btn-bulk-delete');
+
+            if (currentView === 'active') {
+                currentView = 'trash';
+                e.target.innerText = "🔙 Back to Active Orders";
+                e.target.style.color = "#28a745";
+                e.target.style.borderColor = "#28a745";
+                btnVoid.style.display = 'none';
+                btnRestore.style.display = 'inline-block';
+                btnDelete.style.display = 'inline-block';
+            } else {
+                currentView = 'active';
+                e.target.innerText = "🗑️ View Trash Bin";
+                e.target.style.color = "#ff5252";
+                e.target.style.borderColor = "#ff5252";
+                btnVoid.style.display = 'inline-block';
+                btnRestore.style.display = 'none';
+                btnDelete.style.display = 'none';
+            }
+            updateTableView();
+        };
+
+        document.getElementById('btn-bulk-void').onclick = () => processBulkAction('void');
+        document.getElementById('btn-bulk-restore').onclick = () => processBulkAction('restore');
+        document.getElementById('btn-bulk-delete').onclick = () => processBulkAction('delete');
+    }
+
+    window.toggleAllChecks = function(masterCb) {
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = masterCb.checked);
+    };
+
+    window.processBulkAction = async function(action) {
+        const checked = document.querySelectorAll('.row-check:checked');
+        if (checked.length === 0) return alert("Select at least one record using the checkboxes.");
+        
+        let msg = "";
+        if(action === 'void') msg = `Move ${checked.length} record(s) to the Trash Bin?`;
+        if(action === 'restore') msg = `Restore ${checked.length} record(s) back to active revenue?`;
+        if(action === 'delete') msg = `💀 PERMANENTLY DELETE ${checked.length} record(s)?\n\nTHIS CANNOT BE UNDONE!`;
+        
+        if(!confirm(msg)) return;
+
+        filterBtn.disabled = true;
+        filterBtn.innerHTML = "Processing...";
+
+        try {
+            const batch = db.batch();
+            checked.forEach(cb => {
+                const docRef = db.collection('archived_orders').doc(cb.value);
+                if (action === 'void') batch.update(docRef, { isVoided: true });
+                else if (action === 'restore') batch.update(docRef, { isVoided: false });
+                else if (action === 'delete') batch.delete(docRef);
+            });
+
+            await batch.commit();
+            fetchRecords(); 
+        } catch (e) {
+            console.error("Batch Error:", e);
+            alert("Error processing request: " + e.message);
+            filterBtn.disabled = false;
+            filterBtn.innerHTML = "<span>🔍</span> Filter Records";
+        }
+    };
+
+    function updateTableHeaders() {
+        const thead = recordsTbody.parentElement.querySelector('thead');
+        if (!thead) return;
+        let tr = thead.querySelector('tr');
+        if (!tr) return;
+
+        let headers = `
+            <th>Date</th>
+            <th>Time</th>
+            <th>Table / Customer</th>
+            <th>Type</th>
+            <th>Payment</th>
+            <th style="text-align:right;">Amount</th>
+            <th style="text-align:center;">Action</th>
+        `;
+
+        if (isEditMode) {
+            headers = `<th style="width:40px; text-align:center;"><input type="checkbox" id="check-all" onclick="toggleAllChecks(this)" style="transform:scale(1.5); cursor:pointer;"></th>` + headers;
+        }
+        tr.innerHTML = headers;
+    }
+
+    function updateTableView() {
+        currentDisplayRecords = allFetchedRecords.filter(r => currentView === 'trash' ? r.isVoided : !r.isVoided);
+        
+        updateTableHeaders();
+        renderRecords(currentDisplayRecords);
+        calculateKPIs(currentDisplayRecords);
+    }
+
+
+    // --- 6. DATA FETCHING (Using your exact logic) ---
     async function fetchRecords() {
         let startDate = new Date(startDateInput.value + 'T00:00:00');
         let endDate = new Date(endDateInput.value + 'T23:59:59');
@@ -97,10 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         filterBtn.disabled = true;
         filterBtn.innerHTML = "<span>⏳</span> Loading...";
-        recordsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#888;">Retrieving Data from Cloud...</td></tr>`;
+        let colCount = isEditMode ? 8 : 7;
+        recordsTbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center; padding:30px; color:#888;">Retrieving Data from Cloud...</td></tr>`;
 
         try {
-
             const query = db.collection("archived_orders")
                 .where("closedAt", ">=", firebase.firestore.Timestamp.fromDate(startDate))
                 .where("closedAt", "<=", firebase.firestore.Timestamp.fromDate(endDate))
@@ -108,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const snapshot = await query.get();
             
-            // --- 🚨 FIXED TABLE GROUPING LOGIC 🚨 ---
+            // --- YOUR EXACT GROUPING LOGIC ---
             let groupedRecords = {};
 
             snapshot.docs.forEach(doc => {
@@ -116,7 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 let groupKey = doc.id; 
                 
-		            // Group Dine-in by Table + Day (ignores milliseconds so they merge!)
                 if ((data.orderType === 'dine-in' || !data.orderType) && data.table && data.closedAt) {
                     let timeVal = 0;
                     if (typeof data.closedAt.toMillis === 'function') {
@@ -140,17 +311,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-
             const cleanRecords = Object.values(groupedRecords);
             
             allFetchedRecords = cleanRecords.reverse(); 
             
-            renderRecords(allFetchedRecords);
-            calculateKPIs(allFetchedRecords);
+            // Route through the Vault View Updater instead of rendering directly
+            updateTableView();
 
         } catch (error) {
             console.error("Error:", error);
-            recordsTbody.innerHTML = `<tr><td colspan="6" style="color:#ff5252; text-align:center; padding:20px;">
+            let colCount = isEditMode ? 8 : 7;
+            recordsTbody.innerHTML = `<tr><td colspan="${colCount}" style="color:#ff5252; text-align:center; padding:20px;">
                 <strong>System Error:</strong> ${error.message}<br>
                 <small>Check browser console (F12) for Index Creation Link if first run.</small>
             </td></tr>`;
@@ -162,9 +333,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderRecords(records) {
         recordsTbody.innerHTML = ""; 
+        let colCount = isEditMode ? 8 : 7;
 
         if (records.length === 0) {
-            recordsTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#666;">No sales records found for this period.</td></tr>`;
+            let emptyMsg = currentView === 'trash' ? "Trash Bin is empty." : "No sales records found for this period.";
+            recordsTbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center; padding:30px; color:#666;">${emptyMsg}</td></tr>`;
             return;
         }
 
@@ -194,7 +367,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableName = `Table ${tableName}`;
             }
 	    
-	          // --- 🚨 PAYMENT BADGES 🚨 ---
             let payBadge = `<span class="badge" style="background:#28a745; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💵 CASH</span>`;
             if (record.paymentCollected === 'card') {
                 payBadge = `<span class="badge" style="background:#007bff; color:white; border:none; padding:3px 6px; border-radius:4px; font-size:0.75rem;">💳 CARD</span>`;
@@ -202,18 +374,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let amountDisplay = `${Number(amount).toFixed(2).replace('.', ',')} €`;
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+            let rowHtml = `
                 <td>${recordDate}</td>
                 <td>${recordTime}</td>
                 <td style="font-weight:600; color:#fff;">${tableName}</td>
                 <td>${typeBadge}</td>
-		            <td>${payBadge}</td>
+		        <td>${payBadge}</td>
                 <td style="text-align:right; font-family:monospace; font-size:1rem; color:var(--success);">${Number(amount).toFixed(2)} €</td>
                 <td style="text-align:center;">
                     <button class="btn-tool" style="padding:4px 10px; font-size:0.8rem; background:transparent; border:1px solid #555;" onclick="window.showDetail('${record.id}')">View</button>
                 </td>
             `;
+
+            // Inject checkboxes if unlocked
+            if (isEditMode) {
+                rowHtml = `<td style="text-align:center;"><input type="checkbox" class="row-check" value="${record.id}" style="transform:scale(1.5); cursor:pointer;"></td>` + rowHtml;
+            }
+
+            const tr = document.createElement('tr');
+            if (currentView === 'trash') tr.style.opacity = '0.5'; // Dim trashed items
+            tr.innerHTML = rowHtml;
             recordsTbody.appendChild(tr);
         });
     }
@@ -396,7 +576,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p>Tel: +49 162 3757839</p>
                 <p>St-Nr: 209/5000/1234</p>
             </div>
-            
             <div class="divider"></div>          
             <div style="display:flex; justify-content:space-between;">
                 <span>Datum: ${dateStr}</span>
@@ -406,22 +585,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>Kunde: ${tableName}</span>
                 <span>Beleg: #${orderIdShort}</span>
             </div>
-            
             <div class="divider"></div>            
             <div class="bold" style="display:flex; justify-content:space-between; margin-bottom: 8px;">
                 <span>Artikel</span>
                 <span>EUR</span>
             </div>
-            
             ${itemsHtml}
             ${discountHtml}
-            
             <div class="thick-divider"></div>            
             <div class="bold" style="display:flex; justify-content:space-between; font-size: 16px;">
                 <span>GESAMTBETRAG</span>
                 <span>${finalPaid.toFixed(2).replace('.', ',')} €</span>
             </div>
-            
             <div class="divider"></div>            
             <div style="display:flex; justify-content:space-between; font-size: 11px;">
                 <span>Netto</span>
@@ -431,7 +606,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>MwSt (${taxLabel})</span>
                 <span>${taxAmount.toFixed(2).replace('.', ',')}</span>
             </div>
-            
             <div class="divider"></div>            
             <div class="text-center" style="font-size: 10px; margin-top: 15px; color: #444;">
                 <p>TSE-Signatur (KassenSichV):</p>
@@ -439,7 +613,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p>Seriennummer: ER3984719002</p>
                 <p style="margin-top:15px; color:#000; font-size: 12px;" class="bold">Vielen Dank für Ihren Besuch!</p>
             </div>
-            
             <script>
                 window.onload = function() {
                     setTimeout(function() {
@@ -468,7 +641,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- EXPORT TO CSV ---
     function exportToCSV() {
-        if(allFetchedRecords.length === 0) {
+        // Only export ACTIVE displayed records
+        if(currentDisplayRecords.length === 0) {
             alert("No data to export.");
             return;
         }
@@ -476,7 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += "Date,Time,OrderType,Payment,Table/Customer,Items,TotalAmount(EUR)\n";
 
-        allFetchedRecords.forEach(r => {
+        currentDisplayRecords.forEach(r => {
             let dateStr = "", timeStr = "";
             if (r.closedAt && r.closedAt.toDate) {
                 const d = r.closedAt.toDate();
@@ -484,12 +658,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 timeStr = d.toLocaleTimeString('de-DE');
             }            
             const name = (r.orderType === 'dine-in') ? `Table ${r.table}` : (r.customerName || "Customer");
-            const total = Number(r.paidAmount || r.total || 0).toFixed(2);
-			let payText = "CASH";
+            const total = Number(r.paidAmount || r.total || 0).toFixed(2);            
+            
+            let payText = "CASH";
             if (r.paymentCollected === 'card') payText = "CARD";
+
             let itemStr = "";
             if(r.items) itemStr = r.items.map(i => `${i.quantity}x ${i.name}`).join(" | ");
             itemStr = itemStr.replace(/,/g, "").replace(/"/g, "'"); 
+            
             csvContent += `${dateStr},${timeStr},${r.orderType},${payText},${name},"${itemStr}",${total}\n`;
         });
 

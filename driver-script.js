@@ -358,20 +358,28 @@ window.nativeShare = function(phone, url) {
     }
 }
 
-// --- 8. COMPLETE DELIVERY (Modified for Cash Control) ---
+// --- 8. COMPLETE DELIVERY (Modified for Cash & Card Control) ---
+let pendingDeliveryOrderId = null;
+
 window.completeDelivery = function(orderId) {
     if(navigator.vibrate) navigator.vibrate(50);
 
-    // 1. Ask Driver for confirmation
-    if(!confirm("💰 Hast du das Geld erhalten und das Essen übergeben?")) return;
+    // Instead of finishing instantly, we open the Cash/Card popup!
+    pendingDeliveryOrderId = orderId;
+    document.getElementById('payment-select-modal').classList.remove('hidden');
+}
 
-    // 2. Update Status to 'delivered' (NOT 'completed')
-    // This tells the Waiter: "Driver is back, check the cash."
-    db.collection("orders").doc(orderId).update({
+// NEW: Function triggered when Driver clicks Cash or Card in the popup
+window.confirmDeliveryPayment = function(method) {
+    if(!pendingDeliveryOrderId) return;
+
+    // 1. Update Status to 'delivered' AND save the Payment Method
+    db.collection("orders").doc(pendingDeliveryOrderId).update({
         status: "delivered", 
+        paymentCollected: method, // Saves 'cash' or 'card'
         driverDeliveredAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        // 3. Stop GPS Tracking to save battery
+        // 2. Stop GPS Tracking to save battery
         if(watchId !== null) {
             navigator.geolocation.clearWatch(watchId);
             watchId = null;
@@ -380,6 +388,10 @@ window.completeDelivery = function(orderId) {
     }).catch((error) => {
         alert("Error: " + error.message);
     });
+
+    // 3. Hide the popup and reset
+    document.getElementById('payment-select-modal').classList.add('hidden');
+    pendingDeliveryOrderId = null;
 }
 
 // --- 9. ORDER ITEMS MODAL ---

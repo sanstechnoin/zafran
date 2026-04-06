@@ -1,5 +1,4 @@
-// --- 1. INITIALIZE FIREBASE ---
-const db = firebase.firestore();
+// --- 1. INITIALIZE FIREBASE via config file---
 
 // --- 2. HELPER: GET DISH NUMBER & ALLERGY ---
 function getDishNumber(name) {

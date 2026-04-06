@@ -39,10 +39,10 @@ function renderDynamicMenu() {
         cat.items.forEach(item => {
             const priceStr = item.price.toFixed(2).replace('.', ',');
             const descHtml = item.desc ? `<span class="description">${item.desc}</span>` : '';
-            
+            const allergyHtml = item.allergy ? `<sup style="color: #aaa; margin-left: 3px; font-weight: normal;">${item.allergy}</sup>` : '';
             html += `
             <li>
-                <span class="item"><strong>${item.id}. ${item.name} <sup></sup></strong>${descHtml}</span>
+                <span class="item"><strong>${item.id}. ${item.name}${allergyHtml}</strong>${descHtml}</span>
                 <div class="price-action">
                     <span class="price">${priceStr} €</span>
                     <div class="quantity-controls hidden">

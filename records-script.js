@@ -92,11 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
         printBtn.addEventListener('click', () => window.print());
         exportBtn.addEventListener('click', exportToCSV);
         
-        initBankVaultUI(); // 🚨 Initialize the Vault UI
+        initBankVaultUI(); // 🚨 Initialize the Vault UI & Custom Modals
         fetchRecords();
     }
 
-    // --- 🚨 5. THE ADMIN VAULT LOGIC 🚨 ---
+    // --- 🚨 5. THE ADMIN VAULT & CUSTOM MODAL LOGIC 🚨 ---
     function initBankVaultUI() {
         const tableContainer = recordsTbody.parentNode; 
         
@@ -130,22 +130,41 @@ document.addEventListener("DOMContentLoaded", () => {
         tableContainer.parentNode.insertBefore(vaultHeader, tableContainer);
         tableContainer.parentNode.insertBefore(bulkActionBar, tableContainer);
 
+        // 3. Create the Custom In-House Modals
+        const modalHtml = `
+            <div id="vault-custom-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center;">
+                
+                <div id="vault-pass-box" style="display:none; background:#222; padding:30px; border-radius:12px; border:2px solid var(--gold); text-align:center; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+                    <h3 style="color:var(--gold); margin-top:0; font-size:1.5rem;">🔒 Vault Security</h3>
+                    <p style="color:#ccc; margin-bottom:20px;">Enter Master Deletion Password:</p>
+                    <input type="password" id="vault-pass-input" style="width:100%; padding:12px; background:#111; color:white; border:1px solid #555; border-radius:4px; text-align:center; font-size:1.2rem; margin-bottom:20px;">
+                    <p id="vault-pass-error" style="color:#ff5252; margin-top:-10px; margin-bottom:15px; display:none; font-size:0.9rem;">Incorrect Password</p>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="closeVaultModal()" style="flex:1; padding:12px; background:#444; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Cancel</button>
+                        <button onclick="submitVaultPassword()" style="flex:1; padding:12px; background:var(--gold); color:black; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Unlock</button>
+                    </div>
+                </div>
+
+                <div id="vault-confirm-box" style="display:none; background:#222; padding:30px; border-radius:12px; border:2px solid #ff5252; text-align:center; width:90%; max-width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+                    <h3 style="color:#ff5252; margin-top:0; font-size:1.5rem;">⚠️ Confirm Action</h3>
+                    <p id="vault-confirm-msg" style="color:white; margin-bottom:25px; font-size:1.1rem; white-space:pre-wrap;"></p>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="closeVaultModal()" style="flex:1; padding:12px; background:#444; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Cancel</button>
+                        <button id="vault-confirm-btn" style="flex:1; padding:12px; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;"></button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Allow pressing Enter in password box
+        document.getElementById('vault-pass-input').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') submitVaultPassword();
+        });
+
         // --- BUTTON LISTENERS ---
         document.getElementById('btn-vault-unlock').onclick = () => {
-            if (!isEditMode) {
-                const pass = prompt("Enter Master Deletion Password:");
-                if (pass === MASTER_PASS) {
-                    isEditMode = true;
-                    document.getElementById('vault-status').innerText = "(UNLOCKED)";
-                    document.getElementById('vault-status').style.color = "#ff5252";
-                    document.getElementById('btn-vault-unlock').style.display = 'none';
-                    document.getElementById('btn-vault-trash').style.display = 'inline-block';
-                    bulkActionBar.style.display = 'block';
-                    updateTableView();
-                } else if (pass !== null) {
-                    alert("Incorrect Password.");
-                }
-            }
+            if (!isEditMode) showVaultModal('password');
         };
 
         document.getElementById('btn-vault-lock').onclick = () => {
@@ -192,41 +211,108 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('btn-bulk-delete').onclick = () => processBulkAction('delete');
     }
 
+    // --- GLOBAL MODAL CONTROLLERS ---
+    window.showVaultModal = function(type, options) {
+        const overlay = document.getElementById('vault-custom-modal');
+        const passBox = document.getElementById('vault-pass-box');
+        const confirmBox = document.getElementById('vault-confirm-box');
+        
+        overlay.style.display = 'flex';
+
+        if (type === 'password') {
+            passBox.style.display = 'block';
+            confirmBox.style.display = 'none';
+            document.getElementById('vault-pass-input').value = '';
+            document.getElementById('vault-pass-error').style.display = 'none';
+            setTimeout(() => document.getElementById('vault-pass-input').focus(), 100);
+        } else {
+            passBox.style.display = 'none';
+            confirmBox.style.display = 'block';
+            document.getElementById('vault-confirm-msg').innerText = options.msg;
+            
+            const btn = document.getElementById('vault-confirm-btn');
+            btn.innerText = options.btnText;
+            btn.style.background = options.btnColor;
+            
+            // Swap out the button to prevent duplicate event listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            newBtn.addEventListener('click', options.callback);
+        }
+    };
+
+    window.closeVaultModal = function() {
+        document.getElementById('vault-custom-modal').style.display = 'none';
+    };
+
+    window.submitVaultPassword = function() {
+        const input = document.getElementById('vault-pass-input').value;
+        if (input === MASTER_PASS) {
+            closeVaultModal();
+            isEditMode = true;
+            document.getElementById('vault-status').innerText = "(UNLOCKED)";
+            document.getElementById('vault-status').style.color = "#ff5252";
+            document.getElementById('btn-vault-unlock').style.display = 'none';
+            document.getElementById('btn-vault-trash').style.display = 'inline-block';
+            document.getElementById('bulk-action-bar').style.display = 'block';
+            updateTableView();
+        } else {
+            document.getElementById('vault-pass-error').style.display = 'block';
+        }
+    };
+
     window.toggleAllChecks = function(masterCb) {
         document.querySelectorAll('.row-check').forEach(cb => cb.checked = masterCb.checked);
     };
 
     window.processBulkAction = async function(action) {
         const checked = document.querySelectorAll('.row-check:checked');
-        if (checked.length === 0) return alert("Select at least one record using the checkboxes.");
+        if (checked.length === 0) return alert("Please select at least one record using the checkboxes.");
         
-        let msg = "";
-        if(action === 'void') msg = `Move ${checked.length} record(s) to the Trash Bin?`;
-        if(action === 'restore') msg = `Restore ${checked.length} record(s) back to active revenue?`;
-        if(action === 'delete') msg = `💀 PERMANENTLY DELETE ${checked.length} record(s)?\n\nTHIS CANNOT BE UNDONE!`;
+        let msg = ""; let btnText = ""; let btnColor = "";
         
-        if(!confirm(msg)) return;
-
-        filterBtn.disabled = true;
-        filterBtn.innerHTML = "Processing...";
-
-        try {
-            const batch = db.batch();
-            checked.forEach(cb => {
-                const docRef = db.collection('archived_orders').doc(cb.value);
-                if (action === 'void') batch.update(docRef, { isVoided: true });
-                else if (action === 'restore') batch.update(docRef, { isVoided: false });
-                else if (action === 'delete') batch.delete(docRef);
-            });
-
-            await batch.commit();
-            fetchRecords(); 
-        } catch (e) {
-            console.error("Batch Error:", e);
-            alert("Error processing request: " + e.message);
-            filterBtn.disabled = false;
-            filterBtn.innerHTML = "<span>🔍</span> Filter Records";
+        if(action === 'void') {
+            msg = `Move ${checked.length} record(s) to the Trash Bin?`;
+            btnText = "🗑️ Move to Trash"; btnColor = "#ff5252";
+        } else if(action === 'restore') {
+            msg = `Restore ${checked.length} record(s) back to active revenue?`;
+            btnText = "♻️ Restore"; btnColor = "#28a745";
+        } else if(action === 'delete') {
+            msg = `💀 PERMANENTLY DELETE ${checked.length} record(s)?\n\nTHIS CANNOT BE UNDONE!`;
+            btnText = "💀 Delete Forever"; btnColor = "#8B0000";
         }
+        
+        showVaultModal('confirm', {
+            msg: msg, btnText: btnText, btnColor: btnColor,
+            callback: async () => {
+                closeVaultModal();
+                filterBtn.disabled = true;
+                filterBtn.innerHTML = "Processing...";
+
+                try {
+                    const batch = db.batch();
+                    checked.forEach(cb => {
+                        // 🚨 FIX: Extract ALL document IDs hidden in the data attribute
+                        const ids = cb.dataset.docids.split(',');
+                        ids.forEach(id => {
+                            if (!id.trim()) return;
+                            const docRef = db.collection('archived_orders').doc(id.trim());
+                            if (action === 'void') batch.update(docRef, { isVoided: true });
+                            else if (action === 'restore') batch.update(docRef, { isVoided: false });
+                            else if (action === 'delete') batch.delete(docRef);
+                        });
+                    });
+
+                    await batch.commit();
+                    fetchRecords(); 
+                } catch (e) {
+                    console.error("Batch Error:", e);
+                    alert("Error processing request: " + e.message);
+                    filterBtn.disabled = false;
+                    filterBtn.innerHTML = "<span>🔍</span> Filter Records";
+                }
+            }
+        });
     };
 
     function updateTableHeaders() {
@@ -259,8 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateKPIs(currentDisplayRecords);
     }
 
-
-    // --- 6. DATA FETCHING (Using your exact logic) ---
+    // --- 6. DATA FETCHING (YOUR EXACT LOGIC, WITH docIds TRACKING ADDED) ---
     async function fetchRecords() {
         let startDate = new Date(startDateInput.value + 'T00:00:00');
         let endDate = new Date(endDateInput.value + 'T23:59:59');
@@ -279,8 +364,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 .orderBy("closedAt", "asc"); 
 
             const snapshot = await query.get();
-            
-            // --- YOUR EXACT GROUPING LOGIC ---
             let groupedRecords = {};
 
             snapshot.docs.forEach(doc => {
@@ -300,11 +383,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!groupedRecords[groupKey]) {
                     groupedRecords[groupKey] = { 
-                        id: doc.id, 
+                        id: groupKey, // Safe UI identifier
+                        docIds: [doc.id], // Tracks real DB IDs for deletion
                         ...data, 
                         items: data.items ? [...data.items] : [] 
                     };
                 } else {
+                    groupedRecords[groupKey].docIds.push(doc.id);
                     if (data.items) {
                         groupedRecords[groupKey].items.push(...data.items);
                     }
@@ -314,9 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const cleanRecords = Object.values(groupedRecords);
             
             allFetchedRecords = cleanRecords.reverse(); 
-            
-            // Route through the Vault View Updater instead of rendering directly
-            updateTableView();
+            updateTableView(); 
 
         } catch (error) {
             console.error("Error:", error);
@@ -386,9 +469,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
             `;
 
-            // Inject checkboxes if unlocked
+            // Inject checkboxes with ALL hidden IDs if unlocked
             if (isEditMode) {
-                rowHtml = `<td style="text-align:center;"><input type="checkbox" class="row-check" value="${record.id}" style="transform:scale(1.5); cursor:pointer;"></td>` + rowHtml;
+                const docIdsStr = record.docIds ? record.docIds.join(',') : record.id;
+                rowHtml = `<td style="text-align:center;"><input type="checkbox" class="row-check" data-docids="${docIdsStr}" style="transform:scale(1.5); cursor:pointer;"></td>` + rowHtml;
             }
 
             const tr = document.createElement('tr');
@@ -550,16 +634,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <title>Kassenbon #${orderIdShort}</title>
             <style>
                 @page { margin: 0; }
-                body { 
-                    font-family: 'Courier New', Courier, monospace; 
-                    font-size: 13px; 
-                    color: #000; 
-                    background: #fff;
-                    margin: 0; 
-                    padding: 15px;
-                    width: 300px;
-                    box-sizing: border-box;
-                }
+                body { font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #000; background: #fff; margin: 0; padding: 15px; width: 300px; box-sizing: border-box; }
                 .text-center { text-align: center; }
                 .bold { font-weight: bold; }
                 .divider { border-top: 1px dashed #000; margin: 10px 0; }
@@ -576,51 +651,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p>Tel: +49 162 3757839</p>
                 <p>St-Nr: 209/5000/1234</p>
             </div>
-            <div class="divider"></div>          
-            <div style="display:flex; justify-content:space-between;">
-                <span>Datum: ${dateStr}</span>
-                <span>Zeit: ${timeStr}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span>Kunde: ${tableName}</span>
-                <span>Beleg: #${orderIdShort}</span>
-            </div>
-            <div class="divider"></div>            
-            <div class="bold" style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-                <span>Artikel</span>
-                <span>EUR</span>
-            </div>
+            <div class="divider"></div>
+            <div style="display:flex; justify-content:space-between;"><span>Datum: ${dateStr}</span><span>Zeit: ${timeStr}</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Kunde: ${tableName}</span><span>Beleg: #${orderIdShort}</span></div>
+            <div class="divider"></div>
+            <div class="bold" style="display:flex; justify-content:space-between; margin-bottom: 8px;"><span>Artikel</span><span>EUR</span></div>
             ${itemsHtml}
             ${discountHtml}
-            <div class="thick-divider"></div>            
-            <div class="bold" style="display:flex; justify-content:space-between; font-size: 16px;">
-                <span>GESAMTBETRAG</span>
-                <span>${finalPaid.toFixed(2).replace('.', ',')} €</span>
-            </div>
-            <div class="divider"></div>            
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-                <span>Netto</span>
-                <span>${netAmount.toFixed(2).replace('.', ',')}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-                <span>MwSt (${taxLabel})</span>
-                <span>${taxAmount.toFixed(2).replace('.', ',')}</span>
-            </div>
-            <div class="divider"></div>            
+            <div class="thick-divider"></div>
+            <div class="bold" style="display:flex; justify-content:space-between; font-size: 16px;"><span>GESAMTBETRAG</span><span>${finalPaid.toFixed(2).replace('.', ',')} €</span></div>
+            <div class="divider"></div>
+            <div style="display:flex; justify-content:space-between; font-size: 11px;"><span>Netto</span><span>${netAmount.toFixed(2).replace('.', ',')}</span></div>
+            <div style="display:flex; justify-content:space-between; font-size: 11px;"><span>MwSt (${taxLabel})</span><span>${taxAmount.toFixed(2).replace('.', ',')}</span></div>
+            <div class="divider"></div>
             <div class="text-center" style="font-size: 10px; margin-top: 15px; color: #444;">
                 <p>TSE-Signatur (KassenSichV):</p>
                 <p style="word-break: break-all; margin-top: 5px;">TSE-${tseSig}</p>
                 <p>Seriennummer: ER3984719002</p>
                 <p style="margin-top:15px; color:#000; font-size: 12px;" class="bold">Vielen Dank für Ihren Besuch!</p>
             </div>
-            <script>
-                window.onload = function() {
-                    setTimeout(function() {
-                        window.print();
-                        setTimeout(function() { window.close(); }, 500);
-                    }, 250);
-                }
-            </script>
+            <script>window.onload = function() { setTimeout(function() { window.print(); setTimeout(function() { window.close(); }, 500); }, 250); }</script>
         </body>
         </html>
         `;

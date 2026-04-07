@@ -3,7 +3,6 @@
 let MENU_DATA = [];
 let MENU_ITEMS = [];
 
-// Real-time listener connects directly to your Firebase Database
 db.collection('settings').doc('menu').onSnapshot((doc) => {
     if (doc.exists) {
         const rawData = doc.data().menuData || [];

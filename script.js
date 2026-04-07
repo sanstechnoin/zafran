@@ -232,16 +232,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         const doc = await db.collection('coupons').doc(code).get();
         
         if (!doc.exists) {
-            msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Ungültiger Code.</div>`;
+            // 🚨 1. Typo / Doesn't exist at all
+            msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Kein gültiger Code.</div>`;
             currentCoupon = null;
             updateCart();
         } else {
             const data = doc.data();
             const today = new Date().toISOString().split('T')[0];
 
-            // Safely catch deactivated codes from the Admin panel
+            // 🚨 2. Code exists, but you hit the Kill-Switch in Admin
             if (data.active === false) {
-                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Dieser Code ist deaktiviert.</div>`;
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Nicht mehr aktiv.</div>`;
                 currentCoupon = null;
                 updateCart();
             }

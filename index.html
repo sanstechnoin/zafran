@@ -528,8 +528,7 @@
     <section id="offers" class="offers-section">
         <div class="container">
             <h2 class="text-center" style="font-size: 2.5rem; color: var(--gold); margin-bottom: 40px;" data-i18n="offer_title">Events & Angebote</h2>
-            <div class="offers-grid">
-                
+            <div class="offers-grid" id="dynamic-offers-grid">                
                 <div class="offer-card">
                     <span class="offer-tag" style="background: var(--gold); color: #000;" data-i18n="tag_event">Event</span>
                     <h3 class="offer-title" data-i18n="buffet_title">Sonntagsbuffet</h3>
@@ -991,8 +990,7 @@
         }
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>    
     <script src="firebase-config.js"></script>
     <script>
         async function loadDynamicHomepageData() {
@@ -1042,20 +1040,44 @@
                     valueText = `${data.discountValue}€ Rabatt`;
                 }
 
-                let minOrderText = data.minOrder ? `Mindestbestellwert: ${data.minOrder} €` : 'Kein Mindestbestellwert';
                 let validForText = data.validFor === 'pickup' ? 'Nur bei Abholung' : (data.validFor === 'delivery' ? 'Nur bei Lieferung' : 'Abholung & Lieferung');
 
+                // --- SMART CONDITIONS LOGIC ---
+                let reqs = [];
+                if(data.minOrder > 0) reqs.push(`Min. ${data.minOrder} €`);
+                if(data.minMainDishes > 0) reqs.push(`Min. ${data.minMainDishes} Hauptgerichte`);
+                if(data.validFor === 'pickup') reqs.push(`Nur Abholung`);
+                if(data.validFor === 'delivery') reqs.push(`Nur Lieferung`);
+                
+                if (data.mode === 'recurring' && data.recurringRule) {
+                    const weeks = { 'week1': '1. Woche', 'week2': '2. Woche', 'week3': '3. Woche', 'week4': '4. Woche' };
+                    reqs.push(`Nur in der ${weeks[data.recurringRule] || data.recurringRule}`);
+                }
+                
+                if (data.validCategories && data.validCategories !== 'all' && data.validCategories.length > 0) {
+                    let catNames = Array.isArray(data.validCategories) ? data.validCategories.join(', ') : data.validCategories;
+                    catNames = catNames.replace('fisch-garnelen', 'Fisch').replace('vegetarisches', 'Vegetarisch').replace('getraenke', 'Getränke');
+                    reqs.push(`Gilt für: ${catNames}`);
+                }
+
+                let conditionStr = reqs.length > 0 ? `Bedingungen: ${reqs.join(' | ')}` : "Keine Mindestbestellbedingungen";
+
+                // --- BUILD THE HTML CARD ---
                 dynamicCardsHtml += `
-                <div class="offer-card" style="border: 2px solid var(--gold); box-shadow: 0 0 20px rgba(212,175,55,0.15);">
-                    <span class="offer-tag" style="background: ${badgeColor}; color: #fff;">${tagText}</span>
-                    <h3 class="offer-title">${titleText}</h3>
-                    <p style="font-size: 0.9rem; color: #aaa;">${validForText}</p>
-                    <div class="offer-detail">
-                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--gold);">${valueText}</p>
+                <div class="offer-card" style="border: 2px solid var(--gold); box-shadow: 0 0 20px rgba(212,175,55,0.15); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <span class="offer-tag" style="background: ${badgeColor}; color: #fff;">${tagText}</span>
+                        <h3 class="offer-title">${titleText}</h3>
+                        <p style="font-size: 0.9rem; color: #aaa;">${validForText}</p>
+                        <div class="offer-detail">
+                            <p style="font-size: 1.2rem; font-weight: bold; color: var(--gold); margin-bottom: 15px;">${valueText}</p>
+                        </div>
                     </div>
-                    <p style="font-size: 0.8rem; font-style: italic; color: #888;">${minOrderText}</p>
-                    <div class="code-box" style="border-color: ${badgeColor}; color: ${badgeColor};">CODE: ${data.code}</div>
-                    <a href="${data.validFor === 'delivery' ? 'delivery.html' : 'pickup.html'}" class="btn btn-red" style="margin-top: 15px; background: ${badgeColor};">Jetzt Einlösen</a>
+                    <div style="margin-top: auto;">
+                        <p style="font-size: 0.8rem; font-style: italic; color: #888; border-top: 1px solid #444; padding-top: 10px; margin-top: 10px;">${conditionStr}</p>
+                        <div class="code-box" style="border-color: ${badgeColor}; color: ${badgeColor}; margin-top: 15px;">CODE: ${data.code}</div>
+                        <a href="${data.validFor === 'delivery' ? 'delivery.html' : 'pickup.html'}" class="btn btn-red" style="margin-top: 15px; background: ${badgeColor};">Jetzt Einlösen</a>
+                    </div>
                 </div>`;
             });
 

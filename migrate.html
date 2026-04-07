@@ -17,6 +17,7 @@
     <h2 id="status-text" style="margin-top: 30px; color: white;"></h2>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
     <script src="firebase-config.js"></script>
@@ -28,11 +29,16 @@
             const status = document.getElementById('status-text');
             
             btn.disabled = true;
-            btn.innerText = "Uploading...";
-            status.innerText = "Connecting to Firebase...";
+            btn.innerText = "Authenticating & Uploading...";
+            status.innerText = "Logging in as Admin...";
 
             try {
-                // We save the entire menu as a single master document for blazing fast load times
+                // 1. Authenticate as Admin first!
+                await firebase.auth().signInWithEmailAndPassword("webmaster@zafraneuskirchen.de", "!Zafran2025");
+                
+                status.innerText = "Admin verified. Uploading menu...";
+
+                // 2. Upload the data
                 await db.collection('system_config').doc('menu_master').set({
                     menuData: MENU_DATA,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()

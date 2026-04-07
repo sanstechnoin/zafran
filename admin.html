@@ -287,6 +287,9 @@
             <button class="tab-btn active" onclick="switchTab('tab-settings', this)">
                 <span class="tab-icon">⚙️</span> <span class="tab-text" data-i18n="tab_settings">Web</span>
             </button>
+            <button class="tab-btn" onclick="switchTab('tab-menu', this)">
+                <span class="tab-icon">🍔</span> <span class="tab-text" data-i18n="tab_menu">Menu</span>
+            </button>
             <button class="tab-btn" onclick="switchTab('tab-hours', this)">
                 <span class="tab-icon">⏰</span> <span class="tab-text" data-i18n="tab_hours">Zeit</span>
             </button>
@@ -668,15 +671,60 @@
                     </table>
                 </div>
             </div>
+            <div id="tab-menu" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 style="margin: 0; border:none; padding:0;">🍔 Menü Manager</h2>
+                    <button class="btn-small btn-blue" onclick="addCategory()" style="margin: 0; min-width: 150px;">+ Neue Kategorie</button>
+                </div>
+                <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;">Änderungen werden live in die Firebase Datenbank gespeichert.</p>
 
+                <div id="admin-menu-container">
+                </div>
+            </div>
         </div>
     </main>
 </div>
-
+<div id="menu-edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--gold); width:90%; max-width:500px; max-height:90vh; overflow-y:auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">
+        <h3 id="menu-modal-title" style="color:var(--gold); margin-top:0;">Artikel bearbeiten</h3>
+        <form id="menu-item-form">
+            <input type="hidden" id="edit-cat-index">
+            <input type="hidden" id="edit-item-index">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nummer (ID) *</label>
+                    <input type="text" id="edit-item-id" required placeholder="z.B. 114">
+                </div>
+                <div class="form-group">
+                    <label>Preis (€) *</label>
+                    <input type="number" step="0.01" id="edit-item-price" required placeholder="5.50">
+                </div>
+                <div class="form-group full-width">
+                    <label>Name *</label>
+                    <input type="text" id="edit-item-name" required placeholder="Artikelname">
+                </div>
+                <div class="form-group full-width">
+                    <label>Beschreibung (Zutaten, Details)</label>
+                    <textarea id="edit-item-desc" rows="2" placeholder="Nach indischer Art..."></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Allergene (Komma-getrennt)</label>
+                    <input type="text" id="edit-item-allergy" placeholder="z.B. A, G, E">
+                </div>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="button" onclick="document.getElementById('menu-edit-modal').style.display='none'" style="background:#444; color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Abbrechen</button>
+                <button type="submit" style="background:var(--success-green); color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script> 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
+<script src="firebase-config.js"></script>
 <script>
     // --- EMAILJS CONFIG FOR RESERVATIONS ---
     emailjs.init("T020QG7Dq2gI1E_8J"); 
@@ -764,17 +812,6 @@
         renderWeeklySchedule();
     }
 
-    // --- FIREBASE INIT ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
-      authDomain: "zaffran-delight.firebaseapp.com",
-      projectId: "zaffran-delight",
-      storageBucket: "zaffran-delight.firebasestorage.app",
-      messagingSenderId: "1022960860126",
-      appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
     const ADMIN_PASSWORD = "zafran"; 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1332,6 +1369,161 @@
         alert("Pop-Up Banner gespeichert!");
     });
 
+    // ==========================================
+    // 6. MENU MANAGER LOGIC
+    // ==========================================
+    let adminMenuData = [];
+
+    // Modify your existing initAdmin() function to ALSO load the menu
+    const originalInitAdmin = initAdmin;
+    initAdmin = function() {
+        originalInitAdmin();
+        loadAdminMenu();
+    };
+
+    function loadAdminMenu() {
+        db.collection('settings').doc('menu').get().then(doc => {
+            if (doc.exists) {
+                adminMenuData = doc.data().menuData || [];
+                renderAdminMenu();
+            }
+        });
+    }
+
+    function renderAdminMenu() {
+        const container = document.getElementById('admin-menu-container');
+        let html = '';
+        
+        adminMenuData.forEach((cat, catIndex) => {
+            html += `
+            <div style="background:#111; border:1px solid #333; border-radius:8px; margin-bottom:20px; overflow:hidden;">
+                <div style="background:#222; padding:15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gold);">
+                    <h3 style="margin:0; color:var(--gold); font-size:1.2rem; border:none; padding:0;">${cat.category}</h3>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-small" style="background:var(--info-blue); color:white; margin:0;" onclick="openItemModal(${catIndex}, -1)">+ Artikel</button>
+                        <button class="btn-small" style="background:var(--danger-red); color:white; margin:0;" onclick="deleteCategory(${catIndex})">🗑️ Kat. löschen</button>
+                    </div>
+                </div>
+                <div class="table-container" style="margin-top:0;">
+                    <table style="width:100%; border-collapse: collapse; min-width: 600px;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #444; background:#1a1a1a;">
+                                <th style="padding:10px; text-align:left; color:#888; width:60px;">ID</th>
+                                <th style="padding:10px; text-align:left; color:#888;">Name & Info</th>
+                                <th style="padding:10px; text-align:left; color:#888; width:100px;">Preis</th>
+                                <th style="padding:10px; text-align:right; color:#888; width:120px;">Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            cat.items.forEach((item, itemIndex) => {
+                const allergyStr = item.allergy ? `<span class="badge" style="background:#ff4444; color:white; font-size:0.7rem; margin-left:8px;">${item.allergy}</span>` : '';
+                html += `
+                            <tr style="border-bottom:1px solid #333;">
+                                <td style="padding:10px; font-weight:bold; color:var(--gold);">${item.id}</td>
+                                <td style="padding:10px;">
+                                    <strong>${item.name}</strong> ${allergyStr}<br>
+                                    <span style="font-size:0.8rem; color:#aaa;">${item.desc || '-'}</span>
+                                </td>
+                                <td style="padding:10px; font-weight:bold;">${parseFloat(item.price).toFixed(2)} €</td>
+                                <td style="padding:10px; text-align:right;">
+                                    <button class="btn-small" style="background:#444; color:white; margin:0;" onclick="openItemModal(${catIndex}, ${itemIndex})" title="Bearbeiten">✏️</button>
+                                    <button class="btn-small" style="background:var(--danger-red); color:white; margin:0;" onclick="deleteItem(${catIndex}, ${itemIndex})" title="Löschen">❌</button>
+                                </td>
+                            </tr>`;
+            });
+            
+            html += `</tbody></table></div></div>`;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    async function saveMenuToCloud() {
+        try {
+            await db.collection('settings').doc('menu').update({
+                menuData: adminMenuData,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            renderAdminMenu();
+        } catch (e) {
+            console.error("Save error:", e);
+            alert("Fehler beim Speichern in die Datenbank!");
+        }
+    }
+
+    // --- CATEGORY ACTIONS ---
+    window.addCategory = function() {
+        const catName = prompt("Name der neuen Kategorie (z.B. Getränke):");
+        if (catName && catName.trim() !== "") {
+            adminMenuData.push({ category: catName.trim(), items: [] });
+            saveMenuToCloud();
+        }
+    };
+
+    window.deleteCategory = function(catIndex) {
+        if (confirm(`Möchten Sie die Kategorie "${adminMenuData[catIndex].category}" wirklich löschen? Alle Artikel darin gehen verloren!`)) {
+            adminMenuData.splice(catIndex, 1);
+            saveMenuToCloud();
+        }
+    };
+
+    // --- ITEM ACTIONS ---
+    window.deleteItem = function(catIndex, itemIndex) {
+        if (confirm(`Artikel "${adminMenuData[catIndex].items[itemIndex].name}" wirklich löschen?`)) {
+            adminMenuData[catIndex].items.splice(itemIndex, 1);
+            saveMenuToCloud();
+        }
+    };
+
+    window.openItemModal = function(catIndex, itemIndex) {
+        const form = document.getElementById('menu-item-form');
+        form.reset();
+        
+        document.getElementById('edit-cat-index').value = catIndex;
+        document.getElementById('edit-item-index').value = itemIndex;
+
+        if (itemIndex > -1) {
+            // Edit existing item
+            document.getElementById('menu-modal-title').innerText = "Artikel bearbeiten";
+            const item = adminMenuData[catIndex].items[itemIndex];
+            document.getElementById('edit-item-id').value = item.id;
+            document.getElementById('edit-item-name').value = item.name;
+            document.getElementById('edit-item-price').value = item.price;
+            document.getElementById('edit-item-desc').value = item.desc || "";
+            document.getElementById('edit-item-allergy').value = item.allergy || "";
+        } else {
+            // Add new item
+            document.getElementById('menu-modal-title').innerText = "Neuen Artikel hinzufügen";
+        }
+        
+        document.getElementById('menu-edit-modal').style.display = 'flex';
+    };
+
+    document.getElementById('menu-item-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const catIndex = parseInt(document.getElementById('edit-cat-index').value);
+        const itemIndex = parseInt(document.getElementById('edit-item-index').value);
+        
+        const newItem = {
+            id: document.getElementById('edit-item-id').value.trim(),
+            name: document.getElementById('edit-item-name').value.trim(),
+            price: parseFloat(document.getElementById('edit-item-price').value),
+            desc: document.getElementById('edit-item-desc').value.trim(),
+            allergy: document.getElementById('edit-item-allergy').value.trim()
+        };
+
+        if (itemIndex > -1) {
+            adminMenuData[catIndex].items[itemIndex] = newItem; // Update
+        } else {
+            adminMenuData[catIndex].items.push(newItem); // Add new
+        }
+
+        document.getElementById('menu-edit-modal').style.display = 'none';
+        saveMenuToCloud();
+    });
+    
 </script>
 </body>
 </html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>SAN Tech - Menu Migration</title>
+    <style>
+        body { background: #121212; color: #D4AF37; font-family: sans-serif; text-align: center; padding: 50px; }
+        button { background: #D4AF37; color: black; padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border: none; cursor: pointer; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <h1>Database Migration Tool</h1>
+    <p>Click below to transfer MENU_DATA into Firebase.</p>
+    
+    <button id="migrate-btn" onclick="startMigration()">Upload Menu to Database</button>
+    <h2 id="status-text" style="margin-top: 30px; color: white;"></h2>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="menu-data.js"></script>
+
+    <script>
+        async function startMigration() {
+            const btn = document.getElementById('migrate-btn');
+            const status = document.getElementById('status-text');
+            
+            btn.disabled = true;
+            btn.innerText = "Uploading...";
+            status.innerText = "Connecting to Firebase...";
+
+            try {
+                // We save the entire menu as a single master document for blazing fast load times
+                await db.collection('system_config').doc('menu_master').set({
+                    menuData: MENU_DATA,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                status.innerText = "✅ SUCCESS! Menu perfectly migrated to Firebase.";
+                status.style.color = "#4CAF50";
+                btn.innerText = "Migration Complete";
+                
+            } catch (error) {
+                console.error(error);
+                status.innerText = "❌ ERROR: " + error.message;
+                status.style.color = "#f44336";
+                btn.disabled = false;
+                btn.innerText = "Try Again";
+            }
+        }
+    </script>
+</body>
+</html>

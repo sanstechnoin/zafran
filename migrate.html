@@ -33,13 +33,13 @@
             status.innerText = "Logging in as Admin...";
 
             try {
-                // 1. Authenticate as Admin first!
+                // 1. Authenticate as Admin
                 await firebase.auth().signInWithEmailAndPassword("webmaster@zafraneuskirchen.de", "!Zafran2025");
                 
                 status.innerText = "Admin verified. Uploading menu...";
 
-                // 2. Upload the data
-                await db.collection('system_config').doc('menu_master').set({
+                // 2. Upload the data into the EXISTING 'settings' folder
+                await db.collection('settings').doc('menu').set({
                     menuData: MENU_DATA,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 });

@@ -1255,13 +1255,20 @@
             tableBody.innerHTML = "";
             snap.forEach(doc => {
                 const d = doc.data(); const isPercent = d.discountType === 'percent';
+                
+                const isActive = d.active !== false; // defaults to true
+                const rowOpacity = isActive ? '1' : '0.4';
+                
                 let badge = d.discountType === 'gratis' ? 'badge-fixed' : (isPercent ? 'badge-percent' : 'badge-fixed');
                 let val = d.discountType === 'gratis' ? '🎁 GRATIS' : (isPercent ? `${d.discountValue}%` : `${d.discountValue}€`);
                 const eyeColor = d.showDropdown ? 'var(--success-green)' : '#444';
                 const micColor = d.showBanner ? 'var(--gold)' : '#444';
 
-                const row = `<tr>
-                    <td style="color:var(--gold); font-weight:bold;">${d.code}</td>
+                const row = `<tr style="opacity: ${rowOpacity}; transition: 0.3s;">
+                    <td style="color:var(--gold); font-weight:bold;">
+                        ${d.code}
+                        ${!isActive ? '<br><span style="background:#ff4444; color:white; font-size:0.7rem; padding: 2px 6px; border-radius: 4px; display:inline-block; margin-top:4px;">Deaktiviert</span>' : ''}
+                    </td>
                     <td><span class="badge ${badge}">${val}</span></td>
                     <td>${d.minOrder || 0}€</td>
                     <td>${d.mode === 'recurring' ? 'Recurring' : (d.validUntil || d.expiryDate || 'N/A')}</td>
@@ -1269,11 +1276,19 @@
                         <button style="background:${eyeColor}; border:none; border-radius:4px; padding:5px; cursor:pointer; margin-right:5px; font-size:1.2rem;" onclick="toggleCouponFlag('${d.code}', 'showDropdown')" title="Als Dropdown am Warenkorb zeigen">🫣</button>
                         <button style="background:${micColor}; border:none; border-radius:4px; padding:5px; cursor:pointer; margin-right:5px; font-size:1.2rem;" onclick="toggleCouponFlag('${d.code}', 'showBanner')" title="Als Popup Flash-Banner zeigen">🎙️</button>
                     </td>
-                    <td><button class="btn-action-x" onclick="deleteCoupon('${d.code}')">X</button></td>
+                    <td style="display:flex; gap:8px; align-items:center;">
+                        <button style="background:transparent; border:1px solid ${isActive ? '#555' : '#ff4444'}; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:1.2rem;" onclick="toggleCouponActive('${d.code}', ${isActive})" title="Aktiv/Inaktiv schalten">${isActive ? '👁️' : '🚫'}</button>
+                        
+                        <button class="btn-action-x" onclick="deleteCoupon('${d.code}')">X</button>
+                    </td>
                 </tr>`;
                 tableBody.innerHTML += row;
             });
         });
+    }
+
+    window.toggleCouponActive = function(code, currentState) { 
+        db.collection("coupons").doc(code).update({ active: !currentState }).then(loadCoupons); 
     }
 
     window.deleteCoupon = function(code) { if(confirm("Delete " + code + "?")) db.collection("coupons").doc(code).delete().then(loadCoupons); }

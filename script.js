@@ -1,45 +1,40 @@
 // ---  1. DYNAMIC MENU GENERATOR  ---
 function renderDynamicMenu() {
     const container = document.getElementById('dynamic-menu-container');
-    if (!container) return; // Only run on pages that have the menu container
+    const navContainer = document.getElementById('nav-links-container'); // Targets the Nav Bar
+    
+    if (!container) return; 
 
     let html = '';
+    let navHtml = ''; 
     
-    // Custom ID mapper to ensure your Top Navigation links still scroll perfectly!
+    // Custom ID mapper to ensure Top Navigation links scroll perfectly!
     const getSectionId = (catName) => {
-    switch (catName) {
-        case "Suppen": return "suppen";
-        case "Vorspeisen": return "vorspeisen";
-        case "Veganes": return "veganes";
-        case "Vegetarisches": return "vegetarisches";
-        case "Chicken": return "chicken";
-        case "Lamm": return "lamm";
-        case "Fisch & Garnelen": return "fisch-garnelen";
-        case "Tandoori": return "tandoori";
-        case "Biryani": return "biryani";
-        case "Brot": return "brot"; 
-        case "Beilagen": return "beilagen"; 
-        case "Kinder Menüs": return "kinder";
-        case "Reis": return "reis";
-        case "Salate": return "salate";
-        case "Dessert": return "dessert";
-        case "Getränke": return "getraenke";
-        default:
-            return catName.toLowerCase().replace(/\s+/g, '-').replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/&/g, 'und');
-    }
-};
+        return catName.toLowerCase().replace(/\s+/g, '-').replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/&/g, 'und');
+    };
 
     MENU_DATA.forEach(cat => {
+        // Skip rendering if category is deactivated in Admin
+        if (cat.active === false) return;
+
         const sectionId = getSectionId(cat.category);
         
+        // 1. Build the Navigation Link dynamically using EXACTLY what is in the database
+        navHtml += `<a href="#${sectionId}">${cat.category}</a>`;
+
+        // 2. Build the Main Menu Section
         html += `<section id="${sectionId}">`;
         html += `<h2>${cat.category}</h2>`;
         html += `<ul>`;
 
         cat.items.forEach(item => {
-            const priceStr = item.price.toFixed(2).replace('.', ',');
+            // Skip deactivated items
+            if (item.active === false) return;
+
+            const priceStr = parseFloat(item.price).toFixed(2).replace('.', ',');
             const descHtml = item.desc ? `<span class="description">${item.desc}</span>` : '';
             const allergyHtml = item.allergy ? `<sup style="color: #aaa; margin-left: 3px; font-weight: normal;">${item.allergy}</sup>` : '';
+            
             html += `
             <li>
                 <span class="item"><strong>${item.id}. ${item.name}${allergyHtml}</strong>${descHtml}</span>
@@ -57,7 +52,9 @@ function renderDynamicMenu() {
         html += `</ul></section>`;
     });
 
+    // Inject the generated HTML into the page
     container.innerHTML = html;
+    if (navContainer) navContainer.innerHTML = navHtml; // Inject the Nav Links!
 }
 
 // Execute the generator IMMEDIATELY so the HTML exists before the cart logic runs!

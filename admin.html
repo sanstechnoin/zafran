@@ -1395,13 +1395,19 @@
         let html = '';
         
         adminMenuData.forEach((cat, catIndex) => {
+            // Check if active (defaults to true if undefined)
+            const isCatActive = cat.active !== false; 
+            const catEye = isCatActive ? '👁️' : '🚫';
+            const catOpacity = isCatActive ? '1' : '0.4';
+
             html += `
-            <div style="background:#111; border:1px solid #333; border-radius:8px; margin-bottom:20px; overflow:hidden;">
+            <div style="background:#111; border:1px solid ${isCatActive ? '#333' : '#ff4444'}; border-radius:8px; margin-bottom:20px; overflow:hidden; opacity:${catOpacity}; transition: 0.3s;">
                 <div style="background:#222; padding:15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gold);">
-                    <h3 style="margin:0; color:var(--gold); font-size:1.2rem; border:none; padding:0;">${cat.category}</h3>
+                    <h3 style="margin:0; color:var(--gold); font-size:1.2rem; border:none; padding:0;">${cat.category} ${!isCatActive ? '(Deaktiviert)' : ''}</h3>
                     <div style="display:flex; gap:10px;">
+                        <button class="btn-small" style="background:#555; color:white; margin:0; font-size:1.1rem;" onclick="toggleCategoryVisibility(${catIndex})" title="Sichtbarkeit umschalten">${catEye}</button>
                         <button class="btn-small" style="background:var(--info-blue); color:white; margin:0;" onclick="openItemModal(${catIndex}, -1)">+ Artikel</button>
-                        <button class="btn-small" style="background:var(--danger-red); color:white; margin:0;" onclick="deleteCategory(${catIndex})">🗑️ Kat. löschen</button>
+                        <button class="btn-small" style="background:var(--danger-red); color:white; margin:0;" onclick="deleteCategory(${catIndex})">🗑️</button>
                     </div>
                 </div>
                 <div class="table-container" style="margin-top:0;">
@@ -1411,15 +1417,19 @@
                                 <th style="padding:10px; text-align:left; color:#888; width:60px;">ID</th>
                                 <th style="padding:10px; text-align:left; color:#888;">Name & Info</th>
                                 <th style="padding:10px; text-align:left; color:#888; width:100px;">Preis</th>
-                                <th style="padding:10px; text-align:right; color:#888; width:120px;">Aktion</th>
+                                <th style="padding:10px; text-align:right; color:#888; width:160px;">Aktion</th>
                             </tr>
                         </thead>
                         <tbody>`;
             
             cat.items.forEach((item, itemIndex) => {
+                const isItemActive = item.active !== false;
+                const itemEye = isItemActive ? '👁️' : '🚫';
+                const itemOpacity = isItemActive ? '1' : '0.3';
                 const allergyStr = item.allergy ? `<span class="badge" style="background:#ff4444; color:white; font-size:0.7rem; margin-left:8px;">${item.allergy}</span>` : '';
+                
                 html += `
-                            <tr style="border-bottom:1px solid #333;">
+                            <tr style="border-bottom:1px solid #333; opacity:${itemOpacity}; transition: 0.3s;">
                                 <td style="padding:10px; font-weight:bold; color:var(--gold);">${item.id}</td>
                                 <td style="padding:10px;">
                                     <strong>${item.name}</strong> ${allergyStr}<br>
@@ -1427,6 +1437,7 @@
                                 </td>
                                 <td style="padding:10px; font-weight:bold;">${parseFloat(item.price).toFixed(2)} €</td>
                                 <td style="padding:10px; text-align:right;">
+                                    <button class="btn-small" style="background:#555; color:white; margin:0; font-size:1.1rem;" onclick="toggleItemVisibility(${catIndex}, ${itemIndex})" title="Sichtbarkeit umschalten">${itemEye}</button>
                                     <button class="btn-small" style="background:#444; color:white; margin:0;" onclick="openItemModal(${catIndex}, ${itemIndex})" title="Bearbeiten">✏️</button>
                                     <button class="btn-small" style="background:var(--danger-red); color:white; margin:0;" onclick="deleteItem(${catIndex}, ${itemIndex})" title="Löschen">❌</button>
                                 </td>
@@ -1438,6 +1449,19 @@
         
         container.innerHTML = html;
     }
+
+    // --- NEW: TOGGLE FUNCTIONS ---
+    window.toggleCategoryVisibility = function(catIndex) {
+        if (adminMenuData[catIndex].active === undefined) adminMenuData[catIndex].active = true;
+        adminMenuData[catIndex].active = !adminMenuData[catIndex].active;
+        saveMenuToCloud();
+    };
+
+    window.toggleItemVisibility = function(catIndex, itemIndex) {
+        if (adminMenuData[catIndex].items[itemIndex].active === undefined) adminMenuData[catIndex].items[itemIndex].active = true;
+        adminMenuData[catIndex].items[itemIndex].active = !adminMenuData[catIndex].items[itemIndex].active;
+        saveMenuToCloud();
+    };
 
     async function saveMenuToCloud() {
         try {

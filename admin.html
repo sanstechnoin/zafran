@@ -512,7 +512,7 @@
                                 <label style="margin: 0;">Nachricht (Message)</label>
                                 
                                 <div style="display: flex; background: #111; border: 1px solid #444; border-radius: 6px; overflow: hidden;">
-                                    <button type="button" id="btn-mode-visual" onclick="setBannerMode('visual')" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: var(--gold); color: #000; border: none; text-transform: none;">👁️ Visuell</button>
+                                    <button type="button" id="btn-mode-visual" onclick="setBannerMode('visual')" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: var(--gold); color: #000; border: none; text-transform: none;">🫣 Visuell</button>
                                     <button type="button" id="btn-mode-html" onclick="setBannerMode('html')" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: transparent; color: #888; border: none; border-left: 1px solid #444; text-transform: none;">⌨️ HTML Code</button>
                                 </div>
                             </div>
@@ -1266,7 +1266,7 @@
                     <td>${d.minOrder || 0}€</td>
                     <td>${d.mode === 'recurring' ? 'Recurring' : (d.validUntil || d.expiryDate || 'N/A')}</td>
                     <td>
-                        <button style="background:${eyeColor}; border:none; border-radius:4px; padding:5px; cursor:pointer; margin-right:5px; font-size:1.2rem;" onclick="toggleCouponFlag('${d.code}', 'showDropdown')" title="Als Dropdown am Warenkorb zeigen">👁️</button>
+                        <button style="background:${eyeColor}; border:none; border-radius:4px; padding:5px; cursor:pointer; margin-right:5px; font-size:1.2rem;" onclick="toggleCouponFlag('${d.code}', 'showDropdown')" title="Als Dropdown am Warenkorb zeigen">🫣</button>
                         <button style="background:${micColor}; border:none; border-radius:4px; padding:5px; cursor:pointer; margin-right:5px; font-size:1.2rem;" onclick="toggleCouponFlag('${d.code}', 'showBanner')" title="Als Popup Flash-Banner zeigen">🎙️</button>
                     </td>
                     <td><button class="btn-action-x" onclick="deleteCoupon('${d.code}')">X</button></td>
@@ -1396,7 +1396,7 @@
         
         adminMenuData.forEach((cat, catIndex) => {
             const isCatActive = cat.active !== false; 
-            const catEye = isCatActive ? '👁️' : '🚫';
+            const catEye = isCatActive ? '🫣' : '🚫';
             const catOpacity = isCatActive ? '1' : '0.4';
 
             html += `
@@ -1418,7 +1418,7 @@
             } else {
                 cat.items.forEach((item, itemIndex) => {
                     const isItemActive = item.active !== false;
-                    const itemEye = isItemActive ? '👁️' : '🚫';
+                    const itemEye = isItemActive ? '🫣' : '🚫';
                     const itemOpacity = isItemActive ? '1' : '0.3';
                     const allergyStr = item.allergy ? `<span class="badge" style="background:#ff4444; color:white; font-size:0.7rem; margin-left:8px; padding:2px 4px;">${item.allergy}</span>` : '';
                     

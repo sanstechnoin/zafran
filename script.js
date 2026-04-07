@@ -219,67 +219,116 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- COUPON LOGIC ---
     async function handleApplyCoupon() {
-        const codeInput = document.getElementById('coupon-input');
-        const msgEl = document.getElementById('coupon-message');
-        const code = codeInput.value.trim().toUpperCase();
+    const codeInput = document.getElementById('coupon-input');
+    const msgEl = document.getElementById('coupon-message');
+    const code = codeInput.value.trim().toUpperCase();
 
-        if (!code) return;
+    if (!code) return;
 
-        msgEl.textContent = "Überprüfe...";
-        msgEl.style.color = "#666";
+    // Sleek loading state
+    msgEl.innerHTML = `<div style="color: #aaa; font-style: italic; margin-top: 8px;">⏳ Code wird überprüft...</div>`;
 
-        try {
-            const doc = await db.collection('coupons').doc(code).get();
-            
-            if (!doc.exists) {
-                msgEl.textContent = "Ungültiger Code.";
-                msgEl.style.color = "red";
+    try {
+        const doc = await db.collection('coupons').doc(code).get();
+        
+        if (!doc.exists) {
+            msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Ungültiger Code.</div>`;
+            currentCoupon = null;
+            updateCart();
+        } else {
+            const data = doc.data();
+            const today = new Date().toISOString().split('T')[0];
+
+            // Safely catch deactivated codes from the Admin panel
+            if (data.active === false) {
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Dieser Code ist deaktiviert.</div>`;
                 currentCoupon = null;
                 updateCart();
-            } else {
-                const data = doc.data();
-                const today = new Date().toISOString().split('T')[0];
-
-                if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) {
-                    msgEl.textContent = "Gutschein abgelaufen.";
-                    msgEl.style.color = "red";
-                    currentCoupon = null;
-                    updateCart();
+            }
+            else if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) {
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gutschein ist abgelaufen.</div>`;
+                currentCoupon = null;
+                updateCart();
+            } 
+            else if (data.validFor === 'pickup' && isDeliveryPage()) {
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gilt nur für Abholung (Pickup)!</div>`;
+                currentCoupon = null;
+                updateCart();
+            }
+            else if (data.validFor === 'delivery' && !isDeliveryPage()) {
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gilt nur für Lieferung (Delivery)!</div>`;
+                currentCoupon = null;
+                updateCart();
+            }
+            else {
+                if (data.discountType === 'gratis' && data.promoAskChoice) {
+                    showPromoChoiceModal(data, msgEl, codeInput);
+                    return; 
                 } 
-                else if (data.validFor === 'pickup' && isDeliveryPage()) {
-                    msgEl.textContent = "Dieser Code gilt nur für Abholung (Pickup)!";
-                    msgEl.style.color = "red";
-                    currentCoupon = null;
-                    updateCart();
-                }
-                else if (data.validFor === 'delivery' && !isDeliveryPage()) {
-                    msgEl.textContent = "Dieser Code gilt nur für Lieferung (Delivery)!";
-                    msgEl.style.color = "red";
-                    currentCoupon = null;
-                    updateCart();
-                }
                 else {
-                    // 🚨 NEW: Custom UI Modal instead of Prompt
-                    if (data.discountType === 'gratis' && data.promoAskChoice) {
-                        showPromoChoiceModal(data, msgEl, codeInput);
-                        return; // Stop execution here. The modal handles the rest!
-                    } 
-                    else {
-                        if (data.discountType === 'gratis') data.finalPromoName = data.promoItemName;
-                        currentCoupon = data;
-                        msgEl.textContent = `Code gefunden. Prüfe...`;
-                        msgEl.style.color = "#666";
-                        codeInput.value = ""; 
-                        updateCart();
+                    if (data.discountType === 'gratis') data.finalPromoName = data.promoItemName;
+                    currentCoupon = data;
+                    
+                    // --- DYNAMIC REQUIREMENT CHECKLIST UI ---
+                    let reqHtml = `
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--gold, #D4AF37); border-radius: 8px; padding: 12px; margin-top: 15px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                        <strong style="color: var(--gold, #D4AF37); display: block; margin-bottom: 10px; font-size: 1rem; border-bottom: 1px dashed #444; padding-bottom: 5px;">
+                            🎫 Code: ${code}
+                        </strong>
+                        <div style="font-size: 0.85rem; color: #ddd; display: flex; flex-direction: column; gap: 8px;">`;
+                    
+                    // Calculation for Min Order (assumes a standard global 'cart' array exists)
+                    let cartTotal = 0;
+                    if (typeof cart !== 'undefined') {
+                        cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                     }
+
+                    // Condition 1: Min Order
+                    if (data.minOrder > 0) {
+                        const isMet = cartTotal >= data.minOrder;
+                        reqHtml += `
+                            <div style="display: flex; align-items: center; gap: 8px; color: ${isMet ? '#28a745' : '#ff4444'};">
+                                <span>${isMet ? '✅' : '❌'}</span> 
+                                Mindestbestellwert: ${data.minOrder}€ ${!isMet ? `<span style="font-style:italic;">(Noch ${(data.minOrder - cartTotal).toFixed(2)}€)</span>` : ''}
+                            </div>`;
+                    }
+
+                    // Condition 2: Min Main Dishes
+                    if (data.minMainDishes > 0) {
+                        reqHtml += `
+                            <div style="display: flex; align-items: center; gap: 8px; color: #ccc;">
+                                <span>🍽️</span> Min. ${data.minMainDishes} Hauptgerichte erforderlich
+                            </div>`;
+                    }
+
+                    // Condition 3: Category Specific
+                    if (data.validCategories && data.validCategories !== 'all' && data.validCategories.length > 0) {
+                        reqHtml += `
+                            <div style="display: flex; align-items: center; gap: 8px; color: #ccc;">
+                                <span>🏷️</span> Gilt nur für ausgewählte Kategorien
+                            </div>`;
+                    }
+
+                    // Success Footer
+                    reqHtml += `
+                        </div>
+                        <div style="margin-top: 12px; font-weight: bold; color: #28a745; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                            <span>🎉</span> Gutschein vorgemerkt!
+                        </div>
+                    </div>`;
+
+                    msgEl.innerHTML = reqHtml;
+                    codeInput.value = ""; 
+                    updateCart();
                 }
             }
-        } catch (error) {
-            console.error("Coupon Error:", error);
-            msgEl.textContent = "Fehler beim Prüfen.";
-            msgEl.style.color = "red";
         }
+    } catch (error) {
+        console.error("Coupon Error:", error);
+        msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Fehler beim Prüfen.</div>`;
     }
+}
+
 
     // --- NEW: SLEEK CHOICE MODAL ---
     function showPromoChoiceModal(couponData, msgEl, codeInput) {

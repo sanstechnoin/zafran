@@ -1064,47 +1064,54 @@
         });
 
         // --- 5. LOAD DYNAMIC MENU BOOK ---
+        async function loadDynamicMenuBook() {
             const menuBookContainer = document.getElementById('dynamic-menu-book');
             if (menuBookContainer) {
-                const menuDoc = await db.collection('settings').doc('menu').get();
-                if (menuDoc.exists) {
-                    const rawMenu = menuDoc.data().menuData || [];
-                    let bookHtml = '';
-                    let pageCount = 0;
+                try {
+                    const menuDoc = await db.collection('settings').doc('menu').get();
+                    if (menuDoc.exists) {
+                        const rawMenu = menuDoc.data().menuData || [];
+                        let bookHtml = '';
+                        let pageCount = 0;
 
-                    rawMenu.forEach(cat => {
-                        if (cat.active === false) return; // Skip hidden categories
-                        pageCount++;
-                        
-                        bookHtml += `<div class="book-page" data-page="${pageCount}">`;
-                        bookHtml += `<h3 class="menu-category-title">${cat.category}</h3>`;
-                        
-                        cat.items.forEach(item => {
-                            if (item.active === false) return; // Skip hidden items
+                        rawMenu.forEach(cat => {
+                            if (cat.active === false) return; // Skip hidden categories
+                            pageCount++;
                             
-                            const priceStr = parseFloat(item.price).toFixed(2).replace('.', ',');
-                            const allergyStr = item.allergy ? `<sup style="color:#aaa; margin-left:4px; font-weight:normal; font-size:0.7rem;">${item.allergy}</sup>` : '';
+                            bookHtml += `<div class="book-page" data-page="${pageCount}">`;
+                            bookHtml += `<h3 class="menu-category-title">${cat.category}</h3>`;
                             
-                            bookHtml += `
-                            <div class="menu-item">
-                                <h5 class="item-num">${item.id}.</h5>
-                                <h5>${item.name}${allergyStr}</h5>
-                                <span>${priceStr} €</span>
-                            </div>`;
+                            cat.items.forEach(item => {
+                                if (item.active === false) return; // Skip hidden items
+                                
+                                const priceStr = parseFloat(item.price).toFixed(2).replace('.', ',');
+                                const allergyStr = item.allergy ? `<sup style="color:#aaa; margin-left:4px; font-weight:normal; font-size:0.7rem;">${item.allergy}</sup>` : '';
+                                
+                                bookHtml += `
+                                <div class="menu-item">
+                                    <h5 class="item-num">${item.id}.</h5>
+                                    <h5>${item.name}${allergyStr}</h5>
+                                    <span>${priceStr} €</span>
+                                </div>`;
+                            });
+                            
+                            bookHtml += `<div class="page-num">- ${pageCount} -</div>`;
+                            bookHtml += `</div>`;
                         });
-                        
-                        bookHtml += `<div class="page-num">- ${pageCount} -</div>`;
-                        bookHtml += `</div>`;
-                    });
 
-                    menuBookContainer.innerHTML = bookHtml;
-                    
-                    // Tell the pagination engine how many pages we just created!
-                    window.totalPages = pageCount;
-                    window.currentPage = 1;
-                    if (typeof updateBookView === 'function') updateBookView();
+                        menuBookContainer.innerHTML = bookHtml;
+                        
+                        // Tell the pagination engine how many pages we just created!
+                        window.totalPages = pageCount;
+                        window.currentPage = 1;
+                        if (typeof updateBookView === 'function') updateBookView();
+                    }
+                } catch (e) {
+                    console.error("Error loading dynamic menu book:", e);
                 }
             }
+        }
+        setTimeout(loadDynamicMenuBook, 700);
     </script>
 </body>
 </html>

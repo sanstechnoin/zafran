@@ -860,7 +860,7 @@
 
             couponsSnap.forEach(doc => {
                 const data = doc.data();
-                
+                if (data.active === false) return;
                 // Only show valid coupons
                 if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) return;
                 
@@ -943,6 +943,7 @@
 
             couponsSnap.forEach(doc => {
                 const data = doc.data();
+                if (data.active === false) return;
                 if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) return;
                 if (data.showBanner) flashCoupons.push(data);
             });

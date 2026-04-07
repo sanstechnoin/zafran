@@ -49,13 +49,19 @@ function renderDynamicMenu() {
             </li>`;
         });
 
-        html += `</ul></section>`;
+                html += `</ul></section>`;
     });
 
     // Inject the generated HTML into the page
     container.innerHTML = html;
     if (navContainer) navContainer.innerHTML = navHtml; // Inject the Nav Links!
+
+    // 🚨 CRITICAL FIX: Reconnect cart buttons after Firebase builds the menu!
+    if (typeof window.initItemControls === 'function') {
+        window.initItemControls();
+    }
 }
+
 
 // Execute the generator IMMEDIATELY so the HTML exists before the cart logic runs!
 renderDynamicMenu();
@@ -203,7 +209,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    function initItemControls() {
+        // --- Item Controls ---
+    window.initItemControls = function() {
         document.querySelectorAll('.add-btn').forEach(btn => {
             btn.removeEventListener('click', handleAddToCartClick);
             btn.addEventListener('click', handleAddToCartClick);
@@ -212,14 +219,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             btn.removeEventListener('click', handleRemoveFromCartClick);
             btn.addEventListener('click', handleRemoveFromCartClick);
         });
-    }
+        
+        // Ensure quantities stay correct if the database syncs live!
+        if (typeof updateCart === 'function') updateCart();
+    };
+    
     function handleAddToCartClick() {
-        addToCart(this.dataset.id, this.dataset.name, parseFloat(this.dataset.price), this.dataset.category);
+        addToCart(
+            this.dataset.id, 
+            this.dataset.name, 
+            parseFloat(this.dataset.price),
+            this.dataset.category 
+        );
     }
     function handleRemoveFromCartClick() {
         adjustQuantity(this.dataset.id, -1);
     }
-    initItemControls(); 
+    
+    // Call it on initial load
+    window.initItemControls(); 
+ 
 
     function addToCart(id, name, price, category) {
         const existingItem = cart.find(item => item.id === id);

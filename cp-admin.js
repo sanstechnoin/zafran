@@ -837,3 +837,14 @@
         document.getElementById('menu-edit-modal').style.display = 'none';
         saveMenuToCloud();
     });
+
+    // --- LOGOUT LOGIC ---
+    window.adminLogout = function() {
+        firebase.auth().signOut().then(() => {
+            // Refresh the page to bring back the login overlay
+            window.location.reload();
+        }).catch((error) => {
+            console.error("Logout Error:", error);
+            alert("Fehler beim Abmelden.");
+        });
+    };

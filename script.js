@@ -228,38 +228,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Sleek loading state
     msgEl.innerHTML = `<div style="color: #aaa; font-style: italic; margin-top: 8px;">⏳ Code wird überprüft...</div>`;
 
-    try {
+        try {
         const doc = await db.collection('coupons').doc(code).get();
         
         if (!doc.exists) {
-            // 🚨 1. Typo / Doesn't exist at all
-            msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Kein gültiger Code.</div>`;
+            // 🚨 1. Typo / Doesn't exist
             currentCoupon = null;
-            updateCart();
+            updateCart(); // Call this FIRST!
+            msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Kein gültiger Code.</div>`;
         } else {
             const data = doc.data();
             const today = new Date().toISOString().split('T')[0];
 
-            // 🚨 2. Code exists, but you hit the Kill-Switch in Admin
+            // 🚨 2. Code exists, but disabled in Admin
             if (data.active === false) {
-                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Nicht mehr aktiv.</div>`;
                 currentCoupon = null;
-                updateCart();
+                updateCart(); // Call this FIRST!
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Nicht mehr aktiv.</div>`;
             }
             else if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) {
-                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gutschein ist abgelaufen.</div>`;
                 currentCoupon = null;
-                updateCart();
+                updateCart(); // Call this FIRST!
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gutschein ist abgelaufen.</div>`;
             } 
             else if (data.validFor === 'pickup' && isDeliveryPage()) {
-                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gilt nur für Abholung (Pickup)!</div>`;
                 currentCoupon = null;
-                updateCart();
+                updateCart(); // Call this FIRST!
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gilt nur für Abholung (Pickup)!</div>`;
             }
             else if (data.validFor === 'delivery' && !isDeliveryPage()) {
-                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gilt nur für Lieferung (Delivery)!</div>`;
                 currentCoupon = null;
-                updateCart();
+                updateCart(); // Call this FIRST!
+                msgEl.innerHTML = `<div style="color: var(--danger-red, #ff4444); margin-top: 8px; font-weight: bold;">❌ Gilt nur für Lieferung (Delivery)!</div>`;
             }
             else {
                 if (data.discountType === 'gratis' && data.promoAskChoice) {

@@ -513,7 +513,7 @@
     // 3. MASTER PIN MANAGER
     // ==========================================
     function loadAllPins() {
-        ['driver', 'kitchen', 'waiter', 'record'].forEach(type => {
+        ['driver', 'kitchen', 'waiter', 'record', 'vault'].forEach(type => {
             db.collection('settings').doc(`${type}_auth`).get().then(doc => {
                 if(doc.exists) {
                     const input = document.getElementById(`${type}-pin-input`);

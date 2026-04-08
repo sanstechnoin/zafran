@@ -78,14 +78,29 @@
         renderWeeklySchedule();
     }
 
-    // 🚨 NEW: SECURE FIREBASE AUTH LOGIN 🚨
+    // 🚨 MASTER ADMIN ONLY ACCESS 🚨
+    const MASTER_EMAIL = "admin@zafraneuskirchen.de"; // <--- CHANGE THIS TO YOUR ACTUAL ADMIN EMAIL
+
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('html-mode-container').style.display = 'none';
 
         // 1. Listen for Authentication State from Firebase
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                initAdmin();
+                // CHECK: Is this the Master Admin?
+                if (user.email === MASTER_EMAIL) {
+                    initAdmin();
+                } else {
+                    // KICK OUT: It's a staff member trying to access Master Control!
+                    firebase.auth().signOut();
+                    const errEl = document.getElementById('login-error');
+                    if(errEl) {
+                        errEl.textContent = "❌ Access Denied: Master Admin Only.";
+                        errEl.style.display = 'block';
+                    }
+                    document.getElementById('login-overlay').style.display = 'flex';
+                    document.getElementById('admin-content').style.display = 'none';
+                }
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
                 document.getElementById('admin-content').style.display = 'none';
@@ -95,7 +110,6 @@
         // 2. Secure Login Form Submit
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            // Ensure you have an <input type="email" id="admin-email"> in your cp-admin.html!
             const email = document.getElementById('admin-email').value.trim(); 
             const pass = document.getElementById('admin-password').value;
             const loginBtn = document.querySelector('#login-form button');
@@ -105,13 +119,14 @@
             
             firebase.auth().signInWithEmailAndPassword(email, pass)
             .catch((error) => { 
-                document.getElementById('login-error').textContent = "Incorrect Email or Password"; 
+                const errEl = document.getElementById('login-error');
+                errEl.textContent = "❌ Falsche E-Mail oder Passwort."; 
+                errEl.style.display = 'block';
                 loginBtn.innerText = "Login"; 
                 loginBtn.disabled = false; 
             });
         });
     });
-
     function initAdmin() {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('admin-content').style.display = 'block'; 

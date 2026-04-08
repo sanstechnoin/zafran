@@ -1175,6 +1175,7 @@ async function checkAndShowMarketing() {
 
     couponsSnap.forEach(doc => {
         const data = doc.data();
+        if (data.active === false) return;
         if (data.expiryDate && data.expiryDate !== 'Recurring' && data.expiryDate < today) return;
         if (data.validFor === 'pickup' && isDelivery) return;
         if (data.validFor === 'delivery' && !isDelivery) return;

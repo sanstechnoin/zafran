@@ -1,5 +1,3 @@
-const db = firebase.firestore();
-
 let reservationUnsubscribe = null;
 let isSoundOn = true;
 let isInitialLoad = true;

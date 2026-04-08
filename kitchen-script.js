@@ -35,54 +35,69 @@ let currentWaiterCallId = null;
 
 // Audio
 const alertAudio = document.getElementById('alertSound');
-const KITCHEN_PASSWORD = "zafran"; 
 const TOTAL_DINE_IN_TABLES = 12;
 let allOrders = {};
 
 // --- NEW QUEUE VARIABLES ---
 let newOrderQueue = []; 
 
-// --- 4. SECURE LOGIN LOGIC ---
+// --- 4. SECURE STRICT LOGIN LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
     loginButton.addEventListener('click', () => {
-        // 1. Check if staff typed "zafran"
-        if (passwordInput.value === KITCHEN_PASSWORD) {
-            
-            // 2. Secretly Log in to Firebase
-            const hiddenEmail = "webmaster@zafraneuskirchen.de";
-            const hiddenPass  = "!Zafran2025";
+        const enteredPin = passwordInput.value.trim();
+        if (!enteredPin) return;
 
-            const originalText = loginButton.innerText;
-            loginButton.innerText = "Verbinden...";
-            loginButton.disabled = true;
+        const originalText = loginButton.innerText;
+        loginButton.innerText = "Verbinden...";
+        loginButton.disabled = true;
 
-            firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
-            .then(() => {
-                // Success! Unlock screen
-                loginOverlay.classList.add('hidden');
-                kdsContentWrapper.style.opacity = '1';
-                
-                // Unlock Audio for Alerts
-                alertAudio.play().then(() => {
-                    alertAudio.pause();
-                    alertAudio.currentTime = 0;
-                }).catch(e => console.log("Audio Init:", e));
-
-                // Start the App
-                initializeKDS(); 
-            })
-            .catch((error) => {
-                console.error("Login Error:", error);
-                loginError.innerText = "Verbindungsfehler (Auth)";
+        // Fetch Kitchen PIN (STRICT NO FALLBACK)
+        db.collection('settings').doc('kitchen_auth').get()
+        .then(doc => {
+            if (!doc.exists || !doc.data().pin) {
+                loginError.innerText = "❌ PIN nicht im Admin Panel konfiguriert!";
                 loginError.style.display = 'block';
                 loginButton.innerText = originalText;
                 loginButton.disabled = false;
-            });
+                return;
+            }
 
-        } else {
-            loginError.innerText = "Falsches Passwort";
+            const realPin = doc.data().pin;
+
+            if (enteredPin === realPin) {
+                const hiddenEmail = "webmaster@zafraneuskirchen.de";
+                const hiddenPass  = "!Zafran2025"; 
+
+                firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
+                .then(() => {
+                    loginOverlay.classList.add('hidden');
+                    kdsContentWrapper.style.opacity = '1';
+                    
+                    alertAudio.play().then(() => {
+                        alertAudio.pause(); alertAudio.currentTime = 0;
+                    }).catch(e => console.log("Audio Init:", e));
+
+                    initializeKDS(); 
+                })
+                .catch((error) => {
+                    loginError.innerText = "❌ Verbindungsfehler (Auth)";
+                    loginError.style.display = 'block';
+                    loginButton.innerText = originalText;
+                    loginButton.disabled = false;
+                });
+            } else {
+                loginError.innerText = "❌ Falscher PIN.";
+                loginError.style.display = 'block';
+                loginButton.innerText = originalText;
+                loginButton.disabled = false;
+            }
+        })
+        .catch(err => {
+            loginError.innerText = "❌ Netzwerkfehler.";
             loginError.style.display = 'block';
-        }
+            loginButton.innerText = originalText;
+            loginButton.disabled = false;
+        });
     });
 
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
@@ -456,13 +471,25 @@ async function handleMasterClear() {
         return;
     }
 
-    const pwd = prompt("Please enter Kitchen Password to confirm deletion:");
-    if (pwd !== KITCHEN_PASSWORD) {
-        alert("Wrong password. Action cancelled.");
-        return;
-    }
+    const pwd = prompt("Please enter Kitchen PIN to confirm deletion:");
+    if (!pwd) return; 
 
     try {
+        const doc = await db.collection('settings').doc('kitchen_auth').get();
+        
+        // STRICT NO FALLBACK
+        if (!doc.exists || !doc.data().pin) {
+            alert("Fehler: PIN ist nicht im Admin Panel konfiguriert!");
+            return;
+        }
+        
+        const realPin = doc.data().pin;
+        
+        if (pwd !== realPin) {
+            alert("Wrong PIN. Action cancelled.");
+            return;
+        }
+
         const snapshot = await db.collection("orders").get();
         if (snapshot.empty) {
             alert("Board is already empty.");
@@ -470,9 +497,7 @@ async function handleMasterClear() {
         }
 
         const batch = db.batch();
-        snapshot.docs.forEach(doc => {
-            batch.delete(doc.ref);
-        });
+        snapshot.docs.forEach(doc => batch.delete(doc.ref));
 
         await batch.commit();
         alert("✅ Board Cleared! Ready for new day.");

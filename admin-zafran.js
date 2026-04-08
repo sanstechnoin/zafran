@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('admin-content').style.display = 'block';
                 startRealtimeListener();
-                loadDriverPin();
+                loadAllPins();
                 setTimeout(loadFinanceData, 1000);
             } else {
                 // KICK OUT: Unauthorized email

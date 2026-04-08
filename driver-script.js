@@ -6,18 +6,14 @@ let watchId = null;
 // --- 3. LOGIN & PIN LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
     
-    // A. Start Silent Login immediately (Background)
-    firebase.auth().signInAnonymously().catch(e => console.error("Background Auth Error:", e));
-
-    // B. Check if already authorized from previous session
-    // We wait for Auth to be ready before auto-showing the app
+    // Check if already authorized from previous session
     firebase.auth().onAuthStateChanged((user) => {
         if (user && sessionStorage.getItem('driver_authorized') === 'true') {
             showDriverApp();
         }
     });
 
-    // C. Handle PIN Submission
+    // Handle PIN Submission
     document.getElementById('pin-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const inputPin = document.getElementById('driver-pin').value.trim();
@@ -28,31 +24,30 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
         err.textContent = "";
 
-        // 1. Verify PIN from Database (Public Read)
+        // 1. Verify PIN from Database
         db.collection('settings').doc('driver_auth').get()
             .then((doc) => {
-                if (doc.exists && doc.data().pin === inputPin) {
+                const realPin = doc.exists ? doc.data().pin : "zafran"; // Fallback
+
+                if (inputPin === realPin) {
                     // PIN IS CORRECT!
-                    sessionStorage.setItem('driver_authorized', 'true');
                     btn.innerText = "Connecting...";
 
-                    // 2. Ensure we are Logged In
-                    if (firebase.auth().currentUser) {
-                        showDriverApp();
-                    } else {
-                        // Force Login if background attempt failed/stalled
-                        console.log("Auth missing, forcing login...");
-                        return firebase.auth().signInAnonymously();
-                    }
+                    // 2. Secretly Log in to Firebase with the Service Account
+                    const serviceEmail = "webmaster@zafraneuskirchen.de";
+                    const servicePass  = "!Zafran2025"; // Make sure this matches Firebase!
+
+                    return firebase.auth().signInWithEmailAndPassword(serviceEmail, servicePass);
                 } else {
                     throw new Error("Wrong PIN!");
                 }
             })
-            .then((userCredential) => {
-                // If we had to force login, this runs after it succeeds
-                if (userCredential) {
-                    showDriverApp();
-                }
+            .then(() => {
+                // Success! Unlock screen
+                sessionStorage.setItem('driver_authorized', 'true');
+                showDriverApp();
+                btn.innerText = "ENTER";
+                btn.disabled = false;
             })
             .catch((error) => {
                 console.error("Login/PIN Error:", error);

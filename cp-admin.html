@@ -307,6 +307,9 @@
             <button class="tab-btn" onclick="switchTab('tab-coupons', this)">
                 <span class="tab-icon">🎟️</span> <span class="tab-text" data-i18n="tab_coupons">Code</span>
             </button>
+            <button class="tab-btn" onclick="switchTab('tab-pins', this)">
+                <span class="tab-icon">🔐</span> <span class="tab-text" data-i18n="tab_pins">PINs</span>
+            </button>
         </div>
 
         <div class="sidebar-footer">
@@ -686,6 +689,52 @@
                 <div id="admin-menu-container">
                 </div>
             </div>
+
+            <div id="tab-pins" class="tab-content">
+                <h2 data-i18n="pin_title">Access PIN Manager</h2>
+                <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;" data-i18n="pin_desc">Verwalten Sie hier die Zugangs-PINs für alle Endgeräte.</p>
+                
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+                    
+                    <div class="service-card" style="margin-bottom:0;">
+                        <h3 style="margin-top:0; color:var(--info-blue);">🚗 Fahrer (Driver)</h3>
+                        <div class="pin-box">
+                            <input type="text" id="driver-pin-input" class="pin-input" maxlength="6" placeholder="---">
+                            <button class="btn-save-pin" onclick="savePin('driver')">SAVE</button>
+                        </div>
+                        <div id="driver-pin-status" class="message-box"></div>
+                    </div>
+
+                    <div class="service-card" style="margin-bottom:0;">
+                        <h3 style="margin-top:0; color:var(--warning-orange);">👨‍🍳 Küche (Kitchen)</h3>
+                        <div class="pin-box">
+                            <input type="text" id="kitchen-pin-input" class="pin-input" maxlength="6" placeholder="---">
+                            <button class="btn-save-pin" onclick="savePin('kitchen')">SAVE</button>
+                        </div>
+                        <div id="kitchen-pin-status" class="message-box"></div>
+                    </div>
+
+                    <div class="service-card" style="margin-bottom:0;">
+                        <h3 style="margin-top:0; color:var(--success-green);">🍽️ Kellner (Waiter)</h3>
+                        <div class="pin-box">
+                            <input type="text" id="waiter-pin-input" class="pin-input" maxlength="6" placeholder="---">
+                            <button class="btn-save-pin" onclick="savePin('waiter')">SAVE</button>
+                        </div>
+                        <div id="waiter-pin-status" class="message-box"></div>
+                    </div>
+
+                    <div class="service-card" style="margin-bottom:0;">
+                        <h3 style="margin-top:0; color:var(--gold);">📊 Record / Vault</h3>
+                        <div class="pin-box">
+                            <input type="text" id="record-pin-input" class="pin-input" maxlength="6" placeholder="---">
+                            <button class="btn-save-pin" onclick="savePin('record')">SAVE</button>
+                        </div>
+                        <div id="record-pin-status" class="message-box"></div>
+                    </div>
+
+                </div>
+            </div>
+            
         </div>
     </main>
 </div>

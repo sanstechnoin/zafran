@@ -5,6 +5,8 @@ let isSoundOn = true;
 let isInitialLoad = true;
 
 // --- 2. SECURE LOGIN & INIT ---
+const ALLOWED_USERS = ["admin@zafraneuskirchen.de", "staff@zafraneuskirchen.de"]; // <--- ADD YOUR EXACT EMAILS HERE
+
 document.addEventListener("DOMContentLoaded", () => {
     setTodayDate();
     initFinanceDates();
@@ -12,11 +14,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // Listen for Real Authentication
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('admin-content').style.display = 'block';
-            startRealtimeListener();
-            loadDriverPin();
-            setTimeout(loadFinanceData, 1000);
+            // CHECK: Is this an allowed user?
+            if (ALLOWED_USERS.includes(user.email)) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                startRealtimeListener();
+                loadDriverPin();
+                setTimeout(loadFinanceData, 1000);
+            } else {
+                // KICK OUT: Unauthorized email
+                firebase.auth().signOut();
+                const errEl = document.getElementById('login-error');
+                if(errEl) {
+                    errEl.textContent = "❌ Keine Berechtigung für dieses Terminal.";
+                    errEl.style.display = 'block';
+                }
+                document.getElementById('login-overlay').style.display = 'flex';
+                document.getElementById('admin-content').style.display = 'none';
+            }
         } else {
             document.getElementById('login-overlay').style.display = 'flex';
             document.getElementById('admin-content').style.display = 'none';
@@ -37,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         firebase.auth().signInWithEmailAndPassword(email, pass)
         .catch((error) => {
             err.innerHTML = `❌ Falsche E-Mail oder Passwort.`;
+            err.style.display = 'block';
             btn.innerText = "Login";
             btn.disabled = false;
         });

@@ -203,14 +203,43 @@
         <img src="logo.png" alt="Zafran Logo" class="header-logo">
         
         <div class="pin-section">
-            <h3 style="color:var(--gold); margin:0; font-size:1rem;">🚗 Fahrer PIN Manager</h3>
-            <div class="pin-box">
-                <input type="text" id="driver-pin-input" class="pin-input" maxlength="6" placeholder="Loading...">
-                <button class="btn-save-pin" onclick="saveDriverPin()">SAVE</button>
-            </div>
-            <div id="pin-status" class="message-box"></div>
-        </div>
+            <h3 style="color:var(--gold); margin:0; font-size:1.2rem;">🔐 Security PIN Manager</h3>
+            <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Verwalten Sie die Zugangscodes für das Personal</p>
 
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#222; padding:15px; border-radius:6px; border:1px solid #444; margin-bottom:10px; flex-wrap:wrap;">
+                <div style="text-align:left;">
+                    <h4 style="margin:0; color:white;">🚗 Fahrer (Driver)</h4>
+                    <div id="pin-status" class="message-box" style="margin-top:5px; font-size:0.8rem; min-height:15px;"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="driver-pin-input" class="pin-input" maxlength="6" placeholder="---" style="width:80px; font-size:1.2rem;">
+                    <button class="btn-save-pin" onclick="saveDriverPin()">SAVE</button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#222; padding:15px; border-radius:6px; border:1px solid #444; margin-bottom:10px; flex-wrap:wrap;">
+                <div style="text-align:left;">
+                    <h4 style="margin:0; color:white;">👨‍🍳 Küche (Kitchen)</h4>
+                    <div id="kitchen-pin-status" class="message-box" style="margin-top:5px; font-size:0.8rem; min-height:15px;"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="kitchen-pin-input" class="pin-input" maxlength="6" placeholder="---" style="width:80px; font-size:1.2rem;">
+                    <button class="btn-save-pin" onclick="saveKitchenPin()">SAVE</button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#222; padding:15px; border-radius:6px; border:1px solid #444; flex-wrap:wrap;">
+                <div style="text-align:left;">
+                    <h4 style="margin:0; color:white;">🍽️ Kellner (Waiter)</h4>
+                    <div id="waiter-pin-status" class="message-box" style="margin-top:5px; font-size:0.8rem; min-height:15px;"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="waiter-pin-input" class="pin-input" maxlength="6" placeholder="---" style="width:80px; font-size:1.2rem;">
+                    <button class="btn-save-pin" onclick="saveWaiterPin()">SAVE</button>
+                </div>
+            </div>
+        </div>
+        
         <div class="pin-section" style="margin-top: 20px;">
             <h3 style="color:var(--gold); margin:0 0 15px 0; font-size:1.2rem;">💰 Finanzübersicht</h3>
 

@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentDisplayRecords = []; 
     let isEditMode = false;
     let currentView = 'active'; // 'active' or 'trash'
-    const MASTER_PASS = "ZafranMaster";
 
     // --- 3. SECURE STRICT LOGIN LOGIC (NO FALLBACK) ---
     loginButton.addEventListener('click', () => {
@@ -259,18 +258,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.submitVaultPassword = function() {
         const input = document.getElementById('vault-pass-input').value;
-        if (input === MASTER_PASS) {
-            closeVaultModal();
-            isEditMode = true;
-            document.getElementById('vault-status').innerText = "(UNLOCKED)";
-            document.getElementById('vault-status').style.color = "#ff5252";
-            document.getElementById('btn-vault-unlock').style.display = 'none';
-            document.getElementById('btn-vault-trash').style.display = 'inline-block';
-            document.getElementById('bulk-action-bar').style.display = 'block';
-            updateTableView();
-        } else {
-            document.getElementById('vault-pass-error').style.display = 'block';
-        }
+        const errorEl = document.getElementById('vault-pass-error');
+        
+        // Disable button while checking
+        const unlockBtn = document.querySelector('#vault-pass-box button:last-child');
+        const originalText = unlockBtn.innerText;
+        unlockBtn.innerText = "Checking...";
+        unlockBtn.disabled = true;
+        errorEl.style.display = 'none';
+
+        // STRICT NO-FALLBACK CHECK FROM DB
+        db.collection('settings').doc('vault_auth').get()
+        .then(doc => {
+            if (!doc.exists || !doc.data().pin) {
+                errorEl.innerText = "❌ Master-Passwort nicht im Admin Panel konfiguriert!";
+                errorEl.style.display = 'block';
+                unlockBtn.innerText = originalText;
+                unlockBtn.disabled = false;
+                return;
+            }
+
+            const realMasterPass = doc.data().pin;
+
+            if (input === realMasterPass) {
+                closeVaultModal();
+                isEditMode = true;
+                document.getElementById('vault-status').innerText = "(UNLOCKED)";
+                document.getElementById('vault-status').style.color = "#ff5252";
+                document.getElementById('btn-vault-unlock').style.display = 'none';
+                document.getElementById('btn-vault-trash').style.display = 'inline-block';
+                document.getElementById('bulk-action-bar').style.display = 'block';
+                updateTableView();
+            } else {
+                errorEl.innerText = "❌ Falsches Master-Passwort.";
+                errorEl.style.display = 'block';
+            }
+            unlockBtn.innerText = originalText;
+            unlockBtn.disabled = false;
+        })
+        .catch(err => {
+            console.error("Vault Auth Error:", err);
+            errorEl.innerText = "❌ Netzwerkfehler.";
+            errorEl.style.display = 'block';
+            unlockBtn.innerText = originalText;
+            unlockBtn.disabled = false;
+        });
     };
 
     window.toggleAllChecks = function(masterCb) {

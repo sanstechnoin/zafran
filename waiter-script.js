@@ -62,45 +62,66 @@ document.addEventListener("DOMContentLoaded", () => {
     let allOrders = {}; 
     let activeTableId = null; 
     let currentDraftOrder = []; 
-    const KITCHEN_PASSWORD = "zafran"; 
     const TOTAL_DINE_IN_TABLES = 12;
 
-   // --- 4. SECURE LOGIN LOGIC ---
+   // --- 4. SECURE STRICT LOGIN LOGIC ---
 if (loginButton) {
     loginButton.addEventListener('click', () => {
-        if (passwordInput.value === KITCHEN_PASSWORD) {
-            const hiddenEmail = "webmaster@zafraneuskirchen.de";
-            const hiddenPass  = "!Zafran2025";
+        const enteredPin = passwordInput.value.trim();
+        if (!enteredPin) return;
 
-            const originalBtnText = loginButton.innerText;
-            loginButton.innerText = "Verbinden...";
-            loginButton.disabled = true;
+        const originalBtnText = loginButton.innerText;
+        loginButton.innerText = "Verbinden...";
+        loginButton.disabled = true;
 
-            firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
-            .then((userCredential) => {
-                loginOverlay.classList.add('hidden');
-                kdsContentWrapper.style.opacity = '1';
-
-                // Unlock Audio
-                serviceBell.play().then(() => {
-                    serviceBell.pause();
-                    serviceBell.currentTime = 0;
-                }).catch(e => console.log("Audio unlock failed:", e));
-
-                initializeWaiterStation();
-            })
-            .catch((error) => {
-                console.error("Login Error:", error);
-                loginError.innerText = "Systemfehler: Login nicht möglich.";
+        // Fetch Waiter PIN (STRICT NO FALLBACK)
+        db.collection('settings').doc('waiter_auth').get()
+        .then(doc => {
+            if (!doc.exists || !doc.data().pin) {
+                loginError.innerText = "❌ PIN nicht im Admin Panel konfiguriert!";
                 loginError.style.display = 'block';
                 loginButton.innerText = originalBtnText;
                 loginButton.disabled = false;
-            });
+                return;
+            }
 
-        } else {
-            loginError.innerText = "Falsches Passwort";
+            const realPin = doc.data().pin;
+
+            if (enteredPin === realPin) {
+                const serviceEmail = "webmaster@zafraneuskirchen.de";
+                const servicePass = "!Zafran2025"; 
+
+                firebase.auth().signInWithEmailAndPassword(serviceEmail, servicePass)
+                .then(() => {
+                    loginOverlay.classList.add('hidden');
+                    kdsContentWrapper.style.opacity = '1';
+
+                    if(typeof serviceBell !== 'undefined') {
+                        serviceBell.play().then(() => {
+                            serviceBell.pause(); serviceBell.currentTime = 0;
+                        }).catch(e => console.log("Audio unlock failed:", e));
+                    }
+                    initializeWaiterStation();
+                })
+                .catch((error) => {
+                    loginError.innerText = "❌ Systemfehler: Service Key abgelehnt.";
+                    loginError.style.display = 'block';
+                    loginButton.innerText = originalBtnText;
+                    loginButton.disabled = false;
+                });
+            } else {
+                loginError.innerText = "❌ Falscher PIN.";
+                loginError.style.display = 'block';
+                loginButton.innerText = originalBtnText;
+                loginButton.disabled = false;
+            }
+        })
+        .catch(err => {
+            loginError.innerText = "❌ Netzwerkfehler.";
             loginError.style.display = 'block';
-        }
+            loginButton.innerText = originalBtnText;
+            loginButton.disabled = false;
+        });
     });
 
     passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());

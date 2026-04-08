@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loginButton.disabled = true;
 
         // Fetch Kitchen PIN from DB
-        db.collection('settings').doc('kitchen_auth').get()
+        db.collection('settings').doc('record_auth').get()
         .then(doc => {
             if (!doc.exists || !doc.data().pin) {
                 loginError.innerText = "❌ PIN nicht im Admin Panel konfiguriert!";

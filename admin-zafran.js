@@ -180,22 +180,75 @@ function triggerNotification(name, guests, time) {
     setTimeout(() => { banner.classList.remove('show'); }, 6000);
 }
 
-// --- 4. DRIVER PIN ---
-function loadDriverPin() {
+// --- 4. SECURITY PIN MANAGERS ---
+
+function loadAllPins() {
+    // Load Driver PIN
     db.collection('settings').doc('driver_auth').get().then(doc => {
         document.getElementById('driver-pin-input').value = doc.exists ? (doc.data().pin || "") : "";
     });
+
+    // Load Kitchen PIN
+    db.collection('settings').doc('kitchen_auth').get().then(doc => {
+        document.getElementById('kitchen-pin-input').value = doc.exists ? (doc.data().pin || "") : "";
+    });
+
+    // Load Waiter PIN
+    db.collection('settings').doc('waiter_auth').get().then(doc => {
+        document.getElementById('waiter-pin-input').value = doc.exists ? (doc.data().pin || "") : "";
+    });
 }
 
+// 1. SAVE DRIVER PIN
 window.saveDriverPin = function() {
     const newPin = document.getElementById('driver-pin-input').value.trim();
     const statusEl = document.getElementById('pin-status');
+    
     if(newPin.length < 4) {
         statusEl.innerText = "Min 4 Zeichen";
         statusEl.className = "message-box error-msg";
         return;
     }
+    
     db.collection('settings').doc('driver_auth').set({ pin: newPin })
+    .then(() => {
+        statusEl.innerText = "Gespeichert!";
+        statusEl.className = "message-box success-msg";
+        setTimeout(() => statusEl.innerText = "", 3000);
+    });
+};
+
+// 2. SAVE KITCHEN PIN
+window.saveKitchenPin = function() {
+    const newPin = document.getElementById('kitchen-pin-input').value.trim();
+    const statusEl = document.getElementById('kitchen-pin-status');
+    
+    if(newPin.length < 4) {
+        statusEl.innerText = "Min 4 Zeichen";
+        statusEl.className = "message-box error-msg";
+        return;
+    }
+    
+    db.collection('settings').doc('kitchen_auth').set({ pin: newPin })
+    .then(() => {
+        statusEl.innerText = "Gespeichert!";
+        statusEl.className = "message-box success-msg";
+        setTimeout(() => statusEl.innerText = "", 3000);
+    });
+};
+
+// 3. SAVE WAITER PIN
+window.saveWaiterPin = function() {
+    const newPin = document.getElementById('waiter-pin-input').value.trim();
+    const statusEl = document.getElementById('waiter-pin-status');
+    
+    if(newPin.length < 4) {
+        statusEl.innerText = "Min 4 Zeichen";
+        statusEl.className = "message-box error-msg";
+        return;
+    }
+    
+    db.collection('settings').doc('waiter_auth').set({ pin: newPin })
     .then(() => {
         statusEl.innerText = "Gespeichert!";
         statusEl.className = "message-box success-msg";

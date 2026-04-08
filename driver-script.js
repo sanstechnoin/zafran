@@ -3,17 +3,15 @@ const driverContainer = document.getElementById('driver-orders');
 
 let watchId = null; 
 
-// --- 3. LOGIN & PIN LOGIC ---
+// --- 3. LOGIN & STRICT PIN LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
     
-    // Check if already authorized from previous session
     firebase.auth().onAuthStateChanged((user) => {
         if (user && sessionStorage.getItem('driver_authorized') === 'true') {
             showDriverApp();
         }
     });
 
-    // Handle PIN Submission
     document.getElementById('pin-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const inputPin = document.getElementById('driver-pin').value.trim();
@@ -24,47 +22,38 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
         err.textContent = "";
 
-        // 1. Verify PIN from Database
+        // 1. Verify PIN from Database (STRICT NO FALLBACK)
         db.collection('settings').doc('driver_auth').get()
             .then((doc) => {
-                const realPin = doc.exists ? doc.data().pin : "zafran"; // Fallback
+                if (!doc.exists || !doc.data().pin) {
+                    throw new Error("Kein PIN im Admin Panel konfiguriert!");
+                }
+                
+                const realPin = doc.data().pin; 
 
                 if (inputPin === realPin) {
-                    // PIN IS CORRECT!
+                    sessionStorage.setItem('driver_authorized', 'true');
                     btn.innerText = "Connecting...";
 
-                    // 2. Secretly Log in to Firebase with the Service Account
                     const serviceEmail = "webmaster@zafraneuskirchen.de";
-                    const servicePass  = "!Zafran2025"; // Make sure this matches Firebase!
-
+                    const servicePass  = "!Zafran2025"; 
                     return firebase.auth().signInWithEmailAndPassword(serviceEmail, servicePass);
                 } else {
                     throw new Error("Wrong PIN!");
                 }
             })
-            .then(() => {
-                // Success! Unlock screen
-                sessionStorage.setItem('driver_authorized', 'true');
-                showDriverApp();
-                btn.innerText = "ENTER";
-                btn.disabled = false;
+            .then((userCredential) => {
+                if (userCredential) showDriverApp();
             })
             .catch((error) => {
                 console.error("Login/PIN Error:", error);
                 
-                // Show friendly error message
-                if (error.message === "Wrong PIN!") {
-                    err.textContent = "Falscher PIN!";
-                } else {
-                    err.textContent = "Fehler: " + error.message;
-                }
+                if (error.message === "Wrong PIN!") err.textContent = "❌ Falscher PIN!";
+                else err.textContent = "❌ " + error.message;
                 
-                // Reset Button
                 btn.innerText = "ENTER";
                 btn.disabled = false;
-                if(error.message === "Wrong PIN!") {
-                    document.getElementById('driver-pin').value = "";
-                }
+                if(error.message === "Wrong PIN!") document.getElementById('driver-pin').value = "";
             });
     });
 });

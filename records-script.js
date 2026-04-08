@@ -1,20 +1,4 @@
-// --- 1. FIREBASE CONFIG ---
-const firebaseConfig = {
-  apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
-  authDomain: "zaffran-delight.firebaseapp.com",
-  projectId: "zaffran-delight",
-  storageBucket: "zaffran-delight.firebasestorage.app",
-  messagingSenderId: "1022960860126",
-  appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
-};
-
-// --- 2. Initialize ---
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.firestore();
-
-// --- 3. DOM & State ---
+// --- 2. DOM & State ---
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
     const loginOverlay = document.getElementById('records-login-overlay');
@@ -44,8 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelItems = document.getElementById('panel-items');
     const panelTotal = document.getElementById('panel-total');
 
-    const RECORDS_PASSWORD = "zafran"; 
-    
     // --- 🚨 VAULT STATE VARIABLES 🚨 ---
     let allFetchedRecords = []; 
     let currentDisplayRecords = []; 
@@ -53,32 +35,64 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentView = 'active'; // 'active' or 'trash'
     const MASTER_PASS = "ZafranMaster";
 
-    // --- 4. SECURE LOGIN LOGIC ---
+    // --- 3. SECURE STRICT LOGIN LOGIC (NO FALLBACK) ---
     loginButton.addEventListener('click', () => {
-        if (passwordInput.value === RECORDS_PASSWORD) {
-            const hiddenEmail = "webmaster@zafraneuskirchen.de";
-            const hiddenPass  = "!Zafran2025";
-            loginButton.innerText = "Verbinden...";
-            
-            firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
-            .then((userCredential) => {
-                loginOverlay.style.display = 'none';
-                contentWrapper.style.opacity = '1';
-                initializeRecordsPage(); 
-            })
-            .catch((error) => {
-                console.error("Login Error:", error);
-                loginError.innerText = "Systemfehler: Login nicht möglich.";
+        const enteredPin = passwordInput.value.trim();
+        if (!enteredPin) return;
+
+        const originalBtnText = loginButton.innerText;
+        loginButton.innerText = "Verbinden...";
+        loginButton.disabled = true;
+
+        // Fetch Kitchen PIN from DB
+        db.collection('settings').doc('kitchen_auth').get()
+        .then(doc => {
+            if (!doc.exists || !doc.data().pin) {
+                loginError.innerText = "❌ PIN nicht im Admin Panel konfiguriert!";
                 loginError.style.display = 'block';
-                loginButton.innerText = "UNLOCK DASHBOARD";
-            });
-        } else {
-            loginError.innerText = "Falsches Passwort";
+                loginButton.innerText = originalBtnText;
+                loginButton.disabled = false;
+                return;
+            }
+
+            const realPin = doc.data().pin;
+
+            if (enteredPin === realPin) {
+                const hiddenEmail = "webmaster@zafraneuskirchen.de";
+                const hiddenPass  = "!Zafran2025";
+                
+                firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
+                .then(() => {
+                    loginOverlay.style.display = 'none';
+                    contentWrapper.style.opacity = '1';
+                    initializeRecordsPage(); 
+                })
+                .catch((error) => {
+                    console.error("Auth Error:", error);
+                    loginError.innerText = "❌ Systemfehler: Service Key abgelehnt.";
+                    loginError.style.display = 'block';
+                    loginButton.innerText = originalBtnText;
+                    loginButton.disabled = false;
+                });
+            } else {
+                loginError.innerText = "❌ Falscher PIN.";
+                loginError.style.display = 'block';
+                loginButton.innerText = originalBtnText;
+                loginButton.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error("Network Error:", err);
+            loginError.innerText = "❌ Netzwerkfehler.";
             loginError.style.display = 'block';
-        }
+            loginButton.innerText = originalBtnText;
+            loginButton.disabled = false;
+        });
     });
 
-    passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
+    passwordInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter' && !loginButton.disabled) loginButton.click();
+    });
 
     function initializeRecordsPage() {
         statusDot.classList.add('online');
@@ -92,11 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
         printBtn.addEventListener('click', () => window.print());
         exportBtn.addEventListener('click', exportToCSV);
         
-        initBankVaultUI(); // 🚨 Initialize the Vault UI & Custom Modals
+        initBankVaultUI(); // Initialize the Vault UI & Custom Modals
         fetchRecords();
     }
 
-    // --- 🚨 5. THE ADMIN VAULT & CUSTOM MODAL LOGIC 🚨 ---
+    // --- 🚨 4. THE ADMIN VAULT & CUSTOM MODAL LOGIC 🚨 ---
     function initBankVaultUI() {
         const tableContainer = recordsTbody.parentNode; 
         
@@ -157,7 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-        // Allow pressing Enter in password box
         document.getElementById('vault-pass-input').addEventListener('keyup', (e) => {
             if (e.key === 'Enter') submitVaultPassword();
         });
@@ -234,7 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.innerText = options.btnText;
             btn.style.background = options.btnColor;
             
-            // Swap out the button to prevent duplicate event listeners
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             newBtn.addEventListener('click', options.callback);
@@ -292,7 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     const batch = db.batch();
                     checked.forEach(cb => {
-                        // 🚨 FIX: Extract ALL document IDs hidden in the data attribute
                         const ids = cb.dataset.docids.split(',');
                         ids.forEach(id => {
                             if (!id.trim()) return;
@@ -345,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
         calculateKPIs(currentDisplayRecords);
     }
 
-    // --- 6. DATA FETCHING (YOUR EXACT LOGIC, WITH docIds TRACKING ADDED) ---
+    // --- 5. DATA FETCHING ---
     async function fetchRecords() {
         let startDate = new Date(startDateInput.value + 'T00:00:00');
         let endDate = new Date(endDateInput.value + 'T23:59:59');
@@ -383,8 +394,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!groupedRecords[groupKey]) {
                     groupedRecords[groupKey] = { 
-                        id: groupKey, // Safe UI identifier
-                        docIds: [doc.id], // Tracks real DB IDs for deletion
+                        id: groupKey, 
+                        docIds: [doc.id], 
                         ...data, 
                         items: data.items ? [...data.items] : [] 
                     };
@@ -397,7 +408,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             const cleanRecords = Object.values(groupedRecords);
-            
             allFetchedRecords = cleanRecords.reverse(); 
             updateTableView(); 
 
@@ -469,14 +479,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
             `;
 
-            // Inject checkboxes with ALL hidden IDs if unlocked
             if (isEditMode) {
                 const docIdsStr = record.docIds ? record.docIds.join(',') : record.id;
                 rowHtml = `<td style="text-align:center;"><input type="checkbox" class="row-check" data-docids="${docIdsStr}" style="transform:scale(1.5); cursor:pointer;"></td>` + rowHtml;
             }
 
             const tr = document.createElement('tr');
-            if (currentView === 'trash') tr.style.opacity = '0.5'; // Dim trashed items
+            if (currentView === 'trash') tr.style.opacity = '0.5'; 
             tr.innerHTML = rowHtml;
             recordsTbody.appendChild(tr);
         });
@@ -494,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
         avgTicketEl.textContent = `${avg.toFixed(2)} €`;
     }
 
-    // --- SIDE PANEL LOGIC ---
+    // --- 6. SIDE PANEL & THERMAL PRINT LOGIC ---
     window.showDetail = function(id) {
         const record = allFetchedRecords.find(r => r.id === id);
         if(!record) return;
@@ -572,7 +581,6 @@ document.addEventListener("DOMContentLoaded", () => {
         detailPanel.classList.add('open');
     }
 
-    // --- GERMAN THERMAL PRINT LOGIC ---
     function printThermalReceipt(record, calcSubtotal, discountAmount, couponName) {
         let dateStr = "N/A", timeStr = "N/A";
         if (record.closedAt && record.closedAt.toDate) {
@@ -689,9 +697,8 @@ document.addEventListener("DOMContentLoaded", () => {
         detailPanel.classList.remove('open');
     }
 
-    // --- EXPORT TO CSV ---
+    // --- 7. EXPORT TO CSV ---
     function exportToCSV() {
-        // Only export ACTIVE displayed records
         if(currentDisplayRecords.length === 0) {
             alert("No data to export.");
             return;

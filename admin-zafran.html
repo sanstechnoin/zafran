@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Zafran Res">
     <link rel="apple-touch-icon" href="favlogo.png">
     
-    <title>Reservation Manager - Zafran</title>
+    <title>Zafran Delight Admin</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <style>
         /* --- KDS THEME VARIABLES --- */
@@ -185,12 +185,18 @@
     </div>
 </div>
 
-<form id="login-form">
+<div id="login-overlay">
+    <div class="login-box">
+        <img src="logo.png" alt="Zafran" style="height:70px; margin-bottom:20px;">
+        <h3 style="color:var(--gold); margin-bottom:20px;">ZAFRAN ADMIN</h3>
+        <form id="login-form">
             <input type="email" id="admin-email" placeholder="Staff E-Mail" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; color: white; border: 1px solid #444; text-align: center; box-sizing: border-box;">
             <input type="password" id="admin-password" placeholder="Passwort" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; color: white; border: 1px solid #444; text-align: center; box-sizing: border-box;">
-            <button type="submit">Login</button>
+            <button type="submit" style="width: 100%; padding: 12px; background: var(--gold); border: none; font-weight: bold; cursor: pointer; border-radius: 4px; color: black;">Login</button>
             <p id="login-error" style="color:red; margin-top:10px; font-size:0.9rem;"></p>
         </form>
+    </div>
+</div>
 
 <div id="admin-content" style="display:none;">
     <div class="admin-container">

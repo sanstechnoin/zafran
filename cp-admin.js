@@ -131,7 +131,7 @@
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('admin-content').style.display = 'block'; 
         changeAdminLang(currentLang);
-        loadSettings(); loadHours(); loadCoupons(); loadDriverPin(); loadSpecialBanner();    
+        loadSettings(); loadHours(); loadCoupons(); loadAllPins(); loadSpecialBanner();    
     }
 
     // ==========================================
@@ -510,19 +510,42 @@
     }
 
     // ==========================================
-    // 3. DRIVER PIN LOGIC
+    // 3. MASTER PIN MANAGER
     // ==========================================
-    function loadDriverPin() {
-        db.collection('settings').doc('driver_auth').get().then(doc => {
-            if(doc.exists) document.getElementById('driver-pin-input').value = doc.data().pin || "";
+    function loadAllPins() {
+        ['driver', 'kitchen', 'waiter', 'record'].forEach(type => {
+            db.collection('settings').doc(`${type}_auth`).get().then(doc => {
+                if(doc.exists) {
+                    const input = document.getElementById(`${type}-pin-input`);
+                    if(input) input.value = doc.data().pin || "";
+                }
+            });
         });
     }
 
-    window.saveDriverPin = function() {
-        const newPin = document.getElementById('driver-pin-input').value.trim();
-        if(newPin.length < 4) return alert(translations[currentLang].pin_error);
-        db.collection('settings').doc('driver_auth').set({ pin: newPin })
-        .then(() => { alert(translations[currentLang].pin_saved); })
+    window.savePin = function(type) {
+        const newPin = document.getElementById(`${type}-pin-input`).value.trim();
+        const statusEl = document.getElementById(`${type}-pin-status`);
+        
+        if(newPin.length < 4) {
+            statusEl.innerText = "❌ Min 4 Zeichen";
+            statusEl.className = "message-box error";
+            statusEl.style.display = "block";
+            return;
+        }
+        
+        db.collection('settings').doc(`${type}_auth`).set({ pin: newPin })
+        .then(() => { 
+            statusEl.innerText = "✅ Gespeichert!";
+            statusEl.className = "message-box success";
+            statusEl.style.display = "block";
+            setTimeout(() => { statusEl.style.display = "none"; }, 3000);
+        })
+        .catch(err => {
+            statusEl.innerText = "❌ Fehler";
+            statusEl.className = "message-box error";
+            statusEl.style.display = "block";
+        });
     };
 
     // ==========================================

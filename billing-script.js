@@ -1,5 +1,4 @@
 // --- 1. FIREBASE SETUP ---
-// (Initialized securely via firebase-config.js)
 
 document.addEventListener("DOMContentLoaded", () => {
     
@@ -15,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentDiscount = 0;
     let appliedCoupon = null;
     let liveMenuItems = []; 
+    let liveCoupons = []; // DB Fetched Coupons
 
     // --- 3. CUSTOM MODAL CONTROLLERS ---
     let promptCallback = null;
@@ -165,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 6. POS INITIALIZATION & LISTENERS ---
     function initPOS() {
+        // Fetch Live Menu
         db.collection('settings').doc('menu').get().then(doc => {
             if (doc.exists && doc.data().menuData) {
                 const datalist = document.getElementById('menu-items-list');
@@ -176,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         cat.items.forEach(item => {
                             liveMenuItems.push(item);
                             const option = document.createElement('option');
-                            // FORMAT: "41 - Chicken Curry"
                             option.value = item.id ? `${item.id} - ${item.name}` : item.name;
                             datalist.appendChild(option);
                         });
@@ -185,6 +185,25 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Fetch Live Coupons
+        db.collection('settings').doc('coupons').get().then(doc => {
+            if (doc.exists && doc.data().list) {
+                const select = document.getElementById('coupon-select');
+                select.innerHTML = '<option value="">No Coupon Selected</option>';
+                liveCoupons = doc.data().list.filter(c => c.active); // Only fetch Active ones!
+                
+                liveCoupons.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c.code;
+                    let conditionTxt = c.minOrder ? ` (Min: ${c.minOrder}€)` : '';
+                    let valTxt = c.type === 'percent' ? `${c.value}%` : `${c.value}€`;
+                    option.text = `🎫 ${c.code} - ${valTxt}${conditionTxt}`;
+                    select.appendChild(option);
+                });
+            }
+        });
+
+        // Fetch Orders
         db.collection("orders")
           .onSnapshot(snapshot => {
               const list = document.getElementById('ready-orders-list');
@@ -206,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   
                   const card = document.createElement('div');
                   card.className = `order-card ${activeOrder && activeOrder.id === doc.id ? 'active' : ''}`;
-                  card.dataset.orderId = doc.id; // Added for efficient DOM highlighting
+                  card.dataset.orderId = doc.id; 
                   card.innerHTML = `
                       <div style="display:flex; justify-content:space-between; font-weight:bold;">
                           <span>${displayName}</span>
@@ -222,21 +241,15 @@ document.addEventListener("DOMContentLoaded", () => {
           });
     }
 
-    // Attach listener outside initPOS to prevent duplicate events
     document.getElementById('custom-name').addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
-        
-        // Search by exact ID, exact Name, or Combined "ID - Name"
         const match = liveMenuItems.find(i => {
             const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
             return combinedName === query || 
                    i.name.toLowerCase() === query || 
                    (i.id && i.id.toString().toLowerCase() === query);
         });
-        
-        if(match) {
-            document.getElementById('custom-price').value = match.price.toFixed(2);
-        }
+        if(match) document.getElementById('custom-price').value = match.price.toFixed(2);
     });
 
     // --- 7. CORE LOGIC ---
@@ -249,20 +262,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('btn-cash').disabled = false;
         document.getElementById('btn-card').disabled = false;
 
-        currentDiscount = 0;
-        appliedCoupon = null;
+        // Reset inputs on table switch
+        document.getElementById('coupon-select').value = "";
+        document.getElementById('manual-discount-percent').value = "";
+        document.getElementById('manual-discount-money').value = "";
         document.getElementById('tip-amount').value = 0;
-        document.getElementById('coupon-code').value = "";
         
         updateCalculations();
         
-        // Manually update the active card highlight to prevent memory leaks
         document.querySelectorAll('.order-card').forEach(card => {
-            if (card.dataset.orderId === id) {
-                card.classList.add('active');
-            } else {
-                card.classList.remove('active');
-            }
+            if (card.dataset.orderId === id) card.classList.add('active');
+            else card.classList.remove('active');
         });
     }
 
@@ -273,7 +283,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if(!name || isNaN(price)) return showAlertModal("Invalid item or price");
         
-        // Auto-Expand: If they just typed "41", it expands to "41 - Chicken Curry"
         const match = liveMenuItems.find(i => {
             const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
             return (i.id && i.id.toString().toLowerCase() === name.toLowerCase()) || 
@@ -281,9 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
                    i.name.toLowerCase() === name.toLowerCase();
         });
 
-        if (match) {
-            name = match.id ? `${match.id} - ${match.name}` : match.name;
-        }
+        if (match) name = match.id ? `${match.id} - ${match.name}` : match.name;
 
         if(!activeOrder.items) activeOrder.items = [];
         activeOrder.items.push({ name: name, quantity: 1, price: price });
@@ -318,10 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('calc-subtotal').innerText = "0.00 €";
                 document.getElementById('calc-discount').innerText = "- 0.00 €";
                 document.getElementById('calc-total').innerText = "0.00 €";
-                document.getElementById('receipt-paper').innerHTML = `
-                    <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
-                        Bill Cancelled & Deleted.
-                    </div>`;
+                document.getElementById('receipt-paper').innerHTML = `<div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">Bill Cancelled & Deleted.</div>`;
                 document.getElementById('active-table-name').innerText = "None Selected";
                 document.getElementById('btn-cash').disabled = true;
                 document.getElementById('btn-card').disabled = true;
@@ -339,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let subtotal = 0;
         let itemsHtml = "";
         
+        // Calculate Base Items
         activeOrder.items.forEach((item, index) => {
             const price = parseFloat(item.price || 0);
             const qty = parseInt(item.quantity || 1);
@@ -354,6 +359,39 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         });
         
+        currentDiscount = 0;
+        appliedCoupon = null;
+
+        // 1. Process Dropdown Coupon
+        const selectedCoupon = document.getElementById('coupon-select').value;
+        if (selectedCoupon && liveCoupons) {
+            const coupon = liveCoupons.find(c => c.code === selectedCoupon);
+            if (coupon) {
+                // Check Minimum Order Condition
+                if (coupon.minOrder && subtotal < coupon.minOrder) {
+                    // Fail silently, don't apply it if subtotal is too low
+                } else {
+                    appliedCoupon = coupon.code;
+                    if (coupon.type === 'percent') {
+                        currentDiscount += subtotal * (coupon.value / 100);
+                    } else {
+                        currentDiscount += coupon.value;
+                    }
+                }
+            }
+        }
+
+        // 2. Process Manual Percent
+        const manPercent = parseFloat(document.getElementById('manual-discount-percent').value) || 0;
+        if (manPercent > 0) currentDiscount += subtotal * (manPercent / 100);
+
+        // 3. Process Manual Money
+        const manMoney = parseFloat(document.getElementById('manual-discount-money').value) || 0;
+        if (manMoney > 0) currentDiscount += manMoney;
+
+        // Discount cannot exceed subtotal
+        if (currentDiscount > subtotal) currentDiscount = subtotal;
+
         document.getElementById('calc-items').innerHTML = itemsHtml;
         document.getElementById('calc-subtotal').innerText = `${subtotal.toFixed(2)} €`;
         
@@ -363,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('calc-discount').innerText = `- ${currentDiscount.toFixed(2)} €`;
         document.getElementById('calc-total').innerText = `${Math.max(0, grandTotal).toFixed(2)} €`;
         
-        generateLiveReceipt(subtotal, grandTotal, tip);
+        generateLiveReceipt(subtotal, Math.max(0, grandTotal), tip);
     }
 
     // --- 8. GERMAN COMPLIANCE & RECEIPT ---
@@ -421,7 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ${currentDiscount > 0 ? `
             <div class="divider"></div>
             <div style="display:flex; justify-content:space-between; color:#444;">
-                <span>Rabatt ${appliedCoupon ? `(${appliedCoupon})` : ''}</span>
+                <span>Rabatt ${appliedCoupon ? `(${appliedCoupon})` : '(Manuell)'}</span>
                 <span>- ${currentDiscount.toFixed(2).replace('.', ',')}</span>
             </div>` : ''}
             
@@ -479,10 +517,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.splitBillMenu = function() {
         showAlertModal("Split Bill Module UI will launch here in Phase 2!");
-    }
-
-    window.applyCoupon = function() {
-        showAlertModal("Live Coupon Engine linking in Phase 2!");
     }
 
     // --- 10. CLOSE BILL & ARCHIVE ---

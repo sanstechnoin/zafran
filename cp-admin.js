@@ -409,6 +409,22 @@
         btn.disabled = false;
     });
 
+    // --- NEW TSE SAVE FUNCTION ---
+    window.saveTseConfig = function() {
+        const isEnabled = document.getElementById('admin-tse-toggle').checked;
+        const serial = document.getElementById('admin-tse-serial').value.trim();
+        
+        db.collection('settings').doc('tse_config').set({
+            enabled: isEnabled,
+            serialNumber: serial || "ER3984719002_SIM"
+        }).then(() => {
+            alert(currentLang === 'de' ? "TSE Einstellungen erfolgreich gespeichert!" : "TSE Settings Saved Successfully!");
+        }).catch(err => {
+            alert("Error saving TSE settings.");
+            console.error(err);
+        });
+    };
+
     // ==========================================
     // 2. HOURS & SCHEDULE LOGIC
     // ==========================================

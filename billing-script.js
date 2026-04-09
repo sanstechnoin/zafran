@@ -92,15 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Listen for active orders (For now fetching all dine-in. Phase 2 will fetch 'ready_to_pay')
+        // Listen for ALL active orders (Dine-in and Pickups)
         db.collection("orders")
-          .where("orderType", "==", "dine-in")
           .onSnapshot(snapshot => {
               const list = document.getElementById('ready-orders-list');
               list.innerHTML = "";
               
               if(snapshot.empty) {
-                  list.innerHTML = `<p style="color:#666; text-align:center;">No tables currently active.</p>`;
+                  list.innerHTML = `<p style="color:#666; text-align:center;">No active orders.</p>`;
                   return;
               }
 
@@ -111,11 +110,14 @@ document.addEventListener("DOMContentLoaded", () => {
                       data.items.forEach(i => localTotal += (i.price * i.quantity));
                   }
                   
+                  // Dynamic Naming based on order type
+                  let displayName = data.orderType === 'dine-in' ? `Tisch ${data.table}` : `${data.customerName || 'Gast'}`;
+                  
                   const card = document.createElement('div');
                   card.className = `order-card ${activeOrder && activeOrder.id === doc.id ? 'active' : ''}`;
                   card.innerHTML = `
                       <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                          <span>Tisch ${data.table}</span>
+                          <span>${displayName}</span>
                           <span style="color:var(--gold);">${localTotal.toFixed(2)} €</span>
                       </div>
                       <div style="font-size:0.85rem; color:#888; margin-top:5px;">
@@ -127,20 +129,64 @@ document.addEventListener("DOMContentLoaded", () => {
               });
           });
 
-        // Auto-Pricing Logic Event Listener
         document.getElementById('custom-name').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
             const match = liveMenuItems.find(i => i.name.toLowerCase() === query);
-            if(match) {
-                document.getElementById('custom-price').value = match.price.toFixed(2);
-            }
+            if(match) document.getElementById('custom-price').value = match.price.toFixed(2);
         });
     }
+
+    // --- NEW: CREATE BLANK BILL (MANUAL ORDER) ---
+    window.createNewBill = function() {
+        let input = prompt("Enter Table Number (e.g., 5) OR Customer Name (e.g., John).\nLeave completely blank for an anonymous Pickup ID:");
+        if (input === null) return; // Cancelled
+
+        let orderType = 'pickup';
+        let tableName = '';
+        let customerName = '';
+
+        if (input.trim() === '') {
+            // GDPR Compliant Anonymous ID
+            customerName = "Gast-" + Math.floor(Math.random() * 9000 + 1000);
+        } else if (!isNaN(input) && input.trim() !== '') {
+            orderType = 'dine-in';
+            tableName = input.trim();
+        } else {
+            customerName = input.trim();
+        }
+
+        const newOrderRef = db.collection("orders").doc();
+        const newOrder = {
+            orderType: orderType,
+            table: tableName,
+            customerName: customerName,
+            items: [],
+            total: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Create instantly in Firebase so it syncs across the system
+        newOrderRef.set(newOrder).then(() => {
+            selectOrder(newOrderRef.id, newOrder);
+        }).catch(err => {
+            console.error("Error creating bill:", err);
+            alert("Error creating new bill.");
+        });
+    };
+
+    // --- NEW: LOGOUT LOGIC ---
+    window.posLogout = function() {
+        firebase.auth().signOut().then(() => {
+            window.location.reload();
+        });
+    };
 
     // --- 5. CORE LOGIC ---
     window.selectOrder = function(id, data) {
         activeOrder = { id, ...data };
-        document.getElementById('active-table-name').innerText = `Tisch ${data.table}`;
+        
+        let displayName = data.orderType === 'dine-in' ? `Tisch ${data.table}` : `${data.customerName || 'Gast'}`;
+        document.getElementById('active-table-name').innerText = displayName;
         
         document.getElementById('btn-cash').disabled = false;
         document.getElementById('btn-card').disabled = false;
@@ -154,9 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
         initPOS(); // Visual refresh
     }
 
-    // Add Custom or Datalist Item
     window.addCustomItem = function() {
-        if(!activeOrder) return alert("Select a table first!");
+        if(!activeOrder) return alert("Select an order first!");
         const name = document.getElementById('custom-name').value.trim();
         const price = parseFloat(document.getElementById('custom-price').value);
         
@@ -167,14 +212,17 @@ document.addEventListener("DOMContentLoaded", () => {
         
         document.getElementById('custom-name').value = "";
         document.getElementById('custom-price').value = "";
+        
+        // Auto-save to Firebase so line-items are persistent
+        db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
         updateCalculations();
     }
 
-    // Swiped Line-Item Voiding Logic
     window.voidItem = function(index) {
         if(!activeOrder || !activeOrder.items) return;
         if(confirm(`Remove "${activeOrder.items[index].name}" from this bill?`)) {
             activeOrder.items.splice(index, 1);
+            db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
             updateCalculations();
         }
     }
@@ -246,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         activeOrder.currentTseSig = generateTseSignature();
+        let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
 
         paper.innerHTML = `
             <div class="text-center">
@@ -255,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <div class="divider"></div>
             <div style="display:flex; justify-content:space-between;"><span>Datum: ${dateStr}</span><span>Zeit: ${timeStr}</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>Tisch: ${activeOrder.table}</span><span>Beleg: Vorschau</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Kunde: ${displayName}</span><span>Beleg: Vorschau</span></div>
             <div class="divider"></div>
             
             <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:8px;">
@@ -333,7 +382,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- 8. CLOSE BILL & ARCHIVE ---
     window.closeBill = async function(method) {
         if(!activeOrder) return;
-        if(!confirm(`Close Tisch ${activeOrder.table} with ${method.toUpperCase()}?`)) return;
+        
+        let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
+        if(!confirm(`Close bill for ${displayName} with ${method.toUpperCase()}?`)) return;
 
         const btnCash = document.getElementById('btn-cash');
         const btnCard = document.getElementById('btn-card');
@@ -341,7 +392,6 @@ document.addEventListener("DOMContentLoaded", () => {
         btnCash.innerText = "Processing...";
 
         try {
-            // Extract final totals
             let subtotal = 0;
             activeOrder.items.forEach(i => subtotal += (i.price * i.quantity));
             const tip = parseFloat(document.getElementById('tip-amount').value) || 0;
@@ -360,15 +410,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 isVoided: false
             };
 
-            // 1. Save to Archive
             await db.collection("archived_orders").doc(activeOrder.id).set(archiveData);
-            
-            // 2. Delete from Active Orders
             await db.collection("orders").doc(activeOrder.id).delete();
 
             alert(`✅ TSE Transaction Logged. Bill closed (${method.toUpperCase()}).`);
             
-            // Reset UI
             activeOrder = null;
             document.getElementById('calc-items').innerHTML = "";
             document.getElementById('receipt-paper').innerHTML = `
@@ -384,4 +430,3 @@ document.addEventListener("DOMContentLoaded", () => {
             btnCash.innerText = "💵 CASH";
         }
     }
-});

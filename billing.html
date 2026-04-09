@@ -26,7 +26,12 @@
 
         /* 3-COLUMN GRID */
         .pos-grid { display: grid; grid-template-columns: 300px 1fr 350px; flex: 1; overflow: hidden; }
-        .panel { padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); }
+        panel { 
+            padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); 
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        .panel::-webkit-scrollbar { display: none; /* Chrome, Safari, Opera */ }
         .panel:last-child { border-right: none; background: #1a1a1a; }
         
         h2 { font-size: 1.1rem; color: #aaa; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 10px; }
@@ -76,12 +81,16 @@
 
     <header class="pos-header">
         <h1>Zafran POS <span style="color:white; font-size:1rem; opacity:0.5;">v2.0 Enterprise</span></h1>
-        <div class="status">● TSE MODULE ACTIVE</div>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <div class="status">● TSE MODULE ACTIVE</div>
+            <button class="btn btn-red" style="padding: 5px 15px; font-size: 0.8rem;" onclick="posLogout()">LOGOUT</button>
+        </div>
     </header>
 
     <div class="pos-grid" style="opacity: 0; transition: opacity 0.5s;" id="main-content">
         
         <div class="panel">
+            <button class="btn btn-gold" style="width:100%; margin-bottom:20px; font-size:1.1rem; padding:12px;" onclick="createNewBill()">➕ NEW BLANK BILL</button>            
             <h2>🛎️ Ready to Pay</h2>
             <div id="ready-orders-list">
                 <p style="color:#666; text-align:center; margin-top:50px;">Waiting for orders...</p>

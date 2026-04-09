@@ -347,7 +347,22 @@
                     </div>
                     <button type="submit" id="settingsBtn" class="btn-blue" data-i18n="save_settings">Einstellungen Speichern</button>
                     <div id="settings-message" class="message-box"></div>
-                </form>
+                </form> <div style="background: #111; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid var(--border-color);">
+                    <h3 style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">POS TSE Engine (KassenSichV)</h3>
+                    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;">Deaktivieren Sie dies für Kunden außerhalb Deutschlands oder bei Kleingewerbe.</p>
+                    
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 15px;">
+                        <input type="checkbox" id="admin-tse-toggle" style="width: 22px; height: 22px; accent-color: var(--success-green);">
+                        <strong style="color: white; font-size: 1.1rem;">TSE Signatures Aktivieren</strong>
+                    </label>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="color: var(--gold); font-size: 0.9rem; font-weight: bold;">TSE Serial Number (White-Label Override)</label>
+                        <input type="text" id="admin-tse-serial" placeholder="z.B. ER3984719002_SIM">
+                    </div>
+                    
+                    <button type="button" onclick="saveTseConfig()" class="btn-blue" style="margin-top: 20px; width: auto;">TSE Einstellungen Speichern</button>
+                </div>
             </div>
 
             <div id="tab-hours" class="tab-content">

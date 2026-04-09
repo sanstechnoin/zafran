@@ -3,90 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaffran Billing</title>
-    <link rel="stylesheet" href="style.css?v=33">
+    <title>Zafran POS & Billing (TSE Compliant)</title>
     <link rel="icon" type="image/png" href="favlogo.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --panel-bg: #1e1e2d;
+            --gold: #D4AF37;
+            --success: #00c853;
+            --danger: #ff5252;
+            --info: #007bff;
+            --border: #333;
+        }
+        body { background: var(--bg-dark); color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* HEADER */
+        .pos-header { background: #111; border-bottom: 2px solid var(--gold); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .pos-header h1 { margin: 0; font-size: 1.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; }
+        .pos-header .status { font-family: monospace; font-size: 0.9rem; color: var(--success); border: 1px solid var(--success); padding: 5px 10px; border-radius: 4px; }
+
+        /* 3-COLUMN GRID */
+        .pos-grid { display: grid; grid-template-columns: 300px 1fr 350px; flex: 1; overflow: hidden; }
+        .panel { padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); }
+        .panel:last-child { border-right: none; background: #1a1a1a; }
+        
+        h2 { font-size: 1.1rem; color: #aaa; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 10px; }
+
+        /* TABLES LIST */
+        .order-card { background: #222; border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border-left: 4px solid var(--info); }
+        .order-card:hover { border-color: var(--gold); background: #2a2a2a; }
+        .order-card.active { border-color: var(--gold); border-left: 4px solid var(--gold); background: rgba(212, 175, 55, 0.1); }
+        
+        /* CALC SECTION */
+        .calc-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 1.1rem; }
+        .calc-row.total { font-size: 1.5rem; color: var(--gold); font-weight: bold; border-top: 2px solid var(--gold); border-bottom: none; margin-top: 10px; padding-top: 15px; }
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .input-group input { flex: 1; padding: 10px; background: #111; border: 1px solid var(--border); color: white; border-radius: 4px; font-size: 1rem; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn-gold { background: var(--gold); color: black; }
+        .btn-blue { background: var(--info); color: white; }
+        .btn-green { background: var(--success); color: white; }
+        .btn-red { background: var(--danger); color: white; }
+
+        /* RECEIPT PREVIEW */
+        .receipt-preview { background: #fff; color: #000; font-family: 'Courier New', Courier, monospace; padding: 20px; width: 100%; box-sizing: border-box; min-height: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; margin-bottom: 20px; }
+        .receipt-preview .text-center { text-align: center; }
+        .receipt-preview .divider { border-top: 1px dashed #000; margin: 10px 0; }
+        
+        /* MODALS */
+        #billing-login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: var(--panel-bg); padding: 40px; border-radius: 8px; border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 400px; }
+        .login-box input { width: 100%; padding: 15px; font-size: 1.5rem; text-align: center; margin-bottom: 20px; background: #111; border: 1px solid #444; color: var(--gold); letter-spacing: 5px; }
+        
+        #qr-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index: 10000; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        #qrcode { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    </style>
 </head>
-<body class="billing-body"> <header class="kitchen-header"> <div class="header-logo">
-            <img src="logo.png" alt="Zaffran Logo">
-            <h1>Billing Management</h1>
-            <span id="connection-icon">...</span>
+<body>
+
+    <div id="billing-login-overlay">
+        <div class="login-box">
+            <h2 style="color:var(--gold); border:none; font-size:2rem; margin-bottom:10px;">POS System</h2>
+            <p style="color:#aaa; margin-bottom:20px;">KassenSichV Compliant Terminal</p>
+            <input type="password" id="billing-password" placeholder="PIN" maxlength="6">
+            <button id="login-button" class="btn btn-gold" style="width:100%; font-size:1.2rem; padding:15px;">TERMINAL ENTSPERREN</button>
+            <p id="login-error" style="color:var(--danger); display:none; margin-top:15px; font-weight:bold;"></p>
         </div>
+    </div>
+
+    <header class="pos-header">
+        <h1>Zafran POS <span style="color:white; font-size:1rem; opacity:0.5;">v2.0 Enterprise</span></h1>
+        <div class="status">● TSE MODULE ACTIVE</div>
     </header>
 
-    <main class="billing-main">
-        <div id="billing-content-wrapper">
-            <div id="table-list-container">
-                <h2>Tables to Bill</h2>
-                <div id="table-list">
-                    <p>No open bills.</p>
+    <div class="pos-grid" style="opacity: 0; transition: opacity 0.5s;" id="main-content">
+        
+        <div class="panel">
+            <h2>🛎️ Ready to Pay</h2>
+            <div id="ready-orders-list">
+                <p style="color:#666; text-align:center; margin-top:50px;">Waiting for orders...</p>
+            </div>
+            
+            <h2 style="margin-top:40px;">➕ Add / Custom Item</h2>
+            <div class="input-group">
+                <input type="text" id="custom-name" list="menu-items-list" placeholder="Search Item or Type Custom">
+                <datalist id="menu-items-list"></datalist>
+            </div>
+            <div class="input-group">
+                <input type="number" id="custom-price" placeholder="Price (€)" step="0.50">
+                <button class="btn btn-blue" onclick="addCustomItem()">ADD</button>
+            </div>
+        </div>
+
+        <div class="panel" style="background: #151515;">
+            <h2>🧮 Calculator: <span id="active-table-name" style="color:var(--gold);">None Selected</span></h2>
+            
+            <div id="calc-items" style="min-height: 200px; margin-bottom: 20px;">
+                </div>
+
+            <div style="background:#111; padding:20px; border-radius:8px; border:1px solid #333;">
+                <div class="input-group">
+                    <input type="text" id="coupon-code" placeholder="Coupon Code (z.B. SUMMER25)" style="text-transform: uppercase;">
+                    <button class="btn btn-blue" onclick="applyCoupon()">APPLY</button>
+                </div>
+                
+                <div class="calc-row">
+                    <span>Subtotal</span>
+                    <span id="calc-subtotal">0.00 €</span>
+                </div>
+                <div class="calc-row" style="color:var(--danger);">
+                    <span>Discount</span>
+                    <span id="calc-discount">- 0.00 €</span>
+                </div>
+                <div class="calc-row">
+                    <span>Tip / Trinkgeld</span>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="tip-amount" value="0" step="0.50" style="width:70px; background:transparent; border:1px solid #444; color:white; text-align:right;" onchange="updateCalculations()">
+                        <span>€</span>
+                    </div>
+                </div>
+                <div class="calc-row total">
+                    <span>TOTAL</span>
+                    <span id="calc-total">0.00 €</span>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="btn btn-gold" style="flex:1;" onclick="splitBillMenu()">✂️ SPLIT BILL</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="margin:0; border:none;">🧾 Live Receipt</h2>
+                <button class="btn btn-green" onclick="showEcoQR()">📱 ECO-QR</button>
+            </div>
+            
+            <div class="receipt-preview" id="receipt-paper">
+                <div class="text-center">
+                    <h3 style="margin:0;">ZAFFRAN DELIGHT</h3>
+                    <p style="margin:5px 0;">Musterstraße 1, 53879 Euskirchen</p>
+                    <p style="margin:0;">St-Nr: 209/5000/1234</p>
+                </div>
+                <div class="divider"></div>
+                <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
+                    Select an order to generate preview...
                 </div>
             </div>
 
-            <div id="bill-view-container" class="hidden">
-                <h2 class="bill-title">Bill for <span id="bill-table-number"></span></h2>
-                
-                <ul id="bill-item-list">
-                    </ul>
-                
-                <div class="bill-total">
-                    <strong>Total: <span id="bill-total-amount">0.00 €</span></strong>
-                </div>
-
-                <hr class="billing-hr">
-
-                <form id="add-item-form">
-                    <h3>Add Manual Item</h3>
-                    <div class="form-row">
-                        <label for="item-name">Item Name</label>
-                        <input type="text" id="item-name" required list="menu-items-list">
-                    </div>
-                    <div class="form-row form-row-small">
-                        <label for="item-qty">Qty</label>
-                        <input type="number" id="item-qty" value="1" required>
-                    </div>
-                    <div class="form-row form-row-small">
-                        <label for="item-price">Price (€)</label>
-                        <input type="number" id="item-price" step="0.01" required>
-                    </div>
-                    <button type="submit" id="add-item-btn">Add to Bill</button>
-                </form>
-
-                <hr class="billing-hr">
-
-                <button id="close-bill-btn">Close Bill (Finalize & Clear)</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-green" style="flex:1; padding:20px; font-size:1.2rem;" onclick="closeBill('cash')" id="btn-cash" disabled>💵 CASH</button>
+                <button class="btn btn-blue" style="flex:1; padding:20px; font-size:1.2rem;" onclick="closeBill('card')" id="btn-card" disabled>💳 CARD</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <datalist id="menu-items-list">
-        </datalist>
-
-    <footer class="site-credit-footer">
-        <div class="footer-line-one">
-            <p class="footer-developer">
-                Created & Developed by <a href="https://sanstechno.in/" target="_blank" rel="noopener">Shri Avinash Narendhran S V</a> +49 162 3757839
-            </p>
-            <p class="footer-copyright">
-                &copy; Zaffran Delight, Euskirchen 2025
-            </p>
-        </div>
-   </footer>   
-
-    <div id="billing-login-overlay" class="kitchen-popup-overlay">
-        <div class="kitchen-popup-box">
-            <h3>Billing Login</h3>
-            <p>Please enter the management password.</p>
-            <input type="password" id="billing-password" placeholder="Password">
-            <p id="login-error" style="color: red; display: none;">Invalid Password</p>
-            <button id="login-button">Login</button>
-        </div>
+    <div id="qr-modal">
+        <h2 style="color:var(--success); font-size:2rem; margin-bottom:10px;">🌱 Save Earth. Go Digital.</h2>
+        <p style="margin-bottom:30px;">Kunde scannen lassen für digitalen Kassenbon.</p>
+        <div id="qrcode"></div>
+        <button class="btn btn-gold" style="padding:15px 30px;" onclick="document.getElementById('qr-modal').style.display='none'">SCHLIESSEN</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="billing-script.js?v=1"></script>
-
+    <script src="firebase-config.js"></script>
+    <script src="billing-script.js"></script>
 </body>
 </html>

@@ -430,3 +430,4 @@ document.addEventListener("DOMContentLoaded", () => {
             btnCash.innerText = "💵 CASH";
         }
     }
+});

@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentGrandTotal = 0; 
     let liveMenuItems = []; 
     let liveCoupons = []; 
+    
+    // NEW: Dynamic TSE Config
+    let tseConfig = { enabled: false, serial: "ER3984719002_SIM" }; 
 
     let promptCallback = null;
     let confirmCallback = null;
@@ -158,6 +161,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- POS INIT ---
     function initPOS() {
+        
+        // --- NEW: FETCH TSE CONFIG ---
+        db.collection('settings').doc('tse_config').onSnapshot(doc => {
+            const badge = document.getElementById('tse-status-badge');
+            if (doc.exists) {
+                tseConfig = doc.data();
+            } else {
+                tseConfig = { enabled: false }; // Default if no config exists
+            }
+            
+            if (tseConfig.enabled) {
+                badge.innerHTML = "● TSE ACTIVE";
+                badge.className = "status active";
+            } else {
+                badge.innerHTML = "● TSE DISABLED";
+                badge.className = "status";
+            }
+            updateCalculations(); // Re-render receipt to apply TSE layout changes
+        });
+
         db.collection('settings').doc('menu').get().then(doc => {
             if (doc.exists && doc.data().menuData) {
                 liveMenuItems = [];
@@ -254,7 +277,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- NEW: CUSTOM MOBILE-FRIENDLY AUTOCOMPLETE ---
     const nameInput = document.getElementById('custom-name');
     const autoList = document.getElementById('autocomplete-list');
 
@@ -282,7 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 div.innerHTML = `<strong>${match.id ? match.id + ' - ' : ''}${match.name}</strong> <span style="float:right; color:var(--gold);">${match.price.toFixed(2)}€</span>`;
                 
                 div.onclick = () => {
-                    // Set input to JUST the name, but keep ID logic secure
                     nameInput.value = match.name;
                     document.getElementById('custom-price').value = match.price.toFixed(2);
                     autoList.style.display = 'none';
@@ -294,7 +315,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Close autocomplete if clicked outside
     document.addEventListener('click', (e) => {
         if(e.target !== nameInput && e.target !== autoList) {
             autoList.style.display = 'none';
@@ -337,7 +357,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return num === query.toLowerCase() || i.name.toLowerCase() === query.toLowerCase();
         });
 
-        // Strip everything and use ONLY the final name
         let finalName = query;
         if (match) {
             finalName = match.name;
@@ -347,7 +366,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if(isNaN(price)) return showAlertModal("Invalid price");
         if(!activeOrder.items) activeOrder.items = [];
         
-        // Stacking identical items
         const existingItem = activeOrder.items.find(i => i.name === finalName && i.price === price);
         if (existingItem) {
             existingItem.quantity = (parseInt(existingItem.quantity) || 1) + 1;
@@ -514,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
         generateLiveReceipt(subtotal, currentGrandTotal, tip);
     }
 
-    // --- NEW: THE SPLIT BILL ENGINE ---
+    // --- THE SPLIT BILL ENGINE ---
     window.splitBillMenu = function() {
         if(!activeOrder) return showAlertModal("Select an order first.");
         if(currentGrandTotal <= 0) return showAlertModal("Total amount is 0.00 €");
@@ -556,12 +574,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('split-each-display').innerText = each.toFixed(2) + " €";
     }
 
-    // NEW: Processing the Equal Split
     window.processEqualSplit = async function(method) {
         let ways = parseInt(document.getElementById('split-ways').value);
         let each = currentGrandTotal / ways;
 
-        // If the remaining balance is covered entirely by this payment, close whole bill
         if (Math.abs(currentGrandTotal - each) < 0.01 || currentGrandTotal <= each) {
             closeSplitModal();
             closeBill(method);
@@ -572,7 +588,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showConfirmModal(`Process 1/${ways} of bill (${each.toFixed(2)}€) via ${method.toUpperCase()}?`, btnColor, async () => {
             try {
-                // Archive a sub-receipt for the exact partial amount
                 const partialData = {
                     ...activeOrder,
                     closedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -582,7 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     tipAmount: 0,
                     discount: 0,
                     couponCode: "Equal Split",
-                    tseSignature: generateTseSignature(),
+                    tseSignature: tseConfig.enabled ? generateTseSignature() : "DISABLED",
                     isVoided: false,
                     isPartial: true,
                     items: [{ name: `Teilzahlung (1/${ways})`, price: each, quantity: 1 }]
@@ -591,7 +606,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const partialId = activeOrder.id + "_eqsplit_" + Date.now();
                 await db.collection("archived_orders").doc(partialId).set(partialData);
 
-                // Add a negative item to the main active order to reduce the balance
                 if(!activeOrder.items) activeOrder.items = [];
                 activeOrder.items.push({ name: `Bereits bezahlt (1/${ways})`, price: -Math.abs(each), quantity: 1 });
                 
@@ -608,7 +622,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // Advanced Dish Split (Checkboxes)
     window.showItemSplit = function() {
         document.getElementById('split-choice-view').style.display = 'none';
         const listDiv = document.getElementById('split-checkbox-list');
@@ -682,7 +695,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     tipAmount: 0, 
                     discount: 0,  
                     couponCode: "Partial Split",
-                    tseSignature: generateTseSignature(),
+                    tseSignature: tseConfig.enabled ? generateTseSignature() : "DISABLED",
                     isVoided: false,
                     isPartial: true,
                     items: paidItems
@@ -715,7 +728,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- RECEIPT GENERATOR ---
+    // --- RECEIPT GENERATOR (DYNAMIC TSE) ---
     function generateTseSignature() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
         let sig = 'TSE_MAC_';
@@ -748,7 +761,24 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         });
 
-        activeOrder.currentTseSig = generateTseSignature();
+        // NEW: DYNAMIC TSE RENDERING
+        let tseHtml = "";
+        if (tseConfig.enabled) {
+            activeOrder.currentTseSig = generateTseSignature();
+            let serial = tseConfig.serialNumber || "ER3984719002_SIM";
+            tseHtml = `
+            <div class="divider"></div>
+            <div class="text-center" style="font-size: 10px; color: #444; margin-top:15px;">
+                <p style="margin:2px;">--- KassenSichV Konform (GoBD) ---</p>
+                <p style="margin:2px;">Start: ${now.toISOString()}</p>
+                <p style="margin:2px;">TSE-Signatur:</p>
+                <p style="margin:2px; word-break:break-all;">${activeOrder.currentTseSig}</p>
+                <p style="margin:2px;">Seriennummer: ${serial}</p>
+            </div>`;
+        } else {
+            activeOrder.currentTseSig = "N/A";
+        }
+
         let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
 
         paper.innerHTML = `
@@ -794,14 +824,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>MwSt (${taxLabel})</span><span>${taxAmount.toFixed(2).replace('.', ',')}</span>
             </div>
             
-            <div class="divider"></div>
-            <div class="text-center" style="font-size: 10px; color: #444; margin-top:15px;">
-                <p style="margin:2px;">--- KassenSichV Konform (GoBD) ---</p>
-                <p style="margin:2px;">Start: ${now.toISOString()}</p>
-                <p style="margin:2px;">TSE-Signatur:</p>
-                <p style="margin:2px; word-break:break-all;">${activeOrder.currentTseSig}</p>
-                <p style="margin:2px;">Seriennummer: ER3984719002_SIM</p>
-            </div>
+            ${tseHtml}
         `;
     }
 
@@ -852,7 +875,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     tipAmount: tip,
                     discount: currentDiscount,
                     couponCode: appliedCoupon || "None",
-                    tseSignature: activeOrder.currentTseSig,
+                    tseSignature: tseConfig.enabled ? (activeOrder.currentTseSig || generateTseSignature()) : "DISABLED",
                     isVoided: false
                 };
 

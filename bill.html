@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaffran Delight - Digitaler Beleg</title>
+    <link rel="icon" type="image/png" href="favlogo.png">
+    <style>
+        /* Mobile-First Digital Receipt Styling */
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
+            background: #f4f4f9; 
+            color: #222; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .receipt-container { 
+            background: #fff; 
+            width: 100%; 
+            max-width: 420px; 
+            padding: 30px 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            box-sizing: border-box;
+        }
+        .logo-area { text-align: center; margin-bottom: 25px; }
+        .logo-area h1 { margin: 0; color: #D4AF37; text-transform: uppercase; font-size: 1.8rem; letter-spacing: 1px;}
+        .logo-area p { margin: 4px 0; font-size: 0.9rem; color: #666; }
+        
+        .badge { text-align: center; padding: 8px; border-radius: 6px; font-weight: bold; margin-bottom: 20px; font-size: 1.1rem; letter-spacing: 1px; }
+        .badge.open { background: #ffebee; color: #ff5252; border: 1px solid #ff5252; }
+        .badge.paid { background: #e8f5e9; color: #00c853; border: 1px solid #00c853; }
+
+        .divider { border-top: 1px dashed #ccc; margin: 15px 0; }
+        .thick-divider { border-top: 2px solid #222; margin: 15px 0; }
+        
+        .info-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #555; margin-bottom: 5px; }
+        
+        .item-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.05rem; }
+        .totals-row { display: flex; justify-content: space-between; font-size: 1.1rem; margin-top: 8px; color: #444; }
+        
+        .grand-total { font-size: 1.6rem; font-weight: bold; color: #000; padding-top: 15px; margin-top: 15px; }
+        
+        .tax-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #888; margin-top: 4px; }
+        
+        .tse-block { font-size: 0.75rem; color: #999; text-align: center; margin-top: 30px; word-break: break-all; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;}
+        .tse-block p { margin: 3px 0; }
+        
+        .loader { text-align: center; padding: 50px 0; color: #D4AF37; font-weight: bold; font-size: 1.2rem; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        
+        .footer-msg { text-align: center; margin-top: 35px; font-weight: bold; color: #D4AF37; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-container" id="receipt-box">
+        <div class="loader" id="loader">Lade digitalen Beleg...</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // 1. Get the Order ID from the URL (e.g. ?id=ABC1234)
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('id');
+            const box = document.getElementById('receipt-box');
+
+            if (!orderId) {
+                box.innerHTML = `
+                    <h3 style='color:#ff5252; text-align:center;'>Ungültiger Link</h3>
+                    <p style='text-align:center; color:#666;'>Es wurde keine Rechnungs-ID in der URL gefunden.</p>
+                `;
+                return;
+            }
+
+            try {
+                // 2. First, check if the order is still OPEN in the kitchen/POS
+                let doc = await db.collection("orders").doc(orderId).get();
+                let data = doc.exists ? doc.data() : null;
+                let isArchived = false;
+
+                // 3. If not found in open orders, check if it was PAID and archived
+                if (!data) {
+                    doc = await db.collection("archived_orders").doc(orderId).get();
+                    data = doc.exists ? doc.data() : null;
+                    isArchived = true;
+                }
+
+                // 4. If neither exist, the bill was deleted or never existed
+                if (!data) {
+                    box.innerHTML = `
+                        <h3 style='color:#ff5252; text-align:center;'>Beleg nicht gefunden</h3>
+                        <p style='text-align:center; color:#666;'>Diese Rechnung existiert nicht oder wurde gelöscht.</p>
+                    `;
+                    return;
+                }
+
+                // 5. Render the digital receipt!
+                renderReceipt(data, isArchived, orderId);
+
+            } catch (error) {
+                console.error("Firebase Error:", error);
+                box.innerHTML = `
+                    <h3 style='color:#ff5252; text-align:center;'>Systemfehler</h3>
+                    <p style='text-align:center; color:#666;'>Fehler beim Laden des Belegs von der Datenbank.</p>
+                `;
+            }
+        });
+
+        function renderReceipt(data, isArchived, orderId) {
+            const box = document.getElementById('receipt-box');
+            
+            // --- MATH CALCULATIONS ---
+            let subtotal = 0;
+            let itemsHtml = "";
+            
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const price = parseFloat(item.price || 0);
+                    const qty = parseInt(item.quantity || 1);
+                    const lineTotal = price * qty;
+                    subtotal += lineTotal;
+                    
+                    itemsHtml += `
+                        <div class="item-row">
+                            <span style="flex:1; padding-right:15px;">${qty}x ${item.name}</span>
+                            <span style="font-weight:600;">${lineTotal.toFixed(2).replace('.', ',')} €</span>
+                        </div>
+                    `;
+                });
+            } else {
+                itemsHtml = "<p style='text-align:center; color:#888;'>Keine Artikel gefunden.</p>";
+            }
+
+            const discount = parseFloat(data.discount || 0);
+            const tip = parseFloat(data.tipAmount || 0);
+            const grandTotal = parseFloat(data.total || (subtotal - discount + tip));
+            
+            const taxRate = data.orderType === 'dine-in' ? 0.19 : 0.07;
+            const taxLabel = data.orderType === 'dine-in' ? "19%" : "7%";
+            const netAmount = grandTotal / (1 + taxRate);
+            const taxAmount = grandTotal - netAmount;
+
+            // --- DATE & TIME ---
+            let dateStr = "N/A";
+            let timeStr = "N/A";
+            let timeSource = data.closedAt || data.createdAt;
+            
+            if (timeSource && timeSource.toDate) {
+                const d = timeSource.toDate();
+                dateStr = d.toLocaleDateString('de-DE');
+                timeStr = d.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+            }
+
+            // --- BADGE STATUS ---
+            let statusBadge = isArchived 
+                ? `<div class="badge paid">✅ BEZAHLT (${(data.paymentCollected || 'CASH').toUpperCase()})</div>`
+                : `<div class="badge open">⚠️ OFFEN (NICHT BEZAHLT)</div>`;
+            
+            if (data.isPartial) {
+                 statusBadge = `<div class="badge paid" style="background:#e3f2fd; color:#007bff; border-color:#007bff;">✅ TEILZAHLUNG (${(data.paymentCollected || '').toUpperCase()})</div>`;
+            }
+
+            // --- TSE COMPLIANCE BLOCK ---
+            let tseHtml = "";
+            if (data.tseSignature) {
+                tseHtml = `
+                    <div class="tse-block">
+                        <p style="font-weight:bold; color:#555; margin-bottom:8px;">--- KassenSichV Konform ---</p>
+                        <p><strong>Signatur:</strong></p>
+                        <p style="font-family:monospace; margin-bottom:8px;">${data.tseSignature}</p>
+                        <p><strong>Seriennummer:</strong> ER3984719002_SIM</p>
+                        <p><strong>Transaktion:</strong> ${orderId.substring(0,8).toUpperCase()}</p>
+                    </div>
+                `;
+            }
+
+            let customerName = data.orderType === 'dine-in' ? 'Tisch ' + data.table : (data.customerName || 'Gast');
+
+            // --- FINAL HTML INJECTION ---
+            box.innerHTML = `
+                <div class="logo-area">
+                    <h1>Zaffran Delight</h1>
+                    <p>Authentische Indische Küche</p>
+                    <p>Musterstraße 1, 53879 Euskirchen</p>
+                    <p>St-Nr: 209/5000/1234</p>
+                </div>
+                
+                ${statusBadge}
+
+                <div class="info-row">
+                    <span><strong>Datum:</strong> ${dateStr}</span>
+                    <span><strong>Zeit:</strong> ${timeStr}</span>
+                </div>
+                <div class="info-row" style="margin-bottom:15px;">
+                    <span><strong>Kunde:</strong> ${customerName}</span>
+                </div>
+                
+                <div class="thick-divider"></div>
+                
+                <div style="font-weight:bold; margin-bottom:15px; display:flex; justify-content:space-between; color:#888; text-transform:uppercase; font-size:0.85rem;">
+                    <span>Artikel</span><span>Betrag</span>
+                </div>
+                
+                ${itemsHtml}
+                
+                <div class="thick-divider"></div>
+                
+                <div class="totals-row">
+                    <span>Zwischensumme</span>
+                    <span>${subtotal.toFixed(2).replace('.', ',')} €</span>
+                </div>
+
+                ${discount > 0 ? `
+                <div class="totals-row" style="color:#ff5252;">
+                    <span>Rabatt ${data.couponCode && data.couponCode !== 'None' ? '(' + data.couponCode + ')' : ''}</span>
+                    <span>- ${discount.toFixed(2).replace('.', ',')} €</span>
+                </div>` : ''}
+                
+                ${tip > 0 ? `
+                <div class="totals-row">
+                    <span>Trinkgeld (0% MwSt)</span>
+                    <span>+ ${tip.toFixed(2).replace('.', ',')} €</span>
+                </div>` : ''}
+
+                <div class="totals-row grand-total">
+                    <span>GESAMTBETRAG</span>
+                    <span>${grandTotal.toFixed(2).replace('.', ',')} €</span>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div class="tax-row">
+                    <span>Netto</span><span>${netAmount.toFixed(2).replace('.', ',')} €</span>
+                </div>
+                <div class="tax-row">
+                    <span>MwSt (${taxLabel})</span><span>${taxAmount.toFixed(2).replace('.', ',')} €</span>
+                </div>
+                
+                ${tseHtml}
+                
+                <div class="footer-msg">
+                    Vielen Dank für Ihren Besuch!
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

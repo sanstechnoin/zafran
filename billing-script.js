@@ -160,17 +160,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function initPOS() {
         db.collection('settings').doc('menu').get().then(doc => {
             if (doc.exists && doc.data().menuData) {
-                const datalist = document.getElementById('menu-items-list');
-                datalist.innerHTML = "";
                 liveMenuItems = [];
-                
                 doc.data().menuData.forEach(cat => {
                     if(cat.items) {
                         cat.items.forEach(item => {
                             liveMenuItems.push(item);
-                            const option = document.createElement('option');
-                            option.value = item.id ? `${item.id} - ${item.name}` : item.name;
-                            datalist.appendChild(option);
                         });
                     }
                 });
@@ -260,14 +254,51 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Number Search Auto-fill Logic
-    document.getElementById('custom-name').addEventListener('input', (e) => {
+    // --- NEW: CUSTOM MOBILE-FRIENDLY AUTOCOMPLETE ---
+    const nameInput = document.getElementById('custom-name');
+    const autoList = document.getElementById('autocomplete-list');
+
+    nameInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
-        const match = liveMenuItems.find(i => {
-            const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
-            return combinedName === query || (i.id && i.id.toString().toLowerCase() === query) || i.name.toLowerCase() === query;
-        });
-        if(match) document.getElementById('custom-price').value = match.price.toFixed(2);
+        autoList.innerHTML = '';
+        
+        if (!query) {
+            autoList.style.display = 'none';
+            document.getElementById('custom-price').value = '';
+            return;
+        }
+
+        const matches = liveMenuItems.filter(i => {
+            const num = i.id ? i.id.toString() : "";
+            const name = i.name.toLowerCase();
+            return num === query || name.includes(query) || (num + " " + name).includes(query);
+        }).slice(0, 15); 
+
+        if (matches.length > 0) {
+            autoList.style.display = 'block';
+            matches.forEach(match => {
+                const div = document.createElement('div');
+                div.className = 'auto-item';
+                div.innerHTML = `<strong>${match.id ? match.id + ' - ' : ''}${match.name}</strong> <span style="float:right; color:var(--gold);">${match.price.toFixed(2)}€</span>`;
+                
+                div.onclick = () => {
+                    // Set input to JUST the name, but keep ID logic secure
+                    nameInput.value = match.name;
+                    document.getElementById('custom-price').value = match.price.toFixed(2);
+                    autoList.style.display = 'none';
+                };
+                autoList.appendChild(div);
+            });
+        } else {
+            autoList.style.display = 'none';
+        }
+    });
+
+    // Close autocomplete if clicked outside
+    document.addEventListener('click', (e) => {
+        if(e.target !== nameInput && e.target !== autoList) {
+            autoList.style.display = 'none';
+        }
     });
 
     // --- CORE LOGIC ---
@@ -294,7 +325,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Strict Number-to-Name extraction
     window.addCustomItem = function() {
         if(!activeOrder) return showAlertModal("Select an order first!");
         let query = document.getElementById('custom-name').value.trim();
@@ -303,10 +333,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if(!query) return showAlertModal("Enter an item.");
         
         const match = liveMenuItems.find(i => {
-            const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
-            return combinedName === query.toLowerCase() || 
-                   (i.id && i.id.toString().toLowerCase() === query.toLowerCase()) || 
-                   i.name.toLowerCase() === query.toLowerCase();
+            const num = i.id ? i.id.toString() : "";
+            return num === query.toLowerCase() || i.name.toLowerCase() === query.toLowerCase();
         });
 
         // Strip everything and use ONLY the final name
@@ -334,9 +362,23 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCalculations();
     }
 
+    window.changeQty = function(index, delta) {
+        if(!activeOrder || !activeOrder.items) return;
+        let item = activeOrder.items[index];
+        let newQty = (parseInt(item.quantity) || 1) + delta;
+        
+        if (newQty <= 0) {
+            voidItem(index);
+        } else {
+            item.quantity = newQty;
+            db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
+            updateCalculations();
+        }
+    }
+
     window.voidItem = function(index) {
         if(!activeOrder || !activeOrder.items) return;
-        showConfirmModal(`Remove "${activeOrder.items[index].name}" from this bill?`, 'var(--danger)', () => {
+        showConfirmModal(`Remove "${activeOrder.items[index].name}" completely?`, 'var(--danger)', () => {
             activeOrder.items.splice(index, 1);
             db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
             updateCalculations();
@@ -367,6 +409,36 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    window.applyCoupon = function() {
+        if(!activeOrder) return showAlertModal("Select an order first!");
+        
+        const codeInput = document.getElementById('coupon-code').value.trim().toUpperCase();
+        if (!codeInput) return showAlertModal("Please enter a coupon code.");
+
+        const match = liveCoupons.find(c => {
+            const cCode = (c.code || c.id || c.name || c.couponCode || "").toUpperCase();
+            return cCode === codeInput;
+        });
+        
+        if (match) {
+            const select = document.getElementById('coupon-select');
+            const matchValue = match.code || match.id || match.name || match.couponCode;
+            
+            let optionExists = Array.from(select.options).some(opt => opt.value === matchValue);
+            
+            if (optionExists) {
+                select.value = matchValue;
+                updateCalculations();
+                showAlertModal(`✅ Coupon "${matchValue}" angewendet!`);
+            } else {
+                showAlertModal(`❌ Coupon is inactive or invalid.`);
+            }
+        } else {
+            showAlertModal(`❌ Coupon "${codeInput}" not found.`);
+        }
+        document.getElementById('coupon-code').value = '';
+    }
+
     window.updateCalculations = function() {
         if(!activeOrder) return;
         
@@ -381,8 +453,13 @@ document.addEventListener("DOMContentLoaded", () => {
             
             itemsHtml += `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #333;">
-                    <span style="flex:1;">${qty}x ${item.name}</span>
-                    <span style="color:var(--gold); margin-right:15px;">${lineTotal.toFixed(2)} €</span>
+                    <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                        <button class="btn" style="padding:2px 8px; background:#444; color:white; font-size:1rem;" onclick="changeQty(${index}, -1)">-</button>
+                        <span style="min-width:20px; text-align:center; font-weight:bold;">${qty}</span>
+                        <button class="btn" style="padding:2px 8px; background:#444; color:white; font-size:1rem;" onclick="changeQty(${index}, 1)">+</button>
+                        <span style="margin-left:10px;">${item.name}</span>
+                    </div>
+                    <span style="color:var(--gold); margin-right:15px; min-width:60px; text-align:right;">${lineTotal.toFixed(2)} €</span>
                     <button class="btn-red" style="padding:4px 8px; font-size:0.8rem; cursor:pointer;" onclick="voidItem(${index})" title="Void Item">X</button>
                 </div>
             `;
@@ -479,6 +556,58 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('split-each-display').innerText = each.toFixed(2) + " €";
     }
 
+    // NEW: Processing the Equal Split
+    window.processEqualSplit = async function(method) {
+        let ways = parseInt(document.getElementById('split-ways').value);
+        let each = currentGrandTotal / ways;
+
+        // If the remaining balance is covered entirely by this payment, close whole bill
+        if (Math.abs(currentGrandTotal - each) < 0.01 || currentGrandTotal <= each) {
+            closeSplitModal();
+            closeBill(method);
+            return;
+        }
+
+        let btnColor = method === 'cash' ? 'var(--success)' : 'var(--info)';
+
+        showConfirmModal(`Process 1/${ways} of bill (${each.toFixed(2)}€) via ${method.toUpperCase()}?`, btnColor, async () => {
+            try {
+                // Archive a sub-receipt for the exact partial amount
+                const partialData = {
+                    ...activeOrder,
+                    closedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    paymentCollected: method,
+                    total: each,
+                    paidAmount: each,
+                    tipAmount: 0,
+                    discount: 0,
+                    couponCode: "Equal Split",
+                    tseSignature: generateTseSignature(),
+                    isVoided: false,
+                    isPartial: true,
+                    items: [{ name: `Teilzahlung (1/${ways})`, price: each, quantity: 1 }]
+                };
+
+                const partialId = activeOrder.id + "_eqsplit_" + Date.now();
+                await db.collection("archived_orders").doc(partialId).set(partialData);
+
+                // Add a negative item to the main active order to reduce the balance
+                if(!activeOrder.items) activeOrder.items = [];
+                activeOrder.items.push({ name: `Bereits bezahlt (1/${ways})`, price: -Math.abs(each), quantity: 1 });
+                
+                await db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
+
+                showAlertModal(`✅ Partial Bill of ${each.toFixed(2)}€ Paid (${method.toUpperCase()}).`);
+                updateCalculations();
+                closeSplitModal();
+
+            } catch(e) {
+                console.error(e);
+                showAlertModal("Error processing equal split payment.");
+            }
+        });
+    };
+
     // Advanced Dish Split (Checkboxes)
     window.showItemSplit = function() {
         document.getElementById('split-choice-view').style.display = 'none';
@@ -488,7 +617,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!activeOrder || !activeOrder.items || activeOrder.items.length === 0) {
             listDiv.innerHTML = '<p style="color:#888; padding:15px; text-align:center;">No items to split.</p>';
         } else {
-            // Generate checkboxes (expand quantities so 3 cokes = 3 checkboxes)
             activeOrder.items.forEach((item, index) => {
                 const qty = parseInt(item.quantity) || 1;
                 const price = parseFloat(item.price) || 0;
@@ -533,7 +661,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 let remainingItems = [];
                 let paidItems = [];
 
-                // Divide items securely based on checkboxes
                 activeOrder.items.forEach((item, index) => {
                     let c_checked = 0;
                     let c_unchecked = 0;
@@ -565,7 +692,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 await db.collection("archived_orders").doc(partialId).set(archiveData);
 
                 if (remainingItems.length === 0) {
-                    // Whole bill was split out!
                     await db.collection("orders").doc(activeOrder.id).delete();
                     activeOrder = null;
                     document.getElementById('active-table-name').innerText = "None Selected";
@@ -574,7 +700,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById('calc-items').innerHTML = "";
                     document.getElementById('receipt-paper').innerHTML = `<div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">Order Closed Successfully.</div>`;
                 } else {
-                    // Update main bill with leftovers
                     activeOrder.items = remainingItems;
                     await db.collection("orders").doc(activeOrder.id).update({ items: remainingItems });
                 }
@@ -588,37 +713,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 showAlertModal("Error processing split payment.");
             }
         });
-    }
-
-    // Live Apply Coupon Button
-    window.applyCoupon = function() {
-        if(!activeOrder) return showAlertModal("Select an order first!");
-        
-        const codeInput = document.getElementById('coupon-code').value.trim().toUpperCase();
-        if (!codeInput) return showAlertModal("Please enter a coupon code.");
-
-        const match = liveCoupons.find(c => {
-            const cCode = (c.code || c.id || c.name || c.couponCode || "").toUpperCase();
-            return cCode === codeInput;
-        });
-        
-        if (match) {
-            const select = document.getElementById('coupon-select');
-            const matchValue = match.code || match.id || match.name || match.couponCode;
-            
-            let optionExists = Array.from(select.options).some(opt => opt.value === matchValue);
-            
-            if (optionExists) {
-                select.value = matchValue;
-                updateCalculations();
-                showAlertModal(`✅ Coupon "${matchValue}" angewendet!`);
-            } else {
-                showAlertModal(`❌ Coupon is inactive or invalid.`);
-            }
-        } else {
-            showAlertModal(`❌ Coupon "${codeInput}" not found.`);
-        }
-        document.getElementById('coupon-code').value = '';
     }
 
     // --- RECEIPT GENERATOR ---

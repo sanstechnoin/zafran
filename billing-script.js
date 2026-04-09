@@ -3,22 +3,19 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- 2. DOM Elements ---
     const loginOverlay = document.getElementById('billing-login-overlay');
     const loginButton = document.getElementById('login-button');
     const passwordInput = document.getElementById('billing-password');
     const loginError = document.getElementById('login-error');
     const mainContent = document.getElementById('main-content');
     
-    // POS State
     let activeOrder = null;
     let currentDiscount = 0;
     let appliedCoupon = null;
-    let currentGrandTotal = 0; // Needed for Split Calculator
+    let currentGrandTotal = 0; 
     let liveMenuItems = []; 
     let liveCoupons = []; 
 
-    // --- 3. CUSTOM MODAL CONTROLLERS ---
     let promptCallback = null;
     let confirmCallback = null;
 
@@ -59,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
             newOrderRef.set(newOrder).then(() => {
                 selectOrder(newOrderRef.id, newOrder);
             }).catch(err => {
-                console.error("Error creating bill:", err);
+                console.error(err);
                 showAlertModal("Error creating new bill.");
             });
         };
@@ -82,10 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.showConfirmModal = function(msg, btnColor, cb) {
         confirmCallback = cb;
         document.getElementById('confirm-message').innerText = msg;
-        
-        const btn = document.getElementById('confirm-yes-btn');
-        btn.style.background = btnColor;
-        
+        document.getElementById('confirm-yes-btn').style.background = btnColor;
         document.getElementById('custom-confirm-modal').style.display = 'flex';
     }
 
@@ -99,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
         closeConfirmModal();
     });
 
-    // --- 4. SECURE STRICT LOGIN LOGIC ---
+    // --- SECURE LOGIN ---
     loginButton.addEventListener('click', () => {
         const enteredPin = passwordInput.value.trim();
         if (!enteredPin) return;
@@ -117,9 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const realPin = doc.data().pin;
-
-            if (enteredPin === realPin) {
+            if (enteredPin === doc.data().pin) {
                 const hiddenEmail = "webmaster@zafraneuskirchen.de";
                 const hiddenPass  = "!Zafran2025";
                 
@@ -164,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // --- 5. POS INITIALIZATION & LISTENERS ---
+    // --- POS INIT ---
     function initPOS() {
         db.collection('settings').doc('menu').get().then(doc => {
             if (doc.exists && doc.data().menuData) {
@@ -173,13 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 liveMenuItems = [];
                 
                 doc.data().menuData.forEach(cat => {
-                    let catName = cat.category || cat.categoryName || cat.name || "Kategorie";
                     if(cat.items) {
                         cat.items.forEach(item => {
-                            item.categoryName = catName; 
                             liveMenuItems.push(item);
                             const option = document.createElement('option');
-                            option.value = item.id ? `[${catName}] ${item.id} - ${item.name}` : `[${catName}] ${item.name}`;
+                            option.value = item.id ? `${item.id} - ${item.name}` : item.name;
                             datalist.appendChild(option);
                         });
                     }
@@ -222,19 +212,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     let minOrder = c.minOrder || c.minAmount || c.condition || c.kondition || 0;
                     let conditionTxt = minOrder > 0 ? ` (Min: ${minOrder}€)` : '';
-                    
                     let val = c.value || c.discount || c.amount || c.wert || 0;
                     let type = c.type || c.discountType || c.typ || '';
                     let valTxt = (type === 'percent' || type === '%' || type === 'Prozentual' || type === 'prozent') ? `${val}%` : `${val}€`;
-                    
                     let activeStatus = c.active === true || c.active === "true" || c.active === "on" || c.isActive === true || c.status === 'Aktiv' || c.status === true;
                     let statusTxt = activeStatus ? '' : ' [INAKTIV]';
                     
                     option.text = `🎫 ${code} - Typ: ${valTxt}${conditionTxt}${statusTxt}`;
                     select.appendChild(option);
                 });
-            }).catch(e => console.error("Root coupons fetch error", e));
-        }).catch(err => console.error("Settings coupons fetch error", err));
+            }).catch(e => console.error(e));
+        }).catch(err => console.error(err));
 
         db.collection("orders").onSnapshot(snapshot => {
             const list = document.getElementById('ready-orders-list');
@@ -272,18 +260,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Number Search Auto-fill Logic
     document.getElementById('custom-name').addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
         const match = liveMenuItems.find(i => {
-            const catName = i.categoryName || "";
-            const combinedName1 = i.id ? `[${catName}] ${i.id} - ${i.name}`.toLowerCase() : `[${catName}] ${i.name}`.toLowerCase();
-            const combinedName2 = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
-            return combinedName1 === query || combinedName2 === query || i.name.toLowerCase() === query || (i.id && i.id.toString().toLowerCase() === query);
+            const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
+            return combinedName === query || (i.id && i.id.toString().toLowerCase() === query) || i.name.toLowerCase() === query;
         });
         if(match) document.getElementById('custom-price').value = match.price.toFixed(2);
     });
 
-    // --- 6. CORE LOGIC ---
+    // --- CORE LOGIC ---
     window.selectOrder = function(id, data) {
         activeOrder = { id, ...data };
         
@@ -307,30 +294,37 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // NEW: Auto-Stacking Logic
+    // Strict Number-to-Name extraction
     window.addCustomItem = function() {
         if(!activeOrder) return showAlertModal("Select an order first!");
-        let name = document.getElementById('custom-name').value.trim();
-        const price = parseFloat(document.getElementById('custom-price').value);
+        let query = document.getElementById('custom-name').value.trim();
+        let price = parseFloat(document.getElementById('custom-price').value);
         
-        if(!name || isNaN(price)) return showAlertModal("Invalid item or price");
+        if(!query) return showAlertModal("Enter an item.");
         
         const match = liveMenuItems.find(i => {
-            const catName = i.categoryName || "";
-            const combinedName1 = i.id ? `[${catName}] ${i.id} - ${i.name}`.toLowerCase() : `[${catName}] ${i.name}`.toLowerCase();
-            return combinedName1 === name.toLowerCase() || (i.id && i.id.toString().toLowerCase() === name.toLowerCase()) || i.name.toLowerCase() === name.toLowerCase();
+            const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
+            return combinedName === query.toLowerCase() || 
+                   (i.id && i.id.toString().toLowerCase() === query.toLowerCase()) || 
+                   i.name.toLowerCase() === query.toLowerCase();
         });
 
-        if (match) name = match.id ? `${match.id} - ${match.name}` : match.name;
+        // Strip everything and use ONLY the final name
+        let finalName = query;
+        if (match) {
+            finalName = match.name;
+            if(isNaN(price)) price = parseFloat(match.price);
+        }
 
+        if(isNaN(price)) return showAlertModal("Invalid price");
         if(!activeOrder.items) activeOrder.items = [];
         
-        // Check if item already exists to stack it
-        const existingItem = activeOrder.items.find(i => i.name === name && i.price === price);
+        // Stacking identical items
+        const existingItem = activeOrder.items.find(i => i.name === finalName && i.price === price);
         if (existingItem) {
             existingItem.quantity = (parseInt(existingItem.quantity) || 1) + 1;
         } else {
-            activeOrder.items.push({ name: name, quantity: 1, price: price });
+            activeOrder.items.push({ name: finalName, quantity: 1, price: price });
         }
         
         document.getElementById('custom-name').value = "";
@@ -340,24 +334,9 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCalculations();
     }
 
-    // NEW: Smart Quantity Adjuster (+/-)
-    window.changeQty = function(index, delta) {
-        if(!activeOrder || !activeOrder.items) return;
-        let item = activeOrder.items[index];
-        let newQty = (parseInt(item.quantity) || 1) + delta;
-        
-        if (newQty <= 0) {
-            voidItem(index);
-        } else {
-            item.quantity = newQty;
-            db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
-            updateCalculations();
-        }
-    }
-
     window.voidItem = function(index) {
         if(!activeOrder || !activeOrder.items) return;
-        showConfirmModal(`Remove "${activeOrder.items[index].name}" completely?`, 'var(--danger)', () => {
+        showConfirmModal(`Remove "${activeOrder.items[index].name}" from this bill?`, 'var(--danger)', () => {
             activeOrder.items.splice(index, 1);
             db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
             updateCalculations();
@@ -388,38 +367,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // --- 7. DISCOUNT & MATH ENGINE ---
-    // NEW: Text Input Coupon Logic
-    window.applyCoupon = function() {
-        if(!activeOrder) return showAlertModal("Select an order first!");
-        
-        const codeInput = document.getElementById('coupon-code').value.trim().toUpperCase();
-        if (!codeInput) return showAlertModal("Please enter a coupon code.");
-
-        const match = liveCoupons.find(c => {
-            const cCode = (c.code || c.id || c.name || c.couponCode || "").toUpperCase();
-            return cCode === codeInput;
-        });
-        
-        if (match) {
-            const select = document.getElementById('coupon-select');
-            const matchValue = match.code || match.id || match.name || match.couponCode;
-            
-            let optionExists = Array.from(select.options).some(opt => opt.value === matchValue);
-            
-            if (optionExists) {
-                select.value = matchValue;
-                updateCalculations();
-                showAlertModal(`✅ Coupon "${matchValue}" angewendet!`);
-            } else {
-                showAlertModal(`❌ Coupon is inactive or invalid.`);
-            }
-        } else {
-            showAlertModal(`❌ Coupon "${codeInput}" not found.`);
-        }
-        document.getElementById('coupon-code').value = '';
-    }
-
     window.updateCalculations = function() {
         if(!activeOrder) return;
         
@@ -432,16 +379,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const lineTotal = price * qty;
             subtotal += lineTotal;
             
-            // Render items with +/- quantity buttons
             itemsHtml += `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #333;">
-                    <div style="display:flex; align-items:center; gap:8px; flex:1;">
-                        <button class="btn" style="padding:2px 8px; background:#444; color:white; font-size:1rem;" onclick="changeQty(${index}, -1)">-</button>
-                        <span style="min-width:20px; text-align:center; font-weight:bold;">${qty}</span>
-                        <button class="btn" style="padding:2px 8px; background:#444; color:white; font-size:1rem;" onclick="changeQty(${index}, 1)">+</button>
-                        <span style="margin-left:10px;">${item.name}</span>
-                    </div>
-                    <span style="color:var(--gold); margin-right:15px; min-width:60px; text-align:right;">${lineTotal.toFixed(2)} €</span>
+                    <span style="flex:1;">${qty}x ${item.name}</span>
+                    <span style="color:var(--gold); margin-right:15px;">${lineTotal.toFixed(2)} €</span>
                     <button class="btn-red" style="padding:4px 8px; font-size:0.8rem; cursor:pointer;" onclick="voidItem(${index})" title="Void Item">X</button>
                 </div>
             `;
@@ -488,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const tip = parseFloat(document.getElementById('tip-amount').value) || 0;
         const grandTotal = (subtotal - currentDiscount) + tip;
         
-        currentGrandTotal = Math.max(0, grandTotal); // Save globally for Split Calculator
+        currentGrandTotal = Math.max(0, grandTotal);
 
         document.getElementById('calc-discount').innerText = `- ${currentDiscount.toFixed(2)} €`;
         document.getElementById('calc-total').innerText = `${currentGrandTotal.toFixed(2)} €`;
@@ -496,15 +437,32 @@ document.addEventListener("DOMContentLoaded", () => {
         generateLiveReceipt(subtotal, currentGrandTotal, tip);
     }
 
-    // --- 8. NEW: SPLIT BILL CALCULATOR ---
+    // --- NEW: THE SPLIT BILL ENGINE ---
     window.splitBillMenu = function() {
         if(!activeOrder) return showAlertModal("Select an order first.");
         if(currentGrandTotal <= 0) return showAlertModal("Total amount is 0.00 €");
         
         document.getElementById('split-total-display').innerText = currentGrandTotal.toFixed(2) + " €";
-        document.getElementById('split-ways').value = 2; // Default to split 2 ways
+        document.getElementById('split-ways').value = 2;
         updateSplitDisplay();
+
+        resetSplitModal();
         document.getElementById('split-bill-modal').style.display = 'flex';
+    }
+
+    window.closeSplitModal = function() {
+        document.getElementById('split-bill-modal').style.display = 'none';
+    }
+
+    window.resetSplitModal = function() {
+        document.getElementById('split-choice-view').style.display = 'block';
+        document.getElementById('split-equal-view').style.display = 'none';
+        document.getElementById('split-item-view').style.display = 'none';
+    }
+
+    window.showEqualSplit = function() {
+        document.getElementById('split-choice-view').style.display = 'none';
+        document.getElementById('split-equal-view').style.display = 'block';
     }
 
     window.adjustSplit = function(delta) {
@@ -521,8 +479,149 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('split-each-display').innerText = each.toFixed(2) + " €";
     }
 
+    // Advanced Dish Split (Checkboxes)
+    window.showItemSplit = function() {
+        document.getElementById('split-choice-view').style.display = 'none';
+        const listDiv = document.getElementById('split-checkbox-list');
+        listDiv.innerHTML = '';
 
-    // --- 9. GERMAN COMPLIANCE & RECEIPT ---
+        if (!activeOrder || !activeOrder.items || activeOrder.items.length === 0) {
+            listDiv.innerHTML = '<p style="color:#888; padding:15px; text-align:center;">No items to split.</p>';
+        } else {
+            // Generate checkboxes (expand quantities so 3 cokes = 3 checkboxes)
+            activeOrder.items.forEach((item, index) => {
+                const qty = parseInt(item.quantity) || 1;
+                const price = parseFloat(item.price) || 0;
+                for (let i = 0; i < qty; i++) {
+                    listDiv.innerHTML += `
+                        <label class="split-item-row">
+                            <input type="checkbox" class="split-chk" data-index="${index}" data-price="${price}" data-name="${item.name}" onchange="calculateSelectedSplit()">
+                            <span style="flex:1; font-size:1.1rem;">${item.name}</span>
+                            <span style="color:var(--gold); font-weight:bold;">${price.toFixed(2)} €</span>
+                        </label>
+                    `;
+                }
+            });
+        }
+
+        calculateSelectedSplit();
+        document.getElementById('split-item-view').style.display = 'block';
+    }
+
+    window.calculateSelectedSplit = function() {
+        const checkboxes = document.querySelectorAll('.split-chk');
+        let selectedTotal = 0;
+        checkboxes.forEach(chk => {
+            if (chk.checked) selectedTotal += parseFloat(chk.getAttribute('data-price'));
+        });
+        document.getElementById('split-selected-total').innerText = selectedTotal.toFixed(2) + " €";
+        return selectedTotal;
+    }
+
+    window.processItemSplit = async function(method) {
+        const checkboxes = document.querySelectorAll('.split-chk');
+        let checkedCount = 0;
+        checkboxes.forEach(chk => { if(chk.checked) checkedCount++; });
+
+        if (checkedCount === 0) return showAlertModal("Bitte wählen Sie mindestens einen Artikel aus.");
+
+        let paidSubtotal = calculateSelectedSplit();
+        let btnColor = method === 'cash' ? 'var(--success)' : 'var(--info)';
+
+        showConfirmModal(`Process partial split of ${paidSubtotal.toFixed(2)}€ via ${method.toUpperCase()}?`, btnColor, async () => {
+            try {
+                let remainingItems = [];
+                let paidItems = [];
+
+                // Divide items securely based on checkboxes
+                activeOrder.items.forEach((item, index) => {
+                    let c_checked = 0;
+                    let c_unchecked = 0;
+                    document.querySelectorAll(`.split-chk[data-index="${index}"]`).forEach(chk => {
+                        if (chk.checked) c_checked++;
+                        else c_unchecked++;
+                    });
+
+                    if (c_checked > 0) paidItems.push({ name: item.name, price: item.price, quantity: c_checked });
+                    if (c_unchecked > 0) remainingItems.push({ name: item.name, price: item.price, quantity: c_unchecked });
+                });
+
+                const archiveData = {
+                    ...activeOrder,
+                    closedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    paymentCollected: method,
+                    total: paidSubtotal, 
+                    paidAmount: paidSubtotal,
+                    tipAmount: 0, 
+                    discount: 0,  
+                    couponCode: "Partial Split",
+                    tseSignature: generateTseSignature(),
+                    isVoided: false,
+                    isPartial: true,
+                    items: paidItems
+                };
+
+                const partialId = activeOrder.id + "_split_" + Date.now();
+                await db.collection("archived_orders").doc(partialId).set(archiveData);
+
+                if (remainingItems.length === 0) {
+                    // Whole bill was split out!
+                    await db.collection("orders").doc(activeOrder.id).delete();
+                    activeOrder = null;
+                    document.getElementById('active-table-name').innerText = "None Selected";
+                    document.getElementById('btn-cash').disabled = true;
+                    document.getElementById('btn-card').disabled = true;
+                    document.getElementById('calc-items').innerHTML = "";
+                    document.getElementById('receipt-paper').innerHTML = `<div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">Order Closed Successfully.</div>`;
+                } else {
+                    // Update main bill with leftovers
+                    activeOrder.items = remainingItems;
+                    await db.collection("orders").doc(activeOrder.id).update({ items: remainingItems });
+                }
+
+                showAlertModal(`✅ Partial Bill of ${paidSubtotal.toFixed(2)}€ Paid (${method.toUpperCase()}).`);
+                updateCalculations();
+                closeSplitModal();
+
+            } catch(e) {
+                console.error(e);
+                showAlertModal("Error processing split payment.");
+            }
+        });
+    }
+
+    // Live Apply Coupon Button
+    window.applyCoupon = function() {
+        if(!activeOrder) return showAlertModal("Select an order first!");
+        
+        const codeInput = document.getElementById('coupon-code').value.trim().toUpperCase();
+        if (!codeInput) return showAlertModal("Please enter a coupon code.");
+
+        const match = liveCoupons.find(c => {
+            const cCode = (c.code || c.id || c.name || c.couponCode || "").toUpperCase();
+            return cCode === codeInput;
+        });
+        
+        if (match) {
+            const select = document.getElementById('coupon-select');
+            const matchValue = match.code || match.id || match.name || match.couponCode;
+            
+            let optionExists = Array.from(select.options).some(opt => opt.value === matchValue);
+            
+            if (optionExists) {
+                select.value = matchValue;
+                updateCalculations();
+                showAlertModal(`✅ Coupon "${matchValue}" angewendet!`);
+            } else {
+                showAlertModal(`❌ Coupon is inactive or invalid.`);
+            }
+        } else {
+            showAlertModal(`❌ Coupon "${codeInput}" not found.`);
+        }
+        document.getElementById('coupon-code').value = '';
+    }
+
+    // --- RECEIPT GENERATOR ---
     function generateTseSignature() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
         let sig = 'TSE_MAC_';
@@ -612,7 +711,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 10. ECO-QR GENERATOR ---
     window.showEcoQR = function() {
         if(!activeOrder) return showAlertModal("Select an order first.");
         const modal = document.getElementById('qr-modal');
@@ -633,7 +731,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.display = "flex";
     }
 
-    // --- 11. CLOSE BILL & ARCHIVE ---
+    // --- FINAL ARCHIVE ---
     window.closeBill = async function(method) {
         if(!activeOrder) return;
         

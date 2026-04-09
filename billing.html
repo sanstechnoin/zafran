@@ -49,7 +49,7 @@
         .calc-row.total { font-size: 1.6rem; color: var(--gold); font-weight: bold; border-top: 2px solid var(--gold); border-bottom: none; margin-top: 10px; padding-top: 15px; }
         
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .pos-input { flex: 1; padding: 12px; background: #111118; border: 1px solid var(--border); color: white; border-radius: 6px; font-size: 1rem; transition: border 0.2s; box-sizing: border-box; }
+        .pos-input { flex: 1; padding: 12px; background: #111118; border: 1px solid var(--border); color: white; border-radius: 6px; font-size: 1rem; transition: border 0.2s; box-sizing: border-box; width: 100%; }
         select.pos-input { appearance: auto; cursor: pointer; }
         .pos-input:focus { border-color: var(--gold); outline: none; }
         
@@ -66,8 +66,13 @@
         .receipt-preview .text-center { text-align: center; }
         .receipt-preview .divider { border-top: 1px dashed #666; margin: 12px 0; }
         
-        /* --- MODALS --- */
+        /* --- MODALS (Z-INDEX FIXED) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000; display: flex; justify-content: center; align-items: center; }
+        
+        /* OVERRIDE Z-INDEX FOR ALERTS AND CONFIRMS SO THEY ARE ALWAYS ON TOP */
+        #custom-confirm-modal { z-index: 11000 !important; }
+        #custom-alert-modal { z-index: 12000 !important; }
+
         .modal-box { background: var(--panel-bg); padding: 30px; border-radius: 12px; border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 450px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .modal-box input[type="text"], .modal-box input[type="password"] { width: 100%; padding: 15px; font-size: 1.2rem; text-align: center; margin-bottom: 20px; background: #111; border: 1px solid var(--border); color: white; border-radius: 6px; box-sizing: border-box;}
         .modal-box input:focus { border-color: var(--gold); outline: none; }
@@ -80,6 +85,11 @@
         .split-chk { width: 22px; height: 22px; margin-right: 15px; accent-color: var(--gold); cursor: pointer; }
         .split-item-row { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; }
         .split-item-row:hover { background: #222; }
+
+        /* Custom Dropdown (Mobile Fix) */
+        #autocomplete-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #222230; border: 1px solid var(--gold); max-height: 250px; overflow-y: auto; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.8); border-radius: 0 0 6px 6px; }
+        .auto-item { padding: 15px; border-bottom: 1px solid #333; cursor: pointer; font-size: 1.1rem; }
+        .auto-item:hover { background: #111; }
 
         /* --- FOOTER --- */
         .site-credit-footer { background: #111; border-top: 1px solid var(--border); padding: 10px 20px; text-align: center; font-size: 0.85rem; color: var(--text-muted); z-index: 10; }
@@ -166,10 +176,16 @@
                     <input type="text" id="split-ways" value="2" style="width:80px; font-size:1.8rem; text-align:center; padding:10px; margin:0; background:#111; color:white; border:none;" readonly>
                     <button class="btn btn-blue" onclick="adjustSplit(1)" style="font-size:1.5rem; padding:10px 20px;">+</button>
                 </div>
-                <div style="font-size:1.2rem; margin-bottom:25px; background:#111; padding:15px; border-radius:8px; border:1px dashed var(--gold);">
+                <div style="font-size:1.2rem; margin-bottom:20px; background:#111; padding:15px; border-radius:8px; border:1px dashed var(--gold);">
                     Jeder zahlt:<br>
                     <strong id="split-each-display" style="font-size:2rem; color:var(--success);">0.00 €</strong>
                 </div>
+                
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <button class="btn btn-green" style="flex:1;" onclick="processEqualSplit('cash')">💵 CASH</button>
+                    <button class="btn btn-blue" style="flex:1;" onclick="processEqualSplit('card')">💳 CARD</button>
+                </div>
+
                 <button class="btn" style="width:100%; background:#444; color:white;" onclick="resetSplitModal()">ZURÜCK</button>
             </div>
 
@@ -218,8 +234,10 @@
             
             <h2 style="margin-top:40px;">➕ Add / Custom Item</h2>
             <div class="input-group">
-                <input type="text" id="custom-name" class="pos-input" list="menu-items-list" placeholder="Number or Name (e.g. 41)">
-                <datalist id="menu-items-list"></datalist>
+                <div style="position: relative; flex:1; width: 100%;">
+                    <input type="text" id="custom-name" class="pos-input" placeholder="Number or Name (e.g. 41)" autocomplete="off">
+                    <div id="autocomplete-list"></div>
+                </div>
             </div>
             <div class="input-group inline-mobile">
                 <input type="number" id="custom-price" class="pos-input" placeholder="Price (€)" step="0.50">

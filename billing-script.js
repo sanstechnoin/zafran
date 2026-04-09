@@ -20,6 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let promptCallback = null;
     let confirmCallback = null;
 
+    // NEW: Replaces native alert()
+    window.showAlertModal = function(msg) {
+        document.getElementById('alert-message').innerText = msg;
+        document.getElementById('custom-alert-modal').style.display = 'flex';
+    };
+
     window.openNewBillModal = function() {
         document.getElementById('prompt-input').value = '';
         document.getElementById('custom-prompt-modal').style.display = 'flex';
@@ -31,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let customerName = '';
 
             if (input.trim() === '') {
-                customerName = "Gast-" + Math.floor(Math.random() * 9000 + 1000); // GDPR Compliant
+                customerName = "Gast-" + Math.floor(Math.random() * 9000 + 1000); 
             } else if (!isNaN(input) && input.trim() !== '') {
                 orderType = 'dine-in';
                 tableName = input.trim();
@@ -53,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectOrder(newOrderRef.id, newOrder);
             }).catch(err => {
                 console.error("Error creating bill:", err);
-                alert("Error creating new bill.");
+                showAlertModal("Error creating new bill.");
             });
         };
     }
@@ -149,7 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- 5. LOGOUT LOGIC ---
     window.posLogout = function() {
         firebase.auth().signOut().then(() => {
-            // Instantly snap the UI back to locked state
             document.getElementById('billing-login-overlay').style.display = 'flex';
             mainContent.style.opacity = '0';
             activeOrder = null;
@@ -243,11 +248,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.addCustomItem = function() {
-        if(!activeOrder) return alert("Select an order first!");
+        if(!activeOrder) return showAlertModal("Select an order first!");
         const name = document.getElementById('custom-name').value.trim();
         const price = parseFloat(document.getElementById('custom-price').value);
         
-        if(!name || isNaN(price)) return alert("Invalid item or price");
+        if(!name || isNaN(price)) return showAlertModal("Invalid item or price");
         
         if(!activeOrder.items) activeOrder.items = [];
         activeOrder.items.push({ name: name, quantity: 1, price: price });
@@ -269,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.cancelBill = async function() {
-        if(!activeOrder) return alert("Select a bill to cancel first.");
+        if(!activeOrder) return showAlertModal("Select a bill to cancel first.");
         
         let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
         
@@ -292,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
             } catch (error) {
                 console.error("Error cancelling bill:", error);
-                alert("Error cancelling bill. Check console.");
+                showAlertModal("Error cancelling bill. Check console.");
             }
         });
     };
@@ -422,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 9. ECO-QR GENERATOR ---
     window.showEcoQR = function() {
-        if(!activeOrder) return alert("Select an order first.");
+        if(!activeOrder) return showAlertModal("Select an order first.");
         const modal = document.getElementById('qr-modal');
         const qrContainer = document.getElementById('qrcode');
         qrContainer.innerHTML = ""; 
@@ -442,11 +447,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     window.splitBillMenu = function() {
-        alert("Split Bill Module UI will launch here in Phase 2!");
+        showAlertModal("Split Bill Module UI will launch here in Phase 2!");
     }
 
     window.applyCoupon = function() {
-        alert("Live Coupon Engine linking in Phase 2!");
+        showAlertModal("Live Coupon Engine linking in Phase 2!");
     }
 
     // --- 10. CLOSE BILL & ARCHIVE ---
@@ -483,7 +488,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await db.collection("archived_orders").doc(activeOrder.id).set(archiveData);
                 await db.collection("orders").doc(activeOrder.id).delete();
 
-                alert(`✅ TSE Transaction Logged. Bill closed (${method.toUpperCase()}).`);
+                showAlertModal(`✅ TSE Transaction Logged. Bill closed (${method.toUpperCase()}).`);
                 
                 activeOrder = null;
                 document.getElementById('calc-items').innerHTML = "";
@@ -498,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
             } catch (error) {
                 console.error("Error closing bill:", error);
-                alert("Error closing bill. Check console.");
+                showAlertModal("Error closing bill. Check console.");
                 btnCash.disabled = false; btnCard.disabled = false;
             }
         });

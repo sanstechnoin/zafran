@@ -14,9 +14,86 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeOrder = null;
     let currentDiscount = 0;
     let appliedCoupon = null;
-    let liveMenuItems = []; // Pulled from DB
+    let liveMenuItems = []; 
 
-    // --- 3. SECURE STRICT LOGIN LOGIC (NO FALLBACK) ---
+    // --- 3. CUSTOM MODAL CONTROLLERS ---
+    let promptCallback = null;
+    let confirmCallback = null;
+
+    window.openNewBillModal = function() {
+        document.getElementById('prompt-input').value = '';
+        document.getElementById('custom-prompt-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('prompt-input').focus(), 100);
+        
+        promptCallback = function(input) {
+            let orderType = 'pickup';
+            let tableName = '';
+            let customerName = '';
+
+            if (input.trim() === '') {
+                customerName = "Gast-" + Math.floor(Math.random() * 9000 + 1000); // GDPR Compliant
+            } else if (!isNaN(input) && input.trim() !== '') {
+                orderType = 'dine-in';
+                tableName = input.trim();
+            } else {
+                customerName = input.trim();
+            }
+
+            const newOrderRef = db.collection("orders").doc();
+            const newOrder = {
+                orderType: orderType,
+                table: tableName,
+                customerName: customerName,
+                items: [],
+                total: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            newOrderRef.set(newOrder).then(() => {
+                selectOrder(newOrderRef.id, newOrder);
+            }).catch(err => {
+                console.error("Error creating bill:", err);
+                alert("Error creating new bill.");
+            });
+        };
+    }
+
+    window.closePromptModal = function() {
+        document.getElementById('custom-prompt-modal').style.display = 'none';
+        promptCallback = null;
+    }
+
+    window.submitPromptModal = function() {
+        if(promptCallback) promptCallback(document.getElementById('prompt-input').value);
+        closePromptModal();
+    }
+
+    document.getElementById('prompt-input').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') submitPromptModal();
+    });
+
+    window.showConfirmModal = function(msg, btnColor, cb) {
+        confirmCallback = cb;
+        document.getElementById('confirm-message').innerText = msg;
+        
+        const btn = document.getElementById('confirm-yes-btn');
+        btn.style.background = btnColor;
+        
+        document.getElementById('custom-confirm-modal').style.display = 'flex';
+    }
+
+    window.closeConfirmModal = function() {
+        document.getElementById('custom-confirm-modal').style.display = 'none';
+        confirmCallback = null;
+    }
+
+    document.getElementById('confirm-yes-btn').addEventListener('click', () => {
+        if(confirmCallback) confirmCallback();
+        closeConfirmModal();
+    });
+
+
+    // --- 4. SECURE STRICT LOGIN LOGIC ---
     loginButton.addEventListener('click', () => {
         const enteredPin = passwordInput.value.trim();
         if (!enteredPin) return;
@@ -24,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
         loginButton.innerText = "VERBINDEN...";
         loginButton.disabled = true;
 
-        // We use the RECORD PIN for the POS terminal
         db.collection('settings').doc('record_auth').get()
         .then(doc => {
             if (!doc.exists || !doc.data().pin) {
@@ -70,9 +146,22 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === 'Enter' && !loginButton.disabled) loginButton.click();
     });
 
-    // --- 4. POS INITIALIZATION & DATALIST ---
+    // --- 5. LOGOUT LOGIC ---
+    window.posLogout = function() {
+        firebase.auth().signOut().then(() => {
+            // Instantly snap the UI back to locked state
+            document.getElementById('billing-login-overlay').style.display = 'flex';
+            mainContent.style.opacity = '0';
+            activeOrder = null;
+            document.getElementById('billing-password').value = '';
+            loginButton.innerText = "TERMINAL ENTSPERREN";
+            loginButton.disabled = false;
+            loginError.style.display = 'none';
+        });
+    };
+
+    // --- 6. POS INITIALIZATION & DATALIST ---
     function initPOS() {
-        // Fetch Live Menu for Auto-Pricing Datalist
         db.collection('settings').doc('menu').get().then(doc => {
             if (doc.exists && doc.data().menuData) {
                 const datalist = document.getElementById('menu-items-list');
@@ -92,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Listen for ALL active orders (Dine-in and Pickups)
         db.collection("orders")
           .onSnapshot(snapshot => {
               const list = document.getElementById('ready-orders-list');
@@ -110,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
                       data.items.forEach(i => localTotal += (i.price * i.quantity));
                   }
                   
-                  // Dynamic Naming based on order type
                   let displayName = data.orderType === 'dine-in' ? `Tisch ${data.table}` : `${data.customerName || 'Gast'}`;
                   
                   const card = document.createElement('div');
@@ -136,82 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- NEW: CREATE BLANK BILL (MANUAL ORDER) ---
-    window.createNewBill = function() {
-        let input = prompt("Enter Table Number (e.g., 5) OR Customer Name (e.g., John).\\nLeave completely blank for an anonymous Pickup ID:");
-        if (input === null) return; // Cancelled
-
-        let orderType = 'pickup';
-        let tableName = '';
-        let customerName = '';
-
-        if (input.trim() === '') {
-            // GDPR Compliant Anonymous ID
-            customerName = "Gast-" + Math.floor(Math.random() * 9000 + 1000);
-        } else if (!isNaN(input) && input.trim() !== '') {
-            orderType = 'dine-in';
-            tableName = input.trim();
-        } else {
-            customerName = input.trim();
-        }
-
-        const newOrderRef = db.collection("orders").doc();
-        const newOrder = {
-            orderType: orderType,
-            table: tableName,
-            customerName: customerName,
-            items: [],
-            total: 0,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        // Create instantly in Firebase so it syncs across the system
-        newOrderRef.set(newOrder).then(() => {
-            selectOrder(newOrderRef.id, newOrder);
-        }).catch(err => {
-            console.error("Error creating bill:", err);
-            alert("Error creating new bill.");
-        });
-    };
-
-    // --- NEW: CANCEL / DELETE BILL ---
-    window.cancelBill = async function() {
-        if(!activeOrder) return alert("Select a bill to cancel first.");
-        
-        let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
-        if(!confirm(`Are you sure you want to completely CANCEL and DELETE the bill for ${displayName}? This cannot be undone.`)) return;
-
-        try {
-            await db.collection("orders").doc(activeOrder.id).delete();
-            
-            // Reset UI
-            activeOrder = null;
-            document.getElementById('calc-items').innerHTML = "";
-            document.getElementById('calc-subtotal').innerText = "0.00 €";
-            document.getElementById('calc-discount').innerText = "- 0.00 €";
-            document.getElementById('calc-total').innerText = "0.00 €";
-            document.getElementById('receipt-paper').innerHTML = `
-                <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
-                    Bill Cancelled & Deleted.
-                </div>`;
-            document.getElementById('active-table-name').innerText = "None Selected";
-            document.getElementById('btn-cash').disabled = true;
-            document.getElementById('btn-card').disabled = true;
-            
-        } catch (error) {
-            console.error("Error cancelling bill:", error);
-            alert("Error cancelling bill. Check console.");
-        }
-    };
-
-    // --- NEW: LOGOUT LOGIC ---
-    window.posLogout = function() {
-        firebase.auth().signOut().then(() => {
-            window.location.reload();
-        });
-    };
-
-    // --- 5. CORE LOGIC ---
+    // --- 7. CORE LOGIC ---
     window.selectOrder = function(id, data) {
         activeOrder = { id, ...data };
         
@@ -243,19 +255,47 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('custom-name').value = "";
         document.getElementById('custom-price').value = "";
         
-        // Auto-save to Firebase so line-items are persistent
         db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
         updateCalculations();
     }
 
     window.voidItem = function(index) {
         if(!activeOrder || !activeOrder.items) return;
-        if(confirm(`Remove "${activeOrder.items[index].name}" from this bill?`)) {
+        showConfirmModal(`Remove "${activeOrder.items[index].name}" from this bill?`, 'var(--danger)', () => {
             activeOrder.items.splice(index, 1);
             db.collection("orders").doc(activeOrder.id).update({ items: activeOrder.items });
             updateCalculations();
-        }
+        });
     }
+
+    window.cancelBill = async function() {
+        if(!activeOrder) return alert("Select a bill to cancel first.");
+        
+        let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
+        
+        showConfirmModal(`Are you sure you want to completely CANCEL and DELETE the bill for ${displayName}? This cannot be undone.`, 'var(--danger)', async () => {
+            try {
+                await db.collection("orders").doc(activeOrder.id).delete();
+                
+                activeOrder = null;
+                document.getElementById('calc-items').innerHTML = "";
+                document.getElementById('calc-subtotal').innerText = "0.00 €";
+                document.getElementById('calc-discount').innerText = "- 0.00 €";
+                document.getElementById('calc-total').innerText = "0.00 €";
+                document.getElementById('receipt-paper').innerHTML = `
+                    <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
+                        Bill Cancelled & Deleted.
+                    </div>`;
+                document.getElementById('active-table-name').innerText = "None Selected";
+                document.getElementById('btn-cash').disabled = true;
+                document.getElementById('btn-card').disabled = true;
+                
+            } catch (error) {
+                console.error("Error cancelling bill:", error);
+                alert("Error cancelling bill. Check console.");
+            }
+        });
+    };
 
     window.updateCalculations = function() {
         if(!activeOrder) return;
@@ -273,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #333;">
                     <span style="flex:1;">${qty}x ${item.name}</span>
                     <span style="color:var(--gold); margin-right:15px;">${lineTotal.toFixed(2)} €</span>
-                    <button class="btn-red" style="padding:4px 8px; font-size:0.8rem;" onclick="voidItem(${index})" title="Void Item">X</button>
+                    <button class="btn-red" style="padding:4px 8px; font-size:0.8rem; cursor:pointer;" onclick="voidItem(${index})" title="Void Item">X</button>
                 </div>
             `;
         });
@@ -290,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
         generateLiveReceipt(subtotal, grandTotal, tip);
     }
 
-    // --- 6. GERMAN COMPLIANCE & RECEIPT ---
+    // --- 8. GERMAN COMPLIANCE & RECEIPT ---
     function generateTseSignature() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
         let sig = 'TSE_MAC_';
@@ -380,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    // --- 7. ECO-QR GENERATOR ---
+    // --- 9. ECO-QR GENERATOR ---
     window.showEcoQR = function() {
         if(!activeOrder) return alert("Select an order first.");
         const modal = document.getElementById('qr-modal');
@@ -409,58 +449,58 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Live Coupon Engine linking in Phase 2!");
     }
 
-    // --- 8. CLOSE BILL & ARCHIVE ---
+    // --- 10. CLOSE BILL & ARCHIVE ---
     window.closeBill = async function(method) {
         if(!activeOrder) return;
         
         let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
-        if(!confirm(`Close bill for ${displayName} with ${method.toUpperCase()}?`)) return;
-
-        const btnCash = document.getElementById('btn-cash');
-        const btnCard = document.getElementById('btn-card');
-        btnCash.disabled = true; btnCard.disabled = true;
-        btnCash.innerText = "Processing...";
-
-        try {
-            let subtotal = 0;
-            activeOrder.items.forEach(i => subtotal += (i.price * i.quantity));
-            const tip = parseFloat(document.getElementById('tip-amount').value) || 0;
-            const grandTotal = (subtotal - currentDiscount) + tip;
-
-            const archiveData = {
-                ...activeOrder,
-                closedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                paymentCollected: method,
-                total: grandTotal,
-                paidAmount: grandTotal,
-                tipAmount: tip,
-                discount: currentDiscount,
-                couponCode: appliedCoupon || "None",
-                tseSignature: activeOrder.currentTseSig,
-                isVoided: false
-            };
-
-            await db.collection("archived_orders").doc(activeOrder.id).set(archiveData);
-            await db.collection("orders").doc(activeOrder.id).delete();
-
-            alert(`✅ TSE Transaction Logged. Bill closed (${method.toUpperCase()}).`);
+        const btnColor = method === 'cash' ? 'var(--success)' : 'var(--info)';
+        
+        showConfirmModal(`Close bill for ${displayName} with ${method.toUpperCase()}?`, btnColor, async () => {
+            const btnCash = document.getElementById('btn-cash');
+            const btnCard = document.getElementById('btn-card');
+            btnCash.disabled = true; btnCard.disabled = true;
             
-            activeOrder = null;
-            document.getElementById('calc-items').innerHTML = "";
-            document.getElementById('calc-subtotal').innerText = "0.00 €";
-            document.getElementById('calc-discount').innerText = "- 0.00 €";
-            document.getElementById('calc-total').innerText = "0.00 €";
-            document.getElementById('receipt-paper').innerHTML = `
-                <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
-                    Order Closed & Archived Successfully.
-                </div>`;
-            document.getElementById('active-table-name').innerText = "None Selected";
+            try {
+                let subtotal = 0;
+                activeOrder.items.forEach(i => subtotal += (i.price * i.quantity));
+                const tip = parseFloat(document.getElementById('tip-amount').value) || 0;
+                const grandTotal = (subtotal - currentDiscount) + tip;
 
-        } catch (error) {
-            console.error("Error closing bill:", error);
-            alert("Error closing bill. Check console.");
-            btnCash.disabled = false; btnCard.disabled = false;
-            btnCash.innerText = "💵 CASH";
-        }
+                const archiveData = {
+                    ...activeOrder,
+                    closedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    paymentCollected: method,
+                    total: grandTotal,
+                    paidAmount: grandTotal,
+                    tipAmount: tip,
+                    discount: currentDiscount,
+                    couponCode: appliedCoupon || "None",
+                    tseSignature: activeOrder.currentTseSig,
+                    isVoided: false
+                };
+
+                await db.collection("archived_orders").doc(activeOrder.id).set(archiveData);
+                await db.collection("orders").doc(activeOrder.id).delete();
+
+                alert(`✅ TSE Transaction Logged. Bill closed (${method.toUpperCase()}).`);
+                
+                activeOrder = null;
+                document.getElementById('calc-items').innerHTML = "";
+                document.getElementById('calc-subtotal').innerText = "0.00 €";
+                document.getElementById('calc-discount').innerText = "- 0.00 €";
+                document.getElementById('calc-total').innerText = "0.00 €";
+                document.getElementById('receipt-paper').innerHTML = `
+                    <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
+                        Order Closed & Archived Successfully.
+                    </div>`;
+                document.getElementById('active-table-name').innerText = "None Selected";
+                
+            } catch (error) {
+                console.error("Error closing bill:", error);
+                alert("Error closing bill. Check console.");
+                btnCash.disabled = false; btnCard.disabled = false;
+            }
+        });
     }
 });

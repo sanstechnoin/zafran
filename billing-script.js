@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let promptCallback = null;
     let confirmCallback = null;
 
-    // NEW: Replaces native alert()
     window.showAlertModal = function(msg) {
         document.getElementById('alert-message').innerText = msg;
         document.getElementById('custom-alert-modal').style.display = 'flex';
@@ -98,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
         closeConfirmModal();
     });
 
-
     // --- 4. SECURE STRICT LOGIN LOGIC ---
     loginButton.addEventListener('click', () => {
         const enteredPin = passwordInput.value.trim();
@@ -165,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // --- 6. POS INITIALIZATION & DATALIST ---
+    // --- 6. POS INITIALIZATION & LISTENERS ---
     function initPOS() {
         db.collection('settings').doc('menu').get().then(doc => {
             if (doc.exists && doc.data().menuData) {
@@ -178,7 +176,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         cat.items.forEach(item => {
                             liveMenuItems.push(item);
                             const option = document.createElement('option');
-                            option.value = item.name;
+                            // FORMAT: "41 - Chicken Curry"
+                            option.value = item.id ? `${item.id} - ${item.name}` : item.name;
                             datalist.appendChild(option);
                         });
                     }
@@ -207,6 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   
                   const card = document.createElement('div');
                   card.className = `order-card ${activeOrder && activeOrder.id === doc.id ? 'active' : ''}`;
+                  card.dataset.orderId = doc.id; // Added for efficient DOM highlighting
                   card.innerHTML = `
                       <div style="display:flex; justify-content:space-between; font-weight:bold;">
                           <span>${displayName}</span>
@@ -220,13 +220,24 @@ document.addEventListener("DOMContentLoaded", () => {
                   list.appendChild(card);
               });
           });
-
-        document.getElementById('custom-name').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const match = liveMenuItems.find(i => i.name.toLowerCase() === query);
-            if(match) document.getElementById('custom-price').value = match.price.toFixed(2);
-        });
     }
+
+    // Attach listener outside initPOS to prevent duplicate events
+    document.getElementById('custom-name').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        
+        // Search by exact ID, exact Name, or Combined "ID - Name"
+        const match = liveMenuItems.find(i => {
+            const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
+            return combinedName === query || 
+                   i.name.toLowerCase() === query || 
+                   (i.id && i.id.toString().toLowerCase() === query);
+        });
+        
+        if(match) {
+            document.getElementById('custom-price').value = match.price.toFixed(2);
+        }
+    });
 
     // --- 7. CORE LOGIC ---
     window.selectOrder = function(id, data) {
@@ -244,16 +255,36 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('coupon-code').value = "";
         
         updateCalculations();
-        initPOS(); // Visual refresh
+        
+        // Manually update the active card highlight to prevent memory leaks
+        document.querySelectorAll('.order-card').forEach(card => {
+            if (card.dataset.orderId === id) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+        });
     }
 
     window.addCustomItem = function() {
         if(!activeOrder) return showAlertModal("Select an order first!");
-        const name = document.getElementById('custom-name').value.trim();
+        let name = document.getElementById('custom-name').value.trim();
         const price = parseFloat(document.getElementById('custom-price').value);
         
         if(!name || isNaN(price)) return showAlertModal("Invalid item or price");
         
+        // Auto-Expand: If they just typed "41", it expands to "41 - Chicken Curry"
+        const match = liveMenuItems.find(i => {
+            const combinedName = i.id ? `${i.id} - ${i.name}`.toLowerCase() : i.name.toLowerCase();
+            return (i.id && i.id.toString().toLowerCase() === name.toLowerCase()) || 
+                   combinedName === name.toLowerCase() || 
+                   i.name.toLowerCase() === name.toLowerCase();
+        });
+
+        if (match) {
+            name = match.id ? `${match.id} - ${match.name}` : match.name;
+        }
+
         if(!activeOrder.items) activeOrder.items = [];
         activeOrder.items.push({ name: name, quantity: 1, price: price });
         

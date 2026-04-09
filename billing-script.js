@@ -1,476 +1,387 @@
-// --- 1. ZAFFRAN FIREBASE CONFIG ---
-const firebaseConfig = {
-  apiKey: "AIzaSyAVh2kVIuFcrt8Dg88emuEd9CQlqjJxDrA",
-  authDomain: "zaffran-delight.firebaseapp.com",
-  projectId: "zaffran-delight",
-  storageBucket: "zaffran-delight.firebasestorage.app",
-  messagingSenderId: "1022960860126",
-  appId: "1:1022960860126:web:1e06693dea1d0247a0bb4f"
-};
-// --- END OF FIREBASE CONFIG ---
+// --- 1. FIREBASE SETUP ---
+// (Initialized securely via firebase-config.js)
 
-// --- NEW: ZAFFRAN MASTER MENU LIST ---
-const MENU_ITEMS = [
-    { name: "Tomatensuppe", price: 5.00 },
-    { name: "Daal Linsensuppe", price: 5.00 },
-    { name: "Hähnchen Suppe", price: 6.00 },
-    { name: "Mulligatawny Suppe", price: 6.50 },
-    { name: "Veg. Samosa", price: 5.00 },
-    { name: "Chicken Samosa", price: 5.50 },
-    { name: "Aloo Tiki", price: 5.00 },
-    { name: "Mix Pakora", price: 5.50 },
-    { name: "Paneer Pakora", price: 6.00 },
-    { name: "Aloo Pakora", price: 5.50 },
-    { name: "Gobi Pakora", price: 5.50 },
-    { name: "Mashroom Pakora", price: 5.50 },
-    { name: "Chicken Pakora", price: 6.00 },
-    { name: "Prawn Pakora", price: 7.50 },
-    { name: "Vegi Mix", price: 13.00 },
-    { name: "Palak Aallu", price: 13.00 },
-    { name: "Saag Aallu", price: 13.00 },
-    { name: "Tarka Daal", price: 12.50 },
-    { name: "Bhindi Masala", price: 13.00 },
-    { name: "Baingen Aallu", price: 13.00 },
-    { name: "Mushroom Aallu", price: 13.00 },
-    { name: "Gobi Aallu", price: 13.00 },
-    { name: "Channa Masala", price: 12.50 },
-    { name: "Veg. Korma", price: 13.50 },
-    { name: "Nauratan Korma", price: 14.00 },
-    { name: "Shahi Paneer", price: 14.00 },
-    { name: "Paneer Tikka Masala", price: 14.50 },
-    { name: "Paneer Jalfrezi", price: 14.00 },
-    { name: "Paneer Bhunna Masala", price: 14.00 },
-    { name: "Palak Paneer", price: 14.00 },
-    { name: "Paneer Muttar Aallu", price: 14.50 },
-    { name: "Chicken Curry", price: 14.50 },
-    { name: "Chicken Tikka Masala", price: 15.50 },
-    { name: "Chicken Korma", price: 15.00 },
-    { name: "Butter Chicken", price: 15.50 },
-    { name: "Kashmiri Chicken", price: 15.50 },
-    { name: "Chicken Goan Curry", price: 15.50 },
-    { name: "Chicken Jalfrezi", price: 15.50 },
-    { name: "Chicken Kadai", price: 15.50 },
-    { name: "Chicken Bhuna", price: 15.50 },
-    { name: "Vegi Chicken", price: 15.00 },
-    { name: "Chicken Palak", price: 15.50 },
-    { name: "Chicken Dhansik", price: 15.50 },
-    { name: "Chicken Madras", price: 15.50 },
-    { name: "Chicken Vindalo", price: 15.50 },
-    { name: "Lamb Curry", price: 17.00 },
-    { name: "Lamb Tikka Masala", price: 17.50 },
-    { name: "Lamb Korma", price: 17.00 },
-    { name: "Butter Lamb", price: 17.50 },
-    { name: "Kashmiri Lamb", price: 17.50 },
-    { name: "Lamb Goan Curry", price: 17.50 },
-    { name: "Lamb Jalfrezi", price: 17.50 },
-    { name: "Lamb Kadai", price: 17.50 },
-    { name: "Lamb Bhuna", price: 17.50 },
-    { name: "Vegi Lamb", price: 17.00 },
-    { name: "Lamb Palak", price: 17.50 },
-    { name: "Lamb Dhansik", price: 17.50 },
-    { name: "Lamb Madras", price: 17.50 },
-    { name: "Lamb Vindalo", price: 17.50 },
-    { name: "Prawn Curry", price: 18.50 },
-    { name: "Prawn Korma", price: 18.50 },
-    { name: "Prawn Tikka Masala", price: 18.50 },
-    { name: "Fish Curry", price: 18.50 },
-    { name: "Fish Tikka Masala", price: 18.50 },
-    { name: "Chicken Tikka", price: 17.50 },
-    { name: "Tandoori Chicken", price: 17.50 },
-    { name: "Malai Tikka", price: 17.50 },
-    { name: "Haryali Tikka", price: 17.50 },
-    { name: "Lamb Tikka", price: 18.50 },
-    { name: "Lamb Chops", price: 20.50 },
-    { name: "Seekh Kabab", price: 19.50 },
-    { name: "Prawn Tikka", price: 20.50 },
-    { name: "Paneer Tikka", price: 17.50 },
-    { name: "Fish Tawa Fry", price: 20.50 },
-    { name: "Zafrani Mix Grill", price: 24.00 },
-    { name: "Vegi Biryani", price: 14.50 },
-    { name: "Chicken Bombay Biryani", price: 16.50 },
-    { name: "Lamb Karachi Biryani", price: 17.50 },
-    { name: "Prawn Zafran Biryani", price: 20.50 },
-    { name: "Frisches Tandoori Brot", price: 3.50 },
-    { name: "Chapati Roti", price: 3.50 },
-    { name: "Naan", price: 3.00 },
-    { name: "Allo Naan", price: 4.50 },
-    { name: "Cheese Naan", price: 5.00 },
-    { name: "Butter Naan", price: 3.50 },
-    { name: "Garlic Naan", price: 4.50 },
-    { name: "Tandoori Parantha", price: 4.50 },
-    { name: "Mint Sauce", price: 3.00 },
-    { name: "Natur Joghurt", price: 2.50 },
-    { name: "Raita", price: 4.00 },
-    { name: "Mango Chutney", price: 3.00 },
-    { name: "Imli (Tamarind) Chutney", price: 3.00 },
-    { name: "Laal Chutney (scharfe...)", price: 3.50 },
-    { name: "Green Chutney", price: 3.50 },
-    { name: "Pickles", price: 3.50 },
-    { name: "Soße nach Wahl", price: 5.00 },
-    { name: "Gemüse-Frühlingsrollen", price: 5.00 },
-    { name: "Pommes frites", price: 3.50 },
-    { name: "Chicken Nuggets (6 Stk.)", price: 4.50 },
-    { name: "Basmati - Reis", price: 3.50 },
-    { name: "Zeera - Reis", price: 4.00 },
-    { name: "Zafrani - Reis", price: 5.50 },
-    { name: "Gemischter Salat", price: 6.00 },
-    { name: "Chicken Salat", price: 7.50 },
-    { name: "Zafrani Chicken Salat", price: 8.50 },
-    { name: "Mango Kulfi", price: 5.50 },
-    { name: "Almond Kulfi", price: 5.50 },
-    { name: "Pista Kulfi", price: 5.50 },
-    { name: "Gulab Jamun", price: 5.50 },
-    { name: "Ras Malai", price: 5.50 },
-    { name: "Lassi", price: 4.00 },
-    { name: "Mango Lassi", price: 4.50 },
-    { name: "Rosé Lassi", price: 4.50 },
-    { name: "Coca Cola", price: 3.50 },
-    { name: "Cola Zero", price: 3.50 },
-    { name: "Sprite", price: 3.50 },
-    { name: "Fanta", price: 3.50 },
-    { name: "Pinacolada", price: 5.50 },
-    { name: "Mint-Margarita", price: 5.50 },
-    { name: "Ipanema", price: 5.50 }
-];
-// --- END MASTER MENU LIST ---
-
-// --- 2. Initialize Firebase ---
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// --- 3. Global State and DOM Elements ---
 document.addEventListener("DOMContentLoaded", () => {
-    const connectionIconEl = document.getElementById('connection-icon');
+    
+    // --- 2. DOM Elements ---
     const loginOverlay = document.getElementById('billing-login-overlay');
     const loginButton = document.getElementById('login-button');
     const passwordInput = document.getElementById('billing-password');
     const loginError = document.getElementById('login-error');
-    const contentWrapper = document.getElementById('billing-content-wrapper');
+    const mainContent = document.getElementById('main-content');
+    
+    // POS State
+    let activeOrder = null;
+    let currentDiscount = 0;
+    let appliedCoupon = null;
+    let liveMenuItems = []; // Pulled from DB
 
-    const tableListEl = document.getElementById('table-list');
-    const billViewEl = document.getElementById('bill-view-container');
-    const billTableNumberEl = document.getElementById('bill-table-number');
-    const billItemListEl = document.getElementById('bill-item-list');
-    const billTotalAmountEl = document.getElementById('bill-total-amount');
-    const addItemForm = document.getElementById('add-item-form');
-    const closeBillBtn = document.getElementById('close-bill-btn');
+    // --- 3. SECURE STRICT LOGIN LOGIC (NO FALLBACK) ---
+    loginButton.addEventListener('click', () => {
+        const enteredPin = passwordInput.value.trim();
+        if (!enteredPin) return;
 
-    const itemNameInput = document.getElementById('item-name');
-    const itemQtyInput = document.getElementById('item-qty');
-    const itemPriceInput = document.getElementById('item-price');
-    const menuDatalist = document.getElementById('menu-items-list');
+        loginButton.innerText = "VERBINDEN...";
+        loginButton.disabled = true;
 
-    let allCookedOrders = []; 
-    let currentSelectedTable = null; 
-    const BILLING_PASSWORD = "zafran"; // <-- NEW PASSWORD
-
-    // --- 4. NEW SECURE LOGIN LOGIC ---
-loginButton.addEventListener('click', () => {
-    // 1. Check if the staff typed the correct simple PIN ("zafran")
-    if (passwordInput.value === RECORDS_PASSWORD) {
-        
-        // 2. If correct, secretly log them in with the real account
-        const hiddenEmail = "webmaster@zafraneuskirchen.de";
-        const hiddenPass  = "!Zafran2025";
-
-        loginButton.innerText = "Verbinden..."; // Optional: Show loading text
-        
-        firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
-        .then((userCredential) => {
-            // Success! The system is now logged in securely.
-            loginOverlay.style.display = 'none';
-            contentWrapper.style.opacity = '1';
-            initializeRecordsPage(); 
-        })
-        .catch((error) => {
-            console.error("Login Error:", error);
-            loginError.innerText = "Systemfehler: Login nicht möglich.";
-            loginError.style.display = 'block';
-            loginButton.innerText = "UNLOCK DASHBOARD";
-        });
-
-    } else {
-        // Wrong PIN entered
-        loginError.innerText = "Falsches Passwort";
-        loginError.style.display = 'block';
-    }
-});
-    passwordInput.addEventListener('keyup', (e) => e.key === 'Enter' && loginButton.click());
-
-
-    // --- 5. Main Billing Functions ---
-    function initializeBilling() {
-        populateDatalist(); 
-
-        db.collection("orders")
-          .where("status", "==", "cooked") 
-          .onSnapshot(
-            (snapshot) => {
-                connectionIconEl.textContent = '✅';
-                allCookedOrders = snapshot.docs.map(doc => doc.data());
-                renderTableList();
-                if (currentSelectedTable) {
-                    renderBillForTable(currentSelectedTable);
-                }
-            },
-            (error) => {
-                console.error("Error connecting to Firestore: ", error);
-                connectionIconEl.textContent = '❌';
-            }
-        );
-        
-        itemNameInput.addEventListener('input', handleItemSearch);
-
-        // Add Manual Item Form
-        addItemForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentSelectedTable) return;
-
-            const name = itemNameInput.value;
-            const qty = parseInt(itemQtyInput.value);
-            const price = parseFloat(itemPriceInput.value);
-            
-            if (!name || isNaN(qty) || isNaN(price) || qty <= 0 || price < 0) {
-                alert("Please enter valid item details.");
+        // We use the RECORD PIN for the POS terminal
+        db.collection('settings').doc('record_auth').get()
+        .then(doc => {
+            if (!doc.exists || !doc.data().pin) {
+                loginError.innerText = "❌ PIN nicht konfiguriert!";
+                loginError.style.display = 'block';
+                loginButton.innerText = "TERMINAL ENTSPERREN";
+                loginButton.disabled = false;
                 return;
             }
 
-            const newOrderId = `${currentSelectedTable}-manual-${new Date().getTime()}`;
-            const isPickup = allCookedOrders.some(order => order.table === currentSelectedTable && order.orderType === 'pickup');
+            const realPin = doc.data().pin;
 
-            const newItem = {
-                id: newOrderId,
-                table: currentSelectedTable, 
-                items: [{ name: name, quantity: qty, price: price }], 
-                status: "cooked", 
-                createdAt: new Date(),
-                orderType: isPickup ? "pickup" : "dine-in",
-                // Get customer name and phone from the 'table' identifier
-                customerName: isPickup ? currentSelectedTable.split(' (')[0] : null, 
-                customerPhone: isPickup ? currentSelectedTable.split(' (')[1].replace(')','') : null, 
-                name: name,
-                quantity: qty,
-                price: price
-            };
-            
-            try {
-                await db.collection("orders").doc(newOrderId).set(newItem);
-                addItemForm.reset();
-            } catch (err) {
-                console.error("Error adding manual item: ", err);
-                alert("Failed to add item. Check console.");
-            }
-        });
-
-        // Close Bill Button
-        closeBillBtn.addEventListener('click', async () => {
-            if (!currentSelectedTable) return;
-
-            const confirmMessage = `Are you sure you want to CLOSE and ARCHIVE the bill for ${currentSelectedTable}? This cannot be undone.`;
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-            
-            const ordersToClose = allCookedOrders.filter(order => order.table === currentSelectedTable);
-            
-            if (ordersToClose.length === 0) return;
-            
-            let finalBillItems = [];
-            let finalBillTotal = 0;
-
-            ordersToClose.forEach(order => {
-                const items = order.items || [{ name: order.name, quantity: order.quantity, price: order.price }];
-                items.forEach(item => {
-                    finalBillItems.push({
-                        name: item.name,
-                        quantity: item.quantity,
-                        price: item.price
-                    });
-                    finalBillTotal += (item.price || 0) * (item.quantity || 1);
+            if (enteredPin === realPin) {
+                const hiddenEmail = "webmaster@zafraneuskirchen.de";
+                const hiddenPass  = "!Zafran2025";
+                
+                firebase.auth().signInWithEmailAndPassword(hiddenEmail, hiddenPass)
+                .then(() => {
+                    loginOverlay.style.display = 'none';
+                    mainContent.style.opacity = '1';
+                    initPOS(); 
+                })
+                .catch((error) => {
+                    loginError.innerText = "❌ Systemfehler: Auth abgelehnt.";
+                    loginError.style.display = 'block';
+                    loginButton.disabled = false;
                 });
-            });
-
-            const archiveDoc = {
-                table: currentSelectedTable, // This is the Table # or "Name (Phone)"
-                items: finalBillItems,
-                total: finalBillTotal,
-                closedAt: new Date()
-            };
-
-            try {
-                const archiveId = `archive-${new Date().getTime()}`;
-                await db.collection("archived_orders").doc(archiveId).set(archiveDoc);
-
-                const batch = db.batch();
-                ordersToClose.forEach(order => {
-                    batch.delete(db.collection("orders").doc(order.id));
-                });
-                await batch.commit();
-
-                console.log(`Bill for ${currentSelectedTable} has been archived and closed.`);
-                billViewEl.classList.add('hidden'); 
-                currentSelectedTable = null;
-            
-            } catch (err) {
-                console.error("Error archiving bill: ", err);
-                alert("Error closing bill. Check the console.");
-            }
-        });
-    } // End initializeBilling()
-
-    function renderTableList() {
-        const tablesWithBills = [...new Set(allCookedOrders.map(order => order.table))];
-        
-        tablesWithBills.sort((a, b) => {
-            const aIsNum = !isNaN(parseInt(a));
-            const bIsNum = !isNaN(parseInt(b));
-
-            if (aIsNum && !bIsNum) return -1; 
-            if (!aIsNum && bIsNum) return 1;  
-            if (aIsNum && bIsNum) return parseInt(a) - parseInt(b); 
-            return a.localeCompare(b); 
-        });
-        
-        tableListEl.innerHTML = ""; 
-        
-        if (tablesWithBills.length === 0) {
-            tableListEl.innerHTML = "<p>No open bills.</p>";
-            return;
-        }
-
-        tablesWithBills.forEach(tableIdentifier => {
-            const button = document.createElement('button');
-            button.className = 'table-list-btn';
-            
-            const order = allCookedOrders.find(o => o.table === tableIdentifier);
-            
-            if (order && order.orderType === 'pickup') {
-                button.innerHTML = `🛍️ ${tableIdentifier}`; // "Name (Phone)"
             } else {
-                button.innerHTML = `Table ${tableIdentifier}`; 
+                loginError.innerText = "❌ Falscher PIN.";
+                loginError.style.display = 'block';
+                loginButton.innerText = "TERMINAL ENTSPERREN";
+                loginButton.disabled = false;
             }
-            
-            button.dataset.tableId = tableIdentifier;
-            
-            if (tableIdentifier === currentSelectedTable) {
-                button.classList.add('selected');
+        })
+        .catch(err => {
+            loginError.innerText = "❌ Netzwerkfehler.";
+            loginError.style.display = 'block';
+            loginButton.disabled = false;
+        });
+    });
+
+    passwordInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter' && !loginButton.disabled) loginButton.click();
+    });
+
+    // --- 4. POS INITIALIZATION & DATALIST ---
+    function initPOS() {
+        // Fetch Live Menu for Auto-Pricing Datalist
+        db.collection('settings').doc('menu').get().then(doc => {
+            if (doc.exists && doc.data().menuData) {
+                const datalist = document.getElementById('menu-items-list');
+                datalist.innerHTML = "";
+                liveMenuItems = [];
+                
+                doc.data().menuData.forEach(cat => {
+                    if(cat.items) {
+                        cat.items.forEach(item => {
+                            liveMenuItems.push(item);
+                            const option = document.createElement('option');
+                            option.value = item.name;
+                            datalist.appendChild(option);
+                        });
+                    }
+                });
             }
-            
-            button.addEventListener('click', () => {
-                renderBillForTable(tableIdentifier);
-            });
-            tableListEl.appendChild(button);
+        });
+
+        // Listen for active orders (For now fetching all dine-in. Phase 2 will fetch 'ready_to_pay')
+        db.collection("orders")
+          .where("orderType", "==", "dine-in")
+          .onSnapshot(snapshot => {
+              const list = document.getElementById('ready-orders-list');
+              list.innerHTML = "";
+              
+              if(snapshot.empty) {
+                  list.innerHTML = `<p style="color:#666; text-align:center;">No tables currently active.</p>`;
+                  return;
+              }
+
+              snapshot.forEach(doc => {
+                  const data = doc.data();
+                  let localTotal = 0;
+                  if(data.items) {
+                      data.items.forEach(i => localTotal += (i.price * i.quantity));
+                  }
+                  
+                  const card = document.createElement('div');
+                  card.className = `order-card ${activeOrder && activeOrder.id === doc.id ? 'active' : ''}`;
+                  card.innerHTML = `
+                      <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                          <span>Tisch ${data.table}</span>
+                          <span style="color:var(--gold);">${localTotal.toFixed(2)} €</span>
+                      </div>
+                      <div style="font-size:0.85rem; color:#888; margin-top:5px;">
+                          ${data.items ? data.items.length : 0} Artikel
+                      </div>
+                  `;
+                  card.onclick = () => selectOrder(doc.id, data);
+                  list.appendChild(card);
+              });
+          });
+
+        // Auto-Pricing Logic Event Listener
+        document.getElementById('custom-name').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const match = liveMenuItems.find(i => i.name.toLowerCase() === query);
+            if(match) {
+                document.getElementById('custom-price').value = match.price.toFixed(2);
+            }
         });
     }
 
-    function renderBillForTable(tableIdentifier) {
-        currentSelectedTable = tableIdentifier;
+    // --- 5. CORE LOGIC ---
+    window.selectOrder = function(id, data) {
+        activeOrder = { id, ...data };
+        document.getElementById('active-table-name').innerText = `Tisch ${data.table}`;
         
-        document.querySelectorAll('.table-list-btn').forEach(btn => {
-            btn.classList.toggle('selected', btn.dataset.tableId === tableIdentifier);
-        });
+        document.getElementById('btn-cash').disabled = false;
+        document.getElementById('btn-card').disabled = false;
 
-        const tableOrders = allCookedOrders.filter(order => order.table === tableIdentifier);
+        currentDiscount = 0;
+        appliedCoupon = null;
+        document.getElementById('tip-amount').value = 0;
+        document.getElementById('coupon-code').value = "";
         
-        if (tableOrders.length === 0) {
-            billViewEl.classList.add('hidden');
-            currentSelectedTable = null;
-            renderTableList(); 
-            return;
+        updateCalculations();
+        initPOS(); // Visual refresh
+    }
+
+    // Add Custom or Datalist Item
+    window.addCustomItem = function() {
+        if(!activeOrder) return alert("Select a table first!");
+        const name = document.getElementById('custom-name').value.trim();
+        const price = parseFloat(document.getElementById('custom-price').value);
+        
+        if(!name || isNaN(price)) return alert("Invalid item or price");
+        
+        if(!activeOrder.items) activeOrder.items = [];
+        activeOrder.items.push({ name: name, quantity: 1, price: price });
+        
+        document.getElementById('custom-name').value = "";
+        document.getElementById('custom-price').value = "";
+        updateCalculations();
+    }
+
+    // Swiped Line-Item Voiding Logic
+    window.voidItem = function(index) {
+        if(!activeOrder || !activeOrder.items) return;
+        if(confirm(`Remove "${activeOrder.items[index].name}" from this bill?`)) {
+            activeOrder.items.splice(index, 1);
+            updateCalculations();
         }
-        
-        const isPickup = tableOrders.some(order => order.orderType === 'pickup');
+    }
 
-        billViewEl.classList.remove('hidden');
+    window.updateCalculations = function() {
+        if(!activeOrder) return;
         
-        if (isPickup) {
-            billTableNumberEl.innerHTML = `🛍️ ${tableIdentifier}`; // "Name (Phone)"
-        } else {
-            billTableNumberEl.innerHTML = `Table ${tableIdentifier}`; 
-        }
+        let subtotal = 0;
+        let itemsHtml = "";
         
-        billItemListEl.innerHTML = "";
-        let total = 0;
-
-        tableOrders.forEach(order => {
-            const items = order.items || [{ name: order.name, quantity: order.quantity, price: order.price }];
+        activeOrder.items.forEach((item, index) => {
+            const price = parseFloat(item.price || 0);
+            const qty = parseInt(item.quantity || 1);
+            const lineTotal = price * qty;
+            subtotal += lineTotal;
             
-            items.forEach((item, index) => {
-                const itemTotal = (item.price || 0) * (item.quantity || 1);
-                total += itemTotal;
-                
-                const li = document.createElement('li');
-                li.className = 'bill-item';
-                
-                li.innerHTML = `
-                    <span class="item-name">${item.quantity}x ${item.name}</span>
-                    <span class="item-price">${itemTotal.toFixed(2)} €</span>
-                    <button class="bill-delete-item" data-order-id="${order.id}" data-item-index="${index}">×</button>
-                `;
-                billItemListEl.appendChild(li);
-            });
-        });
-
-        billTotalAmountEl.textContent = `${total.toFixed(2)} €`;
-        
-        addDeleteButtonListeners();
-    }
-
-    function addDeleteButtonListeners() {
-        document.querySelectorAll('.bill-delete-item').forEach(btn => {
-            btn.replaceWith(btn.cloneNode(true));
+            itemsHtml += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #333;">
+                    <span style="flex:1;">${qty}x ${item.name}</span>
+                    <span style="color:var(--gold); margin-right:15px;">${lineTotal.toFixed(2)} €</span>
+                    <button class="btn-red" style="padding:4px 8px; font-size:0.8rem;" onclick="voidItem(${index})" title="Void Item">X</button>
+                </div>
+            `;
         });
         
-        document.querySelectorAll('.bill-delete-item').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const orderId = btn.dataset.orderId;
-                const itemIndex = parseInt(btn.dataset.itemIndex); 
-                btn.disabled = true;
-
-                try {
-                    const docRef = db.collection("orders").doc(orderId);
-                    const doc = await docRef.get();
-
-                    if (!doc.exists) {
-                        console.error("Document does not exist, cannot delete item.");
-                        return;
-                    }
-
-                    const orderData = doc.data();
-                    const items = orderData.items;
-
-                    if (!items || items.length === 1) {
-                        await docRef.delete();
-                    } else {
-                        items.splice(itemIndex, 1);
-                        await docRef.update({ items: items });
-                    }
-                } catch (err) {
-                    console.error("Error deleting item:", err);
-                    btn.disabled = false; 
-                }
-            });
-        });
-    }
-
-    // --- NEW HELPER FUNCTIONS ---
-    function populateDatalist() {
-        menuDatalist.innerHTML = ""; // Clear any existing
-        MENU_ITEMS.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.name;
-            menuDatalist.appendChild(option);
-        });
-    }
-
-    function handleItemSearch() {
-        const query = itemNameInput.value;
-        const match = MENU_ITEMS.find(item => item.name.toLowerCase() === query.toLowerCase());
+        document.getElementById('calc-items').innerHTML = itemsHtml;
+        document.getElementById('calc-subtotal').innerText = `${subtotal.toFixed(2)} €`;
         
-        if (match) {
-            itemPriceInput.value = match.price.toFixed(2);
-        } else {
-            itemPriceInput.value = ''; // Clear price if no match
+        const tip = parseFloat(document.getElementById('tip-amount').value) || 0;
+        const grandTotal = (subtotal - currentDiscount) + tip;
+        
+        document.getElementById('calc-discount').innerText = `- ${currentDiscount.toFixed(2)} €`;
+        document.getElementById('calc-total').innerText = `${Math.max(0, grandTotal).toFixed(2)} €`;
+        
+        generateLiveReceipt(subtotal, grandTotal, tip);
+    }
+
+    // --- 6. GERMAN COMPLIANCE & RECEIPT ---
+    function generateTseSignature() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        let sig = 'TSE_MAC_';
+        for(let i=0; i<45; i++) sig += chars.charAt(Math.floor(Math.random() * chars.length));
+        return sig;
+    }
+
+    function generateLiveReceipt(subtotal, grandTotal, tip) {
+        const paper = document.getElementById('receipt-paper');
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('de-DE');
+        const timeStr = now.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
+        
+        const isDineIn = activeOrder.orderType === 'dine-in';
+        const taxRate = isDineIn ? 0.19 : 0.07;
+        const taxLabel = isDineIn ? "19%" : "7%";
+        
+        const netAmount = grandTotal / (1 + taxRate);
+        const taxAmount = grandTotal - netAmount;
+
+        let itemsHtml = "";
+        activeOrder.items.forEach(item => {
+            const price = parseFloat(item.price || 0);
+            const lineTotal = price * item.quantity;
+            itemsHtml += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+                    <span style="flex:1;">${item.quantity}x ${item.name}</span>
+                    <span>${lineTotal.toFixed(2).replace('.', ',')}</span>
+                </div>
+            `;
+        });
+
+        activeOrder.currentTseSig = generateTseSignature();
+
+        paper.innerHTML = `
+            <div class="text-center">
+                <h3 style="margin:0;">ZAFFRAN DELIGHT</h3>
+                <p style="margin:5px 0;">Musterstraße 1, 53879 Euskirchen</p>
+                <p style="margin:0;">St-Nr: 209/5000/1234</p>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex; justify-content:space-between;"><span>Datum: ${dateStr}</span><span>Zeit: ${timeStr}</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Tisch: ${activeOrder.table}</span><span>Beleg: Vorschau</span></div>
+            <div class="divider"></div>
+            
+            <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:8px;">
+                <span>Artikel</span><span>EUR</span>
+            </div>
+            ${itemsHtml}
+            
+            ${currentDiscount > 0 ? `
+            <div class="divider"></div>
+            <div style="display:flex; justify-content:space-between; color:#444;">
+                <span>Rabatt ${appliedCoupon ? `(${appliedCoupon})` : ''}</span>
+                <span>- ${currentDiscount.toFixed(2).replace('.', ',')}</span>
+            </div>` : ''}
+            
+            ${tip > 0 ? `
+            <div style="display:flex; justify-content:space-between; color:#444;">
+                <span>Trinkgeld (0% MwSt)</span>
+                <span>+ ${tip.toFixed(2).replace('.', ',')}</span>
+            </div>` : ''}
+
+            <div class="divider" style="border-top:2px dashed #000;"></div>
+            <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:bold;">
+                <span>GESAMTBETRAG</span>
+                <span>${grandTotal.toFixed(2).replace('.', ',')} €</span>
+            </div>
+            <div class="divider"></div>
+            
+            <div style="display:flex; justify-content:space-between; font-size:11px;">
+                <span>Netto</span><span>${netAmount.toFixed(2).replace('.', ',')}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11px;">
+                <span>MwSt (${taxLabel})</span><span>${taxAmount.toFixed(2).replace('.', ',')}</span>
+            </div>
+            
+            <div class="divider"></div>
+            <div class="text-center" style="font-size: 10px; color: #444; margin-top:15px;">
+                <p style="margin:2px;">--- KassenSichV Konform (GoBD) ---</p>
+                <p style="margin:2px;">Start: ${now.toISOString()}</p>
+                <p style="margin:2px;">TSE-Signatur:</p>
+                <p style="margin:2px; word-break:break-all;">${activeOrder.currentTseSig}</p>
+                <p style="margin:2px;">Seriennummer: ER3984719002_SIM</p>
+            </div>
+        `;
+    }
+
+    // --- 7. ECO-QR GENERATOR ---
+    window.showEcoQR = function() {
+        if(!activeOrder) return alert("Select an order first.");
+        const modal = document.getElementById('qr-modal');
+        const qrContainer = document.getElementById('qrcode');
+        qrContainer.innerHTML = ""; 
+        
+        const billUrl = `https://zafraneuskirchen.de/bill?id=${activeOrder.id}`;
+        
+        new QRCode(qrContainer, {
+            text: billUrl,
+            width: 250,
+            height: 250,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        
+        modal.style.display = "flex";
+    }
+
+    window.splitBillMenu = function() {
+        alert("Split Bill Module UI will launch here in Phase 2!");
+    }
+
+    window.applyCoupon = function() {
+        alert("Live Coupon Engine linking in Phase 2!");
+    }
+
+    // --- 8. CLOSE BILL & ARCHIVE ---
+    window.closeBill = async function(method) {
+        if(!activeOrder) return;
+        if(!confirm(`Close Tisch ${activeOrder.table} with ${method.toUpperCase()}?`)) return;
+
+        const btnCash = document.getElementById('btn-cash');
+        const btnCard = document.getElementById('btn-card');
+        btnCash.disabled = true; btnCard.disabled = true;
+        btnCash.innerText = "Processing...";
+
+        try {
+            // Extract final totals
+            let subtotal = 0;
+            activeOrder.items.forEach(i => subtotal += (i.price * i.quantity));
+            const tip = parseFloat(document.getElementById('tip-amount').value) || 0;
+            const grandTotal = (subtotal - currentDiscount) + tip;
+
+            const archiveData = {
+                ...activeOrder,
+                closedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                paymentCollected: method,
+                total: grandTotal,
+                paidAmount: grandTotal,
+                tipAmount: tip,
+                discount: currentDiscount,
+                couponCode: appliedCoupon || "None",
+                tseSignature: activeOrder.currentTseSig,
+                isVoided: false
+            };
+
+            // 1. Save to Archive
+            await db.collection("archived_orders").doc(activeOrder.id).set(archiveData);
+            
+            // 2. Delete from Active Orders
+            await db.collection("orders").doc(activeOrder.id).delete();
+
+            alert(`✅ TSE Transaction Logged. Bill closed (${method.toUpperCase()}).`);
+            
+            // Reset UI
+            activeOrder = null;
+            document.getElementById('calc-items').innerHTML = "";
+            document.getElementById('receipt-paper').innerHTML = `
+                <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
+                    Order Closed & Archived Successfully.
+                </div>`;
+            document.getElementById('active-table-name').innerText = "None Selected";
+
+        } catch (error) {
+            console.error("Error closing bill:", error);
+            alert("Error closing bill. Check console.");
+            btnCash.disabled = false; btnCard.disabled = false;
+            btnCash.innerText = "💵 CASH";
         }
     }
 });

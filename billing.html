@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
+        /* --- KDS ENTERPRISE THEME VARIABLES --- */
         :root {
             --bg-dark: #121212;
             --panel-bg: #1e1e2d;
@@ -15,56 +16,157 @@
             --success: #00c853;
             --danger: #ff5252;
             --info: #007bff;
-            --border: #333;
+            --border: #2c2c3e;
+            --text-main: #f0f0f0;
+            --text-muted: #888;
         }
-        body { background: var(--bg-dark); color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* HEADER */
-        .pos-header { background: #111; border-bottom: 2px solid var(--gold); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .pos-header h1 { margin: 0; font-size: 1.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; }
-        .pos-header .status { font-family: monospace; font-size: 0.9rem; color: var(--success); border: 1px solid var(--success); padding: 5px 10px; border-radius: 4px; }
 
-        /* 3-COLUMN GRID */
-        .pos-grid { display: grid; grid-template-columns: 300px 1fr 350px; flex: 1; overflow: hidden; }
-        panel { 
-            padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); 
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
+        /* --- GLOBAL BASE --- */
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
         }
-        .panel::-webkit-scrollbar { display: none; /* Chrome, Safari, Opera */ }
-        .panel:last-child { border-right: none; background: #1a1a1a; }
         
-        h2 { font-size: 1.1rem; color: #aaa; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 10px; }
+        /* --- HEADER --- */
+        .pos-header { 
+            background: #181824; 
+            border-bottom: 2px solid var(--gold); 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        .pos-header h1 { margin: 0; font-size: 1.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        .pos-header .status { font-family: monospace; font-size: 0.85rem; color: var(--success); border: 1px solid var(--success); padding: 5px 10px; border-radius: 4px; background: rgba(0, 200, 83, 0.1); }
 
-        /* TABLES LIST */
-        .order-card { background: #222; border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border-left: 4px solid var(--info); }
-        .order-card:hover { border-color: var(--gold); background: #2a2a2a; }
-        .order-card.active { border-color: var(--gold); border-left: 4px solid var(--gold); background: rgba(212, 175, 55, 0.1); }
+        /* --- DESKTOP 3-COLUMN GRID --- */
+        .pos-grid { 
+            display: grid; 
+            grid-template-columns: 320px 1fr 380px; /* Wider, better balanced */
+            flex: 1; 
+            overflow: hidden; 
+            background: var(--bg-dark);
+        }
         
-        /* CALC SECTION */
+        /* Hide scrollbars for native app feel */
+        .panel { 
+            padding: 20px; 
+            overflow-y: auto; 
+            border-right: 1px solid var(--border); 
+            scrollbar-width: none; 
+            -ms-overflow-style: none; 
+        }
+        .panel::-webkit-scrollbar { display: none; }
+        
+        .panel:nth-child(2) { background: #151520; } /* Subtle contrast for the middle calc panel */
+        .panel:last-child { border-right: none; background: #1a1a24; }
+        
+        h2 { font-size: 1.1rem; color: var(--text-muted); margin-top: 0; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 10px; letter-spacing: 1px;}
+
+        /* --- CARDS & UI ELEMENTS --- */
+        .order-card { 
+            background: #222230; 
+            border: 1px solid var(--border); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 12px; 
+            cursor: pointer; 
+            transition: all 0.2s ease-in-out; 
+            border-left: 4px solid var(--info); 
+        }
+        .order-card:hover { border-color: var(--gold); background: #2a2a3d; transform: translateY(-2px); }
+        .order-card.active { border-color: var(--gold); border-left: 4px solid var(--gold); background: rgba(212, 175, 55, 0.08); }
+        
         .calc-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 1.1rem; }
-        .calc-row.total { font-size: 1.5rem; color: var(--gold); font-weight: bold; border-top: 2px solid var(--gold); border-bottom: none; margin-top: 10px; padding-top: 15px; }
+        .calc-row.total { font-size: 1.6rem; color: var(--gold); font-weight: bold; border-top: 2px solid var(--gold); border-bottom: none; margin-top: 10px; padding-top: 15px; }
         
         .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .input-group input { flex: 1; padding: 10px; background: #111; border: 1px solid var(--border); color: white; border-radius: 4px; font-size: 1rem; }
-        .btn { padding: 10px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .btn-gold { background: var(--gold); color: black; }
+        .input-group input { flex: 1; padding: 12px; background: #111118; border: 1px solid var(--border); color: white; border-radius: 6px; font-size: 1rem; transition: border 0.2s; }
+        .input-group input:focus { border-color: var(--gold); outline: none; }
+        
+        .btn { padding: 12px 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-gold { background: var(--gold); color: black; box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2); }
         .btn-blue { background: var(--info); color: white; }
-        .btn-green { background: var(--success); color: white; }
+        .btn-green { background: var(--success); color: white; box-shadow: 0 4px 10px rgba(0, 200, 83, 0.2);}
         .btn-red { background: var(--danger); color: white; }
 
-        /* RECEIPT PREVIEW */
-        .receipt-preview { background: #fff; color: #000; font-family: 'Courier New', Courier, monospace; padding: 20px; width: 100%; box-sizing: border-box; min-height: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; margin-bottom: 20px; }
+        /* --- RECEIPT PREVIEW --- */
+        .receipt-preview { 
+            background: #fdfdfd; 
+            color: #111; 
+            font-family: 'Courier New', Courier, monospace; 
+            padding: 25px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            min-height: 450px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            font-size: 13px; 
+            margin-bottom: 25px; 
+            border-radius: 4px;
+        }
         .receipt-preview .text-center { text-align: center; }
-        .receipt-preview .divider { border-top: 1px dashed #000; margin: 10px 0; }
+        .receipt-preview .divider { border-top: 1px dashed #666; margin: 12px 0; }
         
-        /* MODALS */
+        /* --- MODALS --- */
         #billing-login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: var(--panel-bg); padding: 40px; border-radius: 8px; border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 400px; }
-        .login-box input { width: 100%; padding: 15px; font-size: 1.5rem; text-align: center; margin-bottom: 20px; background: #111; border: 1px solid #444; color: var(--gold); letter-spacing: 5px; }
+        .login-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; border: 2px solid var(--gold); text-align: center; width: 90%; max-width: 400px; box-shadow: 0 15px 40px rgba(0,0,0,0.8);}
+        .login-box input { width: 100%; padding: 15px; font-size: 1.8rem; text-align: center; margin-bottom: 25px; background: #111; border: 1px solid var(--border); color: var(--gold); letter-spacing: 8px; border-radius: 6px; box-sizing: border-box;}
         
-        #qr-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index: 10000; display: none; justify-content: center; align-items: center; flex-direction: column; }
-        #qrcode { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        #qr-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index: 10000; display: none; justify-content: center; align-items: center; flex-direction: column; text-align: center;}
+        #qrcode { background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,200,83,0.3);}
+
+        /* ========================================= */
+        /* RESPONSIVE MOBILE & TABLET FIXES          */
+        /* ========================================= */
+        
+        /* For Tablets / Small Laptops */
+        @media (max-width: 1024px) {
+            .pos-grid { grid-template-columns: 300px 1fr; }
+            .panel:nth-child(3) { grid-column: span 2; border-top: 2px solid var(--gold); border-left: none; }
+        }
+
+        /* For Mobile Phones (Fixes your screenshot) */
+        @media (max-width: 768px) {
+            body { 
+                height: auto; 
+                overflow-y: auto; /* Allow vertical scrolling on mobile */
+            }
+            .pos-header { 
+                flex-direction: column; 
+                align-items: stretch; 
+                gap: 15px; 
+            }
+            .pos-header > div { 
+                display: flex; 
+                justify-content: space-between; 
+                width: 100%; 
+            }
+            .pos-grid { 
+                display: flex; 
+                flex-direction: column; 
+                overflow: visible; 
+            }
+            .panel { 
+                border-right: none; 
+                border-bottom: 4px solid #000; 
+                padding: 15px; 
+            }
+            .panel:last-child { border-bottom: none; }
+            
+            .input-group { flex-direction: column; }
+            .input-group button { width: 100%; padding: 15px; }
+            .receipt-preview { min-height: 250px; }
+        }
     </style>
 </head>
 <body>

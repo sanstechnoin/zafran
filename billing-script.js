@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- NEW: CREATE BLANK BILL (MANUAL ORDER) ---
     window.createNewBill = function() {
-        let input = prompt("Enter Table Number (e.g., 5) OR Customer Name (e.g., John).\nLeave completely blank for an anonymous Pickup ID:");
+        let input = prompt("Enter Table Number (e.g., 5) OR Customer Name (e.g., John).\\nLeave completely blank for an anonymous Pickup ID:");
         if (input === null) return; // Cancelled
 
         let orderType = 'pickup';
@@ -172,6 +172,36 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error creating bill:", err);
             alert("Error creating new bill.");
         });
+    };
+
+    // --- NEW: CANCEL / DELETE BILL ---
+    window.cancelBill = async function() {
+        if(!activeOrder) return alert("Select a bill to cancel first.");
+        
+        let displayName = activeOrder.orderType === 'dine-in' ? `Tisch ${activeOrder.table}` : (activeOrder.customerName || "Gast");
+        if(!confirm(`Are you sure you want to completely CANCEL and DELETE the bill for ${displayName}? This cannot be undone.`)) return;
+
+        try {
+            await db.collection("orders").doc(activeOrder.id).delete();
+            
+            // Reset UI
+            activeOrder = null;
+            document.getElementById('calc-items').innerHTML = "";
+            document.getElementById('calc-subtotal').innerText = "0.00 €";
+            document.getElementById('calc-discount').innerText = "- 0.00 €";
+            document.getElementById('calc-total').innerText = "0.00 €";
+            document.getElementById('receipt-paper').innerHTML = `
+                <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
+                    Bill Cancelled & Deleted.
+                </div>`;
+            document.getElementById('active-table-name').innerText = "None Selected";
+            document.getElementById('btn-cash').disabled = true;
+            document.getElementById('btn-card').disabled = true;
+            
+        } catch (error) {
+            console.error("Error cancelling bill:", error);
+            alert("Error cancelling bill. Check console.");
+        }
     };
 
     // --- NEW: LOGOUT LOGIC ---
@@ -417,6 +447,9 @@ document.addEventListener("DOMContentLoaded", () => {
             
             activeOrder = null;
             document.getElementById('calc-items').innerHTML = "";
+            document.getElementById('calc-subtotal').innerText = "0.00 €";
+            document.getElementById('calc-discount').innerText = "- 0.00 €";
+            document.getElementById('calc-total').innerText = "0.00 €";
             document.getElementById('receipt-paper').innerHTML = `
                 <div style="text-align:center; padding: 40px 0; color:#888; font-style:italic;">
                     Order Closed & Archived Successfully.

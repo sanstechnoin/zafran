@@ -1,4 +1,5 @@
 // --- 1. FIREBASE SETUP ---
+// (Initialized securely via firebase-config.js)
 
 document.addEventListener("DOMContentLoaded", () => {
     
@@ -185,23 +186,40 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Fetch Live Coupons
+        // Fetch Live Coupons (BULLETPROOF VERSION)
         db.collection('settings').doc('coupons').get().then(doc => {
-            if (doc.exists && doc.data().list) {
+            if (doc.exists) {
+                const data = doc.data();
                 const select = document.getElementById('coupon-select');
                 select.innerHTML = '<option value="">No Coupon Selected</option>';
-                liveCoupons = doc.data().list.filter(c => c.active); // Only fetch Active ones!
+                
+                // Extract from possible CP-Admin save formats
+                let allCoupons = data.coupons || data.list || data.couponData || [];
+                
+                // Filter active ones (handling different boolean/string formats)
+                liveCoupons = allCoupons.filter(c => c.active === true || c.active === "true" || c.active === "on" || c.isActive === true);
+                
+                // Fail-safe: If none show as active, show all just in case
+                if (liveCoupons.length === 0 && allCoupons.length > 0) {
+                    liveCoupons = allCoupons;
+                }
                 
                 liveCoupons.forEach(c => {
                     const option = document.createElement('option');
-                    option.value = c.code;
-                    let conditionTxt = c.minOrder ? ` (Min: ${c.minOrder}€)` : '';
-                    let valTxt = c.type === 'percent' ? `${c.value}%` : `${c.value}€`;
-                    option.text = `🎫 ${c.code} - ${valTxt}${conditionTxt}`;
+                    const code = c.code || c.name || c.couponCode; // Fallbacks
+                    option.value = code;
+                    
+                    let minOrder = c.minOrder || c.minAmount || 0;
+                    let conditionTxt = minOrder > 0 ? ` (Min: ${minOrder}€)` : '';
+                    
+                    let val = c.value || c.discount || c.amount || 0;
+                    let valTxt = (c.type === 'percent' || c.discountType === 'percent') ? `${val}%` : `${val}€`;
+                    
+                    option.text = `🎫 ${code} - ${valTxt}${conditionTxt}`;
                     select.appendChild(option);
                 });
             }
-        });
+        }).catch(err => console.error("Error loading coupons:", err));
 
         // Fetch Orders
         db.collection("orders")
@@ -365,17 +383,20 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1. Process Dropdown Coupon
         const selectedCoupon = document.getElementById('coupon-select').value;
         if (selectedCoupon && liveCoupons) {
-            const coupon = liveCoupons.find(c => c.code === selectedCoupon);
+            const coupon = liveCoupons.find(c => c.code === selectedCoupon || c.name === selectedCoupon);
             if (coupon) {
+                let minOrder = coupon.minOrder || coupon.minAmount || 0;
+                let val = coupon.value || coupon.discount || coupon.amount || 0;
+                
                 // Check Minimum Order Condition
-                if (coupon.minOrder && subtotal < coupon.minOrder) {
-                    // Fail silently, don't apply it if subtotal is too low
+                if (minOrder && subtotal < minOrder) {
+                    // Fail silently, don't apply it
                 } else {
-                    appliedCoupon = coupon.code;
-                    if (coupon.type === 'percent') {
-                        currentDiscount += subtotal * (coupon.value / 100);
+                    appliedCoupon = coupon.code || coupon.name;
+                    if (coupon.type === 'percent' || coupon.discountType === 'percent') {
+                        currentDiscount += subtotal * (val / 100);
                     } else {
-                        currentDiscount += coupon.value;
+                        currentDiscount += val;
                     }
                 }
             }

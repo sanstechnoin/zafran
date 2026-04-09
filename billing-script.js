@@ -172,11 +172,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             if (tseConfig.enabled) {
-                badge.innerHTML = "● TSE ACTIVE";
-                badge.className = "status active";
+                badge.innerHTML = "● TSE CONNECTED";
+                badge.className = "status active"; // Green
             } else {
-                badge.innerHTML = "● TSE DISABLED";
-                badge.className = "status";
+                badge.innerHTML = "● CONNECTED";
+                badge.className = "status active"; // Also Green! No panic.
             }
             updateCalculations(); // Re-render receipt to apply TSE layout changes
         });

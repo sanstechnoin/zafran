@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zafran Admin - Master Dashboard</title>
+    <title>SAN Suite - Master Dashboard</title>
     <link rel="icon" type="image/png" href="favlogo.png">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
@@ -206,7 +206,6 @@
         .success { background-color: rgba(40, 167, 69, 0.2); color: #2ecc71; border: 1px solid #2ecc71; display: block; }
         .error { background-color: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid #ff6b6b; display: block; }
 
-        /* FIXED: Table overflowing on mobile */
         .table-container { overflow-x: auto; margin-top: 20px; width: 100%; display: block; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; background: #222; border-radius: 4px; min-width: 600px; }
         th { background-color: #111; color: var(--gold); padding: 12px; text-align: left; border-bottom: 2px solid var(--border-color); white-space: nowrap; }
@@ -245,21 +244,21 @@
 
 <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-dark); z-index:999999; display:flex; flex-direction:column; justify-content:center; align-items:center;">
     <div style="background:var(--card-bg); padding:40px; border-radius:8px; border:2px solid var(--gold); text-align:center; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
-        <img src="logo.png" alt="Zafran Delight" style="height:60px; margin-bottom:20px; opacity:0.8;">
-        <h2 style="color:var(--gold); margin-bottom:5px; text-transform:uppercase;">Master Control</h2>
-        <p style="color:#aaa; font-size:0.9rem; margin-bottom:25px;">Autorisierter Zugriff erforderlich</p>
+        <img src="logo.png" alt="SAN Suite Logo" style="height:60px; margin-bottom:20px; opacity:0.8;">
+        <h2 data-i18n="login_title" style="color:var(--gold); margin-bottom:5px; text-transform:uppercase;">Master Control</h2>
+        <p data-i18n="login_desc" style="color:#aaa; font-size:0.9rem; margin-bottom:25px;">Autorisierter Zugriff erforderlich</p>
         
         <form id="login-form">
-            <input type="email" id="admin-email" placeholder="Admin E-Mail" required style="width:100%; padding:12px; margin-bottom:15px; border:1px solid var(--border-color); border-radius:4px; background:#111; color:white; font-size:1rem; text-align:center;">
-            <input type="password" id="admin-password" placeholder="Passwort" required style="width:100%; padding:12px; margin-bottom:20px; border:1px solid var(--border-color); border-radius:4px; background:#111; color:white; font-size:1rem; text-align:center;">
-            <button type="submit" style="width:100%; font-size:1.1rem; padding:12px; background:var(--gold); color:black; font-weight:bold; border:none; border-radius:4px; cursor:pointer; text-transform:uppercase;">Anmelden</button>
+            <input type="email" id="admin-email" data-i18n="login_email" placeholder="Admin E-Mail" required style="width:100%; padding:12px; margin-bottom:15px; border:1px solid var(--border-color); border-radius:4px; background:#111; color:white; font-size:1rem; text-align:center;">
+            <input type="password" id="admin-password" data-i18n="login_pass" placeholder="Passwort" required style="width:100%; padding:12px; margin-bottom:20px; border:1px solid var(--border-color); border-radius:4px; background:#111; color:white; font-size:1rem; text-align:center;">
+            <button type="submit" data-i18n="login_btn" style="width:100%; font-size:1.1rem; padding:12px; background:var(--gold); color:black; font-weight:bold; border:none; border-radius:4px; cursor:pointer; text-transform:uppercase;">Anmelden</button>
             <p id="login-error" style="color:var(--danger-red); margin-top:15px; display:none; font-weight:bold; font-size:0.9rem;"></p>
         </form>
     </div>
 </div>
     
 <div class="mobile-header" id="mobile-header-bar">
-    <img src="logo.png" alt="Zafran Logo" style="height: 40px;">
+    <img src="logo.png" alt="SAN Suite Logo" style="height: 40px;">
     <div class="lang-toggle-container">
         <span class="lang-label de active">DE</span>
         <label class="switch">
@@ -274,7 +273,7 @@
 
     <nav class="app-sidebar">
         <div class="sidebar-header">
-            <img src="logo.png" alt="Zafran Logo">
+            <img src="logo.png" alt="SAN Suite Logo">
             <div class="lang-toggle-container">
                 <span class="lang-label de active">DE</span>
                 <label class="switch">
@@ -314,10 +313,10 @@
 
         <div class="sidebar-footer">
             <button onclick="adminLogout()" style="width: 100%; background: transparent; border: 1px solid var(--danger-red); color: var(--danger-red); padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px; transition: 0.3s;" onmouseover="this.style.background='var(--danger-red)'; this.style.color='white';" onmouseout="this.style.background='transparent'; this.style.color='var(--danger-red)';">
-                Logout 🔒
+                <span data-i18n="sidebar_logout">Logout 🔒</span>
             </button>
             <p>Created & Developed by<br><strong style="color: #ccc;">SAN Technologies</strong><br>+49 162 3757839</p>
-            <p>© Zaffran Delight, Euskirchen 2025<br>(<a href="https://santechnologies.de" target="_blank">SAN Technologies</a>)</p>
+            <p>© SAN Suite POS 2026<br>(<a href="https://santechnologies.de" target="_blank">SAN Technologies</a>)</p>
         </div>
     </nav>
 
@@ -337,31 +336,33 @@
                             <input type="text" id="whatsappNumber" placeholder="4915123456789">
                         </div>
                         <div class="form-group">
-                            <label>Google Bewertung (z.B. 4.8)</label>
+                            <label data-i18n="google_score">Google Bewertung (z.B. 4.8)</label>
                             <input type="number" step="0.1" min="1" max="5" id="googleScore" placeholder="4.8">
                         </div>
                         <div class="form-group">
-                            <label>Lieferando Bewertung (z.B. 4.6)</label>
+                            <label data-i18n="lieferando_score">Lieferando Bewertung (z.B. 4.6)</label>
                             <input type="number" step="0.1" min="1" max="5" id="lieferandoScore" placeholder="4.6">
                         </div>
                     </div>
                     <button type="submit" id="settingsBtn" class="btn-blue" data-i18n="save_settings">Einstellungen Speichern</button>
                     <div id="settings-message" class="message-box"></div>
-                </form> <div style="background: #111; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid var(--border-color);">
-                    <h3 style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">POS TSE Engine (KassenSichV)</h3>
-                    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;">Deaktivieren Sie dies für Kunden außerhalb Deutschlands oder bei Kleingewerbe.</p>
+                </form> 
+                
+                <div style="background: #111; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid var(--border-color);">
+                    <h3 data-i18n="tse_title" style="color: var(--gold); margin-top: 0; margin-bottom: 5px;">POS TSE Engine (KassenSichV)</h3>
+                    <p data-i18n="tse_desc" style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;">Deaktivieren Sie dies für Kunden außerhalb Deutschlands oder bei Kleingewerbe.</p>
                     
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 15px;">
                         <input type="checkbox" id="admin-tse-toggle" style="width: 22px; height: 22px; accent-color: var(--success-green);">
-                        <strong style="color: white; font-size: 1.1rem;">TSE Signatures Aktivieren</strong>
+                        <strong data-i18n="tse_enable" style="color: white; font-size: 1.1rem;">TSE Signatures Aktivieren</strong>
                     </label>
                     
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <label style="color: var(--gold); font-size: 0.9rem; font-weight: bold;">TSE Serial Number (White-Label Override)</label>
+                        <label data-i18n="tse_serial" style="color: var(--gold); font-size: 0.9rem; font-weight: bold;">TSE Serial Number (White-Label Override)</label>
                         <input type="text" id="admin-tse-serial" placeholder="z.B. ER3984719002_SIM">
                     </div>
                     
-                    <button type="button" onclick="saveTseConfig()" class="btn-blue" style="margin-top: 20px; width: auto;">TSE Einstellungen Speichern</button>
+                    <button type="button" onclick="saveTseConfig()" class="btn-blue" data-i18n="tse_saveBtn" style="margin-top: 20px; width: auto;">TSE Einstellungen Speichern</button>
                 </div>
             </div>
 
@@ -431,9 +432,9 @@
 
                 <div id="archived-filters" style="display:none; justify-content:center; margin-bottom: 20px;">
                     <select id="archive-status" onchange="applyArchiveFilter()" style="max-width:250px; padding:8px; font-size:0.9rem;">
-                        <option value="all">Alle (All)</option>
-                        <option value="confirmed">Bestätigt (Approved)</option>
-                        <option value="cancelled">Storniert (Not Approved)</option>
+                        <option value="all" data-i18n="res_filter_all">Alle (All)</option>
+                        <option value="confirmed" data-i18n="res_filter_conf">Bestätigt (Approved)</option>
+                        <option value="cancelled" data-i18n="res_filter_canc">Storniert (Not Approved)</option>
                     </select>
                 </div>
 
@@ -441,11 +442,11 @@
                     <table id="res-table">
                         <thead>
                             <tr>
-                                <th>Name / Kontakt</th>
-                                <th>Wann (Datum & Zeit)</th>
-                                <th>Gäste</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th data-i18n="res_th_name">Name / Kontakt</th>
+                                <th data-i18n="res_th_date">Wann (Datum & Zeit)</th>
+                                <th data-i18n="res_th_guests">Gäste</th>
+                                <th data-i18n="res_th_status">Status</th>
+                                <th data-i18n="res_th_action">Action</th>
                             </tr>
                         </thead>
                         <tbody id="res-body"></tbody>
@@ -512,11 +513,11 @@
             </div>
 
             <div id="tab-banner" class="tab-content">
-                <h2>📢 Pop-Up Banners</h2>
+                <h2 data-i18n="banner_title">📢 Pop-Up Banners</h2>
                 <form id="banner-form">
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label>Sichtbar auf (Valid For)</label>
+                            <label data-i18n="banner_valid_for">Sichtbar auf (Valid For)</label>
                             <select id="bannerValidFor">
                                 <option value="all">Überall (Startseite, Pickup & Delivery)</option>
                                 <option value="both">Nur Bestellseiten (Pickup & Delivery)</option>
@@ -526,17 +527,17 @@
                             </select>
                         </div>
                         <div class="form-group full-width">
-                            <label>Titel (z.B. Willkommen bei Zaffran!)</label>
+                            <label data-i18n="banner_heading">Titel (z.B. Willkommen bei Zaffran!)</label>
                             <input type="text" id="bannerTitle" placeholder="Titel hier eingeben...">
                         </div>
                         
                         <div class="form-group full-width">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                                <label style="margin: 0;">Nachricht (Message)</label>
+                                <label style="margin: 0;" data-i18n="banner_msg">Nachricht (Message)</label>
                                 
                                 <div style="display: flex; background: #111; border: 1px solid #444; border-radius: 6px; overflow: hidden;">
-                                    <button type="button" id="btn-mode-visual" onclick="setBannerMode('visual')" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: var(--gold); color: #000; border: none; text-transform: none;">🫣 Visuell</button>
-                                    <button type="button" id="btn-mode-html" onclick="setBannerMode('html')" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: transparent; color: #888; border: none; border-left: 1px solid #444; text-transform: none;">⌨️ HTML Code</button>
+                                    <button type="button" id="btn-mode-visual" onclick="setBannerMode('visual')" data-i18n="banner_btn_vis" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: var(--gold); color: #000; border: none; text-transform: none;">🫣 Visuell</button>
+                                    <button type="button" id="btn-mode-html" onclick="setBannerMode('html')" data-i18n="banner_btn_html" style="margin:0; border-radius:0; padding: 8px 15px; font-size: 0.85rem; background: transparent; color: #888; border: none; border-left: 1px solid #444; text-transform: none;">⌨️ HTML Code</button>
                                 </div>
                             </div>
                             
@@ -545,12 +546,12 @@
                             <div id="html-mode-container" style="display: none; flex-direction: column; gap: 25px;">
                                 
                                 <div style="position: relative; padding-top: 10px;">
-                                    <span style="position: absolute; top: -5px; left: 15px; background: var(--gold); color: black; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 2;">HTML CODE EDITOR</span>
+                                    <span data-i18n="banner_html_lbl" style="position: absolute; top: -5px; left: 15px; background: var(--gold); color: black; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 2;">HTML CODE EDITOR</span>
                                     <textarea id="html-editor" style="width: 100%; height: 220px; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; background: #0a0a0a; color: #4af626; border: 2px solid #444; border-radius: 8px; padding: 25px 15px 15px 15px; line-height: 1.5; resize: vertical;" placeholder="Fügen Sie hier Ihren HTML Code ein..."></textarea>
                                 </div>
                                 
                                 <div style="position: relative; padding-top: 10px;">
-                                    <span style="position: absolute; top: -5px; left: 15px; background: #007bff; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 2;">LIVE VORSCHAU</span>
+                                    <span data-i18n="banner_preview_lbl" style="position: absolute; top: -5px; left: 15px; background: #007bff; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 2;">LIVE VORSCHAU</span>
                                     <div class="preview-box" style="width: 100%; background: #222; border: 2px dashed #007bff; border-radius: 8px; padding: 25px 20px 20px 20px; min-height: 150px; max-height: 350px; overflow-y: auto;">
                                         <div id="html-preview" style="color: #eee; font-size: 1rem; line-height: 1.6; text-align: center;"></div>
                                     </div>
@@ -562,11 +563,11 @@
                         <div class="form-group full-width">
                             <label class="checkbox-item">
                                 <input type="checkbox" id="bannerActive" style="width:20px; height:20px;">
-                                <span style="color:var(--gold); font-size:1.1rem;">Banner Aktivieren? (Wird Kunden 1x pro Sitzung angezeigt)</span>
+                                <span style="color:var(--gold); font-size:1.1rem;" data-i18n="banner_active">Banner Aktivieren? (Wird Kunden 1x pro Sitzung angezeigt)</span>
                             </label>
                         </div>
                     </div>
-                    <button type="submit" class="btn-blue">Banner Speichern</button>
+                    <button type="submit" class="btn-blue" data-i18n="banner_save">Banner Speichern</button>
                 </form>
             </div>
 
@@ -682,24 +683,25 @@
                     <table id="coupons-table">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Wert</th>
-                                <th>Min €</th>
-                                <th data-i18n="validity">Gültigkeit</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th data-i18n="coup_th_code">Code</th>
+                                <th data-i18n="coup_th_val">Wert</th>
+                                <th data-i18n="coup_th_min">Min €</th>
+                                <th data-i18n="coup_th_valid">Gültigkeit</th>
+                                <th data-i18n="coup_th_status">Status</th>
+                                <th data-i18n="coup_th_action">Action</th>
                             </tr>
                         </thead>
                         <tbody id="coupons-body"></tbody>
                     </table>
                 </div>
             </div>
+            
             <div id="tab-menu" class="tab-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; border:none; padding:0;">🍔 Menü Manager</h2>
-                    <button class="btn-small btn-blue" onclick="addCategory()" style="margin: 0; min-width: 150px;">+ Neue Kategorie</button>
+                    <h2 data-i18n="menu_title" style="margin: 0; border:none; padding:0;">🍔 Menü Manager</h2>
+                    <button data-i18n="menu_addCat" class="btn-small btn-blue" onclick="addCategory()" style="margin: 0; min-width: 150px;">+ Neue Kategorie</button>
                 </div>
-                <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;">Änderungen werden live in die Firebase Datenbank gespeichert.</p>
+                <p data-i18n="menu_desc" style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;">Änderungen werden live in die Firebase Datenbank gespeichert.</p>
 
                 <div id="admin-menu-container">
                 </div>
@@ -712,49 +714,49 @@
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
                     
                     <div class="service-card" style="margin-bottom:0;">
-                        <h3 style="margin-top:0; color:var(--info-blue);">🚗 Fahrer (Driver)</h3>
+                        <h3 data-i18n="pin_driver" style="margin-top:0; color:var(--info-blue);">🚗 Fahrer (Driver)</h3>
                         <div class="pin-box">
                             <input type="text" id="driver-pin-input" class="pin-input" maxlength="6" placeholder="---">
-                            <button class="btn-save-pin" onclick="savePin('driver')">SAVE</button>
+                            <button data-i18n="pin_save_btn" class="btn-save-pin" onclick="savePin('driver')">SAVE</button>
                         </div>
                         <div id="driver-pin-status" class="message-box"></div>
                     </div>
 
                     <div class="service-card" style="margin-bottom:0;">
-                        <h3 style="margin-top:0; color:var(--warning-orange);">👨‍🍳 Küche (Kitchen)</h3>
+                        <h3 data-i18n="pin_kitchen" style="margin-top:0; color:var(--warning-orange);">👨‍🍳 Küche (Kitchen)</h3>
                         <div class="pin-box">
                             <input type="text" id="kitchen-pin-input" class="pin-input" maxlength="6" placeholder="---">
-                            <button class="btn-save-pin" onclick="savePin('kitchen')">SAVE</button>
+                            <button data-i18n="pin_save_btn" class="btn-save-pin" onclick="savePin('kitchen')">SAVE</button>
                         </div>
                         <div id="kitchen-pin-status" class="message-box"></div>
                     </div>
 
                     <div class="service-card" style="margin-bottom:0;">
-                        <h3 style="margin-top:0; color:var(--success-green);">🍽️ Kellner (Waiter)</h3>
+                        <h3 data-i18n="pin_waiter" style="margin-top:0; color:var(--success-green);">🍽️ Kellner (Waiter)</h3>
                         <div class="pin-box">
                             <input type="text" id="waiter-pin-input" class="pin-input" maxlength="6" placeholder="---">
-                            <button class="btn-save-pin" onclick="savePin('waiter')">SAVE</button>
+                            <button data-i18n="pin_save_btn" class="btn-save-pin" onclick="savePin('waiter')">SAVE</button>
                         </div>
                         <div id="waiter-pin-status" class="message-box"></div>
                     </div>
 
                     <div class="service-card" style="margin-bottom:0;">
-                        <h3 style="margin-top:0; color:var(--gold);">📊 Record / Vault</h3>
+                        <h3 data-i18n="pin_record" style="margin-top:0; color:var(--gold);">📊 Record / Vault</h3>
                         <div class="pin-box">
                             <input type="text" id="record-pin-input" class="pin-input" maxlength="6" placeholder="---">
-                            <button class="btn-save-pin" onclick="savePin('record')">SAVE</button>
+                            <button data-i18n="pin_save_btn" class="btn-save-pin" onclick="savePin('record')">SAVE</button>
                         </div>
                         <div id="record-pin-status" class="message-box"></div>
                     </div>
 
                     <div class="service-card" style="margin-bottom:0; border-color: #ff5252;">
-                        <h3 style="margin-top:0; color:#ff5252;">⚠️ Master Vault (Delete)</h3>
+                        <h3 data-i18n="pin_master" style="margin-top:0; color:#ff5252;">⚠️ Master Vault (Delete)</h3>
                         <div class="pin-box">
                             <input type="text" id="vault-pin-input" class="pin-input" placeholder="---" style="border-bottom-color:#ff5252; color:#ff5252; font-size:1.2rem; letter-spacing:1px;">
-                            <button class="btn-save-pin" onclick="savePin('vault')" style="background:#ff5252;">SAVE</button>
+                            <button data-i18n="pin_save_btn" class="btn-save-pin" onclick="savePin('vault')" style="background:#ff5252;">SAVE</button>
                         </div>
                         <div id="vault-pin-status" class="message-box"></div>
-                        <p style="font-size:0.8rem; color:#aaa; text-align:center; margin-top:10px;">Passwort zum Löschen von Bestellungen.</p>
+                        <p data-i18n="pin_master_desc" style="font-size:0.8rem; color:#aaa; text-align:center; margin-top:10px;">Passwort zum Löschen von Bestellungen.</p>
                     </div>
                 </div>
             </div>
@@ -762,45 +764,46 @@
         </div>
     </main>
 </div>
+
 <div id="menu-edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center;">
     <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--gold); width:90%; max-width:500px; max-height:90vh; overflow-y:auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">
-        <h3 id="menu-modal-title" style="color:var(--gold); margin-top:0;">Artikel bearbeiten</h3>
+        <h3 id="menu-modal-title" data-i18n="menu_modal_title" style="color:var(--gold); margin-top:0;">Artikel bearbeiten</h3>
         <form id="menu-item-form">
             <input type="hidden" id="edit-cat-index">
             <input type="hidden" id="edit-item-index">
             
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Nummer (ID) *</label>
+                    <label data-i18n="menu_id">Nummer (ID) *</label>
                     <input type="text" id="edit-item-id" required placeholder="z.B. 114">
                 </div>
                 <div class="form-group">
-                    <label>Preis (€) *</label>
+                    <label data-i18n="menu_price">Preis (€) *</label>
                     <input type="number" step="0.01" id="edit-item-price" required placeholder="5.50">
                 </div>
                 <div class="form-group full-width">
-                    <label>Name *</label>
+                    <label data-i18n="menu_name">Name *</label>
                     <input type="text" id="edit-item-name" required placeholder="Artikelname">
                 </div>
                 <div class="form-group full-width">
-                    <label>Beschreibung (Zutaten, Details)</label>
+                    <label data-i18n="menu_desc_lbl">Beschreibung (Zutaten, Details)</label>
                     <textarea id="edit-item-desc" rows="2" placeholder="Nach indischer Art..."></textarea>
                 </div>
                 <div class="form-group full-width">
-                    <label>Allergene (Komma-getrennt)</label>
+                    <label data-i18n="menu_allergy">Allergene (Komma-getrennt)</label>
                     <input type="text" id="edit-item-allergy" placeholder="z.B. A, G, E">
                 </div>
             </div>
             
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button type="button" onclick="document.getElementById('menu-edit-modal').style.display='none'" style="background:#444; color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Abbrechen</button>
-                <button type="submit" style="background:var(--success-green); color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Speichern</button>
+                <button type="button" data-i18n="btn_cancel" onclick="document.getElementById('menu-edit-modal').style.display='none'" style="background:#444; color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Abbrechen</button>
+                <button type="submit" data-i18n="btn_save" style="background:var(--success-green); color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Speichern</button>
             </div>
         </form>
     </div>
 </div>
 
-    <div id="admin-alert-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
+<div id="admin-alert-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
     <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--gold); width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">
         <h3 style="color:var(--gold); margin-top:0; font-size:1.5rem;">ℹ️ System Alert</h3>
         <p id="admin-alert-message" style="margin-bottom:25px; font-size:1.1rem; line-height:1.4; color:white;"></p>

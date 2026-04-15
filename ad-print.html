@@ -8,8 +8,15 @@
         /* --- RESET & SETUP --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
+        /* FORCE BROWSER TO KEEP COLORS DURING PRINT/PDF */
+        html, body {
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            color-adjust: exact !important;
+        }
+        
         body {
-            background-color: #222; /* Dark background so the white print-box stands out */
+            background-color: #222;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -19,11 +26,16 @@
             min-height: 100vh;
         }
 
+        .instructions {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
         /* --- THE 10x10 OUTER PRINT BOX (1000px = 10cm for high res) --- */
         .print-canvas-10x10 {
             width: 1000px;
             height: 1000px;
-            background-color: #ffffff;
+            background-color: #ffffff !important; /* Force white outer box */
             position: relative;
             display: flex;
             justify-content: center;
@@ -31,8 +43,8 @@
             box-shadow: 0 25px 50px rgba(0,0,0,0.8);
         }
 
-        /* --- CROP MARKS (To show the publisher where to cut the 8x8) --- */
-        .crop-mark { position: absolute; background: #000; }
+        /* --- CROP MARKS --- */
+        .crop-mark { position: absolute; background: #000 !important; }
         .crop-t-l-h { top: 98px; left: 0; width: 50px; height: 2px; }
         .crop-t-l-v { top: 0; left: 98px; width: 2px; height: 50px; }
         .crop-t-r-h { top: 98px; right: 0; width: 50px; height: 2px; }
@@ -47,7 +59,7 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            color: #888;
+            color: #888 !important;
             font-size: 14px;
             font-family: monospace;
             letter-spacing: 2px;
@@ -57,21 +69,23 @@
         .ad-content-8x8 {
             width: 800px;
             height: 800px;
-            background: linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 100%);
+            /* Force gradient and fallback color */
+            background: #111 !important; 
+            background: linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 100%) !important;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            border: 2px solid #333;
+            border: 2px solid #333 !important;
         }
 
         /* THE STEALTH B2B WATERMARK */
         .stealth-watermark {
             position: absolute;
             right: 8px;
-            bottom: 120px; /* Sits right above the gold footer */
+            bottom: 120px;
             writing-mode: vertical-rl;
-            color: #666;
+            color: #666 !important;
             font-size: 12px;
             font-family: monospace;
             letter-spacing: 2px;
@@ -88,11 +102,10 @@
         .ad-header img {
             height: 90px;
             margin-bottom: 15px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
 
         .headline {
-            color: #D4AF37;
+            color: #D4AF37 !important;
             font-size: 42px;
             font-weight: 900;
             text-transform: uppercase;
@@ -102,7 +115,7 @@
         }
 
         .subheadline {
-            color: #fff;
+            color: #fff !important;
             font-size: 24px;
             font-weight: 600;
             letter-spacing: 1px;
@@ -129,26 +142,23 @@
             height: 320px;
             border-radius: 50%;
             object-fit: cover;
-            border: 8px solid #D4AF37;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 40px rgba(212,175,55,0.2);
+            border: 8px solid #D4AF37 !important;
             z-index: 10;
         }
 
-        /* Small decorative badge over the food */
         .badge {
             position: absolute;
             top: -10px;
             right: 0px;
-            background: #dc3545;
-            color: white;
+            background: #dc3545 !important;
+            color: white !important;
             padding: 15px 20px;
             border-radius: 50px;
             font-weight: 900;
             font-size: 22px;
             transform: rotate(15deg);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             z-index: 20;
-            border: 3px solid #fff;
+            border: 3px solid #fff !important;
         }
 
         .qr-container {
@@ -160,11 +170,10 @@
         }
 
         .qr-box {
-            background: #fff;
+            background: #fff !important;
             padding: 20px;
             border-radius: 16px;
-            border: 5px solid #D4AF37;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            border: 5px solid #D4AF37 !important;
             display: inline-block;
         }
 
@@ -175,7 +184,7 @@
         }
 
         .qr-cta {
-            color: #fff;
+            color: #fff !important;
             font-size: 26px;
             font-weight: 900;
             margin-top: 15px;
@@ -186,19 +195,18 @@
         }
 
         .qr-cta span {
-            color: #D4AF37;
+            color: #D4AF37 !important;
         }
 
-        /* --- AD FOOTER (THE UPSELLS) --- */
+        /* --- AD FOOTER --- */
         .ad-footer {
-            background: #D4AF37;
             display: flex;
             flex-direction: column;
         }
 
         .discount-strip {
-            background: #D4AF37;
-            color: #000;
+            background: #D4AF37 !important;
+            color: #000 !important;
             font-size: 32px;
             font-weight: 900;
             text-align: center;
@@ -208,23 +216,33 @@
         }
 
         .buffet-strip {
-            background: #000;
-            color: #D4AF37;
+            background: #000 !important;
+            color: #D4AF37 !important;
             font-size: 22px;
             font-weight: bold;
             text-align: center;
             padding: 12px 0;
             text-transform: uppercase;
             letter-spacing: 2px;
-            border-top: 2px solid #D4AF37;
+            border-top: 2px solid #D4AF37 !important;
+        }
+
+        /* --- PRINT STYLES (Clean PDF Export) --- */
+        @media print {
+            body { padding: 0; background: #fff !important; align-items: flex-start; justify-content: flex-start; }
+            .instructions { display: none !important; } /* Hides text when saving to PDF */
+            .print-canvas-10x10 { box-shadow: none !important; }
+            @page { margin: 0; size: auto; }
         }
 
     </style>
 </head>
 <body>
 
-    <h2 style="color:white; margin-bottom:10px;">Der 10x10 cm Print-Container</h2>
-    <p style="color:#aaa; margin-bottom:30px;">Die weißen Ränder dienen als Beschnittzugabe (Bleed) für den Verlag. Die Anzeige selbst ist exakt 8x8 cm.<br>Mache einen Screenshot der weißen Box oder drucke die Seite als PDF.</p>
+    <div class="instructions">
+        <h2 style="color:white; margin-bottom:10px;">Der 10x10 cm Print-Container</h2>
+        <p style="color:#aaa;">Drücke <b>STRG + P</b> (oder Rechtsklick -> Drucken) und speichere es als PDF.<br>Achte darauf, dass <b>"Hintergrundgrafiken" (Background graphics) aktiviert</b> ist!</p>
+    </div>
 
     <div class="print-canvas-10x10">
         

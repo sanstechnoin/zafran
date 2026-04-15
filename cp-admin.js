@@ -31,22 +31,18 @@ const translations = {
         holiday_mode: "📅 Urlaub & Schließzeiten (Scenario 3)", start_date: "Start", end_date: "Ende", reason: "Grund (Optional)", add_closure: "Schließzeit Hinzufügen",
         weekly_schedule: "⏰ Wochenplan (Scenario 1 & 2)", schedule_hint: "Definieren Sie hier, wann das Restaurant geöffnet ist und wann Lieferung möglich ist.", day: "Tag", shop_hours: "Restaurant", delivery_hours: "Lieferzeiten", save_hours: "Öffnungszeiten Speichern",
         res_title: "📅 Reservierungen", res_desc: "Verwalten Sie hier alle einkommenden Tisch- und Buffetreservierungen.", res_filter_all: "Alle (All)", res_filter_conf: "Bestätigt (Approved)", res_filter_canc: "Storniert (Not Approved)", res_th_name: "Name / Kontakt", res_th_date: "Wann (Datum & Zeit)", res_th_guests: "Gäste", res_th_status: "Status", res_th_action: "Action",
-        finance_title: "Finanzen Übersicht", finance_desc: "Wählen Sie einen Tag, eine Woche oder einen Monat für die Auswertung.", fin_day: "Tag", fin_week: "KW", fin_month: "Monat", fin_total: "GESAMTUMSATZ",
+        finance_title: "Finanzen Übersicht", finance_desc: "Wählen Sie einen Tag, eine Woche oder einen Monat für die Auswertung.", fin_day: "Tag", fin_week: "KW", fin_month: "Monat", fin_total: "GESAMTUMSATZ", fin_dinein: "Dine-in", fin_pickup: "Abholung", fin_delivery: "Lieferung", fin_orders: "Bestellungen", fin_orders_total: "Bestellungen Gesamt",
         banner_title: "📢 Pop-Up Banners", banner_valid_for: "Sichtbar auf (Valid For)", banner_heading: "Titel (z.B. Willkommen bei Zaffran!)", banner_msg: "Nachricht (Message)", banner_btn_vis: "🫣 Visuell", banner_btn_html: "⌨️ HTML Code", banner_html_lbl: "HTML CODE EDITOR", banner_preview_lbl: "LIVE VORSCHAU", banner_active: "Banner Aktivieren? (Wird Kunden 1x pro Sitzung angezeigt)", banner_save: "Banner Speichern",
-        coupon_title: "Coupon Manager", code: "Code *", validity_mode: "Modus *", mode_range: "Datums-Bereich", mode_recurring: "Monatlich Wiederkehrend", valid_now: "Gültig ab sofort?", week_rule: "Woche des Monats", disc_type: "Typ *", value: "Wert *", min_order: "Mindestbestellwert (€)", categories: "Kategorien (Leer = Alle)", save_coupon: "Coupon Speichern", saved_coupons: "Gespeicherte Coupons", coup_th_code: "Code", coup_th_val: "Wert", coup_th_min: "Min €", coup_th_valid: "Gültigkeit", coup_th_status: "Status", coup_th_action: "Action",
-        menu_title: "🍔 Menü Manager", menu_addCat: "+ Neue Kategorie", menu_desc: "Änderungen werden live in die Firebase Datenbank gespeichert.", menu_modal_title: "Artikel bearbeiten", menu_id: "Nummer (ID) *", menu_price: "Preis (€) *", menu_name: "Name *", menu_desc_lbl: "Beschreibung (Zutaten, Details)", menu_allergy: "Allergene (Komma-getrennt)", btn_cancel: "Abbrechen", btn_save: "Speichern",
+        coupon_title: "Coupon Manager", code: "Code *", validity_mode: "Modus *", mode_range: "Datums-Bereich", mode_recurring: "Monatlich Wiederkehrend", valid_now: "Gültig ab sofort?", week_rule: "Woche des Monats", disc_type: "Typ *", value: "Wert *", min_order: "Mindestbestellwert (€)", categories: "Kategorien (Leer = Alle)", save_coupon: "Coupon Speichern", saved_coupons: "Gespeicherte Coupons", coup_th_code: "Code", coup_th_val: "Wert", coup_th_min: "Min €", coup_th_valid: "Gültigkeit", coup_th_status: "Status", coup_th_action: "Action", coup_valid_for: "Gültig für *", coup_item_name: "Artikel Name (z.B. Vorspeise)", coup_ask_choice: "Kunde soll Sorte wählen? (Prompt)", coup_min_main: "Min. Hauptgerichte",
+        menu_title: "🍔 Menü Manager", menu_addCat: "+ Neue Kategorie", menu_desc: "Änderungen werden live in die Firebase Datenbank gespeichert.", menu_modal_title: "Artikel bearbeiten", menu_id: "Nummer (ID) *", menu_price: "Preis (€) *", menu_name: "Name *", menu_desc_lbl: "Beschreibung (Zutaten, Details)", menu_allergy: "Allergene (Komma-getrennt)", btn_cancel: "Abbrechen", btn_save: "Speichern", menu_no_items: "Keine Artikel vorhanden.",
         pin_title: "Access PIN Manager", pin_desc: "Verwalten Sie hier die Zugangs-PINs für alle Endgeräte.", pin_driver: "🚗 Fahrer (Driver)", pin_kitchen: "👨‍🍳 Küche (Kitchen)", pin_waiter: "🍽️ Kellner (Waiter)", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Passwort zum Löschen von Bestellungen.", pin_save_btn: "SAVE", tab_buffet: "Buffet",
-        buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automatisches Menü für Sonntags-QR-Scans.",
-        buffet_enable: "Sonntags-Buffet Modus aktivieren", buffet_price_lbl: "Pauschalpreis pro Person (€)", buffet_save_config: "Konfiguration Speichern",
-        buffet_items_title: "Buffet Gerichte", buffet_items_desc: "Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).",
-        buffet_add_item: "+ Buffet Gericht Hinzufügen", buffet_th_img: "Bild", buffet_th_name: "Gericht Name", buffet_th_desc: "Beschreibung", buffet_th_action: "Action",
-        buffet_modal_title: "Buffet Gericht Bearbeiten", buffet_img_lbl: "Bild URL", buffet_name_lbl: "Gericht Name *", buffet_desc_lbl: "Beschreibung", buffet_add_from_menu: "Aus Menü hinzufügen",
-        buffet_select_title: "Wählen Sie ein Gericht aus dem Menü",
-        buffet_btn_add: "Hinzufügen"
+        buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automatisches Menü für Sonntags-QR-Scans.", buffet_enable: "Sonntags-Buffet Modus aktivieren", buffet_price_lbl: "Pauschalpreis pro Person (€)", buffet_save_config: "Konfiguration Speichern", buffet_items_title: "Buffet Gerichte", buffet_items_desc: "Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).", buffet_add_item: "+ Buffet Gericht Hinzufügen", buffet_th_img: "Bild", buffet_th_name: "Gericht Name", buffet_th_desc: "Beschreibung", buffet_th_action: "Action", buffet_modal_title: "Buffet Gericht Bearbeiten", buffet_img_lbl: "Bild URL", buffet_name_lbl: "Gericht Name *", buffet_desc_lbl: "Beschreibung", buffet_add_from_menu: "Aus Menü hinzufügen", buffet_select_title: "Gericht aus Menü wählen", buffet_btn_add: "Hinzufügen",
+        alert_title: "ℹ️ System Alert", btn_ok: "OK", confirm_title: "⚠️ Bestätigen", btn_confirm: "Bestätigen",
+        res_new: "Neu", res_confirmed: "Bestätigt", res_cancelled: "Storniert", res_no_records: "Keine Einträge gefunden.", msg_saved: "Gespeichert!", msg_error: "Fehler", msg_delete_cat: "Möchten Sie die Kategorie wirklich löschen?", msg_delete_item: "Artikel wirklich löschen?", msg_new_cat: "Name der neuen Kategorie:"
     },
     en: {
         login_title: "Master Control", login_desc: "Authorized access required", login_email: "Admin Email", login_pass: "Password", login_btn: "Login",
-        tab_settings: "Web", tab_menu: "Menu", tab_hours: "Hours", tab_res: "Tables", tab_finance: "Cash", tab_banner: "Pop", tab_coupons: "Code", tab_pins: "PINs",
+        tab_settings: "Web", tab_menu: "Menu", tab_hours: "Hours", tab_res: "Tables", tab_finance: "Cash", tab_banner: "Pop", tab_coupons: "Code", tab_pins: "PINs", tab_buffet: "Buffet",
         sidebar_logout: "Logout 🔒",
         settings_title: "Website Settings", marquee_label: "Marquee Text", whatsapp_label: "WhatsApp Number", google_score: "Google Score (e.g., 4.8)", lieferando_score: "Delivery Score (e.g., 4.6)", save_settings: "Save Settings",
         tse_title: "POS TSE Engine (KassenSichV)", tse_desc: "Disable this for clients outside Germany or small businesses.", tse_enable: "Enable TSE Signatures", tse_serial: "TSE Serial Number (White-Label Override)", tse_saveBtn: "Save TSE Settings",
@@ -54,18 +50,14 @@ const translations = {
         holiday_mode: "📅 Holidays & Closures (Scenario 3)", start_date: "Start", end_date: "End", reason: "Reason (Optional)", add_closure: "Add Closure",
         weekly_schedule: "⏰ Weekly Schedule (Scenario 1 & 2)", schedule_hint: "Define when the restaurant is open and when delivery is available.", day: "Day", shop_hours: "Store Open", delivery_hours: "Delivery Hours", save_hours: "Save Hours",
         res_title: "📅 Reservations", res_desc: "Manage all incoming table and appointments here.", res_filter_all: "All", res_filter_conf: "Confirmed (Approved)", res_filter_canc: "Cancelled (Not Approved)", res_th_name: "Name / Contact", res_th_date: "When (Date & Time)", res_th_guests: "Guests", res_th_status: "Status", res_th_action: "Action",
-        finance_title: "Financial Overview", finance_desc: "Select a day, week, or month for the evaluation.", fin_day: "Day", fin_week: "Week", fin_month: "Month", fin_total: "GRAND TOTAL",
+        finance_title: "Financial Overview", finance_desc: "Select a day, week, or month for the evaluation.", fin_day: "Day", fin_week: "Week", fin_month: "Month", fin_total: "GRAND TOTAL", fin_dinein: "Dine-in", fin_pickup: "Pickup", fin_delivery: "Delivery", fin_orders: "Orders", fin_orders_total: "Orders Total",
         banner_title: "📢 Pop-Up Banners", banner_valid_for: "Visible on (Valid For)", banner_heading: "Title (e.g., Welcome!)", banner_msg: "Message", banner_btn_vis: "🫣 Visual", banner_btn_html: "⌨️ HTML Code", banner_html_lbl: "HTML CODE EDITOR", banner_preview_lbl: "LIVE PREVIEW", banner_active: "Enable Banner? (Shown to customers 1x per session)", banner_save: "Save Banner",
-        coupon_title: "Coupon Manager", code: "Code *", validity_mode: "Mode *", mode_range: "Date Range", mode_recurring: "Monthly Recurring", valid_now: "Valid immediately?", week_rule: "Week of the Month", disc_type: "Type *", value: "Value *", min_order: "Min. Order (€)", categories: "Categories (Empty = All)", save_coupon: "Save Coupon", saved_coupons: "Saved Coupons", coup_th_code: "Code", coup_th_val: "Value", coup_th_min: "Min €", coup_th_valid: "Validity", coup_th_status: "Status", coup_th_action: "Action",
-        menu_title: "🍔 Menu Manager", menu_addCat: "+ New Category", menu_desc: "Changes are saved live to the Firebase database.", menu_modal_title: "Edit Item", menu_id: "Number (ID) *", menu_price: "Price (€) *", menu_name: "Name *", menu_desc_lbl: "Description (Ingredients, Details)", menu_allergy: "Allergens (Comma-separated)", btn_cancel: "Cancel", btn_save: "Save",
+        coupon_title: "Coupon Manager", code: "Code *", validity_mode: "Mode *", mode_range: "Date Range", mode_recurring: "Monthly Recurring", valid_now: "Valid immediately?", week_rule: "Week of the Month", disc_type: "Type *", value: "Value *", min_order: "Min. Order (€)", categories: "Categories (Empty = All)", save_coupon: "Save Coupon", saved_coupons: "Saved Coupons", coup_th_code: "Code", coup_th_val: "Value", coup_th_min: "Min €", coup_th_valid: "Validity", coup_th_status: "Status", coup_th_action: "Action", coup_valid_for: "Valid For *", coup_item_name: "Free Item Name", coup_ask_choice: "Prompt customer for options?", coup_min_main: "Min. Main Dishes",
+        menu_title: "🍔 Menu Manager", menu_addCat: "+ New Category", menu_desc: "Changes are saved live to the Firebase database.", menu_modal_title: "Edit Item", menu_id: "Number (ID) *", menu_price: "Price (€) *", menu_name: "Name *", menu_desc_lbl: "Description (Ingredients, Details)", menu_allergy: "Allergens (Comma-separated)", btn_cancel: "Cancel", btn_save: "Save", menu_no_items: "No items available.",
         pin_title: "Access PIN Manager", pin_desc: "Manage the access PINs for all end devices here.", pin_driver: "🚗 Driver", pin_kitchen: "👨‍🍳 Kitchen", pin_waiter: "🍽️ Waiter", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Password for deleting records.", pin_save_btn: "SAVE", tab_buffet: "Buffet",
-        buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automated menu for Sunday QR scans.",
-        buffet_enable: "Enable Sunday Buffet Mode", buffet_price_lbl: "Flat Rate Price Per Person (€)", buffet_save_config: "Save Config",
-        buffet_items_title: "Buffet Menu Items", buffet_items_desc: "These items show on the Sunday QR Menu (0.00€ for POS).",
-        buffet_add_item: "+ Add Buffet Dish", buffet_th_img: "Image", buffet_th_name: "Dish Name", buffet_th_desc: "Description", buffet_th_action: "Action",
-        buffet_modal_title: "Edit Buffet Item", buffet_img_lbl: "Image URL", buffet_name_lbl: "Dish Name *", buffet_desc_lbl: "Description", buffet_add_from_menu: "Add from Menu",
-        buffet_select_title: "Select a Dish from the Menu",
-        buffet_btn_add: "Add"
+        buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automated menu for Sunday QR scans.", buffet_enable: "Enable Sunday Buffet Mode", buffet_price_lbl: "Flat Rate Price Per Person (€)", buffet_save_config: "Save Config", buffet_items_title: "Buffet Menu Items", buffet_items_desc: "These items show on the Sunday QR Menu (0.00€ for POS).", buffet_add_item: "+ Add Buffet Dish", buffet_th_img: "Image", buffet_th_name: "Dish Name", buffet_th_desc: "Description", buffet_th_action: "Action", buffet_modal_title: "Edit Buffet Item", buffet_img_lbl: "Image URL", buffet_name_lbl: "Dish Name *", buffet_desc_lbl: "Description", buffet_add_from_menu: "Add from Menu", buffet_select_title: "Select a Dish from the Menu", buffet_btn_add: "Add",
+        alert_title: "ℹ️ System Alert", btn_ok: "OK", confirm_title: "⚠️ Confirm Action", btn_confirm: "Confirm",
+        res_new: "New", res_confirmed: "Confirmed", res_cancelled: "Cancelled", res_no_records: "No records found.", msg_saved: "Saved!", msg_error: "Error", msg_delete_cat: "Do you really want to delete this category?", msg_delete_item: "Really delete this item?", msg_new_cat: "Name of new category:"
     }
 };
 
@@ -276,18 +268,21 @@ function loadFinanceData() {
         });
 
         document.getElementById('fin-dine-total').innerText = stats['dine-in'].total.toFixed(2).replace('.', ',') + ' €';
-        document.getElementById('fin-dine-count').innerText = stats['dine-in'].count + " Orders";
+        const orderTxt = translations[currentLang].fin_orders || "Orders";
+        const orderTotalTxt = translations[currentLang].fin_orders_total || "Orders Total";
+
+        document.getElementById('fin-dine-count').innerText = stats['dine-in'].count + " " + orderTxt;
         
         document.getElementById('fin-pickup-total').innerText = stats['pickup'].total.toFixed(2).replace('.', ',') + ' €';
-        document.getElementById('fin-pickup-count').innerText = stats['pickup'].count + " Orders";
+        document.getElementById('fin-pickup-count').innerText = stats['pickup'].count + " " + orderTxt;
         
         document.getElementById('fin-delivery-total').innerText = stats['delivery'].total.toFixed(2).replace('.', ',') + ' €';
-        document.getElementById('fin-delivery-count').innerText = stats['delivery'].count + " Orders";
+        document.getElementById('fin-delivery-count').innerText = stats['delivery'].count + " " + orderTxt;
 
         const grandTotal = stats['dine-in'].total + stats['pickup'].total + stats['delivery'].total;
         const grandCount = stats['dine-in'].count + stats['pickup'].count + stats['delivery'].count;
         document.getElementById('fin-grand-total').innerText = grandTotal.toFixed(2).replace('.', ',') + ' €';
-        document.getElementById('fin-grand-count').innerText = grandCount + " Orders Total";
+        document.getElementById('fin-grand-count').innerText = grandCount + " " + orderTotalTxt;
 
     }).catch(err => console.error("Finance error:", err));
 }
@@ -1073,6 +1068,61 @@ window.addBuffetItemFromMenu = function(catIndex, itemIndex) {
         renderBuffetItems();
         
         // Show a brief success alert
+        document.getElementById('admin-alert-message').innerText = currentLang === 'de' ? `"${menuItem.name}" zum Buffet hinzugefügt!` : `"${menuItem.name}" added to Buffet!`;
+        document.getElementById('admin-alert-modal').style.display = 'flex';
+    });
+};
+
+// --- NEW: ADD FROM MENU LOGIC ---
+window.openBuffetSelectMenuModal = function() {
+    const container = document.getElementById('buffet-menu-list-container');
+    container.innerHTML = '';
+    
+    if (!adminMenuData || adminMenuData.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#888;">${currentLang === 'de' ? 'Keine Menüartikel gefunden. Bitte zuerst Menü anlegen.' : 'No menu items found. Create menu first.'}</p>`;
+    } else {
+        adminMenuData.forEach((cat, catIndex) => {
+            if (cat.items && cat.items.length > 0) {
+                let catHtml = `<div style="background:#111; padding:10px; border-radius:4px; border:1px solid #333;">
+                    <h4 style="color:var(--gold); margin:0 0 10px 0; border-bottom:1px solid #333; padding-bottom:5px;">${cat.category}</h4>`;
+                
+                cat.items.forEach((item, itemIndex) => {
+                    const addBtnText = translations[currentLang].buffet_btn_add || "Add";
+                    catHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #333;">
+                        <div>
+                            <strong style="color:#eee;">${item.id ? item.id + ' - ' : ''}${item.name}</strong>
+                            <div style="font-size:0.8rem; color:#888;">${item.desc || ''}</div>
+                        </div>
+                        <button class="btn-small btn-blue" onclick="addBuffetItemFromMenu(${catIndex}, ${itemIndex})" style="margin:0; min-width:80px;">${addBtnText}</button>
+                    </div>`;
+                });
+                catHtml += `</div>`;
+                container.insertAdjacentHTML('beforeend', catHtml);
+            }
+        });
+    }
+    
+    document.getElementById('buffet-select-menu-modal').style.display = 'flex';
+};
+
+window.addBuffetItemFromMenu = function(catIndex, itemIndex) {
+    const menuItem = adminMenuData[catIndex].items[itemIndex];
+    
+    const newItem = {
+        image: "", 
+        name: menuItem.name,
+        desc: menuItem.desc || "",
+        active: true
+    };
+    
+    if(!buffetConfig.items) buffetConfig.items = [];
+    buffetConfig.items.push(newItem);
+
+    db.collection('settings').doc('buffet_config').set({ items: buffetConfig.items }, { merge: true }).then(() => {
+        document.getElementById('buffet-select-menu-modal').style.display = 'none';
+        renderBuffetItems();
+        
         document.getElementById('admin-alert-message').innerText = currentLang === 'de' ? `"${menuItem.name}" zum Buffet hinzugefügt!` : `"${menuItem.name}" added to Buffet!`;
         document.getElementById('admin-alert-modal').style.display = 'flex';
     });

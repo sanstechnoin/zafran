@@ -24,11 +24,6 @@
             min-height: 100vh;
         }
 
-        .instructions {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
         /* --- THE 10x10 OUTER PRINT BOX --- */
         .print-canvas-10x10 {
             width: 1000px;
@@ -78,12 +73,28 @@
         .promo-header {
             text-align: center;
             padding: 25px 20px 10px 20px;
+            position: relative; /* Added relative positioning for the phone number */
         }
         
         .promo-header img {
             height: 115px;
             margin-bottom: 5px;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        /* NEW PHONE NUMBER TOP RIGHT */
+        .top-phone {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: #D4AF37 !important;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.5); /* Subtle background for readability */
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #D4AF37 !important;
         }
 
         .headline {
@@ -130,7 +141,6 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.9);
         }
 
-        /* RED STRICTLY FOR THE BADGE */
         .badge {
             position: absolute;
             top: -15px;
@@ -216,6 +226,14 @@
             padding-bottom: 6px;
         }
 
+        .address-text {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px !important;
+            color: #fff !important;
+            line-height: 1.3;
+        }
+
         .hours-box p {
             font-size: 15px;
             line-height: 1.5;
@@ -229,23 +247,6 @@
             flex-direction: column;
         }
 
-        /* Sleek Elegant Buffet Schedule Strip */
-        .buffet-schedule-strip {
-            background: #000 !important;
-            color: #D4AF37 !important;
-            font-size: 15px;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-top: 1px solid #333 !important;
-        }
-
-        .buffet-schedule-strip span {
-            color: #fff !important;
-        }
-
         .discount-strip {
             background: #D4AF37 !important;
             color: #000 !important;
@@ -257,19 +258,28 @@
             letter-spacing: 1px;
         }
 
+        /* NEW FLEX LAYOUT FOR SAN BRANDING */
         .san-branding {
             background: #000 !important;
             color: #666 !important;
-            font-size: 13px;
-            text-align: center;
-            padding: 8px 0;
+            font-size: 12px; /* Slightly smaller to fit both nicely */
+            padding: 8px 15px; /* Added side padding */
             font-family: monospace;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
+            display: flex; /* Key for left/right alignment */
+            justify-content: space-between; /* Pushes content to edges */
+            align-items: center;
         }
         
         .san-branding strong {
             color: #fff !important;
+        }
+
+        .website-link {
+            color: #D4AF37 !important; /* Gold to tie it together */
+            text-transform: lowercase; /* standard for URLs */
+            letter-spacing: 0.5px;
         }
 
         /* --- PRINT STYLES --- */
@@ -296,6 +306,7 @@
         <div class="promo-content-8x8">
 
             <div class="promo-header">
+                <div class="top-phone">📞 02251 / 9599741</div>
                 <img src="./logo.png" alt="Zaffran Delight">
                 <h1 class="headline">Stadtfest Special</h1>
                 <p class="subheadline">Warteschlangen? Einfach überspringen!<br><span style="color:#D4AF37; font-size: 18px;">Stadtfest Buffet am 26.04.2026</span></p>
@@ -329,13 +340,15 @@
                 </div>
             </div>
 
+            <div class="promo-footer">
                 <div class="discount-strip">
                     <div>10% Rabatt mit Code: FEST26</div>
                     <div style="font-size: 10px; font-weight: 700; color: #111; letter-spacing: 1px; margin-top: 4px; text-transform: uppercase;">Mindestbestellwert: Abholung 10€ | Lieferung 20€</div>
                 </div>
                 
                 <div class="san-branding">
-                    Powered by <strong>SAN TECHNOLOGIES</strong>
+                    <span>Powered by <strong>SAN TECHNOLOGIES</strong></span>
+                    <span class="website-link">www.zafraneuskirchen.de</span>
                 </div>
             </div>
 

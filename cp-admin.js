@@ -40,7 +40,9 @@ const translations = {
         buffet_enable: "Sonntags-Buffet Modus aktivieren", buffet_price_lbl: "Pauschalpreis pro Person (€)", buffet_save_config: "Konfiguration Speichern",
         buffet_items_title: "Buffet Gerichte", buffet_items_desc: "Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).",
         buffet_add_item: "+ Buffet Gericht Hinzufügen", buffet_th_img: "Bild", buffet_th_name: "Gericht Name", buffet_th_desc: "Beschreibung", buffet_th_action: "Action",
-        buffet_modal_title: "Buffet Gericht Bearbeiten", buffet_img_lbl: "Bild URL", buffet_name_lbl: "Gericht Name *", buffet_desc_lbl: "Beschreibung"
+        buffet_modal_title: "Buffet Gericht Bearbeiten", buffet_img_lbl: "Bild URL", buffet_name_lbl: "Gericht Name *", buffet_desc_lbl: "Beschreibung", buffet_add_from_menu: "Aus Menü hinzufügen",
+        buffet_select_title: "Wählen Sie ein Gericht aus dem Menü",
+        buffet_btn_add: "Hinzufügen"
     },
     en: {
         login_title: "Master Control", login_desc: "Authorized access required", login_email: "Admin Email", login_pass: "Password", login_btn: "Login",
@@ -61,7 +63,9 @@ const translations = {
         buffet_enable: "Enable Sunday Buffet Mode", buffet_price_lbl: "Flat Rate Price Per Person (€)", buffet_save_config: "Save Config",
         buffet_items_title: "Buffet Menu Items", buffet_items_desc: "These items show on the Sunday QR Menu (0.00€ for POS).",
         buffet_add_item: "+ Add Buffet Dish", buffet_th_img: "Image", buffet_th_name: "Dish Name", buffet_th_desc: "Description", buffet_th_action: "Action",
-        buffet_modal_title: "Edit Buffet Item", buffet_img_lbl: "Image URL", buffet_name_lbl: "Dish Name *", buffet_desc_lbl: "Description"
+        buffet_modal_title: "Edit Buffet Item", buffet_img_lbl: "Image URL", buffet_name_lbl: "Dish Name *", buffet_desc_lbl: "Description", buffet_add_from_menu: "Add from Menu",
+        buffet_select_title: "Select a Dish from the Menu",
+        buffet_btn_add: "Add"
     }
 };
 
@@ -1017,3 +1021,59 @@ document.getElementById('buffet-item-form').addEventListener('submit', function(
         renderBuffetItems();
     });
 });
+
+// --- NEW: ADD FROM MENU LOGIC ---
+window.openBuffetSelectMenuModal = function() {
+    const container = document.getElementById('buffet-menu-list-container');
+    container.innerHTML = '';
+    
+    if (!adminMenuData || adminMenuData.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#888;">${currentLang === 'de' ? 'Keine Menüartikel gefunden. Bitte zuerst Menü anlegen.' : 'No menu items found. Create menu first.'}</p>`;
+    } else {
+        adminMenuData.forEach((cat, catIndex) => {
+            if (cat.items && cat.items.length > 0) {
+                let catHtml = `<div style="background:#111; padding:10px; border-radius:4px; border:1px solid #333;">
+                    <h4 style="color:var(--gold); margin:0 0 10px 0; border-bottom:1px solid #333; padding-bottom:5px;">${cat.category}</h4>`;
+                
+                cat.items.forEach((item, itemIndex) => {
+                    const addBtnText = translations[currentLang].buffet_btn_add || "Add";
+                    catHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #333;">
+                        <div>
+                            <strong style="color:#eee;">${item.id ? item.id + ' - ' : ''}${item.name}</strong>
+                            <div style="font-size:0.8rem; color:#888;">${item.desc || ''}</div>
+                        </div>
+                        <button class="btn-small btn-blue" onclick="addBuffetItemFromMenu(${catIndex}, ${itemIndex})" style="margin:0; min-width:80px;">${addBtnText}</button>
+                    </div>`;
+                });
+                catHtml += `</div>`;
+                container.insertAdjacentHTML('beforeend', catHtml);
+            }
+        });
+    }
+    
+    document.getElementById('buffet-select-menu-modal').style.display = 'flex';
+};
+
+window.addBuffetItemFromMenu = function(catIndex, itemIndex) {
+    const menuItem = adminMenuData[catIndex].items[itemIndex];
+    
+    const newItem = {
+        image: "", // Standard menu doesn't have images yet, admin can edit later
+        name: menuItem.name,
+        desc: menuItem.desc || "",
+        active: true
+    };
+    
+    if(!buffetConfig.items) buffetConfig.items = [];
+    buffetConfig.items.push(newItem);
+
+    db.collection('settings').doc('buffet_config').set({ items: buffetConfig.items }, { merge: true }).then(() => {
+        document.getElementById('buffet-select-menu-modal').style.display = 'none';
+        renderBuffetItems();
+        
+        // Show a brief success alert
+        document.getElementById('admin-alert-message').innerText = currentLang === 'de' ? `"${menuItem.name}" zum Buffet hinzugefügt!` : `"${menuItem.name}" added to Buffet!`;
+        document.getElementById('admin-alert-modal').style.display = 'flex';
+    });
+};

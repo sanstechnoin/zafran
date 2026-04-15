@@ -38,7 +38,8 @@ const translations = {
         pin_title: "Access PIN Manager", pin_desc: "Verwalten Sie hier die Zugangs-PINs für alle Endgeräte.", pin_driver: "🚗 Fahrer (Driver)", pin_kitchen: "👨‍🍳 Küche (Kitchen)", pin_waiter: "🍽️ Kellner (Waiter)", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Passwort zum Löschen von Bestellungen.", pin_save_btn: "SAVE", tab_buffet: "Buffet",
         buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automatisches Menü für Sonntags-QR-Scans.", buffet_enable: "Sonntags-Buffet Modus aktivieren", buffet_price_lbl: "Pauschalpreis pro Person (€)", buffet_save_config: "Konfiguration Speichern", buffet_items_title: "Buffet Gerichte", buffet_items_desc: "Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).", buffet_add_item: "+ Buffet Gericht Hinzufügen", buffet_th_img: "Bild", buffet_th_name: "Gericht Name", buffet_th_desc: "Beschreibung", buffet_th_action: "Action", buffet_modal_title: "Buffet Gericht Bearbeiten", buffet_img_lbl: "Bild URL", buffet_name_lbl: "Gericht Name *", buffet_desc_lbl: "Beschreibung", buffet_add_from_menu: "Aus Menü hinzufügen", buffet_select_title: "Gericht aus Menü wählen", buffet_btn_add: "Hinzufügen",
         alert_title: "ℹ️ System Alert", btn_ok: "OK", confirm_title: "⚠️ Bestätigen", btn_confirm: "Bestätigen",
-        res_new: "Neu", res_confirmed: "Bestätigt", res_cancelled: "Storniert", res_no_records: "Keine Einträge gefunden.", msg_saved: "Gespeichert!", msg_error: "Fehler", msg_delete_cat: "Möchten Sie die Kategorie wirklich löschen?", msg_delete_item: "Artikel wirklich löschen?", msg_new_cat: "Name der neuen Kategorie:"
+        res_new: "Neu", res_confirmed: "Bestätigt", res_cancelled: "Storniert", res_no_records: "Keine Einträge gefunden.", msg_saved: "Gespeichert!", msg_error: "Fehler", msg_delete_cat: "Möchten Sie die Kategorie wirklich löschen?", msg_delete_item: "Artikel wirklich löschen?", msg_new_cat: "Name der neuen Kategorie:",
+        brand_title: "Universal Branding (Marke)", brand_name: "Firmenname *", brand_owner: "Inhaber (Rechtliche Einheit)", brand_address: "Geschäftsadresse *", brand_phone: "Haupttelefon / WhatsApp", brand_logo: "Logo URL", brand_color: "Haupt-Markenfarbe (Hex)", brand_save: "Branding Speichern"
     },
     en: {
         login_title: "Master Control", login_desc: "Authorized access required", login_email: "Admin Email", login_pass: "Password", login_btn: "Login",
@@ -57,7 +58,8 @@ const translations = {
         pin_title: "Access PIN Manager", pin_desc: "Manage the access PINs for all end devices here.", pin_driver: "🚗 Driver", pin_kitchen: "👨‍🍳 Kitchen", pin_waiter: "🍽️ Waiter", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Password for deleting records.", pin_save_btn: "SAVE", tab_buffet: "Buffet",
         buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automated menu for Sunday QR scans.", buffet_enable: "Enable Sunday Buffet Mode", buffet_price_lbl: "Flat Rate Price Per Person (€)", buffet_save_config: "Save Config", buffet_items_title: "Buffet Menu Items", buffet_items_desc: "These items show on the Sunday QR Menu (0.00€ for POS).", buffet_add_item: "+ Add Buffet Dish", buffet_th_img: "Image", buffet_th_name: "Dish Name", buffet_th_desc: "Description", buffet_th_action: "Action", buffet_modal_title: "Edit Buffet Item", buffet_img_lbl: "Image URL", buffet_name_lbl: "Dish Name *", buffet_desc_lbl: "Description", buffet_add_from_menu: "Add from Menu", buffet_select_title: "Select a Dish from the Menu", buffet_btn_add: "Add",
         alert_title: "ℹ️ System Alert", btn_ok: "OK", confirm_title: "⚠️ Confirm Action", btn_confirm: "Confirm",
-        res_new: "New", res_confirmed: "Confirmed", res_cancelled: "Cancelled", res_no_records: "No records found.", msg_saved: "Saved!", msg_error: "Error", msg_delete_cat: "Do you really want to delete this category?", msg_delete_item: "Really delete this item?", msg_new_cat: "Name of new category:"
+        res_new: "New", res_confirmed: "Confirmed", res_cancelled: "Cancelled", res_no_records: "No records found.", msg_saved: "Saved!", msg_error: "Error", msg_delete_cat: "Do you really want to delete this category?", msg_delete_item: "Really delete this item?", msg_new_cat: "Name of new category:",
+        brand_title: "Universal Branding Settings", brand_name: "Business Name *", brand_owner: "Owner Name (Legal Entity)", brand_address: "Business Address *", brand_phone: "Primary Phone / WhatsApp", brand_logo: "Logo URL", brand_color: "Primary Brand Color (Hex)", brand_save: "Save Branding"
     }
 };
 
@@ -401,16 +403,31 @@ window.deleteRes = function(id, name, email, date, time) {
 };
 
 // ==========================================
-// 1. GENERAL SETTINGS
+// 1. GENERAL SETTINGS (WITH BRANDING)
 // ==========================================
 function loadSettings() {
     db.collection('settings').doc('general').get().then((doc) => {
         if (doc.exists) {
             const data = doc.data();
+            
+            // Web Settings
             document.getElementById('marqueeText').value = data.marqueeText || "";
             document.getElementById('whatsappNumber').value = data.whatsappNumber || "";
             document.getElementById('googleScore').value = data.googleScore || "";
             document.getElementById('lieferandoScore').value = data.lieferandoScore || "";
+
+            // Universal Branding
+            document.getElementById('brandName').value = data.brandName || "";
+            document.getElementById('brandOwner').value = data.brandOwner || "";
+            document.getElementById('brandAddress').value = data.brandAddress || "";
+            document.getElementById('brandPhone').value = data.brandPhone || "";
+            document.getElementById('brandLogo').value = data.brandLogo || "";
+            
+            // Live Color Injector
+            const loadedColor = data.brandColor || "#D4AF37";
+            document.getElementById('brandColor').value = loadedColor;
+            document.getElementById('brandColorPicker').value = loadedColor;
+            document.documentElement.style.setProperty('--gold', loadedColor);
         }
     });
 
@@ -422,6 +439,41 @@ function loadSettings() {
     });
 }
 
+// --- LIVE COLOR PICKER LOGIC ---
+document.getElementById('brandColorPicker').addEventListener('input', (e) => {
+    document.getElementById('brandColor').value = e.target.value.toUpperCase();
+    document.documentElement.style.setProperty('--gold', e.target.value);
+});
+
+document.getElementById('brandColor').addEventListener('input', (e) => {
+    let val = e.target.value;
+    if(val.length === 7 && val.startsWith('#')) {
+        document.getElementById('brandColorPicker').value = val;
+        document.documentElement.style.setProperty('--gold', val);
+    }
+});
+
+// --- SAVE BRANDING DATA ---
+document.getElementById('branding-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('brandingBtn'); btn.disabled = true;
+    try {
+        const selectedColor = document.getElementById('brandColor').value.trim().toUpperCase() || "#D4AF37";
+        await db.collection('settings').doc('general').set({
+            brandName: document.getElementById('brandName').value.trim(),
+            brandOwner: document.getElementById('brandOwner').value.trim(),
+            brandAddress: document.getElementById('brandAddress').value.trim(),
+            brandPhone: document.getElementById('brandPhone').value.trim(),
+            brandLogo: document.getElementById('brandLogo').value.trim(),
+            brandColor: selectedColor,
+            updatedAt: new Date()
+        }, { merge: true });
+        showAdminAlert(currentLang === 'de' ? "Universal Branding erfolgreich gespeichert!" : "Universal Branding Saved Successfully!");
+    } catch (err) { showAdminAlert("Error: " + err.message); }
+    btn.disabled = false;
+});
+
+// --- SAVE WEB SETTINGS ---
 document.getElementById('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('settingsBtn'); btn.disabled = true;
@@ -433,25 +485,10 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
             lieferandoScore: document.getElementById('lieferandoScore').value.trim(),
             updatedAt: new Date()
         }, { merge: true });
-        showAdminAlert(currentLang === 'de' ? "Gespeichert!" : "Saved!");
+        showAdminAlert(currentLang === 'de' ? "Einstellungen Gespeichert!" : "Settings Saved!");
     } catch (err) { showAdminAlert("Error: " + err.message); }
     btn.disabled = false;
 });
-
-window.saveTseConfig = function() {
-    const isEnabled = document.getElementById('admin-tse-toggle').checked;
-    const serial = document.getElementById('admin-tse-serial').value.trim();
-    
-    db.collection('settings').doc('tse_config').set({
-        enabled: isEnabled,
-        serialNumber: serial || "ER3984719002_SIM"
-    }).then(() => {
-        showAdminAlert(currentLang === 'de' ? "TSE Einstellungen erfolgreich gespeichert!" : "TSE Settings Saved Successfully!");
-    }).catch(err => {
-        showAdminAlert("Error saving TSE settings.");
-        console.error(err);
-    });
-};
 
 // ==========================================
 // 2. HOURS & SCHEDULE LOGIC

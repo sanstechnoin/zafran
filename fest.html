@@ -156,7 +156,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px; /* Increased gap slightly since the text was moved */
         }
 
         .qr-box {
@@ -191,7 +191,7 @@
             background: transparent !important;
             border: 2px dashed #D4AF37 !important;
             border-radius: 8px;
-            padding: 10px 15px;
+            padding: 15px 15px;
             text-align: center;
             color: #fff !important;
             width: 100%;
@@ -203,31 +203,16 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             border-bottom: 1px solid #D4AF37 !important;
-            padding-bottom: 4px;
+            padding-bottom: 6px;
         }
 
         .hours-box p {
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.5;
             margin: 0;
             color: #fff !important;
-        }
-
-        /* NEW: Minimal Space-Saving Order Limits */
-        .min-order-text {
-            font-size: 12px;
-            color: #aaa !important;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-align: center;
-            margin-top: -5px; /* Pulls it tighter to the hours box */
-        }
-        
-        .min-order-text span {
-            color: #fff !important;
-            font-weight: bold;
         }
 
         /* --- PROMO FOOTER --- */
@@ -236,7 +221,7 @@
             flex-direction: column;
         }
 
-        /* NEW: Sleek Elegant Buffet Schedule Strip */
+        /* Sleek Elegant Buffet Schedule Strip */
         .buffet-schedule-strip {
             background: #000 !important;
             color: #D4AF37 !important;
@@ -259,7 +244,7 @@
             font-size: 30px;
             font-weight: 900;
             text-align: center;
-            padding: 12px 0;
+            padding: 10px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -336,10 +321,6 @@
                             <span style="color:#aaa; font-size:13px;">Montag Ruhetag</span>
                         </p>
                     </div>
-
-                    <div class="min-order-text">
-                        Mindestbestellwert: <span>Abholung 10€ | Lieferung 20€</span>
-                    </div>
                 </div>
             </div>
 
@@ -349,7 +330,8 @@
                 </div>
 
                 <div class="discount-strip">
-                    10% Rabatt mit Code: FEST26
+                    <div>10% Rabatt mit Code: FEST26</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #111; letter-spacing: 1px; margin-top: 4px; text-transform: uppercase;">Mindestbestellwert: Abholung 10€ | Lieferung 20€</div>
                 </div>
                 
                 <div class="san-branding">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaffran Premium Promo - Clean & Elegant</title>
+    <title>Zaffran Premium Promo - Final Edition</title>
     <style>
         /* --- RESET & BROWSER OVERRIDES --- */
         * { 
@@ -83,14 +83,15 @@
         }
         
         .promo-header img {
-            height: 85px;
+            /* INCREASED LOGO SIZE */
+            height: 115px;
             margin-bottom: 5px;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
 
         .headline {
             color: #D4AF37 !important;
-            font-size: 40px;
+            font-size: 38px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -100,7 +101,7 @@
 
         .subheadline {
             color: #fff !important;
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 600;
             letter-spacing: 1px;
         }
@@ -132,23 +133,33 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.9);
         }
 
-        /* RED STRICTLY FOR THE BADGE */
+        /* UPDATED RED BADGE FOR MEGA BUFFET */
         .badge {
             position: absolute;
             top: -15px;
             left: -15px;
             background: #D32F2F !important;
             color: white !important;
-            padding: 12px 20px;
-            border-radius: 50px;
+            padding: 12px 18px;
+            border-radius: 12px;
             font-weight: 900;
             font-size: 22px;
-            transform: rotate(-10deg);
+            transform: rotate(-8deg);
             z-index: 3;
             border: 3px solid #fff !important;
             text-transform: uppercase;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             letter-spacing: 1px;
+            text-align: center;
+            line-height: 1.1;
+        }
+        
+        .badge span {
+            font-size: 11px;
+            letter-spacing: 0px;
+            font-weight: bold;
+            display: block;
+            margin-top: 3px;
         }
 
         .info-container {
@@ -156,7 +167,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px; /* Increased gap slightly since the text was moved */
+            gap: 15px; 
         }
 
         .qr-box {
@@ -169,14 +180,14 @@
         }
 
         .qr-box img {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             display: block;
         }
 
         .qr-cta {
             color: #fff !important;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 900;
             line-height: 1.2;
             text-transform: uppercase;
@@ -187,11 +198,12 @@
             color: #D4AF37 !important;
         }
 
+        /* UPDATED HOURS BOX WITH ADDRESS */
         .hours-box {
             background: transparent !important;
             border: 2px dashed #D4AF37 !important;
             border-radius: 8px;
-            padding: 15px 15px;
+            padding: 12px 15px;
             text-align: center;
             color: #fff !important;
             width: 100%;
@@ -203,16 +215,39 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #D4AF37 !important;
-            padding-bottom: 6px;
+            padding-bottom: 4px;
+        }
+        
+        .address-text {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px !important;
+            color: #fff !important;
+            line-height: 1.3;
         }
 
         .hours-box p {
-            font-size: 15px;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.4;
             margin: 0;
             color: #fff !important;
+        }
+
+        /* Minimum Order Limits */
+        .min-order-text {
+            font-size: 12px;
+            color: #aaa !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            margin-top: -5px; 
+        }
+        
+        .min-order-text span {
+            color: #fff !important;
+            font-weight: bold;
         }
 
         /* --- PROMO FOOTER --- */
@@ -221,7 +256,7 @@
             flex-direction: column;
         }
 
-        /* Sleek Elegant Buffet Schedule Strip */
+        /* Elegant Buffet Schedule Strip */
         .buffet-schedule-strip {
             background: #000 !important;
             color: #D4AF37 !important;
@@ -301,7 +336,7 @@
             <div class="promo-body">
                 
                 <div class="image-container">
-                    <div class="badge">BUFFET!</div>
+                    <div class="badge">MEGA BUFFET!<br><span>Letzter Sonntag</span></div>
                     <img src="./banner.png" alt="Indian Buffet" class="img-pamphlet">
                 </div>
 
@@ -314,12 +349,19 @@
                     </div>
                     
                     <div class="hours-box">
-                        <strong>Öffnungszeiten</strong>
+                        <strong>Info & Zeiten</strong>
+                        <p class="address-text">
+                            📍 Musterstraße 1<br>53879 Euskirchen
+                        </p>
                         <p>
                             Di - Sa: 11:30 - 22:30 Uhr<br>
                             Sonntag: 12:00 - 21:00 Uhr<br>
                             <span style="color:#aaa; font-size:13px;">Montag Ruhetag</span>
                         </p>
+                    </div>
+
+                    <div class="min-order-text">
+                        Mindestbestellwert: <span>Abholung 10€ | Lieferung 20€</span>
                     </div>
                 </div>
             </div>
@@ -331,7 +373,6 @@
 
                 <div class="discount-strip">
                     <div>10% Rabatt mit Code: FEST26</div>
-                    <div style="font-size: 13px; font-weight: 700; color: #111; letter-spacing: 1px; margin-top: 4px; text-transform: uppercase;">Mindestbestellwert: Abholung 10€ | Lieferung 20€</div>
                 </div>
                 
                 <div class="san-branding">

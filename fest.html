@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaffran Premium Promo - Pamphlet & Hours</title>
+    <title>Zaffran Premium Promo - Clean & Elegant</title>
     <style>
         /* --- RESET & BROWSER OVERRIDES --- */
         * { 
@@ -15,7 +15,7 @@
         }
         
         body {
-            background-color: #000;
+            background-color: #222;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -58,11 +58,10 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            color: #000 !important;
+            color: #888 !important;
             font-size: 14px;
             font-family: monospace;
             letter-spacing: 2px;
-            font-weight: bold;
         }
 
         /* --- THE ACTUAL 8x8 PROMO (800px = 8cm) --- */
@@ -116,7 +115,6 @@
             gap: 20px;
         }
 
-        /* Left Side: Pamphlet Image */
         .image-container {
             flex: 1.1;
             position: relative;
@@ -134,11 +132,12 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.9);
         }
 
+        /* RED STRICTLY FOR THE BADGE */
         .badge {
             position: absolute;
             top: -15px;
             left: -15px;
-            background: #D32F2F !important; /* RED ONLY FOR BUFFET */
+            background: #D32F2F !important;
             color: white !important;
             padding: 12px 20px;
             border-radius: 50px;
@@ -152,7 +151,6 @@
             letter-spacing: 1px;
         }
 
-        /* Right Side: QR Code & Hours */
         .info-container {
             flex: 0.9;
             display: flex;
@@ -189,9 +187,8 @@
             color: #D4AF37 !important;
         }
 
-        /* Hours Box */
         .hours-box {
-            background: #000 !important;
+            background: transparent !important;
             border: 2px dashed #D4AF37 !important;
             border-radius: 8px;
             padding: 10px 15px;
@@ -213,22 +210,24 @@
 
         .hours-box p {
             font-size: 14px;
-            line-height: 1.4;
+            line-height: 1.5;
             margin: 0;
             color: #fff !important;
         }
 
-        /* NEW: Minimum Order Box */
-        .min-order-box {
-            background: #000 !important;
-            border: 1px solid #D4AF37 !important;
-            border-radius: 6px;
-            padding: 8px;
-            text-align: center;
-            width: 100%;
-            color: #fff !important;
-            font-size: 13px;
+        /* NEW: Minimal Space-Saving Order Limits */
+        .min-order-text {
+            font-size: 12px;
+            color: #aaa !important;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            margin-top: -5px; /* Pulls it tighter to the hours box */
+        }
+        
+        .min-order-text span {
+            color: #fff !important;
+            font-weight: bold;
         }
 
         /* --- PROMO FOOTER --- */
@@ -237,17 +236,21 @@
             flex-direction: column;
         }
 
-        /* NEW: Buffet Info Strip */
-        .buffet-strip {
-            background: #D32F2F !important; /* RED ONLY FOR BUFFET */
-            color: #fff !important;
+        /* NEW: Sleek Elegant Buffet Schedule Strip */
+        .buffet-schedule-strip {
+            background: #000 !important;
+            color: #D4AF37 !important;
             font-size: 15px;
             font-weight: bold;
             text-align: center;
-            padding: 10px 5px;
+            padding: 10px 0;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-top: 2px solid #D4AF37 !important;
+            letter-spacing: 1px;
+            border-top: 1px solid #333 !important;
+        }
+
+        .buffet-schedule-strip span {
+            color: #fff !important;
         }
 
         .discount-strip {
@@ -263,19 +266,17 @@
 
         .san-branding {
             background: #000 !important;
-            color: #D4AF37 !important;
-            font-size: 14px;
+            color: #666 !important;
+            font-size: 13px;
             text-align: center;
-            padding: 10px 0;
-            font-family: -apple-system, sans-serif;
-            letter-spacing: 1px;
-            border-top: 1px solid #D4AF37 !important;
+            padding: 8px 0;
+            font-family: monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
         
         .san-branding strong {
             color: #fff !important;
-            font-weight: 800;
-            letter-spacing: 2px;
         }
 
         /* --- PRINT STYLES --- */
@@ -292,7 +293,7 @@
 
     <div class="instructions">
         <h2 style="color:white; margin-bottom:10px;">Der 10x10 cm Print-Container</h2>
-        <p style="color:#fff;">Drücke <b>STRG + P</b> (oder Rechtsklick -> Drucken) und speichere es als PDF.<br>Achte darauf, dass <b>"Hintergrundgrafiken" (Background graphics) aktiviert</b> ist!</p>
+        <p style="color:#aaa;">Drücke <b>STRG + P</b> (oder Rechtsklick -> Drucken) und speichere es als PDF.<br>Achte darauf, dass <b>"Hintergrundgrafiken" (Background graphics) aktiviert</b> ist!</p>
     </div>
 
     <div class="print-canvas-10x10">
@@ -316,7 +317,7 @@
                 
                 <div class="image-container">
                     <div class="badge">BUFFET!</div>
-                    <img src="./image_27b667.jpg" alt="Indian Buffet" class="img-pamphlet">
+                    <img src="./banner.png" alt="Indian Buffet" class="img-pamphlet">
                 </div>
 
                 <div class="info-container">
@@ -332,22 +333,19 @@
                         <p>
                             Di - Sa: 11:30 - 22:30 Uhr<br>
                             Sonntag: 12:00 - 21:00 Uhr<br>
-                            <span style="color:#D4AF37; font-size:13px; font-weight:bold;">Montag Ruhetag</span>
+                            <span style="color:#aaa; font-size:13px;">Montag Ruhetag</span>
                         </p>
                     </div>
 
-                    <div class="min-order-box">
-                        Mindestbestellwert:<br>
-                        <strong style="color:#D4AF37;">Abholung 10€ | Lieferung 20€</strong>
+                    <div class="min-order-text">
+                        Mindestbestellwert: <span>Abholung 10€ | Lieferung 20€</span>
                     </div>
-
                 </div>
             </div>
 
             <div class="promo-footer">
-                
-                <div class="buffet-strip">
-                    <span style="color:#D4AF37;">Mini Buffet:</span> Jeden Sonntag &nbsp;|&nbsp; <span style="color:#D4AF37;">Mega Buffet:</span> Letzter Sonntag im Monat
+                <div class="buffet-schedule-strip">
+                    <span>Mini Buffet:</span> Jeden Sonntag &nbsp;|&nbsp; <span>Mega Buffet:</span> Letzter Sonntag im Monat
                 </div>
 
                 <div class="discount-strip">

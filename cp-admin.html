@@ -328,6 +328,41 @@
             
             <div id="tab-settings" class="tab-content active">
                 <h2 data-i18n="settings_title">Webseiten Einstellungen</h2>
+                <h2 data-i18n="brand_title">Universal Branding (Marke)</h2>
+                <form id="branding-form">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label data-i18n="brand_name">Firmenname *</label>
+                            <input type="text" id="brandName" required placeholder="Zaffran Delight">
+                        </div>
+                        <div class="form-group full-width">
+                            <label data-i18n="brand_owner">Inhaber (Rechtliche Einheit)</label>
+                            <input type="text" id="brandOwner" placeholder="Max Mustermann">
+                        </div>
+                        <div class="form-group full-width">
+                            <label data-i18n="brand_address">Geschäftsadresse *</label>
+                            <input type="text" id="brandAddress" required placeholder="Musterstraße 1, 53879 Euskirchen">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="brand_phone">Haupttelefon / WhatsApp</label>
+                            <input type="text" id="brandPhone" placeholder="+49 123 456789">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="brand_logo">Logo URL</label>
+                            <input type="text" id="brandLogo" placeholder="logo.png">
+                        </div>
+                        <div class="form-group full-width">
+                            <label data-i18n="brand_color">Haupt-Markenfarbe (Hex)</label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="color" id="brandColorPicker" value="#D4AF37" style="width:50px; height:45px; padding:0; cursor:pointer; background:transparent; border:1px solid #444; border-radius:4px;">
+                                <input type="text" id="brandColor" placeholder="#D4AF37" style="flex:1; text-transform:uppercase;">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" id="brandingBtn" class="btn-blue" data-i18n="brand_save">Branding Speichern</button>
+                </form>
+                <hr style="border:1px dashed #444; margin: 30px 0;">
+                
                 <form id="settings-form">
                     <div class="form-grid">
                         <div class="form-group full-width">

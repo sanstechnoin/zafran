@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaffran Premium Promo - 10x10 / 8x8</title>
+    <style>
+        /* --- RESET & BROWSER OVERRIDES --- */
+        * { 
+            box-sizing: border-box; margin: 0; padding: 0; 
+            /* THIS FORCES CHROME TO PRINT THE DARK BACKGROUNDS */
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            color-adjust: exact !important;
+        }
+        
+        body {
+            background-color: #222;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            min-height: 100vh;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* --- THE 10x10 OUTER PRINT BOX --- */
+        .print-canvas-10x10 {
+            width: 1000px;
+            height: 1000px;
+            background-color: #ffffff !important; 
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+        }
+
+        /* --- CROP MARKS --- */
+        .crop-mark { position: absolute; background: #000 !important; }
+        .crop-t-l-h { top: 98px; left: 0; width: 50px; height: 2px; }
+        .crop-t-l-v { top: 0; left: 98px; width: 2px; height: 50px; }
+        .crop-t-r-h { top: 98px; right: 0; width: 50px; height: 2px; }
+        .crop-t-r-v { top: 0; right: 98px; width: 2px; height: 50px; }
+        .crop-b-l-h { bottom: 98px; left: 0; width: 50px; height: 2px; }
+        .crop-b-l-v { bottom: 0; left: 98px; width: 2px; height: 50px; }
+        .crop-b-r-h { bottom: 98px; right: 0; width: 50px; height: 2px; }
+        .crop-b-r-v { bottom: 0; right: 98px; width: 2px; height: 50px; }
+        
+        .cut-line-label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888 !important;
+            font-size: 14px;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        /* --- THE ACTUAL 8x8 PROMO (800px = 8cm) --- */
+        .promo-content-8x8 {
+            width: 800px;
+            height: 800px;
+            background: #111 !important; 
+            background: linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 100%) !important;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #333 !important;
+        }
+
+        /* THE STEALTH B2B WATERMARK */
+        .stealth-watermark {
+            position: absolute;
+            right: 8px;
+            bottom: 120px;
+            writing-mode: vertical-rl;
+            color: #666 !important;
+            font-size: 12px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* --- PROMO HEADER --- */
+        .promo-header {
+            text-align: center;
+            padding: 30px 20px 10px 20px;
+        }
+        
+        .promo-header img {
+            height: 90px;
+            margin-bottom: 15px;
+        }
+
+        .headline {
+            color: #D4AF37 !important;
+            font-size: 42px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.1;
+            margin-bottom: 5px;
+        }
+
+        .subheadline {
+            color: #fff !important;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* --- PROMO MIDDLE --- */
+        .promo-body {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px 20px 40px;
+        }
+
+        .dish-container {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .dish-container img {
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 8px solid #D4AF37 !important;
+            z-index: 10;
+        }
+
+        .badge {
+            position: absolute;
+            top: -10px;
+            right: 0px;
+            background: #dc3545 !important;
+            color: white !important;
+            padding: 15px 20px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 22px;
+            transform: rotate(15deg);
+            z-index: 20;
+            border: 3px solid #fff !important;
+        }
+
+        .qr-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: center;
+        }
+
+        .qr-box {
+            background: #fff !important;
+            padding: 20px;
+            border-radius: 16px;
+            border: 5px solid #D4AF37 !important;
+            display: inline-block;
+        }
+
+        .qr-box img {
+            width: 220px;
+            height: 220px;
+            display: block;
+        }
+
+        .qr-cta {
+            color: #fff !important;
+            font-size: 26px;
+            font-weight: 900;
+            margin-top: 15px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            text-align: center;
+            width: 260px;
+        }
+
+        .qr-cta span {
+            color: #D4AF37 !important;
+        }
+
+        /* --- PROMO FOOTER --- */
+        .promo-footer {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .discount-strip {
+            background: #D4AF37 !important;
+            color: #000 !important;
+            font-size: 32px;
+            font-weight: 900;
+            text-align: center;
+            padding: 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .buffet-strip {
+            background: #000 !important;
+            color: #D4AF37 !important;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            padding: 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-top: 2px solid #D4AF37 !important;
+        }
+
+        /* --- PRINT STYLES (Clean PDF Export) --- */
+        @media print {
+            body { padding: 0; background: #fff !important; align-items: flex-start; justify-content: flex-start; }
+            .instructions { display: none !important; }
+            .print-canvas-10x10 { box-shadow: none !important; }
+            @page { margin: 0; size: auto; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="instructions">
+        <h2 style="color:white; margin-bottom:10px;">Der 10x10 cm Print-Container</h2>
+        <p style="color:#aaa;">Drücke <b>STRG + P</b> (oder Rechtsklick -> Drucken) und speichere es als PDF.<br>Achte darauf, dass <b>"Hintergrundgrafiken" (Background graphics) aktiviert</b> ist!</p>
+    </div>
+
+    <div class="print-canvas-10x10">
+        
+        <div class="cut-line-label">✂️ 10x10cm CANVAS (PROMO IS 8x8cm) ✂️</div>
+
+        <div class="crop-mark crop-t-l-h"></div><div class="crop-mark crop-t-l-v"></div>
+        <div class="crop-mark crop-t-r-h"></div><div class="crop-mark crop-t-r-v"></div>
+        <div class="crop-mark crop-b-l-h"></div><div class="crop-mark crop-b-l-v"></div>
+        <div class="crop-mark crop-b-r-h"></div><div class="crop-mark crop-b-r-v"></div>
+
+        <div class="promo-content-8x8">
+            
+            <div class="stealth-watermark">Digitalized by SAN Technologies</div>
+
+            <div class="promo-header">
+                <img src="./logo.png" alt="Zaffran Delight">
+                <h1 class="headline">Stadtfest Special</h1>
+                <p class="subheadline">Warteschlangen? Einfach überspringen!</p>
+            </div>
+
+            <div class="promo-body">
+                <div class="dish-container">
+                    <div class="badge">LECKER!</div>
+                    <img src="./dish1.png" alt="Indian Curry">
+                </div>
+                <div class="qr-container">
+                    <div class="qr-box">
+                        <img src="./qr-code-1.png" alt="QR Code">
+                    </div>
+                    <div class="qr-cta">
+                        Hier scannen &<br><span>direkt bestellen</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="promo-footer">
+                <div class="discount-strip">
+                    10% Rabatt mit Code: FEST26
+                </div>
+                <div class="buffet-strip">
+                    🍲 Entdecken Sie unser Sonntags-Buffet! 🍲
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

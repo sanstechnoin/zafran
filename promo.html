@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zaffran Delight - Stadtfest Special</title>
+    <title>Zaffran Delight - Link Hub</title>
     <style>
         /* --- RESET & MOBILE OPTIMIZATION --- */
         * {
@@ -20,13 +20,13 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            padding-bottom: 60px; /* Space for the static footer */
+            padding-bottom: 70px; /* Space for the static footer */
         }
 
         /* --- HERO SECTION --- */
         .hero {
-            background: linear-gradient(135deg, #1f1f1f 0%, #050505 100%);
-            padding: 40px 20px 30px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+            padding: 35px 20px 25px;
             text-align: center;
             border-bottom: 2px solid #D4AF37;
             position: relative;
@@ -53,7 +53,7 @@
             font-weight: 500;
         }
 
-        /* Sticky Promo Banner under Header */
+        /* Sticky Promo Banner */
         .sticky-promo {
             background: #D32F2F;
             color: #fff;
@@ -68,10 +68,10 @@
 
         /* --- TILE GRID (ACTION BUTTONS) --- */
         .tile-container {
-            padding: 25px 20px;
+            padding: 20px;
             display: grid;
-            grid-template-columns: 1fr; /* Single column for mobile focus */
-            gap: 15px;
+            grid-template-columns: 1fr;
+            gap: 12px;
             flex: 1;
         }
 
@@ -79,7 +79,7 @@
             background: #222;
             border: 2px solid #333;
             border-radius: 12px;
-            padding: 20px;
+            padding: 18px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -94,16 +94,22 @@
             border-color: #D4AF37;
         }
 
-        /* Primary Action Tiles (Ordering) get special styling */
+        /* Primary Action Tiles */
         .tile.primary {
             background: rgba(212, 175, 55, 0.1);
             border-color: #D4AF37;
         }
 
+        /* Google Review Tile - Special Highlight */
+        .tile.review {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #4285F4; /* Google Blue hint */
+        }
+
         .tile-icon {
-            font-size: 28px;
+            font-size: 26px;
             margin-right: 15px;
-            width: 40px;
+            width: 35px;
             text-align: center;
         }
 
@@ -112,11 +118,11 @@
         }
 
         .tile-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .tile.primary .tile-title {
@@ -132,6 +138,40 @@
             color: #D4AF37;
             font-size: 20px;
             font-weight: bold;
+        }
+
+        /* --- SOCIAL ICON ROW --- */
+        .social-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 10px 20px 20px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: #222;
+            border: 2px solid #D4AF37;
+            border-radius: 50%;
+            color: #D4AF37;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .social-btn:active {
+            transform: scale(0.92);
+            background: #D4AF37;
+            color: #000;
+        }
+
+        .social-btn svg {
+            width: 24px;
+            height: 24px;
         }
 
         /* --- ADDRESS SECTION --- */
@@ -163,23 +203,100 @@
             left: 0;
             width: 100%;
             background: #000;
-            color: #888;
-            font-size: 11px;
-            text-align: center;
-            padding: 15px 0;
-            font-family: monospace;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            padding: 12px 15px;
             border-top: 2px solid #D4AF37;
             z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .static-footer strong {
+        .san-brand {
+            display: flex;
+            align-items: center;
+            color: #666;
+            font-size: 11px;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .san-logo {
+            height: 16px; 
+            margin-right: 8px;
+            object-fit: contain;
+        }
+
+        .san-brand strong {
             color: #fff;
         }
         
-        .static-footer span {
+        .footer-url {
             color: #D4AF37;
+            font-size: 12px;
+            font-family: monospace;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- NEW: MODAL (POPUP) STYLES --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #111;
+            border: 2px solid #D4AF37;
+            border-radius: 12px;
+            padding: 30px 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close-btn:active { color: #fff; }
+
+        .modal-btn-red {
+            display: block; background: #D32F2F; color: #fff; text-align: center; 
+            padding: 14px; border-radius: 8px; font-weight: 800; text-transform: uppercase;
+            text-decoration: none; margin-bottom: 12px; letter-spacing: 1px;
+        }
+
+        .modal-btn-gold {
+            display: block; background: transparent; border: 2px solid #D4AF37; 
+            color: #D4AF37; text-align: center; padding: 12px; border-radius: 8px; 
+            font-weight: 800; text-transform: uppercase; text-decoration: none; letter-spacing: 1px;
         }
 
     </style>
@@ -187,7 +304,7 @@
 <body>
 
     <header class="hero">
-        <img src="./logo.png" alt="Zaffran Delight Logo">
+        <img src="./logo.png" alt="Zaffran Delight">
         <h1>Willkommen</h1>
         <p>Ihr Premium Indisches Restaurant</p>
     </header>
@@ -198,7 +315,7 @@
 
     <main class="tile-container">
         
-        <a href="#" class="tile primary">
+        <a href="pickup.html" target="_blank" rel="noopener noreferrer" class="tile primary">
             <div class="tile-icon">🛍️</div>
             <div class="tile-content">
                 <div class="tile-title">Abholung (Pickup)</div>
@@ -207,7 +324,7 @@
             <div class="tile-arrow">→</div>
         </a>
 
-        <a href="#" class="tile primary">
+        <a href="delivery.html" target="_blank" rel="noopener noreferrer" class="tile primary">
             <div class="tile-icon">🛵</div>
             <div class="tile-content">
                 <div class="tile-title">Lieferung (Delivery)</div>
@@ -216,43 +333,58 @@
             <div class="tile-arrow">→</div>
         </a>
 
-        <a href="#" class="tile">
-            <div class="tile-icon">📅</div>
+        <a href="javascript:void(0);" onclick="openBuffetModal();" class="tile primary">
+            <div class="tile-icon">🥘</div>
             <div class="tile-content">
-                <div class="tile-title">Tisch Reservieren</div>
+                <div class="tile-title">Buffet Buchen</div>
                 <div class="tile-desc">Sichern Sie sich Ihren Platz</div>
             </div>
             <div class="tile-arrow">→</div>
         </a>
 
-        <a href="#" class="tile">
-            <div class="tile-icon">🥘</div>
+        <a href="reservation.html" target="_blank" rel="noopener noreferrer" class="tile primary">
+            <div class="tile-icon">📅</div>
             <div class="tile-content">
-                <div class="tile-title">Mega Buffet Buchen</div>
-                <div class="tile-desc">Jeden letzten Sonntag im Monat</div>
+                <div class="tile-title">Tisch Reservieren</div>
+                <div class="tile-desc">Für ein perfektes Dinner</div>
             </div>
             <div class="tile-arrow">→</div>
         </a>
 
-        <a href="#" class="tile">
+        <a href="https://g.page/r/CeHG4HwZoSxQEBM/review" target="_blank" rel="noopener noreferrer" class="tile primary review">
+            <div class="tile-icon">⭐</div>
+            <div class="tile-content">
+                <div class="tile-title">Auf Google Bewerten</div>
+                <div class="tile-desc" style="color: #4285F4;">Wir freuen uns auf Ihr Feedback!</div>
+            </div>
+            <div class="tile-arrow" style="color: #4285F4;">→</div>
+        </a>
+
+        <a href="visit.html" target="_blank" rel="noopener noreferrer" class="tile primary">
             <div class="tile-icon">🕒</div>
             <div class="tile-content">
-                <div class="tile-title">Öffnungszeiten</div>
-                <div class="tile-desc">Di-Sa: 14-22 | So: 12-21</div>
-            </div>
-            <div class="tile-arrow">→</div>
-        </a>
-
-        <a href="#" class="tile">
-            <div class="tile-icon">ℹ️</div>
-            <div class="tile-content">
-                <div class="tile-title">Info & Kontakt</div>
-                <div class="tile-desc">Speisekarte & mehr</div>
+                <div class="tile-title">Info & Zeiten</div>
+                <div class="tile-desc">Speisekarte & Öffnungszeiten</div>
             </div>
             <div class="tile-arrow">→</div>
         </a>
 
     </main>
+
+    <div class="social-row">
+        <a href="https://www.facebook.com/p/Zafran-Euskirchen-61568881264481/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+            </svg>
+        </a>
+        <a href="https://www.instagram.com/zafranrestauranteuskirchen/" class="social-btn" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+        </a>
+    </div>
 
     <div class="address-section">
         <h3>📍 Standort</h3>
@@ -264,9 +396,46 @@
     </div>
 
     <footer class="static-footer">
-        Digitalized & Powered by <strong>SAN TECHNOLOGIES</strong><br>
-        <span>www.zafraneuskirchen.de</span>
+        <div class="san-brand">
+            <img src="./san-logo.png" alt="SAN Tech Logo" class="san-logo">
+            <span>Powered by <strong>SAN TECH</strong></span>
+        </div>
+        <a href="https://zafraneuskirchen.de" class="footer-url">zafraneuskirchen.de</a>
     </footer>
+
+
+    <div id="buffetModal" class="modal-overlay" onclick="closeBuffetModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeBuffetModal(event)">&times;</span>
+            <h2 style="color: #D4AF37; text-transform: uppercase; margin-bottom: 10px; font-size: 24px; font-weight: 900;">Mega Buffet</h2>
+            <p style="color: #ccc; font-size: 15px; margin-bottom: 25px; line-height: 1.4;">Jeden letzten Sonntag im Monat.<br>Sichern Sie sich jetzt Ihren Tisch!</p>
+            
+            <a href="tel:+4922511290950" class="modal-btn-red">📞 Jetzt Anrufen</a>
+            
+            <a href="reservation.html" target="_blank" class="modal-btn-gold" onclick="closeBuffetModal(event)">💻 Online Reservieren</a>
+        </div>
+    </div>
+
+    <script>
+        function openBuffetModal() {
+            const modal = document.getElementById('buffetModal');
+            modal.style.display = 'flex';
+            // Slight delay so the CSS transition (fade in) triggers smoothly
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        function closeBuffetModal(event) {
+            // Only close if clicking the background overlay or the X button
+            const modal = document.getElementById('buffetModal');
+            modal.classList.remove('active');
+            // Wait for fade out animation before hiding
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    </script>
 
 </body>
 </html>

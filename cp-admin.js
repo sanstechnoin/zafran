@@ -35,7 +35,12 @@ const translations = {
         banner_title: "📢 Pop-Up Banners", banner_valid_for: "Sichtbar auf (Valid For)", banner_heading: "Titel (z.B. Willkommen bei Zaffran!)", banner_msg: "Nachricht (Message)", banner_btn_vis: "🫣 Visuell", banner_btn_html: "⌨️ HTML Code", banner_html_lbl: "HTML CODE EDITOR", banner_preview_lbl: "LIVE VORSCHAU", banner_active: "Banner Aktivieren? (Wird Kunden 1x pro Sitzung angezeigt)", banner_save: "Banner Speichern",
         coupon_title: "Coupon Manager", code: "Code *", validity_mode: "Modus *", mode_range: "Datums-Bereich", mode_recurring: "Monatlich Wiederkehrend", valid_now: "Gültig ab sofort?", week_rule: "Woche des Monats", disc_type: "Typ *", value: "Wert *", min_order: "Mindestbestellwert (€)", categories: "Kategorien (Leer = Alle)", save_coupon: "Coupon Speichern", saved_coupons: "Gespeicherte Coupons", coup_th_code: "Code", coup_th_val: "Wert", coup_th_min: "Min €", coup_th_valid: "Gültigkeit", coup_th_status: "Status", coup_th_action: "Action",
         menu_title: "🍔 Menü Manager", menu_addCat: "+ Neue Kategorie", menu_desc: "Änderungen werden live in die Firebase Datenbank gespeichert.", menu_modal_title: "Artikel bearbeiten", menu_id: "Nummer (ID) *", menu_price: "Preis (€) *", menu_name: "Name *", menu_desc_lbl: "Beschreibung (Zutaten, Details)", menu_allergy: "Allergene (Komma-getrennt)", btn_cancel: "Abbrechen", btn_save: "Speichern",
-        pin_title: "Access PIN Manager", pin_desc: "Verwalten Sie hier die Zugangs-PINs für alle Endgeräte.", pin_driver: "🚗 Fahrer (Driver)", pin_kitchen: "👨‍🍳 Küche (Kitchen)", pin_waiter: "🍽️ Kellner (Waiter)", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Passwort zum Löschen von Bestellungen.", pin_save_btn: "SAVE"
+        pin_title: "Access PIN Manager", pin_desc: "Verwalten Sie hier die Zugangs-PINs für alle Endgeräte.", pin_driver: "🚗 Fahrer (Driver)", pin_kitchen: "👨‍🍳 Küche (Kitchen)", pin_waiter: "🍽️ Kellner (Waiter)", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Passwort zum Löschen von Bestellungen.", pin_save_btn: "SAVE", tab_buffet: "Buffet",
+        buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automatisches Menü für Sonntags-QR-Scans.",
+        buffet_enable: "Sonntags-Buffet Modus aktivieren", buffet_price_lbl: "Pauschalpreis pro Person (€)", buffet_save_config: "Konfiguration Speichern",
+        buffet_items_title: "Buffet Gerichte", buffet_items_desc: "Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).",
+        buffet_add_item: "+ Buffet Gericht Hinzufügen", buffet_th_img: "Bild", buffet_th_name: "Gericht Name", buffet_th_desc: "Beschreibung", buffet_th_action: "Action",
+        buffet_modal_title: "Buffet Gericht Bearbeiten", buffet_img_lbl: "Bild URL", buffet_name_lbl: "Gericht Name *", buffet_desc_lbl: "Beschreibung"
     },
     en: {
         login_title: "Master Control", login_desc: "Authorized access required", login_email: "Admin Email", login_pass: "Password", login_btn: "Login",
@@ -51,7 +56,12 @@ const translations = {
         banner_title: "📢 Pop-Up Banners", banner_valid_for: "Visible on (Valid For)", banner_heading: "Title (e.g., Welcome!)", banner_msg: "Message", banner_btn_vis: "🫣 Visual", banner_btn_html: "⌨️ HTML Code", banner_html_lbl: "HTML CODE EDITOR", banner_preview_lbl: "LIVE PREVIEW", banner_active: "Enable Banner? (Shown to customers 1x per session)", banner_save: "Save Banner",
         coupon_title: "Coupon Manager", code: "Code *", validity_mode: "Mode *", mode_range: "Date Range", mode_recurring: "Monthly Recurring", valid_now: "Valid immediately?", week_rule: "Week of the Month", disc_type: "Type *", value: "Value *", min_order: "Min. Order (€)", categories: "Categories (Empty = All)", save_coupon: "Save Coupon", saved_coupons: "Saved Coupons", coup_th_code: "Code", coup_th_val: "Value", coup_th_min: "Min €", coup_th_valid: "Validity", coup_th_status: "Status", coup_th_action: "Action",
         menu_title: "🍔 Menu Manager", menu_addCat: "+ New Category", menu_desc: "Changes are saved live to the Firebase database.", menu_modal_title: "Edit Item", menu_id: "Number (ID) *", menu_price: "Price (€) *", menu_name: "Name *", menu_desc_lbl: "Description (Ingredients, Details)", menu_allergy: "Allergens (Comma-separated)", btn_cancel: "Cancel", btn_save: "Save",
-        pin_title: "Access PIN Manager", pin_desc: "Manage the access PINs for all end devices here.", pin_driver: "🚗 Driver", pin_kitchen: "👨‍🍳 Kitchen", pin_waiter: "🍽️ Waiter", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Password for deleting records.", pin_save_btn: "SAVE"
+        pin_title: "Access PIN Manager", pin_desc: "Manage the access PINs for all end devices here.", pin_driver: "🚗 Driver", pin_kitchen: "👨‍🍳 Kitchen", pin_waiter: "🍽️ Waiter", pin_record: "📊 Record / Vault", pin_master: "⚠️ Master Vault (Delete)", pin_master_desc: "Password for deleting records.", pin_save_btn: "SAVE", tab_buffet: "Buffet",
+        buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automated menu for Sunday QR scans.",
+        buffet_enable: "Enable Sunday Buffet Mode", buffet_price_lbl: "Flat Rate Price Per Person (€)", buffet_save_config: "Save Config",
+        buffet_items_title: "Buffet Menu Items", buffet_items_desc: "These items show on the Sunday QR Menu (0.00€ for POS).",
+        buffet_add_item: "+ Add Buffet Dish", buffet_th_img: "Image", buffet_th_name: "Dish Name", buffet_th_desc: "Description", buffet_th_action: "Action",
+        buffet_modal_title: "Edit Buffet Item", buffet_img_lbl: "Image URL", buffet_name_lbl: "Dish Name *", buffet_desc_lbl: "Description"
     }
 };
 
@@ -146,7 +156,7 @@ function initAdmin() {
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('admin-content').style.display = 'block'; 
     changeAdminLang(currentLang);
-    loadSettings(); loadHours(); loadCoupons(); loadAllPins(); loadSpecialBanner(); loadAdminMenu();
+    loadSettings(); loadHours(); loadCoupons(); loadAllPins(); loadSpecialBanner(); loadAdminMenu(); loadBuffetConfig();
 }
 
 // ==========================================
@@ -894,3 +904,116 @@ window.adminLogout = function() {
         showAdminAlert("Fehler beim Abmelden.");
     });
 };
+
+// ==========================================
+// 7. SUNDAY BUFFET MANAGER
+// ==========================================
+let buffetConfig = { enabled: false, price: 0, items: [] };
+
+function loadBuffetConfig() {
+    db.collection('settings').doc('buffet_config').get().then(doc => {
+        if(doc.exists) {
+            buffetConfig = doc.data();
+            if(!buffetConfig.items) buffetConfig.items = [];
+            document.getElementById('buffet-active-toggle').checked = buffetConfig.enabled || false;
+            document.getElementById('buffet-price').value = buffetConfig.price || "";
+            renderBuffetItems();
+        }
+    });
+}
+
+window.saveBuffetConfig = function() {
+    const isEnabled = document.getElementById('buffet-active-toggle').checked;
+    const price = parseFloat(document.getElementById('buffet-price').value) || 0;
+    
+    buffetConfig.enabled = isEnabled;
+    buffetConfig.price = price;
+
+    db.collection('settings').doc('buffet_config').set(buffetConfig, { merge: true })
+    .then(() => {
+        document.getElementById('admin-alert-message').innerText = currentLang === 'de' ? "Buffet Konfiguration gespeichert!" : "Buffet Configuration Saved!";
+        document.getElementById('admin-alert-modal').style.display = 'flex';
+    }).catch(err => console.error(err));
+};
+
+function renderBuffetItems() {
+    const tbody = document.getElementById('buffet-items-body');
+    tbody.innerHTML = "";
+    
+    if(!buffetConfig.items || buffetConfig.items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">${currentLang === 'de' ? 'Keine Gerichte vorhanden.' : 'No dishes added yet.'}</td></tr>`;
+        return;
+    }
+
+    buffetConfig.items.forEach((item, index) => {
+        const isActive = item.active !== false;
+        const eyeIcon = isActive ? '🫣' : '🚫';
+        const rowOpacity = isActive ? '1' : '0.4';
+        const imgHtml = item.image ? `<img src="${item.image}" style="width:50px; height:50px; border-radius:4px; object-fit:cover;">` : 'No Image';
+
+        const row = `
+        <tr style="opacity: ${rowOpacity}; transition: 0.3s;">
+            <td>${imgHtml}</td>
+            <td style="font-weight:bold; color:var(--gold);">${item.name}</td>
+            <td style="font-size:0.85rem; color:#aaa; max-width:200px;">${item.desc || ''}</td>
+            <td style="display:flex; gap:6px;">
+                <button style="background:#555; border:none; border-radius:4px; padding:5px; cursor:pointer; font-size:1.1rem;" onclick="toggleBuffetItemVisibility(${index})">${eyeIcon}</button>
+                <button style="background:#444; border:none; border-radius:4px; padding:5px; cursor:pointer; font-size:1.1rem;" onclick="openBuffetItemModal(${index})">✏️</button>
+                <button class="btn-action-x" onclick="deleteBuffetItem(${index})">X</button>
+            </td>
+        </tr>`;
+        tbody.insertAdjacentHTML('beforeend', row);
+    });
+}
+
+window.toggleBuffetItemVisibility = function(index) {
+    if (buffetConfig.items[index].active === undefined) buffetConfig.items[index].active = true;
+    buffetConfig.items[index].active = !buffetConfig.items[index].active;
+    db.collection('settings').doc('buffet_config').update({ items: buffetConfig.items }).then(renderBuffetItems);
+};
+
+window.deleteBuffetItem = function(index) {
+    if(confirm(currentLang === 'de' ? "Wirklich löschen?" : "Really delete?")) {
+        buffetConfig.items.splice(index, 1);
+        db.collection('settings').doc('buffet_config').update({ items: buffetConfig.items }).then(renderBuffetItems);
+    }
+};
+
+window.openBuffetItemModal = function(index) {
+    const form = document.getElementById('buffet-item-form');
+    form.reset();
+    document.getElementById('edit-buffet-index').value = index;
+
+    if (index > -1) {
+        const item = buffetConfig.items[index];
+        document.getElementById('edit-buffet-img').value = item.image || "";
+        document.getElementById('edit-buffet-name').value = item.name || "";
+        document.getElementById('edit-buffet-desc').value = item.desc || "";
+    }
+    document.getElementById('buffet-item-modal').style.display = 'flex';
+};
+
+document.getElementById('buffet-item-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const index = parseInt(document.getElementById('edit-buffet-index').value);
+    
+    const newItem = {
+        image: document.getElementById('edit-buffet-img').value.trim(),
+        name: document.getElementById('edit-buffet-name').value.trim(),
+        desc: document.getElementById('edit-buffet-desc').value.trim(),
+        active: true
+    };
+
+    if(!buffetConfig.items) buffetConfig.items = [];
+    if (index > -1) {
+        newItem.active = buffetConfig.items[index].active !== false;
+        buffetConfig.items[index] = newItem;
+    } else {
+        buffetConfig.items.push(newItem);
+    }
+
+    db.collection('settings').doc('buffet_config').set({ items: buffetConfig.items }, { merge: true }).then(() => {
+        document.getElementById('buffet-item-modal').style.display = 'none';
+        renderBuffetItems();
+    });
+});

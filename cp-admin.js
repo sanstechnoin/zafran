@@ -39,7 +39,7 @@ const translations = {
         buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automatisches Menü für Sonntags-QR-Scans.", buffet_enable: "Sonntags-Buffet Modus aktivieren", buffet_price_lbl: "Pauschalpreis pro Person (€)", buffet_save_config: "Konfiguration Speichern", buffet_items_title: "Buffet Gerichte", buffet_items_desc: "Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).", buffet_add_item: "+ Buffet Gericht Hinzufügen", buffet_th_img: "Bild", buffet_th_name: "Gericht Name", buffet_th_desc: "Beschreibung", buffet_th_action: "Action", buffet_modal_title: "Buffet Gericht Bearbeiten", buffet_img_lbl: "Bild URL", buffet_name_lbl: "Gericht Name *", buffet_desc_lbl: "Beschreibung", buffet_add_from_menu: "Aus Menü hinzufügen", buffet_select_title: "Gericht aus Menü wählen", buffet_btn_add: "Hinzufügen",
         alert_title: "ℹ️ System Alert", btn_ok: "OK", confirm_title: "⚠️ Bestätigen", btn_confirm: "Bestätigen",
         res_new: "Neu", res_confirmed: "Bestätigt", res_cancelled: "Storniert", res_no_records: "Keine Einträge gefunden.", msg_saved: "Gespeichert!", msg_error: "Fehler", msg_delete_cat: "Möchten Sie die Kategorie wirklich löschen?", msg_delete_item: "Artikel wirklich löschen?", msg_new_cat: "Name der neuen Kategorie:",
-        brand_title: "Universal Branding (Marke)", brand_name: "Firmenname *", brand_owner: "Inhaber (Rechtliche Einheit)", brand_address: "Geschäftsadresse *", brand_phone: "Haupttelefon / WhatsApp", brand_logo: "Logo URL", brand_color: "Haupt-Markenfarbe (Hex)", brand_save: "Branding Speichern"
+        brand_title: "Universal Branding (Marke)", brand_name: "Firmenname *", brand_owner: "Inhaber (Rechtliche Einheit)", brand_address: "Geschäftsadresse *", brand_phone: "Haupttelefon / WhatsApp", brand_logo: "Logo URL", brand_color: "Haupt-Markenfarbe (Hex)", brand_save: "Branding Speichern", brand_colors_title: "Farbpalette (Color Theme)", color_primary: "Primärfarbe (Accent)", color_bg: "Hintergrund (Background)", color_card: "Karten & Panels (Card BG)", color_text: "Textfarbe (Main Text)"
     },
     en: {
         login_title: "Master Control", login_desc: "Authorized access required", login_email: "Admin Email", login_pass: "Password", login_btn: "Login",
@@ -59,7 +59,7 @@ const translations = {
         buffet_title: "🍲 Sunday Buffet Manager", buffet_desc: "Automated menu for Sunday QR scans.", buffet_enable: "Enable Sunday Buffet Mode", buffet_price_lbl: "Flat Rate Price Per Person (€)", buffet_save_config: "Save Config", buffet_items_title: "Buffet Menu Items", buffet_items_desc: "These items show on the Sunday QR Menu (0.00€ for POS).", buffet_add_item: "+ Add Buffet Dish", buffet_th_img: "Image", buffet_th_name: "Dish Name", buffet_th_desc: "Description", buffet_th_action: "Action", buffet_modal_title: "Edit Buffet Item", buffet_img_lbl: "Image URL", buffet_name_lbl: "Dish Name *", buffet_desc_lbl: "Description", buffet_add_from_menu: "Add from Menu", buffet_select_title: "Select a Dish from the Menu", buffet_btn_add: "Add",
         alert_title: "ℹ️ System Alert", btn_ok: "OK", confirm_title: "⚠️ Confirm Action", btn_confirm: "Confirm",
         res_new: "New", res_confirmed: "Confirmed", res_cancelled: "Cancelled", res_no_records: "No records found.", msg_saved: "Saved!", msg_error: "Error", msg_delete_cat: "Do you really want to delete this category?", msg_delete_item: "Really delete this item?", msg_new_cat: "Name of new category:",
-        brand_title: "Universal Branding Settings", brand_name: "Business Name *", brand_owner: "Owner Name (Legal Entity)", brand_address: "Business Address *", brand_phone: "Primary Phone / WhatsApp", brand_logo: "Logo URL", brand_color: "Primary Brand Color (Hex)", brand_save: "Save Branding"
+        brand_title: "Universal Branding Settings", brand_name: "Business Name *", brand_owner: "Owner Name (Legal Entity)", brand_address: "Business Address *", brand_phone: "Primary Phone / WhatsApp", brand_logo: "Logo URL", brand_color: "Primary Brand Color (Hex)", brand_save: "Save Branding", brand_colors_title: "Brand Color Palette", color_primary: "Primary Accent", color_bg: "Main Background", color_card: "Panels & Cards", color_text: "Main Text Color"
     }
 };
 
@@ -410,7 +410,6 @@ function loadSettings() {
         if (doc.exists) {
             const data = doc.data();
             
-            // Web Settings
             document.getElementById('marqueeText').value = data.marqueeText || "";
             document.getElementById('whatsappNumber').value = data.whatsappNumber || "";
             document.getElementById('googleScore').value = data.googleScore || "";
@@ -423,11 +422,31 @@ function loadSettings() {
             document.getElementById('brandPhone').value = data.brandPhone || "";
             document.getElementById('brandLogo').value = data.brandLogo || "";
             
-            // Live Color Injector
-            const loadedColor = data.brandColor || "#D4AF37";
-            document.getElementById('brandColor').value = loadedColor;
-            document.getElementById('brandColorPicker').value = loadedColor;
-            document.documentElement.style.setProperty('--gold', loadedColor);
+            // Full Palette Engine
+            const colors = {
+                primary: data.brandColorPrimary || "#D4AF37",
+                bg: data.brandColorBg || "#1a1a1a",
+                card: data.brandColorCard || "#2a2a2a",
+                text: data.brandColorText || "#f0f0f0"
+            };
+
+            document.getElementById('colorTextPrimary').value = colors.primary;
+            document.getElementById('colorPickerPrimary').value = colors.primary;
+            
+            document.getElementById('colorTextBg').value = colors.bg;
+            document.getElementById('colorPickerBg').value = colors.bg;
+            
+            document.getElementById('colorTextCard').value = colors.card;
+            document.getElementById('colorPickerCard').value = colors.card;
+            
+            document.getElementById('colorTextText').value = colors.text;
+            document.getElementById('colorPickerText').value = colors.text;
+
+            // Live Inject into CP-Admin to preview
+            document.documentElement.style.setProperty('--gold', colors.primary);
+            document.documentElement.style.setProperty('--bg-dark', colors.bg);
+            document.documentElement.style.setProperty('--card-bg', colors.card);
+            document.documentElement.style.setProperty('--text-main', colors.text);
         }
     });
 
@@ -439,33 +458,41 @@ function loadSettings() {
     });
 }
 
-// --- LIVE COLOR PICKER LOGIC ---
-document.getElementById('brandColorPicker').addEventListener('input', (e) => {
-    document.getElementById('brandColor').value = e.target.value.toUpperCase();
-    document.documentElement.style.setProperty('--gold', e.target.value);
-});
+// --- LIVE COLOR PICKER LOGIC (FULL PALETTE) ---
+function setupColorSync(pickerId, textId, cssVar) {
+    document.getElementById(pickerId).addEventListener('input', (e) => {
+        document.getElementById(textId).value = e.target.value.toUpperCase();
+        document.documentElement.style.setProperty(cssVar, e.target.value);
+    });
+    document.getElementById(textId).addEventListener('input', (e) => {
+        let val = e.target.value;
+        if(val.length === 7 && val.startsWith('#')) {
+            document.getElementById(pickerId).value = val;
+            document.documentElement.style.setProperty(cssVar, val);
+        }
+    });
+}
 
-document.getElementById('brandColor').addEventListener('input', (e) => {
-    let val = e.target.value;
-    if(val.length === 7 && val.startsWith('#')) {
-        document.getElementById('brandColorPicker').value = val;
-        document.documentElement.style.setProperty('--gold', val);
-    }
-});
+setupColorSync('colorPickerPrimary', 'colorTextPrimary', '--gold');
+setupColorSync('colorPickerBg', 'colorTextBg', '--bg-dark');
+setupColorSync('colorPickerCard', 'colorTextCard', '--card-bg');
+setupColorSync('colorPickerText', 'colorTextText', '--text-main');
 
 // --- SAVE BRANDING DATA ---
 document.getElementById('branding-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('brandingBtn'); btn.disabled = true;
     try {
-        const selectedColor = document.getElementById('brandColor').value.trim().toUpperCase() || "#D4AF37";
         await db.collection('settings').doc('general').set({
             brandName: document.getElementById('brandName').value.trim(),
             brandOwner: document.getElementById('brandOwner').value.trim(),
             brandAddress: document.getElementById('brandAddress').value.trim(),
             brandPhone: document.getElementById('brandPhone').value.trim(),
             brandLogo: document.getElementById('brandLogo').value.trim(),
-            brandColor: selectedColor,
+            brandColorPrimary: document.getElementById('colorTextPrimary').value.trim().toUpperCase() || "#D4AF37",
+            brandColorBg: document.getElementById('colorTextBg').value.trim().toUpperCase() || "#1a1a1a",
+            brandColorCard: document.getElementById('colorTextCard').value.trim().toUpperCase() || "#2a2a2a",
+            brandColorText: document.getElementById('colorTextText').value.trim().toUpperCase() || "#f0f0f0",
             updatedAt: new Date()
         }, { merge: true });
         showAdminAlert(currentLang === 'de' ? "Universal Branding erfolgreich gespeichert!" : "Universal Branding Saved Successfully!");

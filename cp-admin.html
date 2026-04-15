@@ -733,6 +733,7 @@
                     <h3 data-i18n="buffet_items_title">Buffet Gerichte</h3>
                     <p data-i18n="buffet_items_desc" style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).</p>
                     <button class="btn-gold" style="width:auto; margin-bottom:15px;" onclick="openBuffetItemModal(-1)" data-i18n="buffet_add_item">+ Buffet Gericht Hinzufügen</button>
+                    <button class="btn-blue" style="width:auto; margin-bottom:15px; margin-left:10px;" onclick="openBuffetSelectMenuModal()" data-i18n="buffet_add_from_menu">Aus Menü hinzufügen</button>
                     
                     <div class="table-container">
                         <table>
@@ -870,6 +871,17 @@
                 <button type="submit" data-i18n="btn_save" style="background:var(--success-green); color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Speichern</button>
             </div>
         </form>
+    </div>
+</div>
+
+    <div id="buffet-select-menu-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--info-blue); width:90%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9); text-align:left;">
+        <h3 data-i18n="buffet_select_title" style="color:var(--info-blue); margin-top:0; text-align:center;">Wählen Sie ein Gericht aus dem Menü</h3>
+        
+        <div id="buffet-menu-list-container" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+            </div>
+        
+        <button type="button" data-i18n="btn_cancel" onclick="document.getElementById('buffet-select-menu-modal').style.display='none'" style="background:#444; color:white; border:none; padding:12px; border-radius:4px; width:100%; cursor:pointer; font-weight:bold; margin-top:20px;">Abbrechen</button>
     </div>
 </div>
     

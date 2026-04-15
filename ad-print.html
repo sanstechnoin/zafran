@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaffran - Stadtfest Ads</title>
+    <style>
+        :root {
+            --bg-dark: #1a1a1a;
+            --gold: #D4AF37;
+            --text-main: #f0f0f0;
+        }
+
+        body {
+            background-color: #333;
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            gap: 50px;
+        }
+
+        /* --- THE AD CONTAINER (1:1 Aspect Ratio) --- */
+        .ad-box {
+            background-color: var(--bg-dark);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            /* Crisp rendering for screenshots */
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sizes mimicking 10x10 and 8x8 at high resolution for screenshots */
+        .ad-10x10 { width: 1000px; height: 1000px; }
+        .ad-8x8 { width: 800px; height: 800px; }
+
+        /* --- INNER LAYOUT --- */
+        .ad-header {
+            text-align: center;
+            padding: 4% 5% 2% 5%;
+        }
+        
+        .ad-header img {
+            max-height: 12%; /* Scales with the box */
+            margin-bottom: 2%;
+        }
+
+        .ad-title {
+            color: var(--gold);
+            font-size: 5.5cqw; /* Container Query Width - scales perfectly */
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        .ad-subtitle {
+            font-size: 3.5cqw;
+            color: #fff;
+            margin: 2% 0;
+            font-weight: 600;
+        }
+
+        .ad-body {
+            display: flex;
+            flex: 1;
+            padding: 0 5%;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ad-image-wrapper {
+            flex: 1;
+            text-align: left;
+        }
+
+        .ad-image-wrapper img {
+            width: 90%;
+            max-width: 400px;
+            border-radius: 50%; /* Makes the dish look like a sleek plate */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border: 4px solid var(--gold);
+        }
+
+        .ad-qr-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            padding: 4%;
+            border-radius: 4%;
+            border: 3px solid var(--gold);
+            max-width: 40%;
+        }
+
+        .ad-qr-wrapper img {
+            width: 100%;
+            height: auto;
+        }
+
+        .ad-qr-text {
+            color: #000;
+            font-weight: 900;
+            font-size: 2.5cqw;
+            text-align: center;
+            margin-top: 4%;
+            text-transform: uppercase;
+        }
+
+        .ad-footer {
+            background: var(--gold);
+            color: #000;
+            text-align: center;
+            padding: 4%;
+            font-size: 4cqw;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* THE STEALTH WATERMARK */
+        .stealth-watermark {
+            position: absolute;
+            right: 1%;
+            bottom: 12%;
+            writing-mode: vertical-rl;
+            color: #444; /* Dark grey, blends into the black background */
+            font-size: 1.5cqw;
+            font-family: monospace;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        /* Container Query setup so typography scales perfectly between 8x8 and 10x10 */
+        .ad-box { container-type: inline-size; }
+
+    </style>
+</head>
+<body>
+
+    <h1 style="color:white; text-align:center;">10x10 cm Ad (High Res: 1000x1000px)</h1>
+    <p style="color:#aaa; text-align:center;">Tipp: Take a screenshot of this box, or Right Click -> Print -> Save as PDF.</p>
+
+    <div class="ad-box ad-10x10">
+        <div class="ad-header">
+            <img src="logo.png" alt="Zaffran Delight">
+            <h2 class="ad-title">Stadtfest Special</h2>
+            <p class="ad-subtitle">Warteschlangen? Nicht mit uns!</p>
+        </div>
+        
+        <div class="ad-body">
+            <div class="ad-image-wrapper">
+                <img src="dish1.png" alt="Indian Food">
+            </div>
+            <div class="ad-qr-wrapper">
+                <img src="qr-code-1.png" alt="QR Code">
+                <div class="ad-qr-text">Scannen &<br>Bestellen</div>
+            </div>
+        </div>
+
+        <div class="ad-footer">
+            10% Rabatt mit Code: FEST26
+        </div>
+
+        <div class="stealth-watermark">Digitalized by SAN Technologies</div>
+    </div>
+
+
+    <h1 style="color:white; text-align:center; margin-top:50px;">8x8 cm Ad (High Res: 800x800px)</h1>
+
+    <div class="ad-box ad-8x8">
+        <div class="ad-header">
+            <img src="logo.png" alt="Zaffran Delight">
+            <h2 class="ad-title">Stadtfest Special</h2>
+            <p class="ad-subtitle">Warteschlangen? Nicht mit uns!</p>
+        </div>
+        
+        <div class="ad-body">
+            <div class="ad-image-wrapper">
+                <img src="dish1.png" alt="Indian Food">
+            </div>
+            <div class="ad-qr-wrapper">
+                <img src="qr-code-1.png" alt="QR Code">
+                <div class="ad-qr-text">Scannen &<br>Bestellen</div>
+            </div>
+        </div>
+
+        <div class="ad-footer">
+            10% Rabatt mit Code: FEST26
+        </div>
+
+        <div class="stealth-watermark">Digitalized by SAN Technologies</div>
+    </div>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaffran Premium Promo - Final Edition</title>
+    <title>Zaffran Premium Promo - Final Clean Edition</title>
     <style>
         /* --- RESET & BROWSER OVERRIDES --- */
         * { 
@@ -69,6 +69,7 @@
             width: 800px;
             height: 800px;
             background: #111 !important; 
+            background: linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 100%) !important;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -83,7 +84,7 @@
         }
         
         .promo-header img {
-            /* INCREASED LOGO SIZE */
+            /* PRESERVED LARGE LOGO */
             height: 115px;
             margin-bottom: 5px;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
@@ -101,7 +102,7 @@
 
         .subheadline {
             color: #fff !important;
-            font-size: 21px;
+            font-size: 20px;
             font-weight: 600;
             letter-spacing: 1px;
         }
@@ -112,10 +113,11 @@
             flex: 1;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 30px 20px 30px;
+            padding: 10px 30px 15px 30px;
             gap: 20px;
         }
 
+        /* --- Left Side: Food Image --- */
         .image-container {
             flex: 1.1;
             position: relative;
@@ -124,27 +126,29 @@
             justify-content: center;
         }
 
+        /* UPDATED: Fully adjustable image to prevent cropping */
         .img-pamphlet {
             width: 100%;
-            height: 380px;
-            object-fit: cover;
+            height: auto; /* Replaced fixed height for flexibility */
+            max-height: 400px; /* Crucial cap to maintain layout integrity */
+            object-fit: contain; /* CRITICAL: zero cropping, zero distortion */
             border-radius: 12px;
             border: 5px solid #D4AF37 !important;
             box-shadow: 0 15px 35px rgba(0,0,0,0.9);
         }
 
-        /* UPDATED RED BADGE FOR MEGA BUFFET */
+        /* Reverted Red Buffet Badge to a multi-line "Mega Buffet" style */
         .badge {
             position: absolute;
             top: -15px;
             left: -15px;
             background: #D32F2F !important;
             color: white !important;
-            padding: 12px 18px;
+            padding: 10px 15px;
             border-radius: 12px;
             font-weight: 900;
-            font-size: 22px;
-            transform: rotate(-8deg);
+            font-size: 20px;
+            transform: rotate(-10deg);
             z-index: 3;
             border: 3px solid #fff !important;
             text-transform: uppercase;
@@ -155,19 +159,20 @@
         }
         
         .badge span {
-            font-size: 11px;
-            letter-spacing: 0px;
-            font-weight: bold;
             display: block;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0px;
             margin-top: 3px;
         }
 
+        /* --- Right Side: QR Code & Hours & Constraints --- */
         .info-container {
             flex: 0.9;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px; 
+            gap: 15px;
         }
 
         .qr-box {
@@ -180,14 +185,14 @@
         }
 
         .qr-box img {
-            width: 140px;
-            height: 140px;
+            width: 130px;
+            height: 130px;
             display: block;
         }
 
         .qr-cta {
             color: #fff !important;
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 900;
             line-height: 1.2;
             text-transform: uppercase;
@@ -198,7 +203,7 @@
             color: #D4AF37 !important;
         }
 
-        /* UPDATED HOURS BOX WITH ADDRESS */
+        /* Hours & Info Box with Address */
         .hours-box {
             background: transparent !important;
             border: 2px dashed #D4AF37 !important;
@@ -220,6 +225,7 @@
             padding-bottom: 4px;
         }
         
+        /* Clear Address Text */
         .address-text {
             font-size: 13px;
             font-weight: bold;
@@ -235,19 +241,24 @@
             color: #fff !important;
         }
 
-        /* Minimum Order Limits */
-        .min-order-text {
-            font-size: 12px;
-            color: #aaa !important;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        /* REVERTED: Minimal and clean placement for order limits back in the info area */
+        .min-order-box {
+            background: #000 !important;
+            border: 1px solid #D4AF37 !important;
+            border-radius: 6px;
+            padding: 8px;
             text-align: center;
-            margin-top: -5px; 
+            width: 100%;
+            color: #fff !important;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-top: -5px; /* Pull tighter to the hours box */
         }
         
-        .min-order-text span {
-            color: #fff !important;
-            font-weight: bold;
+        .min-order-box span {
+            color: #D4AF37 !important;
+            font-weight: 900;
+            font-size: 14px;
         }
 
         /* --- PROMO FOOTER --- */
@@ -279,7 +290,7 @@
             font-size: 30px;
             font-weight: 900;
             text-align: center;
-            padding: 10px 0;
+            padding: 12px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -337,7 +348,7 @@
                 
                 <div class="image-container">
                     <div class="badge">MEGA BUFFET!<br><span>Letzter Sonntag</span></div>
-                    <img src="./banner.png" alt="Indian Buffet" class="img-pamphlet">
+                    <img src="./image_322349.jpg" alt="Indian Buffet" class="img-pamphlet">
                 </div>
 
                 <div class="info-container">
@@ -356,12 +367,13 @@
                         <p>
                             Di - Sa: 11:30 - 22:30 Uhr<br>
                             Sonntag: 12:00 - 21:00 Uhr<br>
-                            <span style="color:#aaa; font-size:13px;">Montag Ruhetag</span>
+                            <span style="color:#aaa; font-size:13px; font-weight:normal;">Montag Ruhetag</span>
                         </p>
                     </div>
 
-                    <div class="min-order-text">
-                        Mindestbestellwert: <span>Abholung 10€ | Lieferung 20€</span>
+                    <div class="min-order-box">
+                        Mindestbestellwert:<br>
+                        <span>Abholung 10€</span> | <span>Lieferung 20€</span>
                     </div>
                 </div>
             </div>

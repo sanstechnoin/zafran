@@ -291,6 +291,9 @@
             <button class="tab-btn" onclick="switchTab('tab-menu', this)">
                 <span class="tab-icon">🍔</span> <span class="tab-text" data-i18n="tab_menu">Menu</span>
             </button>
+            <button class="tab-btn" onclick="switchTab('tab-buffet', this)">
+                <span class="tab-icon">🍲</span> <span class="tab-text" data-i18n="tab_buffet">Buffet</span>
+            </button>
             <button class="tab-btn" onclick="switchTab('tab-hours', this)">
                 <span class="tab-icon">⏰</span> <span class="tab-text" data-i18n="tab_hours">Zeit</span>
             </button>
@@ -707,6 +710,46 @@
                 </div>
             </div>
 
+            <div id="tab-buffet" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 data-i18n="buffet_title" style="margin: 0; border:none; padding:0;">🍲 Sunday Buffet Manager</h2>
+                </div>
+                <p data-i18n="buffet_desc" style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;">Automatisches Menü für Sonntags-QR-Scans.</p>
+                
+                <div class="service-card" style="border-color: var(--gold);">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 15px;">
+                        <input type="checkbox" id="buffet-active-toggle" style="width: 22px; height: 22px; accent-color: var(--success-green);">
+                        <strong data-i18n="buffet_enable" style="color: white; font-size: 1.1rem;">Sonntags-Buffet Modus aktivieren</strong>
+                    </label>
+
+                    <div class="form-group">
+                        <label data-i18n="buffet_price_lbl">Pauschalpreis pro Person (€)</label>
+                        <input type="number" id="buffet-price" step="0.50" placeholder="24.90" style="max-width:200px;">
+                    </div>
+                    <button onclick="saveBuffetConfig()" class="btn-blue" data-i18n="buffet_save_config" style="width:auto;">Konfiguration Speichern</button>
+                </div>
+
+                <div class="service-card">
+                    <h3 data-i18n="buffet_items_title">Buffet Gerichte</h3>
+                    <p data-i18n="buffet_items_desc" style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Diese Artikel erscheinen im Sonntags-QR-Menü (0.00€ für Kasse).</p>
+                    <button class="btn-gold" style="width:auto; margin-bottom:15px;" onclick="openBuffetItemModal(-1)" data-i18n="buffet_add_item">+ Buffet Gericht Hinzufügen</button>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="buffet_th_img">Bild</th>
+                                    <th data-i18n="buffet_th_name">Gericht Name</th>
+                                    <th data-i18n="buffet_th_desc">Beschreibung</th>
+                                    <th data-i18n="buffet_th_action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="buffet-items-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
             <div id="tab-pins" class="tab-content">
                 <h2 data-i18n="pin_title">Access PIN Manager</h2>
                 <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:0.9rem;" data-i18n="pin_desc">Verwalten Sie hier die Zugangs-PINs für alle Endgeräte.</p>
@@ -803,6 +846,33 @@
     </div>
 </div>
 
+    <div id="buffet-item-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center;">
+    <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--gold); width:90%; max-width:500px; max-height:90vh; overflow-y:auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">
+        <h3 id="buffet-modal-title" data-i18n="buffet_modal_title" style="color:var(--gold); margin-top:0;">Buffet Gericht Bearbeiten</h3>
+        <form id="buffet-item-form">
+            <input type="hidden" id="edit-buffet-index">
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label data-i18n="buffet_img_lbl">Bild URL</label>
+                    <input type="text" id="edit-buffet-img" placeholder="https://.../image.jpg">
+                </div>
+                <div class="form-group full-width">
+                    <label data-i18n="buffet_name_lbl">Gericht Name *</label>
+                    <input type="text" id="edit-buffet-name" required placeholder="Butter Chicken">
+                </div>
+                <div class="form-group full-width">
+                    <label data-i18n="buffet_desc_lbl">Beschreibung</label>
+                    <textarea id="edit-buffet-desc" rows="2" placeholder="Creamy tomato curry..."></textarea>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="button" data-i18n="btn_cancel" onclick="document.getElementById('buffet-item-modal').style.display='none'" style="background:#444; color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Abbrechen</button>
+                <button type="submit" data-i18n="btn_save" style="background:var(--success-green); color:white; border:none; padding:12px; border-radius:4px; flex:1; cursor:pointer; font-weight:bold;">Speichern</button>
+            </div>
+        </form>
+    </div>
+</div>
+    
 <div id="admin-alert-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
     <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--gold); width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">
         <h3 style="color:var(--gold); margin-top:0; font-size:1.5rem;">ℹ️ System Alert</h3>

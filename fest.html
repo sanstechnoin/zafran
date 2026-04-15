@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaffran Premium Promo - 10x10 / 8x8</title>
+    <title>Zaffran Premium Promo - Buffet Edition</title>
     <style>
         /* --- RESET & BROWSER OVERRIDES --- */
         * { 
@@ -77,34 +77,20 @@
             border: 2px solid #333 !important;
         }
 
-        /* THE STEALTH B2B WATERMARK */
-        .stealth-watermark {
-            position: absolute;
-            right: 8px;
-            bottom: 120px;
-            writing-mode: vertical-rl;
-            color: #666 !important;
-            font-size: 12px;
-            font-family: monospace;
-            letter-spacing: 2px;
-            pointer-events: none;
-            z-index: 100;
-        }
-
         /* --- PROMO HEADER --- */
         .promo-header {
             text-align: center;
-            padding: 30px 20px 10px 20px;
+            padding: 25px 20px 15px 20px;
         }
         
         .promo-header img {
-            height: 90px;
-            margin-bottom: 15px;
+            height: 80px;
+            margin-bottom: 10px;
         }
 
         .headline {
             color: #D4AF37 !important;
-            font-size: 42px;
+            font-size: 40px;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -114,53 +100,75 @@
 
         .subheadline {
             color: #fff !important;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
             letter-spacing: 1px;
         }
 
-        /* --- PROMO MIDDLE --- */
+        /* --- PROMO MIDDLE (COLLAGE & QR) --- */
         .promo-body {
             display: flex;
             flex: 1;
             align-items: center;
             justify-content: space-between;
-            padding: 0 40px 20px 40px;
+            padding: 0 35px 20px 35px;
         }
 
-        .dish-container {
-            flex: 1;
+        /* NEW: Image Collage Setup */
+        .collage-container {
+            flex: 1.2;
+            position: relative;
+            height: 350px;
             display: flex;
             justify-content: flex-start;
-            position: relative;
         }
 
-        .dish-container img {
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
+        .img-buffet {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 280px;
+            height: 200px;
             object-fit: cover;
-            border: 8px solid #D4AF37 !important;
-            z-index: 10;
+            border-radius: 12px;
+            border: 4px solid #D4AF37 !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        .img-dish {
+            position: absolute;
+            bottom: 10px;
+            right: 40px;
+            width: 220px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 6px solid #fff !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+            z-index: 2;
         }
 
         .badge {
             position: absolute;
-            top: -10px;
-            right: 0px;
+            top: -15px;
+            right: 20px;
             background: #dc3545 !important;
             color: white !important;
-            padding: 15px 20px;
+            padding: 12px 18px;
             border-radius: 50px;
             font-weight: 900;
-            font-size: 22px;
+            font-size: 18px;
             transform: rotate(15deg);
-            z-index: 20;
+            z-index: 3;
             border: 3px solid #fff !important;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
+        /* QR Code Setup */
         .qr-container {
-            flex: 1;
+            flex: 0.8;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -169,27 +177,28 @@
 
         .qr-box {
             background: #fff !important;
-            padding: 20px;
+            padding: 15px;
             border-radius: 16px;
             border: 5px solid #D4AF37 !important;
             display: inline-block;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
         }
 
         .qr-box img {
-            width: 220px;
-            height: 220px;
+            width: 200px;
+            height: 200px;
             display: block;
         }
 
         .qr-cta {
             color: #fff !important;
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 900;
             margin-top: 15px;
             line-height: 1.2;
             text-transform: uppercase;
             text-align: center;
-            width: 260px;
+            width: 240px;
         }
 
         .qr-cta span {
@@ -202,30 +211,49 @@
             flex-direction: column;
         }
 
-        .discount-strip {
-            background: #D4AF37 !important;
-            color: #000 !important;
-            font-size: 32px;
-            font-weight: 900;
-            text-align: center;
-            padding: 15px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
         .buffet-strip {
             background: #000 !important;
-            color: #D4AF37 !important;
+            color: #fff !important;
             font-size: 22px;
             font-weight: bold;
             text-align: center;
             padding: 12px 0;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            border-top: 2px solid #D4AF37 !important;
+            letter-spacing: 1px;
+            border-top: 2px solid #333 !important;
+        }
+        
+        .buffet-strip span { color: #D4AF37 !important; }
+
+        .discount-strip {
+            background: #D4AF37 !important;
+            color: #000 !important;
+            font-size: 30px;
+            font-weight: 900;
+            text-align: center;
+            padding: 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* --- PRINT STYLES (Clean PDF Export) --- */
+        /* NEW CLEAR SAN TECH BRANDING */
+        .san-branding {
+            background: #050505 !important;
+            color: #aaa !important;
+            font-size: 13px;
+            text-align: center;
+            padding: 8px 0;
+            font-family: monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .san-branding span {
+            color: #007bff !important; /* Tech Blue */
+            font-weight: bold;
+        }
+
+        /* --- PRINT STYLES --- */
         @media print {
             body { padding: 0; background: #fff !important; align-items: flex-start; justify-content: flex-start; }
             .instructions { display: none !important; }
@@ -253,8 +281,6 @@
 
         <div class="promo-content-8x8">
             
-            <div class="stealth-watermark">Digitalized by SAN Technologies</div>
-
             <div class="promo-header">
                 <img src="./logo.png" alt="Zaffran Delight">
                 <h1 class="headline">Stadtfest Special</h1>
@@ -262,10 +288,13 @@
             </div>
 
             <div class="promo-body">
-                <div class="dish-container">
+                
+                <div class="collage-container">
                     <div class="badge">LECKER!</div>
-                    <img src="./dish1.png" alt="Indian Curry">
+                    <img src="./image_256548.jpg" alt="Indian Buffet" class="img-buffet">
+                    <img src="./dish1.png" alt="Indian Curry" class="img-dish">
                 </div>
+
                 <div class="qr-container">
                     <div class="qr-box">
                         <img src="./qr-code-1.png" alt="QR Code">
@@ -277,11 +306,15 @@
             </div>
 
             <div class="promo-footer">
+                <div class="buffet-strip">
+                    🌟 UNSER HIGHLIGHT: <span>GROßES SONNTAGS-BUFFET</span> 🌟
+                </div>
                 <div class="discount-strip">
                     10% Rabatt mit Code: FEST26
                 </div>
-                <div class="buffet-strip">
-                    🍲 Entdecken Sie unser Sonntags-Buffet! 🍲
+                
+                <div class="san-branding">
+                    🚀 Smart Restaurant System by <span>SAN Technologies</span>
                 </div>
             </div>
 

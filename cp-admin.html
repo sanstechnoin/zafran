@@ -492,17 +492,17 @@
 
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:20px;">
                     <div style="background:#111; padding:20px; border-radius:8px; border:1px solid #444; text-align:center;">
-                        <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Dine-in</h3>
+                        <h3 data-i18n="fin_dinein" style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Dine-in</h3>
                         <div style="font-size:1.8rem; font-weight:bold; color:#fff;" id="fin-dine-total">0,00 €</div>
                         <div style="color:#aaa; font-size:0.9rem; margin-top:5px;" id="fin-dine-count">0 Orders</div>
                     </div>
                     <div style="background:#111; padding:20px; border-radius:8px; border:1px solid #444; text-align:center;">
-                        <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Pickup</h3>
+                        <h3 data-i18n="fin_pickup" style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Pickup</h3>
                         <div style="font-size:1.8rem; font-weight:bold; color:#fff;" id="fin-pickup-total">0,00 €</div>
                         <div style="color:#aaa; font-size:0.9rem; margin-top:5px;" id="fin-pickup-count">0 Orders</div>
                     </div>
                     <div style="background:#111; padding:20px; border-radius:8px; border:1px solid #444; text-align:center;">
-                        <h3 style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Delivery</h3>
+                        <h3 data-i18n="fin_delivery" style="margin:0 0 10px 0; font-size:1.1rem; color:var(--gold);">Delivery</h3>
                         <div style="font-size:1.8rem; font-weight:bold; color:#fff;" id="fin-delivery-total">0,00 €</div>
                         <div style="color:#aaa; font-size:0.9rem; margin-top:5px;" id="fin-delivery-count">0 Orders</div>
                     </div>
@@ -616,7 +616,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Gültig für *</label>
+                            <label data-i18n="coup_valid_for">Gültig für *</label>
                             <select id="validFor">
                                 <option value="both">Abholung & Lieferung</option>
                                 <option value="pickup">Nur Abholung (Pickup)</option>
@@ -635,12 +635,12 @@
 
                         <div id="gratisFields" style="display:none; background:#222; padding:15px; border-radius:4px; margin-bottom:15px;" class="full-width">
                             <div class="form-group">
-                                <label>Artikel Name (z.B. Vorspeise des Tages 1)</label>
+                                <label data-i18n="coup_item_name">Artikel Name (z.B. Vorspeise des Tages 1)</label>
                                 <input type="text" id="promoItemName" placeholder="Gratis Vorspeise des Tages 1">
                             </div>
                             <label class="checkbox-item" style="margin-top:10px;">
                                 <input type="checkbox" id="promoAskChoice">
-                                <span style="color:var(--gold);">Kunde soll Lassi-Sorte wählen? (Prompt)</span>
+                                <span data-i18n="coup_ask_choice" style="color:var(--gold);">Kunde soll Sorte wählen? (Prompt)</span>
                             </label>
                         </div>
 
@@ -650,7 +650,7 @@
                         </div>
                         
                         <div class="form-group">
-                            <label>Min. Hauptgerichte (>= 12€)</label>
+                            <label data-i18n="coup_min_main">Min. Hauptgerichte (>= 12€)</label>
                             <input type="number" id="minMainDishes" value="0">
                         </div>
 
@@ -877,19 +877,16 @@
     <div id="buffet-select-menu-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center;">
     <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--info-blue); width:90%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow: 0 10px 30px rgba(0,0,0,0.9); text-align:left;">
         <h3 data-i18n="buffet_select_title" style="color:var(--info-blue); margin-top:0; text-align:center;">Wählen Sie ein Gericht aus dem Menü</h3>
-        
-        <div id="buffet-menu-list-container" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-            </div>
-        
+        <div id="buffet-menu-list-container" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;"></div>
         <button type="button" data-i18n="btn_cancel" onclick="document.getElementById('buffet-select-menu-modal').style.display='none'" style="background:#444; color:white; border:none; padding:12px; border-radius:4px; width:100%; cursor:pointer; font-weight:bold; margin-top:20px;">Abbrechen</button>
     </div>
 </div>
     
 <div id="admin-alert-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
     <div style="background:var(--card-bg); padding:30px; border-radius:8px; border:2px solid var(--gold); width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.9);">
-        <h3 style="color:var(--gold); margin-top:0; font-size:1.5rem;">ℹ️ System Alert</h3>
+        <h3 data-i18n="alert_title" style="color:var(--gold); margin-top:0; font-size:1.5rem;">ℹ️ System Alert</h3>
         <p id="admin-alert-message" style="margin-bottom:25px; font-size:1.1rem; line-height:1.4; color:white;"></p>
-        <button onclick="document.getElementById('admin-alert-modal').style.display='none'" style="background:var(--info-blue); color:white; border:none; padding:12px; border-radius:4px; width:100%; cursor:pointer; font-weight:bold; font-size:1.1rem;">OK</button>
+        <button data-i18n="btn_ok" onclick="document.getElementById('admin-alert-modal').style.display='none'" style="background:var(--info-blue); color:white; border:none; padding:12px; border-radius:4px; width:100%; cursor:pointer; font-weight:bold; font-size:1.1rem;">OK</button>
     </div>
 </div>
     

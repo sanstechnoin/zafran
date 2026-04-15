@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zaffran Delight - Stadtfest Special</title>
+    <style>
+        /* --- RESET & MOBILE OPTIMIZATION --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #111;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 60px; /* Space for the static footer */
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            background: linear-gradient(135deg, #1f1f1f 0%, #050505 100%);
+            padding: 40px 20px 30px;
+            text-align: center;
+            border-bottom: 2px solid #D4AF37;
+            position: relative;
+        }
+
+        .hero img {
+            height: 90px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        .hero h1 {
+            color: #D4AF37;
+            font-size: 26px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .hero p {
+            color: #ccc;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Sticky Promo Banner under Header */
+        .sticky-promo {
+            background: #D32F2F;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* --- TILE GRID (ACTION BUTTONS) --- */
+        .tile-container {
+            padding: 25px 20px;
+            display: grid;
+            grid-template-columns: 1fr; /* Single column for mobile focus */
+            gap: 15px;
+            flex: 1;
+        }
+
+        .tile {
+            background: #222;
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .tile:active {
+            transform: scale(0.98);
+            border-color: #D4AF37;
+        }
+
+        /* Primary Action Tiles (Ordering) get special styling */
+        .tile.primary {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: #D4AF37;
+        }
+
+        .tile-icon {
+            font-size: 28px;
+            margin-right: 15px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .tile-content {
+            flex: 1;
+        }
+
+        .tile-title {
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .tile.primary .tile-title {
+            color: #D4AF37;
+        }
+
+        .tile-desc {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .tile-arrow {
+            color: #D4AF37;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* --- ADDRESS SECTION --- */
+        .address-section {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-top: 1px dashed #444;
+        }
+
+        .address-section h3 {
+            color: #D4AF37;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .address-section p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* --- STATIC FOOTER (SAN TECH) --- */
+        .static-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #000;
+            color: #888;
+            font-size: 11px;
+            text-align: center;
+            padding: 15px 0;
+            font-family: monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-top: 2px solid #D4AF37;
+            z-index: 100;
+        }
+
+        .static-footer strong {
+            color: #fff;
+        }
+        
+        .static-footer span {
+            color: #D4AF37;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <img src="./logo.png" alt="Zaffran Delight Logo">
+        <h1>Willkommen</h1>
+        <p>Ihr Premium Indisches Restaurant</p>
+    </header>
+
+    <div class="sticky-promo">
+        🎟️ 10% RABATT MIT CODE: FEST26 🎟️
+    </div>
+
+    <main class="tile-container">
+        
+        <a href="#" class="tile primary">
+            <div class="tile-icon">🛍️</div>
+            <div class="tile-content">
+                <div class="tile-title">Abholung (Pickup)</div>
+                <div class="tile-desc">Mindestbestellwert 10€</div>
+            </div>
+            <div class="tile-arrow">→</div>
+        </a>
+
+        <a href="#" class="tile primary">
+            <div class="tile-icon">🛵</div>
+            <div class="tile-content">
+                <div class="tile-title">Lieferung (Delivery)</div>
+                <div class="tile-desc">Mindestbestellwert 20€</div>
+            </div>
+            <div class="tile-arrow">→</div>
+        </a>
+
+        <a href="#" class="tile">
+            <div class="tile-icon">📅</div>
+            <div class="tile-content">
+                <div class="tile-title">Tisch Reservieren</div>
+                <div class="tile-desc">Sichern Sie sich Ihren Platz</div>
+            </div>
+            <div class="tile-arrow">→</div>
+        </a>
+
+        <a href="#" class="tile">
+            <div class="tile-icon">🥘</div>
+            <div class="tile-content">
+                <div class="tile-title">Mega Buffet Buchen</div>
+                <div class="tile-desc">Jeden letzten Sonntag im Monat</div>
+            </div>
+            <div class="tile-arrow">→</div>
+        </a>
+
+        <a href="#" class="tile">
+            <div class="tile-icon">🕒</div>
+            <div class="tile-content">
+                <div class="tile-title">Öffnungszeiten</div>
+                <div class="tile-desc">Di-Sa: 14-22 | So: 12-21</div>
+            </div>
+            <div class="tile-arrow">→</div>
+        </a>
+
+        <a href="#" class="tile">
+            <div class="tile-icon">ℹ️</div>
+            <div class="tile-content">
+                <div class="tile-title">Info & Kontakt</div>
+                <div class="tile-desc">Speisekarte & mehr</div>
+            </div>
+            <div class="tile-arrow">→</div>
+        </a>
+
+    </main>
+
+    <div class="address-section">
+        <h3>📍 Standort</h3>
+        <p>
+            Kessenicher Str. 9<br>
+            53879 Euskirchen<br>
+            📞 02251 / 1290950
+        </p>
+    </div>
+
+    <footer class="static-footer">
+        Digitalized & Powered by <strong>SAN TECHNOLOGIES</strong><br>
+        <span>www.zafraneuskirchen.de</span>
+    </footer>
+
+</body>
+</html>

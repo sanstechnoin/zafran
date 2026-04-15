@@ -3,201 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaffran - Stadtfest Ads</title>
+    <title>Zaffran Premium Ad - 10x10 / 8x8</title>
     <style>
-        :root {
-            --bg-dark: #1a1a1a;
-            --gold: #D4AF37;
-            --text-main: #f0f0f0;
-        }
-
+        /* --- RESET & SETUP --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
-            background-color: #333;
-            color: var(--text-main);
+            background-color: #222; /* Dark background so the white print-box stands out */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px;
-            gap: 50px;
+            justify-content: center;
+            padding: 50px;
+            min-height: 100vh;
         }
 
-        /* --- THE AD CONTAINER (1:1 Aspect Ratio) --- */
-        .ad-box {
-            background-color: var(--bg-dark);
+        /* --- THE 10x10 OUTER PRINT BOX (1000px = 10cm for high res) --- */
+        .print-canvas-10x10 {
+            width: 1000px;
+            height: 1000px;
+            background-color: #ffffff;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+        }
+
+        /* --- CROP MARKS (To show the publisher where to cut the 8x8) --- */
+        .crop-mark { position: absolute; background: #000; }
+        .crop-t-l-h { top: 98px; left: 0; width: 50px; height: 2px; }
+        .crop-t-l-v { top: 0; left: 98px; width: 2px; height: 50px; }
+        .crop-t-r-h { top: 98px; right: 0; width: 50px; height: 2px; }
+        .crop-t-r-v { top: 0; right: 98px; width: 2px; height: 50px; }
+        .crop-b-l-h { bottom: 98px; left: 0; width: 50px; height: 2px; }
+        .crop-b-l-v { bottom: 0; left: 98px; width: 2px; height: 50px; }
+        .crop-b-r-h { bottom: 98px; right: 0; width: 50px; height: 2px; }
+        .crop-b-r-v { bottom: 0; right: 98px; width: 2px; height: 50px; }
+        
+        .cut-line-label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 14px;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        /* --- THE ACTUAL 8x8 AD (800px = 8cm) --- */
+        .ad-content-8x8 {
+            width: 800px;
+            height: 800px;
+            background: linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 100%);
             position: relative;
             overflow: hidden;
-            border: 2px solid #000;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            /* Crisp rendering for screenshots */
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
+            border: 2px solid #333;
         }
 
-        /* Sizes mimicking 10x10 and 8x8 at high resolution for screenshots */
-        .ad-10x10 { width: 1000px; height: 1000px; }
-        .ad-8x8 { width: 800px; height: 800px; }
+        /* THE STEALTH B2B WATERMARK */
+        .stealth-watermark {
+            position: absolute;
+            right: 8px;
+            bottom: 120px; /* Sits right above the gold footer */
+            writing-mode: vertical-rl;
+            color: #666;
+            font-size: 12px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            pointer-events: none;
+            z-index: 100;
+        }
 
-        /* --- INNER LAYOUT --- */
+        /* --- AD HEADER --- */
         .ad-header {
             text-align: center;
-            padding: 4% 5% 2% 5%;
+            padding: 30px 20px 10px 20px;
         }
         
         .ad-header img {
-            max-height: 12%; /* Scales with the box */
-            margin-bottom: 2%;
+            height: 90px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
 
-        .ad-title {
-            color: var(--gold);
-            font-size: 5.5cqw; /* Container Query Width - scales perfectly */
-            margin: 0;
+        .headline {
+            color: #D4AF37;
+            font-size: 42px;
+            font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 5px;
         }
 
-        .ad-subtitle {
-            font-size: 3.5cqw;
+        .subheadline {
             color: #fff;
-            margin: 2% 0;
+            font-size: 24px;
             font-weight: 600;
+            letter-spacing: 1px;
         }
 
+        /* --- AD MIDDLE (SPLIT DISH & QR) --- */
         .ad-body {
             display: flex;
             flex: 1;
-            padding: 0 5%;
             align-items: center;
             justify-content: space-between;
+            padding: 0 40px 20px 40px;
         }
 
-        .ad-image-wrapper {
+        .dish-container {
             flex: 1;
-            text-align: left;
+            display: flex;
+            justify-content: flex-start;
+            position: relative;
         }
 
-        .ad-image-wrapper img {
-            width: 90%;
-            max-width: 400px;
-            border-radius: 50%; /* Makes the dish look like a sleek plate */
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            border: 4px solid var(--gold);
+        .dish-container img {
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 8px solid #D4AF37;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 40px rgba(212,175,55,0.2);
+            z-index: 10;
         }
 
-        .ad-qr-wrapper {
+        /* Small decorative badge over the food */
+        .badge {
+            position: absolute;
+            top: -10px;
+            right: 0px;
+            background: #dc3545;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 22px;
+            transform: rotate(15deg);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 20;
+            border: 3px solid #fff;
+        }
+
+        .qr-container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-end;
+            text-align: center;
+        }
+
+        .qr-box {
             background: #fff;
-            padding: 4%;
-            border-radius: 4%;
-            border: 3px solid var(--gold);
-            max-width: 40%;
+            padding: 20px;
+            border-radius: 16px;
+            border: 5px solid #D4AF37;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            display: inline-block;
         }
 
-        .ad-qr-wrapper img {
-            width: 100%;
-            height: auto;
+        .qr-box img {
+            width: 220px;
+            height: 220px;
+            display: block;
         }
 
-        .ad-qr-text {
-            color: #000;
+        .qr-cta {
+            color: #fff;
+            font-size: 26px;
             font-weight: 900;
-            font-size: 2.5cqw;
-            text-align: center;
-            margin-top: 4%;
+            margin-top: 15px;
+            line-height: 1.2;
             text-transform: uppercase;
+            text-align: center;
+            width: 260px;
         }
 
+        .qr-cta span {
+            color: #D4AF37;
+        }
+
+        /* --- AD FOOTER (THE UPSELLS) --- */
         .ad-footer {
-            background: var(--gold);
+            background: #D4AF37;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .discount-strip {
+            background: #D4AF37;
             color: #000;
-            text-align: center;
-            padding: 4%;
-            font-size: 4cqw;
+            font-size: 32px;
             font-weight: 900;
+            text-align: center;
+            padding: 15px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* THE STEALTH WATERMARK */
-        .stealth-watermark {
-            position: absolute;
-            right: 1%;
-            bottom: 12%;
-            writing-mode: vertical-rl;
-            color: #444; /* Dark grey, blends into the black background */
-            font-size: 1.5cqw;
-            font-family: monospace;
-            letter-spacing: 1px;
-            pointer-events: none;
+        .buffet-strip {
+            background: #000;
+            color: #D4AF37;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            padding: 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-top: 2px solid #D4AF37;
         }
-
-        /* Container Query setup so typography scales perfectly between 8x8 and 10x10 */
-        .ad-box { container-type: inline-size; }
 
     </style>
 </head>
 <body>
 
-    <h1 style="color:white; text-align:center;">10x10 cm Ad (High Res: 1000x1000px)</h1>
-    <p style="color:#aaa; text-align:center;">Tipp: Take a screenshot of this box, or Right Click -> Print -> Save as PDF.</p>
+    <h2 style="color:white; margin-bottom:10px;">Der 10x10 cm Print-Container</h2>
+    <p style="color:#aaa; margin-bottom:30px;">Die weißen Ränder dienen als Beschnittzugabe (Bleed) für den Verlag. Die Anzeige selbst ist exakt 8x8 cm.<br>Mache einen Screenshot der weißen Box oder drucke die Seite als PDF.</p>
 
-    <div class="ad-box ad-10x10">
-        <div class="ad-header">
-            <img src="logo.png" alt="Zaffran Delight">
-            <h2 class="ad-title">Stadtfest Special</h2>
-            <p class="ad-subtitle">Warteschlangen? Nicht mit uns!</p>
-        </div>
+    <div class="print-canvas-10x10">
         
-        <div class="ad-body">
-            <div class="ad-image-wrapper">
-                <img src="dish1.png" alt="Indian Food">
+        <div class="cut-line-label">✂️ 10x10cm CANVAS (AD IS 8x8cm) ✂️</div>
+
+        <div class="crop-mark crop-t-l-h"></div><div class="crop-mark crop-t-l-v"></div>
+        <div class="crop-mark crop-t-r-h"></div><div class="crop-mark crop-t-r-v"></div>
+        <div class="crop-mark crop-b-l-h"></div><div class="crop-mark crop-b-l-v"></div>
+        <div class="crop-mark crop-b-r-h"></div><div class="crop-mark crop-b-r-v"></div>
+
+        <div class="ad-content-8x8">
+            
+            <div class="stealth-watermark">Digitalized by SAN Technologies</div>
+
+            <div class="ad-header">
+                <img src="logo.png" alt="Zaffran Delight">
+                <h1 class="headline">Stadtfest Special</h1>
+                <p class="subheadline">Warteschlangen? Einfach überspringen!</p>
             </div>
-            <div class="ad-qr-wrapper">
-                <img src="qr-code-1.png" alt="QR Code">
-                <div class="ad-qr-text">Scannen &<br>Bestellen</div>
+
+            <div class="ad-body">
+                <div class="dish-container">
+                    <div class="badge">LECKER!</div>
+                    <img src="dish1.png" alt="Indian Curry">
+                </div>
+                <div class="qr-container">
+                    <div class="qr-box">
+                        <img src="qr-code-1.png" alt="QR Code">
+                    </div>
+                    <div class="qr-cta">
+                        Hier scannen &<br><span>direkt bestellen</span>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="ad-footer">
-            10% Rabatt mit Code: FEST26
-        </div>
-
-        <div class="stealth-watermark">Digitalized by SAN Technologies</div>
-    </div>
-
-
-    <h1 style="color:white; text-align:center; margin-top:50px;">8x8 cm Ad (High Res: 800x800px)</h1>
-
-    <div class="ad-box ad-8x8">
-        <div class="ad-header">
-            <img src="logo.png" alt="Zaffran Delight">
-            <h2 class="ad-title">Stadtfest Special</h2>
-            <p class="ad-subtitle">Warteschlangen? Nicht mit uns!</p>
-        </div>
-        
-        <div class="ad-body">
-            <div class="ad-image-wrapper">
-                <img src="dish1.png" alt="Indian Food">
+            <div class="ad-footer">
+                <div class="discount-strip">
+                    10% Rabatt mit Code: FEST26
+                </div>
+                <div class="buffet-strip">
+                    🍲 Entdecken Sie unser Sonntags-Buffet! 🍲
+                </div>
             </div>
-            <div class="ad-qr-wrapper">
-                <img src="qr-code-1.png" alt="QR Code">
-                <div class="ad-qr-text">Scannen &<br>Bestellen</div>
-            </div>
-        </div>
 
-        <div class="ad-footer">
-            10% Rabatt mit Code: FEST26
         </div>
-
-        <div class="stealth-watermark">Digitalized by SAN Technologies</div>
     </div>
 
 </body>

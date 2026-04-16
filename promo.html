@@ -52,17 +52,71 @@
             font-weight: 500;
         }
 
-        /* Sticky Promo Banner */
-        .sticky-promo {
-            background: #D32F2F;
-            color: #fff;
+        /* --- TRUST & PROMO STACK --- */
+        .trust-promo-stack {
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            border-bottom: 2px solid #D4AF37;
+        }
+
+        .promo-strip {
+            background: #D4AF37;
+            color: #000;
             text-align: center;
             padding: 10px;
-            font-weight: bold;
+            font-weight: 900;
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .rating-strip {
+            background: #1a1a1a;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-weight: 800;
+            border-bottom: 1px solid #333;
+        }
+
+        .rating-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .payment-strip {
+            background: #111;
+            color: #aaa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .payment-icons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .pay-icon {
+            background: #222;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 900;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 0.5px;
         }
 
         /* --- NOKIA TILE GRID (METRO UI) --- */
@@ -326,9 +380,30 @@
         <p>Ihr Premium Indisches Restaurant</p>
     </header>
 
-    <div class="sticky-promo">
-        🎟️ 10% RABATT MIT CODE: FEST26 🎟️
-    </div>
+    <div class="trust-promo-stack">
+        <div class="promo-strip">
+            🏷️ 10% RABATT MIT CODE: FEST26 🏷️
+        </div>
+        
+        <div class="rating-strip">
+            <div class="rating-item">
+                <span style="color: #fbbc05; font-size: 14px;">⭐</span> Google 4.9
+            </div>
+            <div class="rating-item">
+                <span style="color: #ff8000; font-size: 14px;">🛵</span> Lieferando 4.8
+            </div>
+        </div>
+
+        <div class="payment-strip">
+            <span>Zahlung:</span>
+            <div class="payment-icons">
+                <span class="pay-icon" style="color: #1a1f71; background: #fff; border-color: #fff;">VISA</span>
+                <span class="pay-icon" style="color: #eb001b; background: #fff; border-color: #fff;">MC</span>
+                <span class="pay-icon" style="color: #2e77bc; background: #fff; border-color: #fff;">AMEX</span>
+                <span class="pay-icon" style="color: #fff;">SumUp</span>
+            </div>
+        </div>
+    </div>>
 
     <main class="tile-container">
         

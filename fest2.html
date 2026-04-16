@@ -119,15 +119,12 @@
             flex: 1;
             align-items: stretch;
             justify-content: space-between;
-            /* TOP: 35px pushes the buffet box down so the badge clears the hours.
-               LEFT/RIGHT: 40px side margins perfectly match the 40px center gap.
-            */
             padding: 35px 40px 25px 40px; 
             gap: 40px; 
         }
 
         .image-container {
-            flex: 1.15; /* Adjusted slightly to keep the image looking grand despite bigger gaps */
+            flex: 1.15;
             position: relative;
             display: flex;
             padding: 0 !important;
@@ -173,22 +170,22 @@
         }
 
         .info-container {
-            flex: 0.85; /* Adjusted to balance the wider image */
+            flex: 0.85;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Locks items to top and bottom edges */
+            justify-content: space-between;
             align-items: center;
             padding: 0;
         }
 
         .qr-box {
             background: #fff !important;
-            padding: 10px; /* Tighter padding */
+            padding: 10px;
             border-radius: 16px;
             border: 4px solid #D4AF37 !important;
             display: inline-block;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            margin-top: 0; /* Forces flush alignment with top of image */
+            margin-top: 0; 
         }
 
         .qr-box img {
@@ -218,7 +215,7 @@
             text-align: center;
             color: #fff !important;
             width: 100%;
-            margin-bottom: 0; /* Forces flush alignment with bottom of image */
+            margin-bottom: 0;
         }
 
         .event-box strong {
@@ -320,12 +317,15 @@
                         <img src="./fest.png" alt="QR Code">
                     </div>
                     <div class="qr-cta">
-                        Scannen <span>und sofort bestellen</span>
+                        Hier Scannen &</br><span>Direkt bestellen</span>
                     </div>
                     
                     <div class="event-box">
                         <strong>Stadtfest Buffet</strong>
                         <p>📅 26. April 2026</p>
+                        <p>Ab 12 J. <span> 20,00 €</span></p>
+                        <p>6 - 12 J. <span> 15,00 €</span></p>
+                        <p>Bis 6 J. <span> Gratis</span></p>
                     </div>
                 </div>
             </div>

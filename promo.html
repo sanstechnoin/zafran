@@ -167,58 +167,70 @@
             font-weight: bold;
         }
 
-        /* --- SOCIAL ICON ROW --- */
-        .social-row {
+        /* --- TOP RIGHT SOCIALS --- */
+        .top-socials {
+            position: absolute;
+            top: 15px;
+            right: 15px;
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 10px 20px 20px;
+            gap: 10px;
+            z-index: 10;
         }
-
-        .social-btn {
+        .top-social-btn {
+            width: 34px;
+            height: 34px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #D4AF37;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 50px;
-            height: 50px;
-            background: #222;
-            border: 2px solid #D4AF37;
-            border-radius: 50%;
             color: #D4AF37;
             text-decoration: none;
             transition: all 0.2s ease;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
+        .top-social-btn.google { border-color: #4285F4; color: #4285F4; }
+        .top-social-btn:active { transform: scale(0.9); background: #D4AF37; color: #000; }
+        .top-social-btn.google:active { background: #4285F4; color: #fff; }
+        .top-social-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
-        .social-btn:active {
-            transform: scale(0.92);
-            background: #D4AF37;
-            color: #000;
+        /* --- INTERACTIVE CONTACT CARDS --- */
+        .contact-cards-container {
+            padding: 0 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-
-        .social-btn svg { width: 24px; height: 24px; }
-
-        /* --- ADDRESS SECTION --- */
-        .address-section {
-            text-align: center;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-top: 1px dashed #444;
+        .contact-card {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
         }
-
-        .address-section h3 {
+        .contact-card:active { transform: scale(0.98); border-color: #D4AF37; }
+        .contact-info { display: flex; align-items: center; gap: 15px; }
+        .contact-icon {
+            font-size: 22px;
             color: #D4AF37;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
+            background: rgba(212, 175, 55, 0.1);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
-
-        .address-section p {
-            color: #aaa;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+        .contact-text h3 { color: #D4AF37; font-size: 15px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; }
+        .contact-text p { color: #aaa; font-size: 13px; line-height: 1.4; }
+        .contact-arrow { color: #D4AF37; font-size: 20px; font-weight: bold; }
 
         /* --- STATIC FOOTER (SAN TECH) --- */
         .static-footer {
@@ -297,6 +309,18 @@
 <body>
 
     <header class="hero">
+        <div class="top-socials">
+            <a href="https://www.facebook.com/p/Zafran-Euskirchen-61568881264481/" target="_blank" class="top-social-btn">
+                <svg viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.597 0 0 .597 0 1.325v21.351C0 23.403.597 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.323-.597 1.323-1.324V1.325C24 .597 23.403 0 22.675 0z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/zafranrestauranteuskirchen/" target="_blank" class="top-social-btn">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://g.page/r/CeHG4HwZoSxQEBM/review" target="_blank" class="top-social-btn google">
+                <svg viewBox="0 0 24 24"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/></svg>
+            </a>
+        </div>
+        
         <img src="./logo.png" alt="Zaffran Delight">
         <h1>Willkommen</h1>
         <p>Ihr Premium Indisches Restaurant</p>
@@ -352,28 +376,28 @@
 
     </main>
 
-    <div class="social-row">
-        <a href="https://www.facebook.com/p/Zafran-Euskirchen-61568881264481/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Facebook">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-            </svg>
+    <div class="contact-cards-container">
+        <a href="https://maps.google.com/?q=Kessenicher+Str.+9,+53879+Euskirchen" target="_blank" rel="noopener noreferrer" class="contact-card">
+            <div class="contact-info">
+                <div class="contact-icon">📍</div>
+                <div class="contact-text">
+                    <h3>Route Planen</h3>
+                    <p>Kessenicher Str. 9<br>53879 Euskirchen</p>
+                </div>
+            </div>
+            <div class="contact-arrow">→</div>
         </a>
-        <a href="https://www.instagram.com/zafranrestauranteuskirchen/" class="social-btn" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-        </a>
-    </div>
 
-    <div class="address-section">
-        <h3>📍 Standort</h3>
-        <p>
-            Kessenicher Str. 9<br>
-            53879 Euskirchen<br>
-            📞 02251 / 1290950
-        </p>
+        <a href="tel:+4922511290950" class="contact-card">
+            <div class="contact-info">
+                <div class="contact-icon">📞</div>
+                <div class="contact-text">
+                    <h3>Jetzt Anrufen</h3>
+                    <p>02251 / 1290950</p>
+                </div>
+            </div>
+            <div class="contact-arrow">→</div>
+        </a>
     </div>
 
     <footer class="static-footer">

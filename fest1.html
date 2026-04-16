@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaffran Delight - Newspaper Ad</title>
+    <style>
+        
+        * { 
+            box-sizing: border-box; margin: 0; padding: 0; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+            color-adjust: exact !important;
+        }
+        
+        body {
+            background-color: #222;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            min-height: 100vh;
+        }
+
+        /* --- THE 10x10 OUTER PRINT BOX --- */
+        .print-canvas-10x10 {
+            width: 1000px;
+            height: 1000px;
+            background-color: #ffffff !important; 
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+        }
+
+        /* --- CROP MARKS --- */
+        .crop-mark { position: absolute; background: #000 !important; }
+        .crop-t-l-h { top: 98px; left: 0; width: 50px; height: 2px; }
+        .crop-t-l-v { top: 0; left: 98px; width: 2px; height: 50px; }
+        .crop-t-r-h { top: 98px; right: 0; width: 50px; height: 2px; }
+        .crop-t-r-v { top: 0; right: 98px; width: 2px; height: 50px; }
+        .crop-b-l-h { bottom: 98px; left: 0; width: 50px; height: 2px; }
+        .crop-b-l-v { bottom: 0; left: 98px; width: 2px; height: 50px; }
+        .crop-b-r-h { bottom: 98px; right: 0; width: 50px; height: 2px; }
+        .crop-b-r-v { bottom: 0; right: 98px; width: 2px; height: 50px; }
+        
+        .cut-line-label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888 !important;
+            font-size: 14px;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .promo-content-8x8 {
+            width: 800px;
+            height: 800px;
+            background: #111 !important; 
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #D4AF37 !important;
+        }
+
+        /* --- PROMO HEADER --- */
+        .promo-header {
+            text-align: center;
+            padding: 25px 20px 15px 20px;
+            position: relative;
+        }
+        
+        .promo-header img {
+            height: 115px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        .top-phone {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: #D4AF37 !important;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #D4AF37 !important;
+        }
+
+        /* NEW HEADER TEXT STYLES (Swapped from box) */
+        .header-address {
+            color: #D4AF37 !important;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .header-hours {
+            color: #fff !important;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* --- PROMO MIDDLE --- */
+        .promo-body {
+            display: flex;
+            flex: 1;
+            align-items: stretch;
+            justify-content: space-between;
+            padding: 5px 30px 20px 30px;
+            gap: 25px;
+        }
+
+        .image-container {
+            flex: 1.1;
+            position: relative;
+            display: flex;
+            padding: 0 !important;
+            background: transparent !important;
+        }
+
+        .img-pamphlet {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 3px solid #D4AF37 !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+            display: block;
+        }
+
+        .badge {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: #D32F2F !important;
+            color: white !important;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 22px;
+            transform: rotate(-8deg);
+            z-index: 3;
+            border: 3px solid #fff !important;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            text-align: center;
+            line-height: 1.1;
+        }
+        
+        .badge span {
+            font-size: 11px;
+            letter-spacing: 0px;
+            font-weight: bold;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .info-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px; 
+        }
+
+        .qr-box {
+            background: #fff !important;
+            padding: 12px;
+            border-radius: 16px;
+            border: 4px solid #D4AF37 !important;
+            display: inline-block;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        }
+
+        .qr-box img {
+            width: 150px;
+            height: 150px;
+            display: block;
+        }
+
+        .qr-cta {
+            color: #fff !important;
+            font-size: 22px;
+            font-weight: 900;
+            line-height: 1.2;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .qr-cta span {
+            color: #D4AF37 !important;
+        }
+
+        /* NEW EVENT BOX (Swapped from Address) */
+        .event-box {
+            background: transparent !important;
+            border: 2px dashed #D4AF37 !important;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            color: #fff !important;
+            width: 100%;
+        }
+
+        .event-box strong {
+            color: #D4AF37 !important;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .event-box p {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.4;
+            margin: 0;
+            color: #fff !important;
+        }
+
+        /* --- PROMO FOOTER --- */
+        .promo-footer {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .discount-strip {
+            background: #D4AF37 !important;
+            color: #000 !important;
+            font-size: 30px;
+            font-weight: 900;
+            text-align: center;
+            padding: 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .san-branding {
+            background: #000 !important;
+            color: #666 !important;
+            font-size: 12px; 
+            padding: 3px 15px; 
+            font-family: monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        
+        .san-branding strong {
+            color: #fff !important;
+        }
+
+        .website-link {
+            color: #D4AF37 !important; 
+            text-transform: lowercase; 
+            letter-spacing: 0.5px;
+        }
+
+        @media print {
+            body { padding: 0; background: #fff !important; align-items: flex-start; justify-content: flex-start; }
+            .instructions { display: none !important; }
+            .print-canvas-10x10 { box-shadow: none !important; }
+            @page { margin: 0; size: auto; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="print-canvas-10x10">
+        
+        <div class="cut-line-label">✂️ 10x10cm CANVAS (AD IS 8x8cm) ✂️</div>
+
+        <div class="crop-mark crop-t-l-h"></div><div class="crop-mark crop-t-l-v"></div>
+        <div class="crop-mark crop-t-r-h"></div><div class="crop-mark crop-t-r-v"></div>
+        <div class="crop-mark crop-b-l-h"></div><div class="crop-mark crop-b-l-v"></div>
+        <div class="crop-mark crop-b-r-h"></div><div class="crop-mark crop-b-r-v"></div>
+
+        <div class="promo-content-8x8">
+
+            <div class="promo-header">
+                <div class="top-phone">📞 02251 / 1290950</div>
+                <img src="./logo.png" alt="Zaffran Delight">
+                <h1 class="header-address">📍 Kessenicher Str. 9, Euskirchen</h1>
+                <p class="header-hours">Di - Sa: 14:00 - 22:00 Uhr &nbsp;|&nbsp; Sonntag: 12:00 - 21:00 Uhr</p>
+            </div>
+
+            <div class="promo-body">
+                
+                <div class="image-container">
+                    <div class="badge">MEGA BUFFET!<br><span>Jeden Letzter Sonntag</span></div>
+                    <img src="./banner.png" alt="Indian Buffet" class="img-pamphlet">
+                </div>
+
+                <div class="info-container">
+                    <div class="qr-box">
+                        <img src="./fest.png" alt="QR Code">
+                    </div>
+                    <div class="qr-cta">
+                        Scannen <span>und sofort bestellen</span>
+                    </div>
+                    
+                    <div class="event-box">
+                        <strong>Stadtfest Buffet</strong>
+                        <p>📅 26. April 2026</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="promo-footer">
+                <div class="discount-strip">
+                    <div>10% Rabatt mit Code: FEST26</div>
+                    <div style="font-size: 10px; font-weight: 700; color: #111; letter-spacing: 1px; margin-top: 4px; text-transform: uppercase;">Mindestbestellwert: Abholung 10€ | Lieferung 20€ | Gültig bis 31 Mai 2026</div>
+                </div>
+                
+                <div class="san-branding">
+                    <span>Powered by <strong>SAN TECHNOLOGIES</strong></span>
+                    <span class="website-link">www.zafraneuskirchen.de</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

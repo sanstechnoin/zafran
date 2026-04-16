@@ -279,23 +279,38 @@
             border-top: 2px solid #D4AF37;
             z-index: 100;
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Centers our branding perfectly */
             align-items: center;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.5); /* Adds a slight shadow to lift it off the page */
         }
 
         .san-brand {
-            display: flex; align-items: center; color: #666;
-            font-size: 11px; font-family: monospace; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; 
+            align-items: center; 
+            color: #888;
+            font-size: 12px; 
+            font-family: monospace; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
         }
 
-        .san-logo { height: 16px; margin-right: 8px; object-fit: contain; }
-        .san-brand strong { color: #fff; }
+        .san-logo { 
+            height: 24px; /* INCREASED from 16px for better brand visibility */
+            margin-right: 10px; 
+            object-fit: contain; 
+        }
+        
+        .san-brand strong { 
+            color: #fff; 
+            font-weight: 900; 
+        }
         
         .footer-url {
-            color: #D4AF37; font-size: 12px; font-family: monospace;
-            text-decoration: none; letter-spacing: 0.5px;
+            color: #D4AF37; 
+            text-decoration: none; 
+            display: flex;
+            align-items: center;
         }
-
         /* --- MODAL (POPUP) STYLES --- */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;

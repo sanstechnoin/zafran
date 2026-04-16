@@ -211,7 +211,7 @@
             background: transparent !important;
             border: 2px dashed #D4AF37 !important;
             border-radius: 8px;
-            padding: 15px;
+            padding: 15px 20px; /* Added slight horizontal padding */
             text-align: center;
             color: #fff !important;
             width: 100%;
@@ -228,12 +228,32 @@
             line-height: 1.2;
         }
 
-        .event-box p {
+        .event-date {
             font-size: 16px;
             font-weight: bold;
             line-height: 1.4;
-            margin: 0;
+            margin-bottom: 12px !important;
             color: #fff !important;
+        }
+
+        /* NEW: Price List Styling */
+        .price-row {
+            display: flex;
+            justify-content: space-between; /* Pushes text left, price right */
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3); /* Subtle gold divider */
+            font-size: 14px;
+        }
+        
+        .price-row:last-child {
+            border-bottom: none; /* Removes line under the last item */
+        }
+
+        .price-row span.price {
+            font-weight: 900;
+            color: #D4AF37 !important;
+            font-size: 16px;
         }
 
         /* --- PROMO FOOTER --- */
@@ -322,10 +342,20 @@
                     
                     <div class="event-box">
                         <strong>Stadtfest Buffet</strong>
-                        <p>📅 26. April 2026</p>
-                        <p>Ab 12 J. <span> 20,00 €</span></p>
-                        <p>6 - 12 J. <span> 15,00 €</span></p>
-                        <p>Bis 6 J. <span> Gratis</span></p>
+                        <p class="event-date">📅 26. April 2026</p>
+                        
+                        <div class="price-row">
+                            <span>Ab 12 J.</span>
+                            <span class="price">20,00 €</span>
+                        </div>
+                        <div class="price-row">
+                            <span>6 - 12 J.</span>
+                            <span class="price">15,00 €</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Unter 6 J.</span>
+                            <span class="price">GRATIS</span>
+                        </div>
                     </div>
                 </div>
             </div>

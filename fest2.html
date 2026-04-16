@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zaffran Delight - Newspaper Ad Final</title>
     <style>
-        
+
         * { 
             box-sizing: border-box; margin: 0; padding: 0; 
             -webkit-print-color-adjust: exact !important; 
@@ -14,7 +14,7 @@
         }
         
         body {
-            background-color: #222;
+            background-color: #000000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -24,20 +24,18 @@
             min-height: 100vh;
         }
 
-        /* --- THE 10x10 OUTER PRINT BOX --- */
         .print-canvas-10x10 {
             width: 1000px;
             height: 1000px;
-            background-color: #ffffff !important; 
+            background-color: #FFFFFF !important; 
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
         }
 
         /* --- CROP MARKS --- */
-        .crop-mark { position: absolute; background: #000 !important; }
+        .crop-mark { position: absolute; background: #000000 !important; }
         .crop-t-l-h { top: 98px; left: 0; width: 50px; height: 2px; }
         .crop-t-l-v { top: 0; left: 98px; width: 2px; height: 50px; }
         .crop-t-r-h { top: 98px; right: 0; width: 50px; height: 2px; }
@@ -52,16 +50,17 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            color: #888 !important;
+            color: #000000 !important;
             font-size: 14px;
             font-family: monospace;
             letter-spacing: 2px;
+            font-weight: 800;
         }
 
         .promo-content-8x8 {
             width: 800px;
             height: 800px;
-            background: #111 !important; 
+            background: #000000 !important; 
             position: relative;
             overflow: hidden;
             display: flex;
@@ -74,12 +73,13 @@
             text-align: center;
             padding: 25px 20px 10px 20px;
             position: relative;
+            background: #000000 !important;
         }
         
         .promo-header img {
             height: 115px;
             margin-bottom: 10px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            /* Shadows removed for pure color printing */
         }
 
         .top-phone {
@@ -87,11 +87,11 @@
             top: 15px;
             right: 20px;
             color: #D4AF37 !important;
-            font-size: 20px; 
+            font-size: 20px;
             font-weight: 900;
             letter-spacing: 1px;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 12px; 
+            background: #000000 !important;
+            padding: 8px 12px;
             border-radius: 5px;
             border: 2px solid #D4AF37 !important;
         }
@@ -107,7 +107,7 @@
         }
 
         .header-hours {
-            color: #fff !important;
+            color: #FFFFFF !important;
             font-size: 18px;
             font-weight: 800;
             letter-spacing: 1px;
@@ -121,14 +121,15 @@
             justify-content: space-between;
             padding: 35px 40px 25px 40px; 
             gap: 40px; 
+            background: #000000 !important;
         }
 
         .image-container {
-            flex: 1;
+            flex: 1; 
             position: relative;
             display: flex;
             padding: 0 !important;
-            background: transparent !important;
+            background: #000000 !important;
         }
 
         .img-pamphlet {
@@ -137,7 +138,6 @@
             object-fit: cover;
             border-radius: 12px;
             border: 3px solid #D4AF37 !important;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
             display: block;
         }
 
@@ -146,16 +146,15 @@
             top: -15px;
             left: -15px;
             background: #D32F2F !important;
-            color: white !important;
+            color: #FFFFFF !important;
             padding: 12px 18px;
             border-radius: 12px;
             font-weight: 900;
             font-size: 22px;
             transform: rotate(-8deg);
             z-index: 3;
-            border: 3px solid #fff !important;
+            border: 3px solid #FFFFFF !important;
             text-transform: uppercase;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             letter-spacing: 1px;
             text-align: center;
             line-height: 1.1;
@@ -164,27 +163,27 @@
         .badge span {
             font-size: 11px;
             letter-spacing: 0px;
-            font-weight: bold;
+            font-weight: 900;
             display: block;
             margin-top: 3px;
         }
 
         .info-container {
-            flex: 0 0 190px;
+            flex: 0 0 190px; 
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: space-between; 
             align-items: center;
             padding: 0;
+            background: #000000 !important;
         }
 
         .qr-box {
-            background: #fff !important;
-            padding: 10px;
+            background: #FFFFFF !important;
+            padding: 10px; 
             border-radius: 16px;
             border: 4px solid #D4AF37 !important;
             display: inline-block;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             margin-top: 0; 
         }
 
@@ -195,8 +194,8 @@
         }
 
         .qr-cta {
-            color: #fff !important;
-            font-size: 18px;
+            color: #FFFFFF !important;
+            font-size: 18px; 
             font-weight: 900;
             line-height: 1.2;
             text-transform: uppercase;
@@ -209,19 +208,20 @@
         }
 
         .event-box {
-            background: transparent !important;
+            background: #000000 !important;
             border: 2px dashed #D4AF37 !important;
             border-radius: 8px;
-            padding: 12px 10px; /* Added slight horizontal padding */
+            padding: 12px 10px; 
             text-align: center;
-            color: #fff !important;
+            color: #FFFFFF !important;
             width: 100%;
-            margin-bottom: 0;
+            margin-bottom: 0; 
         }
 
         .event-box strong {
             color: #D4AF37 !important;
-            font-size: 18px;
+            font-size: 18px; 
+            font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1px;
             display: block;
@@ -231,10 +231,10 @@
 
         .event-date {
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 900;
             line-height: 1.4;
             margin-bottom: 10px !important;
-            color: #fff !important;
+            color: #FFFFFF !important;
         }
 
         .price-row {
@@ -242,30 +242,32 @@
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.5); 
-            font-size: 14px;
-            color: #fff !important;
+            border-bottom: 1px solid #D4AF37 !important; /* Solid gold line instead of rgba */
+            font-size: 14px; 
+            font-weight: 800;
+            color: #FFFFFF !important;
         }
         
         .price-row:last-child {
-            border-bottom: none;
+            border-bottom: none !important; 
         }
 
         .price-row span.price {
             font-weight: 900;
             color: #D4AF37 !important;
-            font-size: 15px;
+            font-size: 15px; 
         }
 
         /* --- PROMO FOOTER --- */
         .promo-footer {
             display: flex;
             flex-direction: column;
+            background: #000000 !important;
         }
 
         .discount-strip {
             background: #D4AF37 !important;
-            color: #000 !important;
+            color: #000000 !important;
             font-size: 30px;
             font-weight: 900;
             text-align: center;
@@ -273,23 +275,32 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+        
+        .discount-strip .sub-text {
+            font-size: 11px; 
+            font-weight: 900; 
+            color: #000000 !important; 
+            letter-spacing: 1px; 
+            margin-top: 4px; 
+            text-transform: uppercase;
+        }
 
         .san-branding {
-            background: #000 !important;
-            color: #888 !important;
-            font-size: 14px;
-            font-weight: 800;
-            padding: 3px 15px; 
+            background: #000000 !important;
+            color: #FFFFFF !important;
+            font-size: 14px; 
+            padding: 5px 15px; 
             font-family: monospace;
             letter-spacing: 1px;
             text-transform: uppercase;
             display: flex; 
             justify-content: space-between; 
             align-items: center;
+            font-weight: 800;
         }
         
         .san-branding strong {
-            color: #fff !important;
+            color: #D4AF37 !important;
             font-weight: 900;
         }
 
@@ -297,16 +308,15 @@
             color: #D4AF37 !important; 
             text-transform: lowercase; 
             letter-spacing: 0.5px;
-            font-weight: 800;
+            font-weight: 900;
         }
 
         @media print {
-            body { padding: 0; background: #fff !important; align-items: flex-start; justify-content: flex-start; }
+            body { padding: 0; background: #FFFFFF !important; align-items: flex-start; justify-content: flex-start; }
             .instructions { display: none !important; }
             .print-canvas-10x10 { box-shadow: none !important; }
             @page { margin: 0; size: auto; }
         }
-
     </style>
 </head>
 <body>

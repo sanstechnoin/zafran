@@ -403,6 +403,20 @@ if (loginButton) {
                     updateData.couponCode = existingCoupon ? existingCoupon + " + Manuell Rabatt" : "Manuell Rabatt";
                 }
                 
+                // --- FIREBASE SANITIZER (FIXES THE CRASH) ---
+                Object.keys(updateData).forEach(key => {
+                    if (updateData[key] === undefined) delete updateData[key];
+                });
+                if (updateData.items && Array.isArray(updateData.items)) {
+                    updateData.items = updateData.items.map(item => {
+                        Object.keys(item).forEach(k => {
+                            if (item[k] === undefined) delete item[k];
+                        });
+                        return item;
+                    });
+                }
+                // ---------------------------------------------
+                
                 const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
                 batch.set(archiveRef, updateData);
                 
@@ -498,6 +512,20 @@ if (loginButton) {
                 closedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 day: new Date().toISOString().split('T')[0] 
             };
+            
+            // --- FIREBASE SANITIZER (FIXES THE CRASH) ---
+            Object.keys(updateData).forEach(key => {
+                if (updateData[key] === undefined) delete updateData[key];
+            });
+            if (updateData.items && Array.isArray(updateData.items)) {
+                updateData.items = updateData.items.map(item => {
+                    Object.keys(item).forEach(k => {
+                        if (item[k] === undefined) delete item[k];
+                    });
+                    return item;
+                });
+            }
+            // ---------------------------------------------
             
             const archiveRef = db.collection("archived_orders").doc(`archive-${order.id}`);
             batch.set(archiveRef, updateData);

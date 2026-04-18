@@ -274,61 +274,93 @@ window.saveWaiterPin = function() {
     });
 };
 
-// --- 5. EMAIL ACTIONS ---
+// --- 5. EMAIL ACTIONS & CUSTOM MODALS ---
+
+// Custom Modal Engine
+window.showCustomAlert = function(message) {
+    document.getElementById('custom-alert-message').innerHTML = message;
+    document.getElementById('custom-alert-modal').style.display = 'flex';
+};
+
+window.closeCustomAlert = function() {
+    document.getElementById('custom-alert-modal').style.display = 'none';
+};
+
+window.showCustomConfirm = function(message, onConfirm) {
+    document.getElementById('custom-confirm-message').innerHTML = message;
+    document.getElementById('custom-confirm-modal').style.display = 'flex';
+    
+    document.getElementById('custom-confirm-ok').onclick = function() {
+        document.getElementById('custom-confirm-modal').style.display = 'none';
+        onConfirm();
+    };
+    document.getElementById('custom-confirm-cancel').onclick = function() {
+        document.getElementById('custom-confirm-modal').style.display = 'none';
+    };
+};
+
+window.showCustomDelete = function(message, showEmailCheckbox, onConfirm) {
+    document.getElementById('custom-delete-message').innerHTML = message;
+    document.getElementById('custom-delete-modal').style.display = 'flex';
+    
+    const emailContainer = document.getElementById('custom-delete-email-container');
+    const emailCheckbox = document.getElementById('custom-delete-email-checkbox');
+    
+    if (showEmailCheckbox) {
+        emailContainer.style.display = 'flex';
+        emailCheckbox.checked = true; // Auto-check if they have an email
+    } else {
+        emailContainer.style.display = 'none';
+        emailCheckbox.checked = false;
+    }
+    
+    document.getElementById('custom-delete-ok').onclick = function() {
+        document.getElementById('custom-delete-modal').style.display = 'none';
+        onConfirm(emailCheckbox.checked);
+    };
+    document.getElementById('custom-delete-cancel').onclick = function() {
+        document.getElementById('custom-delete-modal').style.display = 'none';
+    };
+};
+
 function sendAutoEmail(email, name, date, time, guests) {
     if (!email || !email.includes("@")) return;
-
-    const params = {
-        to_email: email,
-        to_name: name,
-        res_date: date,
-        res_time: time,
-        res_guests: guests
-    };
-
+    const params = { to_email: email, to_name: name, res_date: date, res_time: time, res_guests: guests };
     emailjs.send(RES_EMAIL_SERVICE_ID, RES_EMAIL_TEMPLATE_ID, params)
         .then(() => console.log("Email sent successfully!"))
-        .catch((err) => alert("Warnung: Email konnte nicht gesendet werden.\n" + JSON.stringify(err)));
+        .catch((err) => showCustomAlert("Warnung: Email konnte nicht gesendet werden.<br><br>Fehler: " + err.text));
 }
 
 window.confirmRes = function(id, email, name, date, time, guests) {
-    if(!confirm(`Reservierung für ${name} bestätigen und Email senden?`)) return;
-    
-    db.collection("reservations").doc(id).update({ status: "confirmed" })
-    .then(() => {
-        sendAutoEmail(email, name, date, time, guests);
-        alert("Bestätigt! Email wird gesendet.");
-    })
-    .catch(e => alert("Fehler: " + e.message));
+    showCustomConfirm(`Reservierung für <strong style="color:var(--gold);">${name}</strong> bestätigen und automatische Email senden?`, () => {
+        db.collection("reservations").doc(id).update({ status: "confirmed" })
+        .then(() => {
+            sendAutoEmail(email, name, date, time, guests);
+            showCustomAlert("✅ Bestätigt!<br><br>Email an den Kunden wird gesendet.");
+        })
+        .catch(e => showCustomAlert("Fehler: " + e.message));
+    });
 };
 
 window.deleteRes = function(id, name, email, date, time) { 
-    if(!confirm(`Möchten Sie die Reservierung von ${name} wirklich stornieren?`)) return;
+    const hasEmail = email && email.includes("@");
     
-    let sendRejection = false;
-    if(email && email.includes("@")) {
-        sendRejection = confirm("Soll eine höfliche Absage-Email gesendet werden?");
-    }
-
-    db.collection("reservations").doc(id).update({ status: "cancelled" })
-    .then(() => {
-        if(sendRejection) {
-            const dateObj = new Date(date);
-            const dateFormatted = dateObj.toLocaleDateString('de-DE'); 
-
-            const params = {
-                to_email: email,
-                to_name: name,
-                res_date: dateFormatted, 
-                res_time: time
-            };
-            
-            emailjs.send(RES_EMAIL_SERVICE_ID, RES_EMAIL_REJECT_ID, params)
-            .then(() => alert("Storniert & Absage-Email gesendet."))
-            .catch((err) => alert("Storniert, aber Email fehlgeschlagen: " + JSON.stringify(err)));
-        }
-    })
-    .catch(e => alert("Fehler: " + e.message));
+    showCustomDelete(`Möchten Sie die Reservierung von <strong style="color:var(--gold);">${name}</strong> wirklich stornieren?`, hasEmail, (sendRejectionEmail) => {
+        db.collection("reservations").doc(id).update({ status: "cancelled" })
+        .then(() => {
+            if(sendRejectionEmail) {
+                const dateFormatted = new Date(date).toLocaleDateString('de-DE'); 
+                const params = { to_email: email, to_name: name, res_date: dateFormatted, res_time: time };
+                
+                emailjs.send(RES_EMAIL_SERVICE_ID, RES_EMAIL_REJECT_ID, params)
+                .then(() => showCustomAlert("✅ Storniert!<br><br>Absage-Email wurde erfolgreich gesendet."))
+                .catch((err) => showCustomAlert("Storniert, aber Email fehlgeschlagen:<br><br>" + err.text));
+            } else {
+                showCustomAlert("✅ Reservierung wurde storniert.");
+            }
+        })
+        .catch(e => showCustomAlert("Fehler: " + e.message));
+    });
 };
 
 window.resetAndLoadToday = function() {

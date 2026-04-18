@@ -359,8 +359,27 @@ function renderReservations() {
             actions += `<button class="btn-action-x" onclick="hardDeleteRes('${d.id}')" title="Endgültig Löschen" style="background:#333;">🗑️</button>`;
         }
 
+        // --- SMART BADGE LOGIC ---
+        let rawInfo = d.message || d.notes || "Keine besonderen Wünsche";
+        let typeBadge = "";
+        let displayInfo = rawInfo;
+
+        if (rawInfo.includes("CATERING")) {
+            typeBadge = `<span style="background: #D32F2F; color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-right: 6px;">CATERING</span>`;
+            displayInfo = rawInfo.replace("CATERING | ", ""); 
+        } else if (rawInfo.includes("BUFFET")) {
+            typeBadge = `<span style="background: #256b25; color: white; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-right: 6px;">BUFFET</span>`;
+            displayInfo = rawInfo.replace("BUFFET RESERVIERUNG", "Sonntagsbuffet");
+        } else {
+            typeBadge = `<span style="background: #D4AF37; color: black; padding: 2px 4px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-right: 6px;">TISCH</span>`;
+        }
+
         const row = `<tr>
-            <td><strong style="color:var(--gold);">${d.name}</strong><br><span style="font-size:0.8rem; color:#aaa;">${d.phone || ''} <br> ${d.email || ''}</span></td>
+            <td>
+                <div style="margin-bottom: 5px;">${typeBadge} <strong style="color:var(--gold);">${d.name}</strong></div>
+                <span style="font-size:0.8rem; color:#aaa;">${d.phone || ''} | ${d.email || ''}</span><br>
+                <span style="font-size:0.8rem; color:#888; font-style:italic;">Info: ${displayInfo}</span>
+            </td>
             <td>${niceDate}<br><span style="color:#aaa; font-size:0.8rem;">${timeStr}</span></td>
             <td style="font-weight:bold; font-size:1.1rem;">${d.guests}</td>
             <td>${statusBadge}</td>

@@ -583,49 +583,177 @@
         }
         function closeCateringModal() { document.getElementById('cateringModal').classList.remove('open'); }
 
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            
-            fetch("https://formsubmit.co/ajax/delightzafran@gmail.com", {
-                method: "POST",
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(Object.fromEntries(formData))
-            })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById('bookingFormContainer').style.display = 'none';
-                    document.getElementById('reservationSuccess').style.display = 'block';
-                    form.reset();
-                } else {
-                    alert("Oops! Problem submitting form.");
-                }
-            })
-            .catch(error => { console.log(error); alert("Oops! Problem submitting form."); });
+        // ==========================================
+        // 1. REAL-TIME CAPACITY ENGINE
+        // ==========================================
+        const RESTAURANT_CAPACITY = 40; 
+        const AVERAGE_DURATION_MINUTES = 120; 
+
+        function timeToMinutes(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            return (h * 60) + m;
         }
 
-        function handleCateringSubmit(event) {
+        async function checkAvailability(date, time, newGuests) {
+            try {
+                // Fetch all confirmed bookings for this date
+                const snapshot = await db.collection("reservations")
+                                         .where("date", "==", date)
+                                         .where("status", "==", "confirmed") 
+                                         .get();
+                if (snapshot.empty) return true; 
+
+                const newStart = timeToMinutes(time);
+                const newEnd = newStart + AVERAGE_DURATION_MINUTES;
+                let currentOccupancy = 0;
+
+                // Calculate if current bookings overlap with the new requested time
+                snapshot.forEach(doc => {
+                    const booking = doc.data();
+                    const bookingStart = timeToMinutes(booking.time || "12:00");
+                    const bookingEnd = bookingStart + AVERAGE_DURATION_MINUTES;
+
+                    if (newStart < bookingEnd && newEnd > bookingStart) {
+                        let g = parseInt(booking.guests);
+                        if (isNaN(g)) g = 2; 
+                        currentOccupancy += g;
+                    }
+                });
+                
+                // Return true if we have space, false if we are over 40
+                return (currentOccupancy + newGuests) <= RESTAURANT_CAPACITY;
+            } catch (e) {
+                console.error("Availability Check Failed:", e);
+                return true; // If offline or error, let the booking pass through
+            }
+        }
+
+        // ==========================================
+        // 2. PROTECTED BUFFET SUBMISSION
+        // ==========================================
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const form = event.target;
             const formData = new FormData(form);
+            const dataObj = Object.fromEntries(formData);
             
+            const guests = parseInt(dataObj.guests) || 2;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            // SECURITY 1: Force Sunday Booking
+            const selectedDate = new Date(dataObj.date);
+            if (selectedDate.getDay() !== 0) {
+                alert("Buffet-Reservierungen sind nur für Sonntage möglich!");
+                return;
+            }
+
+            // Update UI
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Prüfe Verfügbarkeit...";
+
+            // SECURITY 2: Check Capacity limit
+            const hasSpace = await checkAvailability(dataObj.date, "12:00", guests);
+            if (!hasSpace) {
+                alert("Entschuldigung, unser Buffet ist an diesem Datum leider bereits ausgebucht!");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Jetzt Reservieren";
+                return;
+            }
+
+            // 3. Send Backup Email via FormSubmit
             fetch("https://formsubmit.co/ajax/delightzafran@gmail.com", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(Object.fromEntries(formData))
+                body: JSON.stringify(dataObj)
+            }).catch(error => console.log("Email error:", error));
+
+            // 4. Save to Firebase (Triggers Admin Panel)
+            db.collection('reservations').add({
+                name: dataObj.name,
+                email: dataObj.email,
+                phone: dataObj.phone,
+                date: dataObj.date,
+                time: "12:00", 
+                guests: guests,
+                message: "BUFFET RESERVIERUNG",
+                status: "pending",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById('cateringFormContainer').style.display = 'none';
-                    document.getElementById('cateringSuccess').style.display = 'block';
-                    form.reset();
-                } else { alert("Oops! Problem submitting form."); }
+            .then(() => {
+                document.getElementById('bookingFormContainer').style.display = 'none';
+                document.getElementById('reservationSuccess').style.display = 'block';
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Jetzt Reservieren";
             })
-            .catch(error => { console.log(error); alert("Oops! Problem submitting form."); });
+            .catch(error => {
+                console.error("Firebase Error:", error);
+                alert("Ein Fehler ist aufgetreten.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Jetzt Reservieren";
+            });
+        }
+
+        // ==========================================
+        // 3. PROTECTED CATERING SUBMISSION
+        // ==========================================
+        async function handleCateringSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const dataObj = Object.fromEntries(formData);
+            
+            const guests = parseInt(dataObj.guests) || 10;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Wird verarbeitet...";
+
+            // SECURITY: Only check restaurant capacity if the catering event is IN the restaurant
+            if (dataObj.location === "Restaurant") {
+                const hasSpace = await checkAvailability(dataObj.date, dataObj.time || "12:00", guests);
+                if (!hasSpace) {
+                    alert(`Entschuldigung, für ${guests} Personen haben wir zu dieser Zeit nicht genügend Kapazitäten im Restaurant.`);
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Angebot Anfordern";
+                    return;
+                }
+            }
+
+            // 1. Send Backup Email via FormSubmit
+            fetch("https://formsubmit.co/ajax/delightzafran@gmail.com", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(dataObj)
+            }).catch(error => console.log("Email error:", error));
+
+            // 2. Save to Firebase (Triggers Admin Panel)
+            const finalMessage = `CATERING | Ort: ${dataObj.location} | Service: ${dataObj.service_type} | Info: ${dataObj.message || 'Keine'}`;
+
+            db.collection('reservations').add({
+                name: dataObj.name,
+                email: dataObj.email,
+                phone: dataObj.phone,
+                date: dataObj.date,
+                time: dataObj.time || "12:00",
+                guests: guests,
+                message: finalMessage,
+                status: "pending",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                document.getElementById('cateringFormContainer').style.display = 'none';
+                document.getElementById('cateringSuccess').style.display = 'block';
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Angebot Anfordern";
+            })
+            .catch(error => { 
+                console.error("Firebase Error:", error); 
+                alert("Ein Fehler ist aufgetreten."); 
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Angebot Anfordern";
+            });
         }
 
         const translations = {

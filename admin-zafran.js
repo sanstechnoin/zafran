@@ -147,6 +147,21 @@ function startRealtimeListener() {
                            <button class="btn-action btn-delete" onclick="deleteRes('${res.id}', '${res.name.replace(/'/g, "")}', '${email}', '${res.date}', '${res.time}')">✕</button>`;
             }
 
+            // --- SMART BADGE LOGIC ---
+            let rawInfo = res.message || res.notes || "Keine besonderen Wünsche";
+            let typeBadge = "";
+            let displayInfo = rawInfo;
+
+            if (rawInfo.includes("CATERING")) {
+                typeBadge = `<span style="background: #D32F2F; color: white; padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; margin-bottom: 4px;">CATERING</span><br>`;
+                displayInfo = rawInfo.replace("CATERING | ", ""); 
+            } else if (rawInfo.includes("BUFFET")) {
+                typeBadge = `<span style="background: #256b25; color: white; padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; margin-bottom: 4px;">BUFFET</span><br>`;
+                displayInfo = rawInfo.replace("BUFFET RESERVIERUNG", "Sonntagsbuffet");
+            } else {
+                typeBadge = `<span style="background: #D4AF37; color: black; padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 1px; display: inline-block; margin-bottom: 4px;">TISCH</span><br>`;
+            }
+
             tbody.innerHTML += `
                 <tr style="${res.status==='cancelled'?'opacity:0.5':''}">
                     <td style="color:var(--gold); font-weight:bold; font-size:1rem;"><span style="color:#aaa; font-size:0.8rem;">${res.date}</span><br>${res.time}</td>
@@ -155,7 +170,10 @@ function startRealtimeListener() {
                         <div style="font-size:0.8rem; color:#aaa;"><a href="tel:${res.phone}" style="color:#aaa;text-decoration:none;">${res.phone}</a></div>
                     </td>
                     <td style="text-align:center; font-weight:bold; font-size:1.1rem;">${res.guests}</td>
-                    <td style="font-size:0.8rem; font-style:italic; color:#aaa; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${res.notes || '-'}</td>
+                    <td style="font-size:0.8rem; line-height:1.4; color:#ddd; max-width:200px; white-space:normal;">
+                        ${typeBadge}
+                        <span style="color:#aaa;">${displayInfo}</span>
+                    </td>
                     <td><span class="status-badge ${sClass}">${sText}</span></td>
                     <td style="text-align:right;">${actions}</td>
                 </tr>

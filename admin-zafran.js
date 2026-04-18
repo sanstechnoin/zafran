@@ -328,7 +328,7 @@ function sendAutoEmail(email, name, date, time, guests) {
     const params = { to_email: email, to_name: name, res_date: date, res_time: time, res_guests: guests };
     emailjs.send(RES_EMAIL_SERVICE_ID, RES_EMAIL_TEMPLATE_ID, params)
         .then(() => console.log("Email sent successfully!"))
-        .catch((err) => showCustomAlert("Warnung: Email konnte nicht gesendet werden.<br><br>Fehler: " + err.text));
+        .catch((err) => showCustomAlert("Warnung: Email konnte nicht gesendet werden.<br><br>Fehler: " + JSON.stringify(err)));
 }
 
 window.confirmRes = function(id, email, name, date, time, guests) {
@@ -349,12 +349,13 @@ window.deleteRes = function(id, name, email, date, time) {
         db.collection("reservations").doc(id).update({ status: "cancelled" })
         .then(() => {
             if(sendRejectionEmail) {
-                const dateFormatted = new Date(date).toLocaleDateString('de-DE'); 
+                const dateObj = new Date(date);
+                const dateFormatted = dateObj.toLocaleDateString('de-DE'); 
                 const params = { to_email: email, to_name: name, res_date: dateFormatted, res_time: time };
                 
                 emailjs.send(RES_EMAIL_SERVICE_ID, RES_EMAIL_REJECT_ID, params)
                 .then(() => showCustomAlert("✅ Storniert!<br><br>Absage-Email wurde erfolgreich gesendet."))
-                .catch((err) => showCustomAlert("Storniert, aber Email fehlgeschlagen:<br><br>" + err.text));
+                .catch((err) => showCustomAlert("Storniert, aber Email fehlgeschlagen:<br><br>" + JSON.stringify(err)));
             } else {
                 showCustomAlert("✅ Reservierung wurde storniert.");
             }
